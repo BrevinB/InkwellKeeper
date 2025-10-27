@@ -7,7 +7,79 @@
 
 import Foundation
 
+/// Wrapper for grouping reprinted cards together
+struct CardGroup: Identifiable {
+    let id: String // Based on card name
+    let name: String
+    let cards: [LorcanaCard] // All versions of this card
+
+    var primaryCard: LorcanaCard {
+        // Return the most recent printing (highest set number)
+        cards.max(by: { ($0.setName, $0.uniqueId ?? "") < ($1.setName, $1.uniqueId ?? "") }) ?? cards[0]
+    }
+
+    var isReprint: Bool {
+        cards.count > 1
+    }
+
+    var setCount: Int {
+        cards.count
+    }
+
+    var sets: [String] {
+        cards.map { $0.setName }
+    }
+}
+
 extension LorcanaCard {
+    /// Get local image URL from app bundle
+    /// Returns nil if local image not found
+    func localImageUrl() -> URL? {
+        guard let uniqueId = self.uniqueId else { return nil }
+
+        // Map set IDs to folder names
+        let setFolderMap: [String: String] = [
+            "The First Chapter": "the_first_chapter",
+            "Rise of the Floodborn": "rise_of_the_floodborn",
+            "Into the Inklands": "into_the_inklands",
+            "Ursula's Return": "ursulas_return",
+            "Shimmering Skies": "shimmering_skies",
+            "Azurite Sea": "azurite_sea",
+            "Fabled": "fabled",
+            "Archazia's Island": "archazias_island",
+            "Reign of Jafar": "reign_of_jafar"
+        ]
+
+        guard let folderName = setFolderMap[setName] else { return nil }
+
+        // Try both .png and .jpg extensions (Reign of Jafar uses .jpg, others use .png)
+        let extensions = ["png", "jpg"]
+
+        for ext in extensions {
+            let filename = "\(uniqueId).\(ext)"
+            if let url = Bundle.main.url(
+                forResource: filename.replacingOccurrences(of: ".\(ext)", with: ""),
+                withExtension: ext,
+                subdirectory: "Resources/CardImages/\(folderName)"
+            ) {
+                return url
+            }
+        }
+
+        return nil
+    }
+
+    /// Get the best available image URL - prefers local, falls back to remote
+    func bestImageUrl() -> URL? {
+        // Try local first
+        if let localUrl = localImageUrl() {
+            return localUrl
+        }
+
+        // Fall back to remote URL
+        return URL(string: imageUrl)
+    }
+
     /// Get the image URL for a specific variant
     /// Attempts to construct variant-specific URL, falls back to base image if not available
     func imageUrl(for variant: CardVariant) -> String {

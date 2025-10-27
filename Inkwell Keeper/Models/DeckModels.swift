@@ -242,6 +242,12 @@ class DeckCard {
             inkColor: inkColor
         )
     }
+
+    /// Get the best available image URL - prefers local, falls back to remote
+    func bestImageUrl() -> URL? {
+        // Convert to LorcanaCard and use its bestImageUrl method
+        return toLorcanaCard.bestImageUrl()
+    }
 }
 
 // MARK: - Deck Validation

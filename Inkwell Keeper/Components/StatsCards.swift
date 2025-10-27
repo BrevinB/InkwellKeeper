@@ -98,7 +98,7 @@ struct RecentAdditionsCard: View {
             } else {
                 ForEach(recentCards.prefix(3)) { card in
                     HStack {
-                        AsyncImage(url: URL(string: card.imageUrl)) { image in
+                        AsyncImage(url: card.bestImageUrl()) { image in
                             image
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
@@ -135,17 +135,51 @@ struct RecentAdditionsCard: View {
 
 struct SetCompletionCard: View {
     let cards: [LorcanaCard]
-    
+    @EnvironmentObject var collectionManager: CollectionManager
+    @StateObject private var dataManager = SetsDataManager.shared
+
+    private var setProgress: [(name: String, collected: Int, total: Int)] {
+        // Get all sets
+        let allSets = [
+            "The First Chapter",
+            "Rise of the Floodborn",
+            "Into the Inklands",
+            "Ursula's Return",
+            "Shimmering Skies",
+            "Azurite Sea",
+            "Archazia's Island",
+            "Fabled",
+            "Reign of Jafar"
+        ]
+
+        return allSets.compactMap { setName in
+            let totalCards = dataManager.hasLocalCards(for: setName) ?
+                dataManager.getLocalCardCount(for: setName) : 204
+            let progress = collectionManager.getSetProgress(setName, totalCardsInSet: totalCards)
+
+            // Only include sets with some progress or first 3 sets
+            guard progress.collected > 0 || allSets.firstIndex(of: setName)! < 3 else {
+                return nil
+            }
+
+            return (name: setName, collected: progress.collected, total: progress.total)
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Set Completion")
                 .font(.headline)
                 .foregroundColor(.white)
-            
+
             VStack(spacing: 8) {
-                SetProgressRow(setName: "The First Chapter", current: 25, total: 204)
-                SetProgressRow(setName: "Rise of the Floodborn", current: 12, total: 204)
-                SetProgressRow(setName: "Into the Inklands", current: 8, total: 204)
+                ForEach(setProgress, id: \.name) { progress in
+                    SetProgressRow(
+                        setName: progress.name,
+                        current: progress.collected,
+                        total: progress.total
+                    )
+                }
             }
         }
         .padding(20)

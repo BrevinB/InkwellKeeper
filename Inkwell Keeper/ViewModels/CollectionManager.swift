@@ -314,8 +314,33 @@ class CollectionManager: ObservableObject {
     }
     
     func getSetProgress(_ setName: String, totalCardsInSet: Int) -> (collected: Int, total: Int, percentage: Double) {
-        let collectedInSet = collectedCards.filter { $0.setName == setName }
-        let collectedCount = collectedInSet.count
+        let dataManager = SetsDataManager.shared
+
+        // Get all cards in this set from the data manager
+        let cardsInSet = dataManager.getCardsForSet(setName)
+
+        // Count how many we have collected
+        var collectedCount = 0
+
+        for card in cardsInSet {
+            // Check if we own this specific card
+            let ownedBySetName = collectedCards.contains { $0.setName == setName && $0.name == card.name }
+
+            if ownedBySetName {
+                collectedCount += 1
+                continue
+            }
+
+            // If not found by set name, check if this is a reprint we own from another set
+            if dataManager.isReprint(cardName: card.name) {
+                // Check if we own this card from ANY set
+                let ownedFromAnySet = collectedCards.contains { $0.name == card.name }
+                if ownedFromAnySet {
+                    collectedCount += 1
+                }
+            }
+        }
+
         let percentage = totalCardsInSet > 0 ? Double(collectedCount) / Double(totalCardsInSet) * 100 : 0
         return (collected: collectedCount, total: totalCardsInSet, percentage: percentage)
     }
@@ -352,6 +377,43 @@ class CollectionManager: ObservableObject {
         } catch {
             return false
         }
+    }
+
+    /// Check if a card is collected, considering reprints from other sets
+    func isCardCollectedIncludingReprints(_ card: LorcanaCard) -> Bool {
+        // First check by exact card ID
+        if isCardCollected(card.id) {
+            return true
+        }
+
+        // If not found, check if this is a reprint and we own it from another set
+        let dataManager = SetsDataManager.shared
+        if dataManager.isReprint(cardName: card.name) {
+            // Check if we own this card from ANY set
+            return collectedCards.contains { $0.name == card.name }
+        }
+
+        return false
+    }
+
+    /// Get collected quantity for a card, considering reprints
+    func getCollectedQuantityIncludingReprints(for card: LorcanaCard) -> Int {
+        // First try by exact card ID
+        let exactQuantity = getCollectedQuantity(for: card.id)
+        if exactQuantity > 0 {
+            return exactQuantity
+        }
+
+        // If not found, check reprints from other sets
+        let dataManager = SetsDataManager.shared
+        if dataManager.isReprint(cardName: card.name) {
+            // Find any version of this card in our collection
+            if let collected = collectedCards.first(where: { $0.name == card.name }) {
+                return getCollectedQuantity(for: collected.id)
+            }
+        }
+
+        return 0
     }
 
     func getCollectedQuantity(for cardId: String) -> Int {

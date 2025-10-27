@@ -10,6 +10,7 @@ import SwiftUI
 struct CardTile: View {
     let card: LorcanaCard
     let isWishlist: Bool
+    var reprintCount: Int? = nil // Optional: number of sets this card appears in
     @State private var showingDetail = false
     @State private var showingCollectionDetail = false
     @State private var showingWishlistDetail = false
@@ -25,7 +26,7 @@ struct CardTile: View {
     
     var body: some View {
         VStack(spacing: 8) {
-            AsyncImage(url: URL(string: card.imageUrl)) { phase in
+            AsyncImage(url: card.bestImageUrl()) { phase in
                 switch phase {
                 case .success(let image):
                     image
@@ -86,27 +87,46 @@ struct CardTile: View {
                     .stroke(card.rarity.color, lineWidth: 2)
             )
             .overlay(
-                // Quantity badge in top-right corner
-                Group {
-                    if let collected = collectedCard, collected.quantity > 1 {
-                        VStack {
-                            HStack {
-                                Spacer()
-                                Text("\(collected.quantity)")
-                                    .font(.caption)
+                // Badges in top corners
+                VStack {
+                    HStack {
+                        // Reprint badge in top-left
+                        if let reprintCount = reprintCount, reprintCount > 1 {
+                            HStack(spacing: 3) {
+                                Image(systemName: "square.on.square")
+                                    .font(.caption2)
+                                Text("\(reprintCount)")
+                                    .font(.caption2)
                                     .fontWeight(.bold)
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(
-                                        Capsule()
-                                            .fill(Color.lorcanaGold.opacity(0.9))
-                                    )
-                                    .padding(6)
                             }
-                            Spacer()
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 2)
+                            .background(
+                                Capsule()
+                                    .fill(Color.blue.opacity(0.9))
+                            )
+                            .padding(6)
+                        }
+
+                        Spacer()
+
+                        // Quantity badge in top-right corner
+                        if let collected = collectedCard, collected.quantity > 1 {
+                            Text("\(collected.quantity)")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(
+                                    Capsule()
+                                        .fill(Color.lorcanaGold.opacity(0.9))
+                                )
+                                .padding(6)
                         }
                     }
+                    Spacer()
                 }
             )
             

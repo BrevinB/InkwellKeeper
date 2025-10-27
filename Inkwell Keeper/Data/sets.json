@@ -66,9 +66,18 @@
       "isReleased": true
     },
     {
+      "id": "archazias_island",
+      "name": "Archazia's Island",
+      "setCode": "ARC",
+      "releaseDate": "2025-03-07",
+      "cardCount": 204,
+      "description": "Embark on an adventure to the mysterious Archazia's Island.",
+      "isReleased": true
+    },
+    {
       "id": "reign_of_jafar",
       "name": "Reign of Jafar",
-      "setCode": "REI",
+      "setCode": "ROJ",
       "releaseDate": "2025-06-02",
       "cardCount": 204,
       "description": "The villainous sorcerer's rise to power brings darkness to the realm.",

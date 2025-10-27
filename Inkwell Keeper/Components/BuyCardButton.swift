@@ -118,7 +118,7 @@ struct BuyCardSheet: View {
             VStack(spacing: 20) {
                 // Card preview
                 HStack(spacing: 16) {
-                    AsyncImage(url: URL(string: card.imageUrl)) { image in
+                    AsyncImage(url: card.bestImageUrl()) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)

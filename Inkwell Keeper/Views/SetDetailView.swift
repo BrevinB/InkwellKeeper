@@ -36,9 +36,9 @@ struct SetDetailView: View {
         case .all:
             return cards
         case .owned:
-            return cards.filter { collectionManager.isCardCollected($0.id) }
+            return cards.filter { collectionManager.isCardCollectedIncludingReprints($0) }
         case .missing:
-            return cards.filter { !collectionManager.isCardCollected($0.id) }
+            return cards.filter { !collectionManager.isCardCollectedIncludingReprints($0) }
         }
     }
     
@@ -166,8 +166,8 @@ struct SetDetailView: View {
                             ForEach(filteredCards) { card in
                                 SetCardView(
                                     card: card,
-                                    isCollected: collectionManager.isCardCollected(card.id),
-                                    quantity: collectionManager.getCollectedQuantity(for: card.id),
+                                    isCollected: collectionManager.isCardCollectedIncludingReprints(card),
+                                    quantity: collectionManager.getCollectedQuantityIncludingReprints(for: card),
                                     onTap: {
                                         selectedCard = card
                                     }
@@ -231,7 +231,7 @@ struct SetCardView: View {
     var body: some View {
         VStack(spacing: 8) {
             ZStack {
-                AsyncImage(url: URL(string: card.imageUrl)) { image in
+                AsyncImage(url: card.bestImageUrl()) { image in
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fit)
@@ -323,14 +323,13 @@ struct SetCardView: View {
 struct CardDetailSheetView: View {
     let card: LorcanaCard
     @Environment(\.dismiss) private var dismiss
-    
+    @State private var isPresented = true
+
     var body: some View {
-        CollectionCardDetailView(card: card, isPresented: .constant(true))
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
+        CollectionCardDetailView(card: card, isPresented: $isPresented)
+            .onChange(of: isPresented) { newValue in
+                if !newValue {
+                    dismiss()
                 }
             }
     }

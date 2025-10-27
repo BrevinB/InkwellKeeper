@@ -13,6 +13,7 @@ struct DecksView: View {
     @EnvironmentObject var collectionManager: CollectionManager
     @StateObject private var deckManager = DeckManager()
     @State private var showingCreateDeck = false
+    @State private var showingStarterDecks = false
 
     var body: some View {
         NavigationView {
@@ -21,6 +22,8 @@ struct DecksView: View {
 
                 if deckManager.decks.isEmpty {
                     EmptyDecksView(showingCreateDeck: $showingCreateDeck)
+                        .environmentObject(deckManager)
+                        .environmentObject(collectionManager)
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 12) {
@@ -36,6 +39,17 @@ struct DecksView: View {
             }
             .navigationTitle("Decks")
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: { showingStarterDecks = true }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "square.stack.3d.down.right")
+                            Text("Starter")
+                        }
+                        .font(.caption)
+                        .foregroundColor(.lorcanaGold)
+                    }
+                }
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingCreateDeck = true }) {
                         Image(systemName: "plus")
@@ -51,12 +65,20 @@ struct DecksView: View {
             CreateDeckView()
                 .environmentObject(deckManager)
         }
+        .sheet(isPresented: $showingStarterDecks) {
+            StarterDecksView()
+                .environmentObject(deckManager)
+                .environmentObject(collectionManager)
+        }
     }
 }
 
 // MARK: - Empty State
 struct EmptyDecksView: View {
     @Binding var showingCreateDeck: Bool
+    @State private var showingStarterDecks = false
+    @EnvironmentObject var deckManager: DeckManager
+    @EnvironmentObject var collectionManager: CollectionManager
 
     var body: some View {
         VStack(spacing: 24) {
@@ -76,20 +98,45 @@ struct EmptyDecksView: View {
                     .multilineTextAlignment(.center)
             }
 
-            Button(action: { showingCreateDeck = true }) {
-                HStack {
-                    Image(systemName: "plus.circle.fill")
-                    Text("Create Deck")
+            VStack(spacing: 12) {
+                Button(action: { showingCreateDeck = true }) {
+                    HStack {
+                        Image(systemName: "plus.circle.fill")
+                        Text("Create Deck")
+                    }
+                    .font(.headline)
+                    .foregroundColor(.lorcanaDark)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.lorcanaGold)
+                    .cornerRadius(10)
                 }
-                .font(.headline)
-                .foregroundColor(.lorcanaDark)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 12)
-                .background(Color.lorcanaGold)
-                .cornerRadius(10)
+
+                Button(action: { showingStarterDecks = true }) {
+                    HStack {
+                        Image(systemName: "square.stack.3d.down.right.fill")
+                        Text("Import Starter Deck")
+                    }
+                    .font(.headline)
+                    .foregroundColor(.lorcanaGold)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.lorcanaGold, lineWidth: 2)
+                    )
+                }
             }
+            .padding(.horizontal)
         }
         .padding()
+        .sheet(isPresented: $showingStarterDecks) {
+            StarterDecksView()
+                .environmentObject(deckManager)
+                .environmentObject(collectionManager)
+        }
     }
 }
 
@@ -788,7 +835,7 @@ struct DeckCardRow: View {
     var body: some View {
         Button(action: { showingDetail = true }) {
             HStack(spacing: 12) {
-                AsyncImage(url: URL(string: card.imageUrl)) { image in
+                AsyncImage(url: card.bestImageUrl()) { image in
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fit)
@@ -870,7 +917,7 @@ struct DeckCardDetailView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                AsyncImage(url: URL(string: card.imageUrl)) { image in
+                AsyncImage(url: card.bestImageUrl()) { image in
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fit)
@@ -1327,7 +1374,7 @@ struct BuilderCardView: View {
     var body: some View {
         VStack(spacing: 4) {
             ZStack {
-                AsyncImage(url: URL(string: card.imageUrl)) { image in
+                AsyncImage(url: card.bestImageUrl()) { image in
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fit)
@@ -1417,7 +1464,7 @@ struct AddCardToDeckView: View {
         NavigationView {
             VStack(spacing: 20) {
                 // Card image
-                AsyncImage(url: URL(string: card.imageUrl)) { image in
+                AsyncImage(url: card.bestImageUrl()) { image in
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fit)

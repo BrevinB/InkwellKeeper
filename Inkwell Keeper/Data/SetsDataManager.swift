@@ -107,6 +107,7 @@ class SetsDataManager: ObservableObject {
             "shimmering_skies": "shimmering_skies.json",
             "azurite_sea": "azurite_sea.json",
             "fabled": "fabled.json",
+            "archazias_island": "archazias_island.json",
             "reign_of_jafar": "reign_of_jafar.json"
         ]
 
@@ -198,7 +199,30 @@ class SetsDataManager: ObservableObject {
     }
     
     // MARK: - Search Functionality
-    
+
+    /// Search for cards and group reprints together
+    func searchCardGroups(query: String) -> [CardGroup] {
+        let cards = searchCards(query: query)
+        return groupCards(cards)
+    }
+
+    /// Group cards by name (for handling reprints)
+    private func groupCards(_ cards: [LorcanaCard]) -> [CardGroup] {
+        var grouped: [String: [LorcanaCard]] = [:]
+
+        for card in cards {
+            grouped[card.name, default: []].append(card)
+        }
+
+        return grouped.map { name, cards in
+            CardGroup(
+                id: name.replacingOccurrences(of: " ", with: "_"),
+                name: name,
+                cards: cards.sorted { ($0.setName, $0.uniqueId ?? "") > ($1.setName, $1.uniqueId ?? "") }
+            )
+        }.sorted { $0.name < $1.name }
+    }
+
     func searchCards(query: String) -> [LorcanaCard] {
         guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return []
@@ -275,6 +299,24 @@ class SetsDataManager: ObservableObject {
             allCards.append(contentsOf: cards)
         }
         return allCards.map { getCardWithCachedPrice($0) }
+    }
+
+    /// Get all set names that a card (by name) appears in
+    func getSetsForCard(cardName: String) -> [String] {
+        var sets: Set<String> = []
+        for cards in setCards.values {
+            if cards.contains(where: { $0.name == cardName }) {
+                if let setName = cards.first?.setName {
+                    sets.insert(setName)
+                }
+            }
+        }
+        return Array(sets).sorted()
+    }
+
+    /// Check if a card name appears in multiple sets (is a reprint)
+    func isReprint(cardName: String) -> Bool {
+        return getSetsForCard(cardName: cardName).count > 1
     }
 }
 

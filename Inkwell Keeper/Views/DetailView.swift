@@ -16,7 +16,7 @@ struct CardDetailView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
-                    AsyncImage(url: URL(string: card.imageUrl)) { image in
+                    AsyncImage(url: card.bestImageUrl()) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
@@ -89,7 +89,7 @@ struct CollectionCardDetailView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
-                    AsyncImage(url: URL(string: card.imageUrl)) { image in
+                    AsyncImage(url: card.bestImageUrl()) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
@@ -319,7 +319,7 @@ struct WishlistCardDetailView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
-                    AsyncImage(url: URL(string: card.imageUrl)) { image in
+                    AsyncImage(url: card.bestImageUrl()) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
@@ -454,9 +454,10 @@ struct ManualAddCardView: View {
     @EnvironmentObject var collectionManager: CollectionManager
     @StateObject private var dataManager = SetsDataManager.shared
     @State private var searchText = ""
-    @State private var searchResults: [LorcanaCard] = []
+    @State private var searchResults: [CardGroup] = []
     @State private var searchTask: Task<Void, Never>?
-    @State private var selectedCard: LorcanaCard?
+    @State private var selectedCardGroup: CardGroup?
+    @State private var showingAddModal = false
     
     var body: some View {
         NavigationView {
@@ -499,9 +500,10 @@ struct ManualAddCardView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    List(searchResults, id: \.id) { card in
-                        SimpleCardSearchRow(card: card) {
-                            selectedCard = card
+                    List(searchResults, id: \.id) { cardGroup in
+                        CardGroupSearchRow(cardGroup: cardGroup) {
+                            selectedCardGroup = cardGroup
+                            showingAddModal = true
                         }
                     }
                     .listStyle(PlainListStyle())
@@ -521,31 +523,31 @@ struct ManualAddCardView: View {
         .onDisappear {
             searchTask?.cancel()
         }
-        .sheet(item: $selectedCard) { card in
-            AddCardModal(card: card, isPresented: .constant(true), onAdd: { selectedCard, quantity in
-                for _ in 0..<quantity {
-                    collectionManager.addCard(selectedCard)
-                }
-                // Don't dismiss - let user add more cards
-            }, isWishlist: false)
-            .environmentObject(collectionManager)
+        .sheet(isPresented: $showingAddModal) {
+            if let cardGroup = selectedCardGroup {
+                AddCardGroupModal(cardGroup: cardGroup, isPresented: $showingAddModal, onAdd: { selectedCard, quantity in
+                    for _ in 0..<quantity {
+                        collectionManager.addCard(selectedCard)
+                    }
+                    showingAddModal = false
+                }, isWishlist: false)
+                .environmentObject(collectionManager)
+            }
         }
     }
-    
+
     private func searchCards(query: String) {
         guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             searchResults = []
             return
         }
-        
-        
-        // Use local search - instant results!
-        let results = dataManager.searchCards(query: query)
-        
+
+        // Use local search with grouping - instant results!
+        let results = dataManager.searchCardGroups(query: query)
+
         // Only update results if this search is still current
         if self.searchText.trimmingCharacters(in: .whitespacesAndNewlines) == query {
             self.searchResults = results
-        } else {
         }
     }
 }
@@ -555,9 +557,10 @@ struct AddToWishlistView: View {
     @EnvironmentObject var collectionManager: CollectionManager
     @StateObject private var dataManager = SetsDataManager.shared
     @State private var searchText = ""
-    @State private var searchResults: [LorcanaCard] = []
+    @State private var searchResults: [CardGroup] = []
     @State private var searchTask: Task<Void, Never>?
-    @State private var selectedCard: LorcanaCard?
+    @State private var selectedCardGroup: CardGroup?
+    @State private var showingAddModal = false
     
     var body: some View {
         NavigationView {
@@ -600,9 +603,10 @@ struct AddToWishlistView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    List(searchResults, id: \.id) { card in
-                        SimpleCardSearchRow(card: card) {
-                            selectedCard = card
+                    List(searchResults, id: \.id) { cardGroup in
+                        CardGroupSearchRow(cardGroup: cardGroup) {
+                            selectedCardGroup = cardGroup
+                            showingAddModal = true
                         }
                     }
                     .listStyle(PlainListStyle())
@@ -622,31 +626,31 @@ struct AddToWishlistView: View {
         .onDisappear {
             searchTask?.cancel()
         }
-        .sheet(item: $selectedCard) { card in
-            AddCardModal(card: card, isPresented: .constant(true), onAdd: { selectedCard, quantity in
-                for _ in 0..<quantity {
-                    collectionManager.addToWishlist(selectedCard)
-                }
-                // Don't dismiss - let user add more cards
-            }, isWishlist: true)
-            .environmentObject(collectionManager)
+        .sheet(isPresented: $showingAddModal) {
+            if let cardGroup = selectedCardGroup {
+                AddCardGroupModal(cardGroup: cardGroup, isPresented: $showingAddModal, onAdd: { selectedCard, quantity in
+                    for _ in 0..<quantity {
+                        collectionManager.addToWishlist(selectedCard)
+                    }
+                    showingAddModal = false
+                }, isWishlist: true)
+                .environmentObject(collectionManager)
+            }
         }
     }
-    
+
     private func searchCards(query: String) {
         guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             searchResults = []
             return
         }
-        
-        
-        // Use local search - instant results!
-        let results = dataManager.searchCards(query: query)
-        
+
+        // Use local search with grouping - instant results!
+        let results = dataManager.searchCardGroups(query: query)
+
         // Only update results if this search is still current
         if self.searchText.trimmingCharacters(in: .whitespacesAndNewlines) == query {
             self.searchResults = results
-        } else {
         }
     }
 }
@@ -681,7 +685,7 @@ struct AddCardModal: View {
                 // Card image and basic info (updates with selected variant)
                 HStack(spacing: 16) {
                     ZStack(alignment: .topTrailing) {
-                        AsyncImage(url: URL(string: selectedCard.imageUrl)) { image in
+                        AsyncImage(url: selectedCard.bestImageUrl()) { image in
                             image
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
@@ -857,6 +861,280 @@ struct AddCardModal: View {
     }
 }
 
+// MARK: - Add Card Group Modal (Shows Reprint Info)
+struct AddCardGroupModal: View {
+    let cardGroup: CardGroup
+    @Binding var isPresented: Bool
+    let onAdd: (LorcanaCard, Int) -> Void
+    let isWishlist: Bool
+
+    @State private var selectedVariant: CardVariant = .normal
+    @State private var quantity: Int = 1
+    @State private var showingSuccessBanner = false
+
+    var selectedCard: LorcanaCard {
+        // Use primary card (most recent set) for adding
+        cardGroup.primaryCard.withVariant(selectedVariant)
+    }
+
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Card image and basic info
+                HStack(spacing: 16) {
+                    ZStack(alignment: .topTrailing) {
+                        AsyncImage(url: selectedCard.bestImageUrl()) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                        } placeholder: {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.gray.opacity(0.3))
+                        }
+                        .frame(width: 80, height: 110)
+
+                        // Show variant badge if not normal
+                        if selectedVariant != .normal {
+                            Text(selectedVariant.shortName)
+                                .font(.caption2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding(4)
+                                .background(Color.lorcanaGold)
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                                .padding(4)
+                        }
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .id(selectedCard.id)  // Force reload when set/variant changes
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(selectedCard.name)
+                            .font(.headline)
+                            .foregroundColor(.white)
+
+                        HStack {
+                            RarityBadge(rarity: selectedCard.rarity)
+                            Spacer()
+                            CostBadge(cost: selectedCard.cost)
+                        }
+
+                        if let price = selectedCard.price {
+                            Text("$\(price, specifier: "%.2f")")
+                                .font(.caption)
+                                .foregroundColor(.lorcanaGold)
+                        }
+                    }
+
+                    Spacer()
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.lorcanaDark.opacity(0.8))
+                )
+
+                // Reprint info (if card appears in multiple sets)
+                if cardGroup.isReprint {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Image(systemName: "square.on.square")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                            Text("This card appears in multiple sets")
+                                .font(.subheadline)
+                                .foregroundColor(.white)
+                        }
+
+                        // Show all sets as badges
+                        HStack(spacing: 8) {
+                            ForEach(cardGroup.cards, id: \.id) { card in
+                                HStack(spacing: 4) {
+                                    Text(card.setName)
+                                        .font(.caption)
+                                    if let uniqueId = card.uniqueId {
+                                        Text("(\(uniqueId))")
+                                            .font(.caption2)
+                                            .foregroundColor(.gray)
+                                    }
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .fill(Color.blue.opacity(0.3))
+                                )
+                            }
+                        }
+
+                        Text("Adding this card will count toward all sets")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                            .italic()
+                    }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.lorcanaDark.opacity(0.6))
+                    )
+                }
+
+                // Variant selection
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Card Variant")
+                        .font(.headline)
+                        .foregroundColor(.lorcanaGold)
+
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
+                        ForEach(CardVariant.allCases, id: \.self) { variant in
+                            Button(action: {
+                                selectedVariant = variant
+                            }) {
+                                VStack(spacing: 4) {
+                                    Text(variant.shortName)
+                                        .font(.caption)
+                                        .fontWeight(.bold)
+                                    Text(variant.displayName)
+                                        .font(.caption2)
+                                }
+                                .foregroundColor(selectedVariant == variant ? .white : .gray)
+                                .frame(maxWidth: .infinity)
+                                .padding(8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(selectedVariant == variant ? Color.lorcanaGold.opacity(0.3) : Color.clear)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(selectedVariant == variant ? Color.lorcanaGold : Color.gray.opacity(0.3), lineWidth: 1)
+                                )
+                            }
+                        }
+                    }
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.lorcanaDark.opacity(0.6))
+                )
+
+                // Quantity selection
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Quantity")
+                        .font(.headline)
+                        .foregroundColor(.lorcanaGold)
+
+                    HStack {
+                        Button(action: {
+                            if quantity > 1 {
+                                quantity -= 1
+                            }
+                        }) {
+                            Image(systemName: "minus.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(quantity > 1 ? .lorcanaGold : .gray)
+                        }
+                        .disabled(quantity <= 1)
+
+                        Text("\(quantity)")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .frame(minWidth: 50)
+
+                        Button(action: {
+                            quantity += 1
+                        }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(.lorcanaGold)
+                        }
+                    }
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.lorcanaDark.opacity(0.6))
+                )
+
+                // Buy options (for cards you don't own yet)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Or Buy This Card")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                        .padding(.horizontal)
+
+                    BuyCardOptionsView(card: selectedCard)
+                }
+
+                // Add button
+                Button(action: {
+                    onAdd(selectedCard, quantity)
+                    showingSuccessBanner = true
+
+                    // Dismiss after showing success banner briefly
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        isPresented = false
+                    }
+                }) {
+                    Text("Add \(quantity) \(selectedVariant.displayName) card\(quantity > 1 ? "s" : "") to \(isWishlist ? "Wishlist" : "Collection")")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(LorcanaButtonStyle())
+                .padding()
+                }
+                .padding()
+            }
+            .background(LorcanaBackground())
+            .navigationTitle(isWishlist ? "Add to Wishlist" : "Add Card")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        isPresented = false
+                    }
+                }
+            }
+            .overlay(
+                // Success banner
+                VStack {
+                    if showingSuccessBanner {
+                        HStack(spacing: 12) {
+                            Image(systemName: isWishlist ? "heart.fill" : "checkmark.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(.white)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Success!")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                Text("Added \(quantity) \(selectedVariant.displayName) card\(quantity > 1 ? "s" : "")")
+                                    .font(.caption)
+                                    .foregroundColor(.white.opacity(0.9))
+                            }
+
+                            Spacer()
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.green.opacity(0.95))
+                        )
+                        .padding()
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                    }
+
+                    Spacer()
+                }
+                .animation(.spring(), value: showingSuccessBanner)
+            )
+        }
+    }
+}
+
 struct CardSearchForCorrectionView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedCard: LorcanaCard
@@ -939,11 +1217,11 @@ struct CardSearchForCorrectionView: View {
 struct SimpleCardSearchRow: View {
     let card: LorcanaCard
     let onTap: () -> Void
-    
+
     var body: some View {
         Button(action: onTap) {
             HStack {
-                AsyncImage(url: URL(string: card.imageUrl)) { image in
+                AsyncImage(url: card.bestImageUrl()) { image in
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fit)
@@ -953,13 +1231,13 @@ struct SimpleCardSearchRow: View {
                 }
                 .frame(width: 50, height: 70)
                 .clipShape(RoundedRectangle(cornerRadius: 6))
-                
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text(card.name)
                         .font(.headline)
                         .foregroundColor(.white)
                         .lineLimit(1)
-                    
+
                     HStack {
                         RarityBadge(rarity: card.rarity)
                         Spacer()
@@ -970,14 +1248,79 @@ struct SimpleCardSearchRow: View {
                         }
                     }
                 }
-                
+
                 Spacer()
-                
+
                 Image(systemName: "chevron.right")
                     .foregroundColor(.gray)
                     .font(.caption)
             }
             .padding(.vertical, 4)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+// MARK: - Card Group Search Row
+struct CardGroupSearchRow: View {
+    let cardGroup: CardGroup
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack {
+                AsyncImage(url: cardGroup.primaryCard.bestImageUrl()) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                } placeholder: {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.gray.opacity(0.3))
+                }
+                .frame(width: 50, height: 70)
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(cardGroup.name)
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+
+                    HStack {
+                        RarityBadge(rarity: cardGroup.primaryCard.rarity)
+
+                        // Show reprint badge if multiple sets
+                        if cardGroup.isReprint {
+                            HStack(spacing: 3) {
+                                Image(systemName: "square.on.square")
+                                    .font(.caption2)
+                                Text("\(cardGroup.setCount) sets")
+                                    .font(.caption2)
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 2)
+                            .background(Capsule().fill(Color.blue.opacity(0.8)))
+                        }
+
+                        Spacer()
+
+                        if let price = cardGroup.primaryCard.price {
+                            Text("$\(price, specifier: "%.2f")")
+                                .font(.caption)
+                                .foregroundColor(.lorcanaGold)
+                        }
+                    }
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.gray)
+                    .font(.caption)
+            }
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -989,7 +1332,7 @@ struct CardSearchResultRow: View {
     
     var body: some View {
         HStack {
-            AsyncImage(url: URL(string: card.imageUrl)) { image in
+            AsyncImage(url: card.bestImageUrl()) { image in
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fit)

@@ -20,7 +20,7 @@ struct CardGridView: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 16) {
                 ForEach(cards) { card in
-                    CardTile(card: card, isWishlist: isWishlist)
+                    CardTile(card: card, isWishlist: isWishlist )
                         .transition(.scale.combined(with: .opacity))
                 }
             }
