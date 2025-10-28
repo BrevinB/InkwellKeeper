@@ -76,11 +76,6 @@ struct CollectionView: View {
                             collectionManager.loadCollection()
                         }
                         .foregroundColor(.lorcanaGold)
-                        
-                        Button("Clear") {
-                            collectionManager.clearAllData()
-                        }
-                        .foregroundColor(.red)
                     }
                 }
                 
