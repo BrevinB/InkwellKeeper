@@ -16,7 +16,7 @@ struct DecksView: View {
     @State private var showingStarterDecks = false
 
     var body: some View {
-        NavigationView {
+        navigationWrapper {
             ZStack {
                 LorcanaBackground()
 
@@ -69,6 +69,17 @@ struct DecksView: View {
             StarterDecksView()
                 .environmentObject(deckManager)
                 .environmentObject(collectionManager)
+        }
+    }
+
+    @ViewBuilder
+    private func navigationWrapper<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        if #available(iOS 18.0, *), UIDevice.current.userInterfaceIdiom == .pad {
+            content()
+        } else {
+            NavigationView {
+                content()
+            }
         }
     }
 }
@@ -1060,6 +1071,7 @@ struct ExportDeckView: View {
 struct DeckBuilderView: View {
     let deck: Deck
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @EnvironmentObject var deckManager: DeckManager
     @EnvironmentObject var collectionManager: CollectionManager
     @StateObject private var dataManager = SetsDataManager.shared
@@ -1070,6 +1082,10 @@ struct DeckBuilderView: View {
     @State private var selectedCost: Int? = nil
     @State private var availableCards: [LorcanaCard] = []
     @State private var showingCardToAdd: LorcanaCard? = nil
+
+    private var gridHelper: AdaptiveGridHelper {
+        AdaptiveGridHelper(horizontalSizeClass: horizontalSizeClass)
+    }
 
     var filteredCards: [LorcanaCard] {
         var cards = availableCards
@@ -1295,11 +1311,7 @@ struct DeckBuilderView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     ScrollView {
-                        LazyVGrid(columns: [
-                            GridItem(.flexible()),
-                            GridItem(.flexible()),
-                            GridItem(.flexible())
-                        ], spacing: 12) {
+                        LazyVGrid(columns: gridHelper.deckGridColumns(), spacing: gridHelper.gridSpacing) {
                             ForEach(filteredCards) { card in
                                 BuilderCardView(
                                     card: card,
@@ -1309,7 +1321,7 @@ struct DeckBuilderView: View {
                                 )
                             }
                         }
-                        .padding()
+                        .padding(gridHelper.viewPadding)
                     }
                 }
             }

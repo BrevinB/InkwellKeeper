@@ -15,9 +15,18 @@ struct WishlistCardRow: View {
     var body: some View {
         HStack {
             AsyncImage(url: card.bestImageUrl()) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
+                Group {
+                    if card.variant == .foil {
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .foilEffect(isAnimated: true)
+                    } else {
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                    }
+                }
             } placeholder: {
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.gray.opacity(0.3))
@@ -57,10 +66,11 @@ struct WishlistCardRow: View {
                 }
                 
                 if let price = card.price {
-                    Text("$\(price, specifier: "%.2f")")
-                        .font(.subheadline)
-                        .foregroundColor(.lorcanaGold)
-                        .fontWeight(.semibold)
+                    PriceWithConfidenceView(
+                        price: price,
+                        confidence: .estimated,
+                        style: .inline
+                    )
                 }
 
                 // Buy button for wishlist cards

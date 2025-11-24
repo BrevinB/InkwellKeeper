@@ -12,7 +12,7 @@ struct StatsView: View {
     @EnvironmentObject var collectionManager: CollectionManager
     
     var body: some View {
-        NavigationView {
+        navigationWrapper {
             ScrollView {
                 VStack(spacing: 24) {
                     let stats = collectionManager.getCollectionStats()
@@ -32,6 +32,17 @@ struct StatsView: View {
             }
             .background(LorcanaBackground())
             .navigationTitle("Collection Stats")
+        }
+    }
+
+    @ViewBuilder
+    private func navigationWrapper<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        if #available(iOS 18.0, *), UIDevice.current.userInterfaceIdiom == .pad {
+            content()
+        } else {
+            NavigationView {
+                content()
+            }
         }
     }
 }

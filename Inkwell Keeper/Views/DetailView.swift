@@ -45,11 +45,7 @@ struct CardDetailView: View {
                                 .foregroundColor(.secondary)
                         }
                         
-                        if let price = card.price {
-                            Text("Market Value: $\(price, specifier: "%.2f")")
-                                .font(.headline)
-                                .foregroundColor(.lorcanaGold)
-                        }
+                        // Price display removed - users can check prices via buy options
                     }
                     .padding()
 
@@ -84,15 +80,24 @@ struct CollectionCardDetailView: View {
     @State private var collectedCard: CollectedCard?
     @State private var tempQuantity: Int = 1
     @State private var showingDeleteConfirmation = false
-    
+
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
                     AsyncImage(url: card.bestImageUrl()) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
+                        Group {
+                            if card.variant == .foil {
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .foilEffect(isAnimated: true)
+                            } else {
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                            }
+                        }
                     } placeholder: {
                         RoundedRectangle(cornerRadius: 12)
                             .fill(Color.gray.opacity(0.3))
@@ -199,36 +204,18 @@ struct CollectionCardDetailView: View {
                             }
                         }
                         
-                        if let price = card.price {
-                            HStack {
-                                Text("Market Value:")
-                                    .font(.headline)
-                                    .foregroundColor(.lorcanaGold)
-                                Spacer()
-                                Text("$\(price, specifier: "%.2f")")
-                                    .font(.headline)
-                                    .foregroundColor(.lorcanaGold)
-                            }
-                            
-                            if let collected = collectedCard, collected.quantity > 1 {
-                                HStack {
-                                    Text("Total Value:")
-                                        .font(.subheadline)
-                                        .foregroundColor(.gray)
-                                    Spacer()
-                                    Text("$\(price * Double(collected.quantity), specifier: "%.2f")")
-                                        .font(.subheadline)
-                                        .foregroundColor(.lorcanaGold)
-                                }
-                            }
-                        }
+                        // Price display removed - users can check prices via buy options
                     }
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 16)
                             .fill(Color.lorcanaDark.opacity(0.8))
                     )
-                    
+
+                    // Check Prices section
+                    BuyCardOptionsView(card: card)
+                        .padding(.horizontal)
+
                     // Action buttons - show different buttons based on ownership
                     VStack(spacing: 12) {
                         if collectedCard != nil {
@@ -314,15 +301,24 @@ struct WishlistCardDetailView: View {
     @Binding var isPresented: Bool
     @EnvironmentObject var collectionManager: CollectionManager
     @State private var showingMoveConfirmation = false
-    
+
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
                     AsyncImage(url: card.bestImageUrl()) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
+                        Group {
+                            if card.variant == .foil {
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .foilEffect(isAnimated: true)
+                            } else {
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                            }
+                        }
                     } placeholder: {
                         RoundedRectangle(cornerRadius: 12)
                             .fill(Color.gray.opacity(0.3))
@@ -366,24 +362,18 @@ struct WishlistCardDetailView: View {
                             }
                         }
                         
-                        if let price = card.price {
-                            HStack {
-                                Text("Market Value:")
-                                    .font(.headline)
-                                    .foregroundColor(.lorcanaGold)
-                                Spacer()
-                                Text("$\(price, specifier: "%.2f")")
-                                    .font(.headline)
-                                    .foregroundColor(.lorcanaGold)
-                            }
-                        }
+                        // Price display removed - users can check prices via buy options
                     }
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 16)
                             .fill(Color.lorcanaDark.opacity(0.8))
                     )
-                    
+
+                    // Check Prices section
+                    BuyCardOptionsView(card: card)
+                        .padding(.horizontal)
+
                     // Action buttons
                     VStack(spacing: 12) {
                         Button(action: {
@@ -450,14 +440,13 @@ struct WishlistCardDetailView: View {
 }
 
 struct ManualAddCardView: View {
-    @Environment(\.dismiss) private var dismiss
+    @Binding var isPresented: Bool
     @EnvironmentObject var collectionManager: CollectionManager
     @StateObject private var dataManager = SetsDataManager.shared
     @State private var searchText = ""
     @State private var searchResults: [CardGroup] = []
     @State private var searchTask: Task<Void, Never>?
-    @State private var selectedCardGroup: CardGroup?
-    @State private var showingAddModal = false
+    @State private var selectedCardGroupForAdd: CardGroup?
     
     var body: some View {
         NavigationView {
@@ -502,8 +491,7 @@ struct ManualAddCardView: View {
                 } else {
                     List(searchResults, id: \.id) { cardGroup in
                         CardGroupSearchRow(cardGroup: cardGroup) {
-                            selectedCardGroup = cardGroup
-                            showingAddModal = true
+                            selectedCardGroupForAdd = cardGroup
                         }
                     }
                     .listStyle(PlainListStyle())
@@ -515,7 +503,7 @@ struct ManualAddCardView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
-                        dismiss()
+                        isPresented = false
                     }
                 }
             }
@@ -523,16 +511,22 @@ struct ManualAddCardView: View {
         .onDisappear {
             searchTask?.cancel()
         }
-        .sheet(isPresented: $showingAddModal) {
-            if let cardGroup = selectedCardGroup {
-                AddCardGroupModal(cardGroup: cardGroup, isPresented: $showingAddModal, onAdd: { selectedCard, quantity in
+        .sheet(item: $selectedCardGroupForAdd) { cardGroup in
+            AddCardGroupModal(
+                cardGroup: cardGroup,
+                isPresented: Binding(
+                    get: { selectedCardGroupForAdd != nil },
+                    set: { if !$0 { selectedCardGroupForAdd = nil } }
+                ),
+                onAdd: { selectedCard, quantity in
                     for _ in 0..<quantity {
                         collectionManager.addCard(selectedCard)
                     }
-                    showingAddModal = false
-                }, isWishlist: false)
-                .environmentObject(collectionManager)
-            }
+                    selectedCardGroupForAdd = nil
+                },
+                isWishlist: false
+            )
+            .environmentObject(collectionManager)
         }
     }
 
@@ -553,14 +547,13 @@ struct ManualAddCardView: View {
 }
 
 struct AddToWishlistView: View {
-    @Environment(\.dismiss) private var dismiss
+    @Binding var isPresented: Bool
     @EnvironmentObject var collectionManager: CollectionManager
     @StateObject private var dataManager = SetsDataManager.shared
     @State private var searchText = ""
     @State private var searchResults: [CardGroup] = []
     @State private var searchTask: Task<Void, Never>?
-    @State private var selectedCardGroup: CardGroup?
-    @State private var showingAddModal = false
+    @State private var selectedCardGroupForWishlist: CardGroup?
     
     var body: some View {
         NavigationView {
@@ -605,8 +598,7 @@ struct AddToWishlistView: View {
                 } else {
                     List(searchResults, id: \.id) { cardGroup in
                         CardGroupSearchRow(cardGroup: cardGroup) {
-                            selectedCardGroup = cardGroup
-                            showingAddModal = true
+                            selectedCardGroupForWishlist = cardGroup
                         }
                     }
                     .listStyle(PlainListStyle())
@@ -618,7 +610,7 @@ struct AddToWishlistView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
-                        dismiss()
+                        isPresented = false
                     }
                 }
             }
@@ -626,16 +618,22 @@ struct AddToWishlistView: View {
         .onDisappear {
             searchTask?.cancel()
         }
-        .sheet(isPresented: $showingAddModal) {
-            if let cardGroup = selectedCardGroup {
-                AddCardGroupModal(cardGroup: cardGroup, isPresented: $showingAddModal, onAdd: { selectedCard, quantity in
+        .sheet(item: $selectedCardGroupForWishlist) { cardGroup in
+            AddCardGroupModal(
+                cardGroup: cardGroup,
+                isPresented: Binding(
+                    get: { selectedCardGroupForWishlist != nil },
+                    set: { if !$0 { selectedCardGroupForWishlist = nil } }
+                ),
+                onAdd: { selectedCard, quantity in
                     for _ in 0..<quantity {
                         collectionManager.addToWishlist(selectedCard)
                     }
-                    showingAddModal = false
-                }, isWishlist: true)
-                .environmentObject(collectionManager)
-            }
+                    selectedCardGroupForWishlist = nil
+                },
+                isWishlist: true
+            )
+            .environmentObject(collectionManager)
         }
     }
 
@@ -676,159 +674,21 @@ struct AddCardModal: View {
 
     var selectedCard: LorcanaCard {
         // Use the extension method to get variant-specific image URL
-        currentCard.withVariant(selectedVariant)
+        return currentCard.withVariant(selectedVariant)
     }
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                // Card image and basic info (updates with selected variant)
-                HStack(spacing: 16) {
-                    ZStack(alignment: .topTrailing) {
-                        AsyncImage(url: selectedCard.bestImageUrl()) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                        } placeholder: {
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.gray.opacity(0.3))
-                        }
-                        .frame(width: 80, height: 110)
-
-                        // Show variant badge if not normal
-                        if selectedVariant != .normal {
-                            Text(selectedVariant.shortName)
-                                .font(.caption2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                                .padding(4)
-                                .background(Color.lorcanaGold)
-                                .clipShape(RoundedRectangle(cornerRadius: 4))
-                                .padding(4)
-                        }
-                    }
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .id(selectedVariant)  // Force reload when variant changes
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(currentCard.name)
-                            .font(.headline)
-                            .foregroundColor(.white)
-
-                        HStack {
-                            RarityBadge(rarity: currentCard.rarity)
-                            Spacer()
-                            CostBadge(cost: currentCard.cost)
-                        }
-
-                        if let price = currentCard.price {
-                            Text("$\(price, specifier: "%.2f")")
-                                .font(.caption)
-                                .foregroundColor(.lorcanaGold)
-                        }
-                    }
-                    
-                    Spacer()
+            ScrollView {
+                VStack(spacing: 20) {
+                    headerSection
+                    variantSection
+                    quantitySection
+                    buySection
+                    addButton
                 }
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.lorcanaDark.opacity(0.8))
-                )
-                
-                // Variant selection
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Card Variant")
-                        .font(.headline)
-                        .foregroundColor(.lorcanaGold)
-                    
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
-                        ForEach(CardVariant.allCases, id: \.self) { variant in
-                            Button(action: {
-                                selectedVariant = variant
-                            }) {
-                                VStack(spacing: 4) {
-                                    Text(variant.shortName)
-                                        .font(.caption)
-                                        .fontWeight(.bold)
-                                    Text(variant.displayName)
-                                        .font(.caption2)
-                                }
-                                .foregroundColor(selectedVariant == variant ? .white : .gray)
-                                .padding(.vertical, 8)
-                                .frame(maxWidth: .infinity)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(selectedVariant == variant ? Color.lorcanaGold : Color.gray.opacity(0.3))
-                                )
-                            }
-                        }
-                    }
-                }
-                
-                // Quantity selection
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Quantity")
-                        .font(.headline)
-                        .foregroundColor(.lorcanaGold)
-                    
-                    HStack {
-                        Button("-") {
-                            if quantity > 1 {
-                                quantity -= 1
-                            }
-                        }
-                        .frame(width: 40, height: 40)
-                        .background(Color.red.opacity(0.8))
-                        .foregroundColor(.white)
-                        .clipShape(Circle())
-                        .disabled(quantity <= 1)
-                        
-                        Spacer()
-                        
-                        Text("\(quantity)")
-                            .font(.title)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                        
-                        Spacer()
-                        
-                        Button("+") {
-                            quantity += 1
-                        }
-                        .frame(width: 40, height: 40)
-                        .background(Color.green.opacity(0.8))
-                        .foregroundColor(.white)
-                        .clipShape(Circle())
-                    }
-                    .padding(.horizontal)
-                }
-                
-                // Buy options (for cards you don't own yet)
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Or Buy This Card")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                        .padding(.horizontal)
-
-                    BuyCardOptionsView(card: currentCard)
-                }
-
-                Spacer()
-
-                // Add button
-                Button(action: {
-                    onAdd(selectedCard, quantity)
-                    isPresented = false
-                }) {
-                    Text("Add \(quantity) \(selectedVariant.displayName) card\(quantity > 1 ? "s" : "") to \(isWishlist ? "Wishlist" : "Collection")")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(LorcanaButtonStyle())
                 .padding()
             }
-            .padding()
             .background(LorcanaBackground())
             .navigationTitle(isWishlist ? "Add to Wishlist" : "Add to Collection")
             .navigationBarTitleDisplayMode(.inline)
@@ -855,9 +715,159 @@ struct AddCardModal: View {
             .sheet(isPresented: $showingCardSearch) {
                 CardSearchForCorrectionView(selectedCard: $currentCard)
             }
-            .onChange(of: currentCard.id) { newId in
+            .onChange(of: currentCard.id) { _ in }
+        }
+    }
+    
+    private var headerSection: some View {
+        HStack(spacing: 16) {
+            ZStack(alignment: .topTrailing) {
+                AsyncImage(url: selectedCard.bestImageUrl()) { image in
+                    Group {
+                        if selectedVariant == .foil {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .staticFoilEffect()
+                        } else {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                        }
+                    }
+                } placeholder: {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.gray.opacity(0.3))
+                }
+                .frame(width: 80, height: 110)
+
+                if selectedVariant != .normal {
+                    Text(selectedVariant.shortName)
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(4)
+                        .background(Color.lorcanaGold)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .padding(4)
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .id(selectedVariant)
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text(currentCard.name)
+                    .font(.headline)
+                    .foregroundColor(.white)
+
+                HStack {
+                    RarityBadge(rarity: currentCard.rarity)
+                    Spacer()
+                    CostBadge(cost: currentCard.cost)
+                }
+
+                // Price display removed
+            }
+
+            Spacer()
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.lorcanaDark.opacity(0.8))
+        )
+    }
+
+    private var variantSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Card Variant")
+                .font(.headline)
+                .foregroundColor(.lorcanaGold)
+
+            let availableVariants = currentCard.availableVariants()
+
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
+                ForEach(availableVariants, id: \.self) { variant in
+                    Button(action: { selectedVariant = variant }) {
+                        VStack(spacing: 4) {
+                            Text(variant.shortName)
+                                .font(.caption)
+                                .fontWeight(.bold)
+                            Text(variant.displayName)
+                                .font(.caption2)
+                        }
+                        .foregroundColor(selectedVariant == variant ? .white : .gray)
+                        .padding(.vertical, 8)
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(selectedVariant == variant ? Color.lorcanaGold : Color.gray.opacity(0.3))
+                        )
+                    }
+                }
             }
         }
+    }
+
+    private var quantitySection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Quantity")
+                .font(.headline)
+                .foregroundColor(.lorcanaGold)
+
+            HStack {
+                Button("-") {
+                    if quantity > 1 { quantity -= 1 }
+                }
+                .frame(width: 40, height: 40)
+                .background(Color.red.opacity(0.8))
+                .foregroundColor(.white)
+                .clipShape(Circle())
+                .disabled(quantity <= 1)
+
+                Spacer()
+
+                Text("\(quantity)")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+
+                Spacer()
+
+                Button("+") {
+                    quantity += 1
+                }
+                .frame(width: 40, height: 40)
+                .background(Color.green.opacity(0.8))
+                .foregroundColor(.white)
+                .clipShape(Circle())
+            }
+            .padding(.horizontal)
+        }
+    }
+
+    private var buySection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Or Buy This Card")
+                .font(.caption)
+                .foregroundColor(.gray)
+                .padding(.horizontal)
+
+            BuyCardOptionsView(card: currentCard)
+        }
+    }
+
+    private var addButton: some View {
+        Button(action: {
+            onAdd(selectedCard, quantity)
+            isPresented = false
+        }) {
+            Text("Add \(quantity) \(selectedVariant.displayName) card\(quantity > 1 ? "s" : "") to \(isWishlist ? "Wishlist" : "Collection")")
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(LorcanaButtonStyle())
+        .padding()
     }
 }
 
@@ -885,9 +895,18 @@ struct AddCardGroupModal: View {
                 HStack(spacing: 16) {
                     ZStack(alignment: .topTrailing) {
                         AsyncImage(url: selectedCard.bestImageUrl()) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
+                            Group {
+                                if selectedVariant == .foil {
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .staticFoilEffect()
+                                } else {
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                }
+                            }
                         } placeholder: {
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color.gray.opacity(0.3))
@@ -920,11 +939,7 @@ struct AddCardGroupModal: View {
                             CostBadge(cost: selectedCard.cost)
                         }
 
-                        if let price = selectedCard.price {
-                            Text("$\(price, specifier: "%.2f")")
-                                .font(.caption)
-                                .foregroundColor(.lorcanaGold)
-                        }
+                        // Price display removed
                     }
 
                     Spacer()
@@ -981,14 +996,16 @@ struct AddCardGroupModal: View {
                     )
                 }
 
-                // Variant selection
+                // Variant selection - only show available variants
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Card Variant")
                         .font(.headline)
                         .foregroundColor(.lorcanaGold)
 
+                    let availableVariants = cardGroup.primaryCard.availableVariants()
+
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
-                        ForEach(CardVariant.allCases, id: \.self) { variant in
+                        ForEach(availableVariants, id: \.self) { variant in
                             Button(action: {
                                 selectedVariant = variant
                             }) {
@@ -1131,6 +1148,11 @@ struct AddCardGroupModal: View {
                 }
                 .animation(.spring(), value: showingSuccessBanner)
             )
+            .onAppear {
+                // Initialize selected variant to match the card's actual variant
+                // For promo cards, this ensures it starts as .promo
+                selectedVariant = cardGroup.primaryCard.variant
+            }
         }
     }
 }
@@ -1241,11 +1263,7 @@ struct SimpleCardSearchRow: View {
                     HStack {
                         RarityBadge(rarity: card.rarity)
                         Spacer()
-                        if let price = card.price {
-                            Text("$\(price, specifier: "%.2f")")
-                                .font(.caption)
-                                .foregroundColor(.lorcanaGold)
-                        }
+                        // Price display removed
                     }
                 }
 
@@ -1305,11 +1323,7 @@ struct CardGroupSearchRow: View {
 
                         Spacer()
 
-                        if let price = cardGroup.primaryCard.price {
-                            Text("$\(price, specifier: "%.2f")")
-                                .font(.caption)
-                                .foregroundColor(.lorcanaGold)
-                        }
+                        // Price display removed
                     }
                 }
 
@@ -1351,11 +1365,7 @@ struct CardSearchResultRow: View {
                 HStack {
                     RarityBadge(rarity: card.rarity)
                     Spacer()
-                    if let price = card.price {
-                        Text("$\(price, specifier: "%.2f")")
-                            .font(.caption)
-                            .foregroundColor(.lorcanaGold)
-                    }
+                    // Price display removed
                 }
             }
             

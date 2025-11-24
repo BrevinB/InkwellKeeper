@@ -10,21 +10,22 @@ import SwiftUI
 struct CardGridView: View {
     let cards: [LorcanaCard]
     let isWishlist: Bool
-    
-    private let columns = [
-        GridItem(.flexible()),
-        GridItem(.flexible())
-    ]
-    
+
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var gridHelper: AdaptiveGridHelper {
+        AdaptiveGridHelper(horizontalSizeClass: horizontalSizeClass)
+    }
+
     var body: some View {
         ScrollView {
-            LazyVGrid(columns: columns, spacing: 16) {
+            LazyVGrid(columns: gridHelper.cardGridColumns(), spacing: gridHelper.gridSpacing) {
                 ForEach(cards) { card in
                     CardTile(card: card, isWishlist: isWishlist )
                         .transition(.scale.combined(with: .opacity))
                 }
             }
-            .padding()
+            .padding(gridHelper.viewPadding)
         }
         .animation(.easeInOut(duration: 0.3), value: cards.count)
     }

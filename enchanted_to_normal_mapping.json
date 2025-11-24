@@ -1,0 +1,1396 @@
+{
+  "TFC": {
+    "folder": "the_first_chapter",
+    "cards": [
+      {
+        "name": "Aladdin - Heroic Outlaw",
+        "enchanted_number": "211",
+        "normal_number": "104",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "TFC-211",
+        "normal_id": "TFC-104"
+      },
+      {
+        "name": "Aurora - Dreaming Guardian",
+        "enchanted_number": "213",
+        "normal_number": "139",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "TFC-213",
+        "normal_id": "TFC-139"
+      },
+      {
+        "name": "Belle - Strange but Special",
+        "enchanted_number": "214",
+        "normal_number": "142",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "TFC-214",
+        "normal_id": "TFC-142"
+      },
+      {
+        "name": "Elsa - Spirit of Winter",
+        "enchanted_number": "207",
+        "normal_number": "42",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "TFC-207",
+        "normal_id": "TFC-042"
+      },
+      {
+        "name": "Genie - On the Job",
+        "enchanted_number": "209",
+        "normal_number": "75",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "TFC-209",
+        "normal_id": "TFC-075"
+      },
+      {
+        "name": "Hades - King of Olympus",
+        "enchanted_number": "205",
+        "normal_number": "5",
+        "normal_rarity": "Rare",
+        "enchanted_id": "TFC-205",
+        "normal_id": "TFC-005"
+      },
+      {
+        "name": "Maui - Hero to All",
+        "enchanted_number": "212",
+        "normal_number": "114",
+        "normal_rarity": "Rare",
+        "enchanted_id": "TFC-212",
+        "normal_id": "TFC-114"
+      },
+      {
+        "name": "Mickey Mouse - Artful Rogue",
+        "enchanted_number": "210",
+        "normal_number": "88",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "TFC-210",
+        "normal_id": "TFC-088"
+      },
+      {
+        "name": "Mickey Mouse - Wayward Sorcerer",
+        "enchanted_number": "208",
+        "normal_number": "51",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "TFC-208",
+        "normal_id": "TFC-051"
+      },
+      {
+        "name": "Simba - Returned King",
+        "enchanted_number": "215",
+        "normal_number": "189",
+        "normal_rarity": "Rare",
+        "enchanted_id": "TFC-215",
+        "normal_id": "TFC-189"
+      },
+      {
+        "name": "Stitch - Carefree Surfer",
+        "enchanted_number": "206",
+        "normal_number": "21",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "TFC-206",
+        "normal_id": "TFC-021"
+      },
+      {
+        "name": "Tinker Bell - Giant Fairy",
+        "enchanted_number": "216",
+        "normal_number": "193",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "TFC-216",
+        "normal_id": "TFC-193"
+      }
+    ]
+  },
+  "ROF": {
+    "folder": "rise_of_the_floodborn",
+    "cards": [
+      {
+        "name": "Alice - Growing Girl",
+        "enchanted_number": "213",
+        "normal_number": "137",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ROF-213",
+        "normal_id": "ROF-137"
+      },
+      {
+        "name": "Arthur - Wizard's Apprentice",
+        "enchanted_number": "207",
+        "normal_number": "35",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "ROF-207",
+        "normal_id": "ROF-035"
+      },
+      {
+        "name": "Beast - Relentless",
+        "enchanted_number": "210",
+        "normal_number": "70",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ROF-210",
+        "normal_id": "ROF-070"
+      },
+      {
+        "name": "Cinderella - Ballroom Sensation",
+        "enchanted_number": "205",
+        "normal_number": "3",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ROF-205",
+        "normal_id": "ROF-003"
+      },
+      {
+        "name": "Hercules - Divine Hero",
+        "enchanted_number": "215",
+        "normal_number": "181",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ROF-215",
+        "normal_id": "ROF-181"
+      },
+      {
+        "name": "Lady Tremaine - Imperious Queen",
+        "enchanted_number": "211",
+        "normal_number": "110",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "ROF-211",
+        "normal_id": "ROF-110"
+      },
+      {
+        "name": "Madam Mim - Purple Dragon",
+        "enchanted_number": "208",
+        "normal_number": "47",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ROF-208",
+        "normal_id": "ROF-047"
+      },
+      {
+        "name": "Namaari - Morning Mist",
+        "enchanted_number": "216",
+        "normal_number": "189",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ROF-216",
+        "normal_id": "ROF-189"
+      },
+      {
+        "name": "Pete - Bad Guy",
+        "enchanted_number": "209",
+        "normal_number": "88",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ROF-209",
+        "normal_id": "ROF-088"
+      },
+      {
+        "name": "Shere Khan - Menacing Predator",
+        "enchanted_number": "212",
+        "normal_number": "126",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ROF-212",
+        "normal_id": "ROF-126"
+      },
+      {
+        "name": "Sisu - Divine Water Dragon",
+        "enchanted_number": "214",
+        "normal_number": "159",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ROF-214",
+        "normal_id": "ROF-159"
+      },
+      {
+        "name": "Snow White - Well Wisher",
+        "enchanted_number": "206",
+        "normal_number": "25",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ROF-206",
+        "normal_id": "ROF-025"
+      }
+    ]
+  },
+  "ITI": {
+    "folder": "into_the_inklands",
+    "cards": [
+      {
+        "name": "And Then Along Came Zeus",
+        "enchanted_number": "222",
+        "normal_number": "195",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ITI-222",
+        "normal_id": "ITI-195"
+      },
+      {
+        "name": "Belle's House - Maurice's Workshop",
+        "enchanted_number": "219",
+        "normal_number": "168",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ITI-219",
+        "normal_id": "ITI-168"
+      },
+      {
+        "name": "Captain Hook - Master Swordsman",
+        "enchanted_number": "214",
+        "normal_number": "105",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ITI-214",
+        "normal_id": "ITI-105"
+      },
+      {
+        "name": "Chernabog - Evildoer",
+        "enchanted_number": "205",
+        "normal_number": "3",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "ITI-205",
+        "normal_id": "ITI-003"
+      },
+      {
+        "name": "Gramma Tala - Spirit of the Ocean",
+        "enchanted_number": "217",
+        "normal_number": "143",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ITI-217",
+        "normal_id": "ITI-143"
+      },
+      {
+        "name": "Jafar - Striking Illusionist",
+        "enchanted_number": "208",
+        "normal_number": "42",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ITI-208",
+        "normal_id": "ITI-042"
+      },
+      {
+        "name": "Kida - Protector of Atlantis",
+        "enchanted_number": "206",
+        "normal_number": "7",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ITI-206",
+        "normal_id": "ITI-007"
+      },
+      {
+        "name": "Kuzco's Palace - Home of the Emperor",
+        "enchanted_number": "213",
+        "normal_number": "102",
+        "normal_rarity": "Uncommon",
+        "enchanted_id": "ITI-213",
+        "normal_id": "ITI-102"
+      },
+      {
+        "name": "Maleficent - Mistress of All Evil",
+        "enchanted_number": "209",
+        "normal_number": "51",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ITI-209",
+        "normal_id": "ITI-051"
+      },
+      {
+        "name": "Mickey Mouse - Trumpeter",
+        "enchanted_number": "220",
+        "normal_number": "182",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ITI-220",
+        "normal_id": "ITI-182"
+      },
+      {
+        "name": "Morph - Space Goo",
+        "enchanted_number": "211",
+        "normal_number": "81",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ITI-211",
+        "normal_id": "ITI-081"
+      },
+      {
+        "name": "Peter Pan - Pirate's Bane",
+        "enchanted_number": "215",
+        "normal_number": "120",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ITI-215",
+        "normal_id": "ITI-120"
+      },
+      {
+        "name": "Pride Lands - Pride Rock",
+        "enchanted_number": "207",
+        "normal_number": "33",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ITI-207",
+        "normal_id": "ITI-033"
+      },
+      {
+        "name": "RLS Legacy - Solar Galleon",
+        "enchanted_number": "216",
+        "normal_number": "136",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ITI-216",
+        "normal_id": "ITI-136"
+      },
+      {
+        "name": "Robin Hood - Champion of Sherwood",
+        "enchanted_number": "221",
+        "normal_number": "190",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ITI-221",
+        "normal_id": "ITI-190"
+      },
+      {
+        "name": "Scrooge McDuck - Richest Duck in the World",
+        "enchanted_number": "218",
+        "normal_number": "154",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "ITI-218",
+        "normal_id": "ITI-154"
+      },
+      {
+        "name": "The Sorcerer's Hat",
+        "enchanted_number": "210",
+        "normal_number": "65",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ITI-210",
+        "normal_id": "ITI-065"
+      },
+      {
+        "name": "Ursula - Deceiver of All",
+        "enchanted_number": "212",
+        "normal_number": "91",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ITI-212",
+        "normal_id": "ITI-091"
+      }
+    ]
+  },
+  "URS": {
+    "folder": "ursulas_return",
+    "cards": [
+      {
+        "name": "Anna - True-Hearted",
+        "enchanted_number": "217",
+        "normal_number": "138",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "URS-217",
+        "normal_id": "URS-138"
+      },
+      {
+        "name": "Ariel - Sonic Warrior",
+        "enchanted_number": "220",
+        "normal_number": "175",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "URS-220",
+        "normal_id": "URS-175"
+      },
+      {
+        "name": "Ariel\u2019s Grotto - A Secret Place",
+        "enchanted_number": "219",
+        "normal_number": "169",
+        "normal_rarity": "Rare",
+        "enchanted_id": "URS-219",
+        "normal_id": "URS-169"
+      },
+      {
+        "name": "Cinderella - Melody Weaver",
+        "enchanted_number": "205",
+        "normal_number": "4",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "URS-205",
+        "normal_id": "URS-004"
+      },
+      {
+        "name": "Diablo - Devoted Herald",
+        "enchanted_number": "211",
+        "normal_number": "70",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "URS-211",
+        "normal_id": "URS-070"
+      },
+      {
+        "name": "Goofy - Super Goof",
+        "enchanted_number": "214",
+        "normal_number": "107",
+        "normal_rarity": "Rare",
+        "enchanted_id": "URS-214",
+        "normal_id": "URS-107"
+      },
+      {
+        "name": "Jasmine - Desert Warrior",
+        "enchanted_number": "212",
+        "normal_number": "78",
+        "normal_rarity": "Rare",
+        "enchanted_id": "URS-212",
+        "normal_id": "URS-078"
+      },
+      {
+        "name": "Look at This Family",
+        "enchanted_number": "207",
+        "normal_number": "28",
+        "normal_rarity": "Rare",
+        "enchanted_id": "URS-207",
+        "normal_id": "URS-028"
+      },
+      {
+        "name": "Minnie Mouse - Musketeer Champion",
+        "enchanted_number": "206",
+        "normal_number": "17",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "URS-206",
+        "normal_id": "URS-017"
+      },
+      {
+        "name": "Piglet - Sturdy Swordsman",
+        "enchanted_number": "221",
+        "normal_number": "191",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "URS-221",
+        "normal_id": "URS-191"
+      },
+      {
+        "name": "Second Star to the Right",
+        "enchanted_number": "210",
+        "normal_number": "61",
+        "normal_rarity": "Rare",
+        "enchanted_id": "URS-210",
+        "normal_id": "URS-061"
+      },
+      {
+        "name": "Sisu - Empowered Sibling",
+        "enchanted_number": "215",
+        "normal_number": "125",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "URS-215",
+        "normal_id": "URS-125"
+      },
+      {
+        "name": "Snuggly Duckling - Disreputable Pub",
+        "enchanted_number": "216",
+        "normal_number": "135",
+        "normal_rarity": "Rare",
+        "enchanted_id": "URS-216",
+        "normal_id": "URS-135"
+      },
+      {
+        "name": "The Queen - Diviner",
+        "enchanted_number": "218",
+        "normal_number": "156",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "URS-218",
+        "normal_id": "URS-156"
+      },
+      {
+        "name": "The Wall - Border Fortress",
+        "enchanted_number": "222",
+        "normal_number": "203",
+        "normal_rarity": "Rare",
+        "enchanted_id": "URS-222",
+        "normal_id": "URS-203"
+      },
+      {
+        "name": "Ursula - Sea Witch Queen",
+        "enchanted_number": "208",
+        "normal_number": "58",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "URS-208",
+        "normal_id": "URS-058"
+      },
+      {
+        "name": "We Don't Talk About Bruno",
+        "enchanted_number": "213",
+        "normal_number": "97",
+        "normal_rarity": "Rare",
+        "enchanted_id": "URS-213",
+        "normal_id": "URS-097"
+      },
+      {
+        "name": "Yen Sid - Powerful Sorcerer",
+        "enchanted_number": "209",
+        "normal_number": "59",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "URS-209",
+        "normal_id": "URS-059"
+      }
+    ]
+  },
+  "SSK": {
+    "folder": "shimmering_skies",
+    "cards": [
+      {
+        "name": "Archimedes - Electrified Owl",
+        "enchanted_number": "208",
+        "normal_number": "47",
+        "normal_rarity": "Uncommon",
+        "enchanted_id": "SSK-208",
+        "normal_id": "SSK-047"
+      },
+      {
+        "name": "Arthur - King Victorious",
+        "enchanted_number": "221",
+        "normal_number": "194",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "SSK-221",
+        "normal_id": "SSK-194"
+      },
+      {
+        "name": "Bad-Anon - Villain Support Center",
+        "enchanted_number": "222",
+        "normal_number": "203",
+        "normal_rarity": "Rare",
+        "enchanted_id": "SSK-222",
+        "normal_id": "SSK-203"
+      },
+      {
+        "name": "Clarabelle - Light on Her Hooves",
+        "enchanted_number": "211",
+        "normal_number": "84",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "SSK-211",
+        "normal_id": "SSK-084"
+      },
+      {
+        "name": "Donald Duck - Pie Slinger",
+        "enchanted_number": "214",
+        "normal_number": "107",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "SSK-214",
+        "normal_id": "SSK-107"
+      },
+      {
+        "name": "Finders Keepers",
+        "enchanted_number": "210",
+        "normal_number": "60",
+        "normal_rarity": "Uncommon",
+        "enchanted_id": "SSK-210",
+        "normal_id": "SSK-060"
+      },
+      {
+        "name": "King Candy - Sweet Abomination",
+        "enchanted_number": "218",
+        "normal_number": "154",
+        "normal_rarity": "Uncommon",
+        "enchanted_id": "SSK-218",
+        "normal_id": "SSK-154"
+      },
+      {
+        "name": "Mufasa - Ruler of Pride Rock",
+        "enchanted_number": "217",
+        "normal_number": "150",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "SSK-217",
+        "normal_id": "SSK-150"
+      },
+      {
+        "name": "Olaf - Happy Passenger",
+        "enchanted_number": "209",
+        "normal_number": "50",
+        "normal_rarity": "Rare",
+        "enchanted_id": "SSK-209",
+        "normal_id": "SSK-050"
+      },
+      {
+        "name": "Prince Naveen - Ukulele Player",
+        "enchanted_number": "205",
+        "normal_number": "3",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "SSK-205",
+        "normal_id": "SSK-003"
+      },
+      {
+        "name": "Ratigan's Party - Seedy Back Room",
+        "enchanted_number": "216",
+        "normal_number": "136",
+        "normal_rarity": "Uncommon",
+        "enchanted_id": "SSK-216",
+        "normal_id": "SSK-136"
+      },
+      {
+        "name": "Revive",
+        "enchanted_number": "207",
+        "normal_number": "27",
+        "normal_rarity": "Rare",
+        "enchanted_id": "SSK-207",
+        "normal_id": "SSK-027"
+      },
+      {
+        "name": "Robin Hood - Sharpshooter",
+        "enchanted_number": "215",
+        "normal_number": "118",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "SSK-215",
+        "normal_id": "SSK-118"
+      },
+      {
+        "name": "Royal Tantrum",
+        "enchanted_number": "219",
+        "normal_number": "161",
+        "normal_rarity": "Rare",
+        "enchanted_id": "SSK-219",
+        "normal_id": "SSK-161"
+      },
+      {
+        "name": "Scar - Vengeful Lion",
+        "enchanted_number": "212",
+        "normal_number": "93",
+        "normal_rarity": "Rare",
+        "enchanted_id": "SSK-212",
+        "normal_id": "SSK-093"
+      },
+      {
+        "name": "Snow White - Fair-Hearted",
+        "enchanted_number": "220",
+        "normal_number": "183",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "SSK-220",
+        "normal_id": "SSK-183"
+      },
+      {
+        "name": "Vanellope von Schweetz - Sugar Rush Princess",
+        "enchanted_number": "206",
+        "normal_number": "19",
+        "normal_rarity": "Rare",
+        "enchanted_id": "SSK-206",
+        "normal_id": "SSK-019"
+      },
+      {
+        "name": "You're Welcome",
+        "enchanted_number": "213",
+        "normal_number": "96",
+        "normal_rarity": "Uncommon",
+        "enchanted_id": "SSK-213",
+        "normal_id": "SSK-096"
+      }
+    ]
+  },
+  "AZS": {
+    "folder": "azurite_sea",
+    "cards": [
+      {
+        "name": "Basil - Disguised Detective",
+        "enchanted_number": "212",
+        "normal_number": "91",
+        "normal_rarity": "Uncommon",
+        "enchanted_id": "AZS-212",
+        "normal_id": "AZS-091"
+      },
+      {
+        "name": "Baymax - Personal Healthcare Companion",
+        "enchanted_number": "218",
+        "normal_number": "156",
+        "normal_rarity": "Rare",
+        "enchanted_id": "AZS-218",
+        "normal_id": "AZS-156"
+      },
+      {
+        "name": "Captain Amelia - Commander of the Legacy",
+        "enchanted_number": "221",
+        "normal_number": "192",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "AZS-221",
+        "normal_id": "AZS-192"
+      },
+      {
+        "name": "Chip 'n' Dale - Recovery Rangers",
+        "enchanted_number": "205",
+        "normal_number": "14",
+        "normal_rarity": "Rare",
+        "enchanted_id": "AZS-205",
+        "normal_id": "AZS-014"
+      },
+      {
+        "name": "Daisy Duck - Pirate Captain",
+        "enchanted_number": "211",
+        "normal_number": "81",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "AZS-211",
+        "normal_id": "AZS-081"
+      },
+      {
+        "name": "Gadget Hackwrench - Brilliant Bosun",
+        "enchanted_number": "217",
+        "normal_number": "140",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "AZS-217",
+        "normal_id": "AZS-140"
+      },
+      {
+        "name": "Maleficent's Staff",
+        "enchanted_number": "210",
+        "normal_number": "65",
+        "normal_rarity": "Rare",
+        "enchanted_id": "AZS-210",
+        "normal_id": "AZS-065"
+      },
+      {
+        "name": "Rafiki - Ethereal Guide",
+        "enchanted_number": "208",
+        "normal_number": "52",
+        "normal_rarity": "Rare",
+        "enchanted_id": "AZS-208",
+        "normal_id": "AZS-052"
+      },
+      {
+        "name": "Raya - Kumandran Rider",
+        "enchanted_number": "214",
+        "normal_number": "107",
+        "normal_rarity": "Rare",
+        "enchanted_id": "AZS-214",
+        "normal_id": "AZS-107"
+      },
+      {
+        "name": "Sugar Rush Speedway - Finish Line",
+        "enchanted_number": "207",
+        "normal_number": "35",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "AZS-207",
+        "normal_id": "AZS-035"
+      },
+      {
+        "name": "The Islands I Pulled From the Sea",
+        "enchanted_number": "216",
+        "normal_number": "130",
+        "normal_rarity": "Uncommon",
+        "enchanted_id": "AZS-216",
+        "normal_id": "AZS-130"
+      },
+      {
+        "name": "Tiana - Restaurant Owner",
+        "enchanted_number": "206",
+        "normal_number": "16",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "AZS-206",
+        "normal_id": "AZS-016"
+      },
+      {
+        "name": "Tigger - In the Crow's Nest",
+        "enchanted_number": "215",
+        "normal_number": "126",
+        "normal_rarity": "Rare",
+        "enchanted_id": "AZS-215",
+        "normal_id": "AZS-126"
+      },
+      {
+        "name": "Treasure Mountain - Azurite Sea Island",
+        "enchanted_number": "222",
+        "normal_number": "203",
+        "normal_rarity": "Rare",
+        "enchanted_id": "AZS-222",
+        "normal_id": "AZS-203"
+      },
+      {
+        "name": "We Could Be Immortals",
+        "enchanted_number": "219",
+        "normal_number": "162",
+        "normal_rarity": "Rare",
+        "enchanted_id": "AZS-219",
+        "normal_id": "AZS-162"
+      },
+      {
+        "name": "Wreck-It Ralph - Ham Hands",
+        "enchanted_number": "220",
+        "normal_number": "190",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "AZS-220",
+        "normal_id": "AZS-190"
+      },
+      {
+        "name": "You Came Back",
+        "enchanted_number": "213",
+        "normal_number": "97",
+        "normal_rarity": "Rare",
+        "enchanted_id": "AZS-213",
+        "normal_id": "AZS-097"
+      },
+      {
+        "name": "Yzma - Conniving Chemist",
+        "enchanted_number": "209",
+        "normal_number": "56",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "AZS-209",
+        "normal_id": "AZS-056"
+      }
+    ]
+  },
+  "FAB": {
+    "folder": "fabled",
+    "cards": [
+      {
+        "name": "All Is Found",
+        "enchanted_number": "220",
+        "normal_number": "178",
+        "normal_rarity": "Rare",
+        "enchanted_id": "FAB-220",
+        "normal_id": "FAB-178"
+      },
+      {
+        "name": "Aurora - Waking Beauty",
+        "enchanted_number": "205",
+        "normal_number": "14",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "FAB-205",
+        "normal_id": "FAB-014"
+      },
+      {
+        "name": "Belle - Mechanic Extraordinaire",
+        "enchanted_number": "217",
+        "normal_number": "126",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "FAB-217",
+        "normal_id": "FAB-126"
+      },
+      {
+        "name": "Bolt - Superdog",
+        "enchanted_number": "207",
+        "normal_number": "4",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "FAB-207",
+        "normal_id": "FAB-004"
+      },
+      {
+        "name": "Devil's Eye Diamond",
+        "enchanted_number": "218",
+        "normal_number": "152",
+        "normal_rarity": "Rare",
+        "enchanted_id": "FAB-218",
+        "normal_id": "FAB-152"
+      },
+      {
+        "name": "Donald Duck - Flustered Sorcerer",
+        "enchanted_number": "209",
+        "normal_number": "73",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "FAB-209",
+        "normal_id": "FAB-073"
+      },
+      {
+        "name": "Hiro Hamada - Armor Designer",
+        "enchanted_number": "214",
+        "normal_number": "96",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "FAB-214",
+        "normal_id": "FAB-096"
+      },
+      {
+        "name": "Jafar - Newly Crowned",
+        "enchanted_number": "210",
+        "normal_number": "51",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "FAB-210",
+        "normal_id": "FAB-051"
+      },
+      {
+        "name": "Mad Hatter - Unruly Eccentric",
+        "enchanted_number": "213",
+        "normal_number": "94",
+        "normal_rarity": "Rare",
+        "enchanted_id": "FAB-213",
+        "normal_id": "FAB-094"
+      },
+      {
+        "name": "Mickey Mouse - Inspirational Warrior",
+        "enchanted_number": "221",
+        "normal_number": "200",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "FAB-221",
+        "normal_id": "FAB-200"
+      },
+      {
+        "name": "Mirabel Madrigal - Musically Talented",
+        "enchanted_number": "206",
+        "normal_number": "35",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "FAB-206",
+        "normal_id": "FAB-035"
+      },
+      {
+        "name": "Ratigan - Nefarious Criminal",
+        "enchanted_number": "216",
+        "normal_number": "143",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "FAB-216",
+        "normal_id": "FAB-143"
+      },
+      {
+        "name": "Restoring Atlantis",
+        "enchanted_number": "222",
+        "normal_number": "201",
+        "normal_rarity": "Rare",
+        "enchanted_id": "FAB-222",
+        "normal_id": "FAB-201"
+      },
+      {
+        "name": "Show Me More!",
+        "enchanted_number": "211",
+        "normal_number": "82",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "FAB-211",
+        "normal_id": "FAB-082"
+      },
+      {
+        "name": "Tamatoa - Happy as a Clam",
+        "enchanted_number": "219",
+        "normal_number": "162",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "FAB-219",
+        "normal_id": "FAB-162"
+      },
+      {
+        "name": "The Glass Slipper",
+        "enchanted_number": "208",
+        "normal_number": "44",
+        "normal_rarity": "Rare",
+        "enchanted_id": "FAB-208",
+        "normal_id": "FAB-044"
+      },
+      {
+        "name": "The Return of Hercules",
+        "enchanted_number": "215",
+        "normal_number": "118",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "FAB-215",
+        "normal_id": "FAB-118"
+      },
+      {
+        "name": "Tramp - Enterprising Dog",
+        "enchanted_number": "212",
+        "normal_number": "110",
+        "normal_rarity": "Rare",
+        "enchanted_id": "FAB-212",
+        "normal_id": "FAB-110"
+      }
+    ]
+  },
+  "ARC": {
+    "folder": "archazias_island",
+    "cards": [
+      {
+        "name": "Bambi - Little Prince",
+        "enchanted_number": "209",
+        "normal_number": "63",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ARC-209",
+        "normal_id": "ARC-063"
+      },
+      {
+        "name": "Captain Hook - The Pirate King",
+        "enchanted_number": "215",
+        "normal_number": "109",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ARC-215",
+        "normal_id": "ARC-109"
+      },
+      {
+        "name": "Desperate Plan",
+        "enchanted_number": "222",
+        "normal_number": "201",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ARC-222",
+        "normal_id": "ARC-201"
+      },
+      {
+        "name": "Fantastical and Magical",
+        "enchanted_number": "212",
+        "normal_number": "79",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ARC-212",
+        "normal_id": "ARC-079"
+      },
+      {
+        "name": "Into the Unknown",
+        "enchanted_number": "213",
+        "normal_number": "81",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "ARC-213",
+        "normal_id": "ARC-081"
+      },
+      {
+        "name": "It Means No Worries",
+        "enchanted_number": "208",
+        "normal_number": "42",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ARC-208",
+        "normal_id": "ARC-042"
+      },
+      {
+        "name": "Jasmine - Steady Strategist",
+        "enchanted_number": "221",
+        "normal_number": "171",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "ARC-221",
+        "normal_id": "ARC-171"
+      },
+      {
+        "name": "Kuzco - Impulsive Llama",
+        "enchanted_number": "210",
+        "normal_number": "67",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ARC-210",
+        "normal_id": "ARC-067"
+      },
+      {
+        "name": "Lady - Decisive Dog",
+        "enchanted_number": "205",
+        "normal_number": "33",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ARC-205",
+        "normal_id": "ARC-033"
+      },
+      {
+        "name": "Lilo - Causing an Uproar",
+        "enchanted_number": "217",
+        "normal_number": "137",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ARC-217",
+        "normal_id": "ARC-137"
+      },
+      {
+        "name": "Mother Gothel - Knows What's Best",
+        "enchanted_number": "211",
+        "normal_number": "70",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ARC-211",
+        "normal_id": "ARC-070"
+      },
+      {
+        "name": "Mushu - Your Worst Nightmare",
+        "enchanted_number": "218",
+        "normal_number": "142",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ARC-218",
+        "normal_id": "ARC-142"
+      },
+      {
+        "name": "Perdita - Determined Mother",
+        "enchanted_number": "207",
+        "normal_number": "27",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "ARC-207",
+        "normal_id": "ARC-027"
+      },
+      {
+        "name": "Rapunzel - High Climber",
+        "enchanted_number": "214",
+        "normal_number": "101",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ARC-214",
+        "normal_id": "ARC-101"
+      },
+      {
+        "name": "Stitch - Experiment 626",
+        "enchanted_number": "220",
+        "normal_number": "166",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ARC-220",
+        "normal_id": "ARC-166"
+      },
+      {
+        "name": "The Sword of Shan-Yu",
+        "enchanted_number": "219",
+        "normal_number": "152",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ARC-219",
+        "normal_id": "ARC-152"
+      },
+      {
+        "name": "Wreck-It Ralph - Big Lug",
+        "enchanted_number": "206",
+        "normal_number": "24",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "ARC-206",
+        "normal_id": "ARC-024"
+      },
+      {
+        "name": "Wrong Lever!",
+        "enchanted_number": "216",
+        "normal_number": "116",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ARC-216",
+        "normal_id": "ARC-116"
+      }
+    ]
+  },
+  "ROJ": {
+    "folder": "reign_of_jafar",
+    "cards": [
+      {
+        "name": "Ariel - Adventurous Collector",
+        "enchanted_number": "232",
+        "normal_number": "107",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "ROJ-232",
+        "normal_id": "ROJ-107"
+      },
+      {
+        "name": "Beast - Gracious Prince",
+        "enchanted_number": "224",
+        "normal_number": "4",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ROJ-224",
+        "normal_id": "ROJ-004"
+      },
+      {
+        "name": "Belle - Accomplished Mystic",
+        "enchanted_number": "226",
+        "normal_number": "40",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "ROJ-226",
+        "normal_id": "ROJ-040"
+      },
+      {
+        "name": "Circle of Life",
+        "enchanted_number": "225",
+        "normal_number": "26",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ROJ-225",
+        "normal_id": "ROJ-026"
+      },
+      {
+        "name": "Cruella De Vil - Style Icon",
+        "enchanted_number": "236",
+        "normal_number": "143",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ROJ-236",
+        "normal_id": "ROJ-143"
+      },
+      {
+        "name": "Dumbo - Ninth Wonder of the Universe",
+        "enchanted_number": "228",
+        "normal_number": "45",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ROJ-228",
+        "normal_id": "ROJ-045"
+      },
+      {
+        "name": "Genie - Of the Lamp",
+        "enchanted_number": "229",
+        "normal_number": "76",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "ROJ-229",
+        "normal_id": "ROJ-076"
+      },
+      {
+        "name": "Hades - Infernal Schemer",
+        "enchanted_number": "237",
+        "normal_number": "151",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ROJ-237",
+        "normal_id": "ROJ-151"
+      },
+      {
+        "name": "I2I",
+        "enchanted_number": "234",
+        "normal_number": "130",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ROJ-234",
+        "normal_id": "ROJ-130"
+      },
+      {
+        "name": "Jasmine - Fearless Princess",
+        "enchanted_number": "240",
+        "normal_number": "178",
+        "normal_rarity": "Rare",
+        "enchanted_id": "ROJ-240",
+        "normal_id": "ROJ-178"
+      },
+      {
+        "name": "Lilo - Best Explorer Ever",
+        "enchanted_number": "238",
+        "normal_number": "174",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "ROJ-238",
+        "normal_id": "ROJ-174"
+      },
+      {
+        "name": "Max Goof - Chart Topper",
+        "enchanted_number": "230",
+        "normal_number": "77",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ROJ-230",
+        "normal_id": "ROJ-077"
+      },
+      {
+        "name": "Mickey Mouse - Steamboat Pilot",
+        "enchanted_number": "231",
+        "normal_number": "80",
+        "normal_rarity": "Common",
+        "enchanted_id": "ROJ-231",
+        "normal_id": "ROJ-080"
+      },
+      {
+        "name": "Mulan - Considerate Diplomat",
+        "enchanted_number": "235",
+        "normal_number": "142",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "ROJ-235",
+        "normal_id": "ROJ-142"
+      },
+      {
+        "name": "Pongo - Determined Father",
+        "enchanted_number": "223",
+        "normal_number": "2",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "ROJ-223",
+        "normal_id": "ROJ-002"
+      },
+      {
+        "name": "Powerline - World's Greatest Rock Star",
+        "enchanted_number": "233",
+        "normal_number": "110",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "ROJ-233",
+        "normal_id": "ROJ-110"
+      },
+      {
+        "name": "Scar - Finally King",
+        "enchanted_number": "239",
+        "normal_number": "175",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "ROJ-239",
+        "normal_id": "ROJ-175"
+      },
+      {
+        "name": "Winnie the Pooh - Hunny Wizard",
+        "enchanted_number": "227",
+        "normal_number": "41",
+        "normal_rarity": "Common",
+        "enchanted_id": "ROJ-227",
+        "normal_id": "ROJ-041"
+      }
+    ]
+  },
+  "WIW": {
+    "folder": "whispers_in_the_well",
+    "cards": [
+      {
+        "name": "Baloo - Carefree Bear",
+        "enchanted_number": "230",
+        "normal_number": "85",
+        "normal_rarity": "Rare",
+        "enchanted_id": "WIW-230",
+        "normal_id": "WIW-085"
+      },
+      {
+        "name": "Can't Hold it Back Anymore",
+        "enchanted_number": "228",
+        "normal_number": "62",
+        "normal_rarity": "Rare",
+        "enchanted_id": "WIW-228",
+        "normal_id": "WIW-062"
+      },
+      {
+        "name": "Cinderella - Dream Come True",
+        "enchanted_number": "236",
+        "normal_number": "155",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "WIW-236",
+        "normal_id": "WIW-155"
+      },
+      {
+        "name": "Demona - Scourge of the Wyvern Clan",
+        "enchanted_number": "227",
+        "normal_number": "55",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "WIW-227",
+        "normal_id": "WIW-055"
+      },
+      {
+        "name": "Goliath - Clan Leader",
+        "enchanted_number": "238",
+        "normal_number": "173",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "WIW-238",
+        "normal_id": "WIW-173"
+      },
+      {
+        "name": "Goofy - Galumphing Gumshoe",
+        "enchanted_number": "223",
+        "normal_number": "24",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "WIW-223",
+        "normal_id": "WIW-024"
+      },
+      {
+        "name": "Judy Hopps - Lead Detective",
+        "enchanted_number": "235",
+        "normal_number": "150",
+        "normal_rarity": "Rare",
+        "enchanted_id": "WIW-235",
+        "normal_id": "WIW-150"
+      },
+      {
+        "name": "Lady Tremaine - Sinister Socialite",
+        "enchanted_number": "233",
+        "normal_number": "124",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "WIW-233",
+        "normal_id": "WIW-124"
+      },
+      {
+        "name": "Malicious, Mean, and Scary",
+        "enchanted_number": "231",
+        "normal_number": "97",
+        "normal_rarity": "Uncommon",
+        "enchanted_id": "WIW-231",
+        "normal_id": "WIW-097"
+      },
+      {
+        "name": "Next Stop, Olympus",
+        "enchanted_number": "234",
+        "normal_number": "129",
+        "normal_rarity": "Rare",
+        "enchanted_id": "WIW-234",
+        "normal_id": "WIW-129"
+      },
+      {
+        "name": "Nick Wilde - Persistent Investigator",
+        "enchanted_number": "239",
+        "normal_number": "187",
+        "normal_rarity": "Rare",
+        "enchanted_id": "WIW-239",
+        "normal_id": "WIW-187"
+      },
+      {
+        "name": "Simba - King in the Making",
+        "enchanted_number": "224",
+        "normal_number": "20",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "WIW-224",
+        "normal_id": "WIW-020"
+      },
+      {
+        "name": "Spooky Sight",
+        "enchanted_number": "237",
+        "normal_number": "165",
+        "normal_rarity": "Rare",
+        "enchanted_id": "WIW-237",
+        "normal_id": "WIW-165"
+      },
+      {
+        "name": "The Black Cauldron",
+        "enchanted_number": "225",
+        "normal_number": "32",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "WIW-225",
+        "normal_id": "WIW-032"
+      },
+      {
+        "name": "The Headless Horseman - Terror of Sleepy Hollow",
+        "enchanted_number": "232",
+        "normal_number": "125",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "WIW-232",
+        "normal_id": "WIW-125"
+      },
+      {
+        "name": "The Horned King - Wicked Ruler",
+        "enchanted_number": "226",
+        "normal_number": "36",
+        "normal_rarity": "Super_Rare",
+        "enchanted_id": "WIW-226",
+        "normal_id": "WIW-036"
+      },
+      {
+        "name": "The Sword of Hercules",
+        "enchanted_number": "240",
+        "normal_number": "200",
+        "normal_rarity": "Rare",
+        "enchanted_id": "WIW-240",
+        "normal_id": "WIW-200"
+      },
+      {
+        "name": "Webby Vanderquack - Junior Prospector",
+        "enchanted_number": "229",
+        "normal_number": "93",
+        "normal_rarity": "Legendary",
+        "enchanted_id": "WIW-229",
+        "normal_id": "WIW-093"
+      }
+    ]
+  }
+}

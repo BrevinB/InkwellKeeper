@@ -16,7 +16,7 @@ class AffiliateService {
     // TODO: Replace with your actual affiliate IDs after approval
 
     private let tcgPlayerAffiliateID = "YOUR_TCGPLAYER_AFFILIATE_ID" // From Commission Junction
-    private let ebayPartnerNetworkCampaignID = "YOUR_EBAY_CAMPAIGN_ID" // From eBay Partner Network
+    private let ebayPartnerNetworkCampaignID = "5339128910" // From eBay Partner Network
 
     // MARK: - TCGPlayer Affiliate Links
 
@@ -53,37 +53,21 @@ class AffiliateService {
     }
 
     private func createEbayAffiliateURL(itemID: String) -> URL? {
-        // eBay Partner Network link format
-        let baseURL = "https://rover.ebay.com/rover/1/711-53200-19255-0/1"
-        var components = URLComponents(string: baseURL)
+        // Modern eBay Partner Network link format (direct link with affiliate parameters)
+        let affiliateURL = "https://www.ebay.com/itm/\(itemID)?mkcid=1&mkrid=711-53200-19255-0&siteid=0&campid=\(ebayPartnerNetworkCampaignID)&customid=inkwell_keeper&toolid=10001"
 
-        components?.queryItems = [
-            URLQueryItem(name: "campid", value: ebayPartnerNetworkCampaignID),
-            URLQueryItem(name: "customid", value: "inkwell_keeper"),
-            URLQueryItem(name: "toolid", value: "10001"),
-            URLQueryItem(name: "mpre", value: "https://www.ebay.com/itm/\(itemID)")
-        ]
-
-        return components?.url
+        return URL(string: affiliateURL)
     }
 
     private func createEbaySearchURL(for card: LorcanaCard) -> URL? {
+        // Create search query with card details
         let searchQuery = "\(card.name) Lorcana \(card.setName) \(card.variant.displayName)"
             .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
 
-        let ebaySearchURL = "https://www.ebay.com/sch/i.html?_nkw=\(searchQuery)&_sacat=183454" // 183454 = Trading Cards
+        // Direct eBay search URL with affiliate parameters (183454 = Trading Cards category)
+        let affiliateURL = "https://www.ebay.com/sch/i.html?_nkw=\(searchQuery)&_sacat=183454&mkcid=1&mkrid=711-53200-19255-0&siteid=0&campid=\(ebayPartnerNetworkCampaignID)&customid=inkwell_keeper_search&toolid=10001"
 
-        let baseURL = "https://rover.ebay.com/rover/1/711-53200-19255-0/1"
-        var components = URLComponents(string: baseURL)
-
-        components?.queryItems = [
-            URLQueryItem(name: "campid", value: ebayPartnerNetworkCampaignID),
-            URLQueryItem(name: "customid", value: "inkwell_keeper_search"),
-            URLQueryItem(name: "toolid", value: "10001"),
-            URLQueryItem(name: "mpre", value: ebaySearchURL)
-        ]
-
-        return components?.url
+        return URL(string: affiliateURL)
     }
 
     // MARK: - Multi-Platform Options

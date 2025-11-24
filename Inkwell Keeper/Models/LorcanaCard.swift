@@ -34,11 +34,13 @@ enum CardVariant: String, Codable, CaseIterable, Hashable {
     case borderless = "Borderless"
     case promo = "Promo"
     case enchanted = "Enchanted"
-    
+    case epic = "Epic"
+    case iconic = "Iconic"
+
     var displayName: String {
         return rawValue
     }
-    
+
     var shortName: String {
         switch self {
         case .normal: return "N"
@@ -46,6 +48,8 @@ enum CardVariant: String, Codable, CaseIterable, Hashable {
         case .borderless: return "B"
         case .promo: return "P"
         case .enchanted: return "E"
+        case .epic: return "EP"
+        case .iconic: return "I"
         }
     }
 }
@@ -71,6 +75,7 @@ struct LorcanaCard: Identifiable, Codable, Hashable {
     let lore: Int?
     let franchise: String?
     let inkColor: String?
+    let dateAdded: Date?
     
     // Custom decoding to handle missing id field and field name variations
     init(from decoder: Decoder) throws {
@@ -125,12 +130,13 @@ struct LorcanaCard: Identifiable, Codable, Hashable {
         uniqueId = decodeOptionalField(String.self, keys: ["uniqueId", "Unique_ID", "unique_id"])
         
         // Additional properties
-        inkwell = decodeOptionalField(Bool.self, keys: ["inkwell", "Inkwell"])
+        inkwell = decodeOptionalField(Bool.self, keys: ["inkwell", "Inkwell", "Inkable", "inkable"])
         strength = decodeOptionalField(Int.self, keys: ["strength", "Strength"])
         willpower = decodeOptionalField(Int.self, keys: ["willpower", "Willpower"])
         lore = decodeOptionalField(Int.self, keys: ["lore", "Lore"])
         franchise = decodeOptionalField(String.self, keys: ["franchise", "Franchise"])
         inkColor = decodeOptionalField(String.self, keys: ["Color", "inkColor", "Ink_Color", "ink_color"])
+        dateAdded = decodeOptionalField(Date.self, keys: ["dateAdded", "date_added"])
         
         // Generate ID if not present
         if let existingId = decodeOptionalField(String.self, keys: ["id", "ID"]) {
@@ -147,7 +153,7 @@ struct LorcanaCard: Identifiable, Codable, Hashable {
         }
     }
     
-    init(id: String = UUID().uuidString, name: String, cost: Int, type: String, rarity: CardRarity, setName: String, cardText: String = "", imageUrl: String, price: Double? = nil, variant: CardVariant = .normal, cardNumber: Int? = nil, uniqueId: String? = nil, inkwell: Bool? = nil, strength: Int? = nil, willpower: Int? = nil, lore: Int? = nil, franchise: String? = nil, inkColor: String? = nil) {
+    init(id: String = UUID().uuidString, name: String, cost: Int, type: String, rarity: CardRarity, setName: String, cardText: String = "", imageUrl: String, price: Double? = nil, variant: CardVariant = .normal, cardNumber: Int? = nil, uniqueId: String? = nil, inkwell: Bool? = nil, strength: Int? = nil, willpower: Int? = nil, lore: Int? = nil, franchise: String? = nil, inkColor: String? = nil, dateAdded: Date? = nil) {
         self.id = id
         self.name = name
         self.cost = cost
@@ -166,5 +172,6 @@ struct LorcanaCard: Identifiable, Codable, Hashable {
         self.lore = lore
         self.franchise = franchise
         self.inkColor = inkColor
+        self.dateAdded = dateAdded
     }
 }

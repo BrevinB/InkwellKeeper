@@ -14,9 +14,10 @@ struct ScannerView: View {
     @State private var showingManualAdd = false
     @State private var detectedCard: LorcanaCard?
     @State private var showingCardDetail = false
+    @Binding var isActive: Bool  // Track if this tab is active
     
     var body: some View {
-        NavigationView {
+        navigationWrapper {
             ZStack {
                 if cameraManager.permissionStatus == .authorized && cameraManager.errorMessage == nil {
                     CameraPreview(cameraManager: cameraManager)
@@ -196,7 +197,7 @@ struct ScannerView: View {
             .navigationBarHidden(true)
         }
         .sheet(isPresented: $showingManualAdd) {
-            ManualAddCardView()
+            ManualAddCardView(isPresented: $showingManualAdd)
                 .environmentObject(collectionManager)
         }
         .sheet(isPresented: $showingCardDetail) {
@@ -233,11 +234,30 @@ struct ScannerView: View {
                 }
             }
         }
-        .onAppear {
-            cameraManager.startSession()
+        .task(id: isActive) {
+            // This runs on initial render AND whenever isActive changes
+            if isActive {
+                // Tab is active - start camera
+                cameraManager.startSession()
+            } else {
+                // Tab is inactive - stop camera
+                cameraManager.stopSession()
+            }
         }
         .onDisappear {
+            // Always stop when view disappears (app backgrounded, etc.)
             cameraManager.stopSession()
+        }
+    }
+
+    @ViewBuilder
+    private func navigationWrapper<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        if #available(iOS 18.0, *), UIDevice.current.userInterfaceIdiom == .pad {
+            content()
+        } else {
+            NavigationView {
+                content()
+            }
         }
     }
 }

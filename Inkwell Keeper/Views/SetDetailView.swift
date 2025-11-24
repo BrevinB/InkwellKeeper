@@ -13,9 +13,16 @@ struct SetDetailView: View {
     @StateObject private var dataManager = SetsDataManager.shared
     @State private var cards: [LorcanaCard] = []
     @State private var selectedCard: LorcanaCard?
+    @State private var selectedCardGroupForAdd: CardGroup?
     @State private var showFilterOptions = false
     @State private var filterOption: FilterOption = .all
+    @State private var searchText = ""
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var gridHelper: AdaptiveGridHelper {
+        AdaptiveGridHelper(horizontalSizeClass: horizontalSizeClass)
+    }
     
     enum FilterOption: String, CaseIterable {
         case all = "All Cards"
@@ -32,14 +39,27 @@ struct SetDetailView: View {
     }
     
     private var filteredCards: [LorcanaCard] {
+        var filtered: [LorcanaCard]
+
+        // Apply ownership filter
         switch filterOption {
         case .all:
-            return cards
+            filtered = cards
         case .owned:
-            return cards.filter { collectionManager.isCardCollectedIncludingReprints($0) }
+            filtered = cards.filter { isCardCollectedInSet($0) }
         case .missing:
-            return cards.filter { !collectionManager.isCardCollectedIncludingReprints($0) }
+            filtered = cards.filter { !isCardCollectedInSet($0) }
         }
+
+        // Apply search filter
+        if !searchText.isEmpty {
+            filtered = filtered.filter { card in
+                card.name.localizedCaseInsensitiveContains(searchText) ||
+                card.cardText.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+
+        return filtered
     }
     
     private var progress: (collected: Int, total: Int, percentage: Double) {
@@ -58,21 +78,21 @@ struct SetDetailView: View {
                             .font(.title2)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
-                        
+
                         Spacer()
-                        
+
                         Text("\(Int(progress.percentage))% Complete")
                             .font(.headline)
                             .foregroundColor(.lorcanaGold)
                     }
-                    
+
                     HStack {
                         Text("\(progress.collected) of \(progress.total) cards collected")
                             .font(.subheadline)
                             .foregroundColor(.gray)
-                        
+
                         Spacer()
-                        
+
                         // Filter button
                         Button(action: { showFilterOptions = true }) {
                             HStack(spacing: 4) {
@@ -97,6 +117,9 @@ struct SetDetailView: View {
                             Button("Cancel", role: .cancel) { }
                         }
                     }
+
+                    // Search bar
+                    SearchBar(text: $searchText)
                     
                     // Progress bar
                     GeometryReader { geometry in
@@ -158,23 +181,25 @@ struct SetDetailView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     ScrollView {
-                        LazyVGrid(columns: [
-                            GridItem(.flexible()),
-                            GridItem(.flexible()),
-                            GridItem(.flexible())
-                        ], spacing: 12) {
+                        LazyVGrid(columns: gridHelper.setDetailColumns(), spacing: gridHelper.gridSpacing) {
                             ForEach(filteredCards) { card in
                                 SetCardView(
                                     card: card,
-                                    isCollected: collectionManager.isCardCollectedIncludingReprints(card),
-                                    quantity: collectionManager.getCollectedQuantityIncludingReprints(for: card),
+                                    isCollected: isCardCollectedInSet(card),
+                                    quantity: getCardQuantityInSet(card),
                                     onTap: {
-                                        selectedCard = card
+                                        if isCardCollectedInSet(card) {
+                                            // Show detail view for collected cards
+                                            selectedCard = card
+                                        } else {
+                                            // Show add modal for uncollected cards
+                                            selectedCardGroupForAdd = createCardGroup(from: card)
+                                        }
                                     }
                                 )
                             }
                         }
-                        .padding()
+                        .padding(gridHelper.viewPadding)
                     }
                 }
             }
@@ -206,6 +231,23 @@ struct SetDetailView: View {
             CardDetailSheetView(card: card)
                 .environmentObject(collectionManager)
         }
+        .sheet(item: $selectedCardGroupForAdd) { cardGroup in
+            AddCardGroupModal(
+                cardGroup: cardGroup,
+                isPresented: Binding(
+                    get: { selectedCardGroupForAdd != nil },
+                    set: { if !$0 { selectedCardGroupForAdd = nil } }
+                ),
+                onAdd: { selectedCard, quantity in
+                    for _ in 0..<quantity {
+                        collectionManager.addCard(selectedCard)
+                    }
+                    selectedCardGroupForAdd = nil
+                },
+                isWishlist: false
+            )
+            .environmentObject(collectionManager)
+        }
     }
     
     private func loadCards() {
@@ -219,6 +261,98 @@ struct SetDetailView: View {
 
         // Prefetch images for this set in the background
         ImageCache.shared.prefetchImages(for: cards)
+    }
+
+    private func createCardGroup(from card: LorcanaCard) -> CardGroup {
+        // For promo cards with uniqueId, don't find reprints - treat as standalone
+        if let uniqueId = card.uniqueId, !uniqueId.isEmpty {
+            return CardGroup(
+                id: uniqueId,
+                name: card.name,
+                cards: [card]
+            )
+        }
+
+        // Find all reprints of this card across all sets
+        let allCards = dataManager.getAllCards()
+        let reprints = allCards.filter { $0.name == card.name }
+
+        return CardGroup(
+            id: card.name,
+            name: card.name,
+            cards: reprints.isEmpty ? [card] : reprints
+        )
+    }
+
+    // Helper function to check if a specific card is collected
+    private func isCardCollectedInSet(_ card: LorcanaCard) -> Bool {
+        let isCollected = collectionManager.collectedCards.contains { collected in
+            // Match by card name across ALL sets (reprints count as collected)
+            // For Enchanted/Epic/Iconic/Promo, they are separate cards so match variant too
+            // For Normal/Foil, they're the same card so ignore variant (but don't match special variants)
+            let cardIsSpecialVariant = card.variant == .enchanted ||
+                                       card.variant == .epic ||
+                                       card.variant == .iconic ||
+                                       card.variant == .promo
+
+            let collectedIsSpecialVariant = collected.variant == .enchanted ||
+                                           collected.variant == .epic ||
+                                           collected.variant == .iconic ||
+                                           collected.variant == .promo
+
+            let match: Bool
+            if cardIsSpecialVariant {
+                // For special variants, match name + variant (regardless of set)
+                match = collected.name == card.name &&
+                       collected.variant == card.variant
+            } else {
+                // For Normal/Foil, match name only but EXCLUDE special variants
+                match = collected.name == card.name &&
+                       !collectedIsSpecialVariant
+            }
+
+            if match {
+                print("✅ [isCardCollectedInSet] Match for \(card.name) in \(set.name): found in collection from \(collected.setName ?? "unknown set") (variant: \(collected.variant.rawValue))")
+            }
+            return match
+        }
+
+        if !isCollected {
+            print("❌ [isCardCollectedInSet] No match for: \(card.name) (uniqueId: \(card.uniqueId ?? "nil"), set: \(set.name), variant: \(card.variant.rawValue))")
+        }
+
+        return isCollected
+    }
+
+    // Helper function to get quantity for a specific card
+    private func getCardQuantityInSet(_ card: LorcanaCard) -> Int {
+        // Sum quantities across ALL sets where this card appears (reprints)
+        let cardIsSpecialVariant = card.variant == .enchanted ||
+                                   card.variant == .epic ||
+                                   card.variant == .iconic ||
+                                   card.variant == .promo
+
+        let totalQuantity = collectionManager.collectedCards
+            .filter { collected in
+                let collectedIsSpecialVariant = collected.variant == .enchanted ||
+                                               collected.variant == .epic ||
+                                               collected.variant == .iconic ||
+                                               collected.variant == .promo
+
+                if cardIsSpecialVariant {
+                    // For special variants, match name + variant across all sets
+                    return collected.name == card.name && collected.variant == card.variant
+                } else {
+                    // For Normal/Foil, match name only but EXCLUDE special variants
+                    return collected.name == card.name && !collectedIsSpecialVariant
+                }
+            }
+            .count
+
+        if totalQuantity > 0 {
+            print("📊 [getCardQuantityInSet] Found \(totalQuantity) total for: \(card.name) (\(card.variant.rawValue)) across all sets")
+        }
+        return totalQuantity
     }
 }
 
@@ -334,3 +468,4 @@ struct CardDetailSheetView: View {
             }
     }
 }
+

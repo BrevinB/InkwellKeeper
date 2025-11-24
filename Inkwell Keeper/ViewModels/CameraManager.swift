@@ -148,13 +148,13 @@ class CameraManager: NSObject, ObservableObject {
             }
             
             previewLayer?.videoGravity = .resizeAspectFill
-            
+
             captureSession.commitConfiguration()
-            
-            // Start the session
-            startSession()
+
+            // Don't auto-start the session - let the view control when to start
+            // This prevents the camera from running when the tab is not active
             errorMessage = nil
-            
+
         } catch {
             captureSession.commitConfiguration()
             errorMessage = "Failed to setup camera: \(error.localizedDescription)"
@@ -408,32 +408,42 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
                 }
             }
 
+            print("📝 [Scan] Detected texts: \(detectedTexts.prefix(10).joined(separator: " | "))")
 
             // First, try to find card names in the detected text
             let potentialNames = extractCardNames(from: detectedTexts)
 
+            print("🔍 [Scan] Extracted potential names: \(potentialNames.prefix(5).joined(separator: " | "))")
+
             for name in potentialNames {
                 let results = setsDataManager.searchCards(query: name)
 
-                if !results.isEmpty {
-                }
+                print("📊 [Scan] Search '\(name)' returned \(results.count) results")
 
-                if let bestMatch = findBestMatch(for: name, in: results) {
-                    completion(bestMatch)
-                    return
+                if !results.isEmpty {
+                    if let bestMatch = findBestMatch(for: name, in: results, allDetectedTexts: detectedTexts) {
+                        print("✅ [Scan] Found card: \(bestMatch.name)")
+                        completion(bestMatch)
+                        return
+                    }
                 }
             }
+
+            print("⚠️ [Scan] No match found from extracted names")
 
             // If no specific searches found results, try broader search with all text combined
             let combinedText = detectedTexts.filter { $0.count > 2 }.joined(separator: " ")
             if !combinedText.isEmpty {
+                print("🔍 [Scan] Trying fallback search with combined text")
                 let fallbackResults = setsDataManager.searchCards(query: combinedText)
                 if let bestMatch = fallbackResults.first {
+                    print("✅ [Scan] Fallback found: \(bestMatch.name)")
                     completion(bestMatch)
                     return
                 }
             }
 
+            print("❌ [Scan] No card found")
             completion(nil)
         }
     }
@@ -566,64 +576,139 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
         }
     }
     
-    private func findBestMatch(for searchTerm: String, in cards: [LorcanaCard]) -> LorcanaCard? {
+    private func findBestMatch(for searchTerm: String, in cards: [LorcanaCard], allDetectedTexts: [String]) -> LorcanaCard? {
+        print("🔎 [Scan] Finding best match for: '\(searchTerm)' in \(cards.count) cards")
+
         let lowercaseSearch = searchTerm.lowercased()
-        
-        // If search contains both main and sub name (like "RAFIKI Shaman of the Savanna")
+
+        // Look for exact matches first (highest priority)
+        if let exactMatch = cards.first(where: { $0.name.lowercased() == lowercaseSearch }) {
+            print("✅ [Scan] Exact match found: \(exactMatch.name)")
+            return exactMatch
+        }
+
+        // If search contains both main and sub name (like "MAUI - Half Shark" or "MAUI Half Shark")
+        // This handles the combined main+sub name from extractCardNames
         if searchTerm.contains(" ") && searchTerm.split(separator: " ").count > 1 {
-            let parts = searchTerm.components(separatedBy: " ")
-            let possibleMainName = parts[0].lowercased()
-            let possibleSubName = parts.dropFirst().joined(separator: " ").lowercased()
-            
-            // Look for exact "MainName - SubName" pattern match
+            // Handle both "MAUI - Half Shark" and "MAUI Half Shark" formats
+            let parts = searchTerm.components(separatedBy: " - ")
+            var possibleMainName: String
+            var possibleSubName: String
+
+            if parts.count == 2 {
+                // Format: "MAUI - Half Shark"
+                possibleMainName = parts[0].lowercased().trimmingCharacters(in: .whitespaces)
+                possibleSubName = parts[1].lowercased().trimmingCharacters(in: .whitespaces)
+            } else {
+                // Format: "MAUI Half Shark" (no dash)
+                let words = searchTerm.components(separatedBy: " ")
+                possibleMainName = words[0].lowercased()
+                possibleSubName = words.dropFirst().joined(separator: " ").lowercased()
+            }
+
+            print("🔍 [Scan] Split search - Main: '\(possibleMainName)', Sub: '\(possibleSubName)'")
+
+            // Priority 1: Both parts match exactly
+            for card in cards {
+                let cardParts = card.name.components(separatedBy: " - ")
+                if cardParts.count == 2 {
+                    let cardMainName = cardParts[0].lowercased().trimmingCharacters(in: .whitespaces)
+                    let cardSubName = cardParts[1].lowercased().trimmingCharacters(in: .whitespaces)
+
+                    if cardMainName == possibleMainName && cardSubName == possibleSubName {
+                        print("✅ [Scan] Exact split match: \(card.name)")
+                        return card
+                    }
+                }
+            }
+
+            // Priority 2: Both parts contain the search terms (for partial matches)
             for card in cards {
                 let cardParts = card.name.components(separatedBy: " - ")
                 if cardParts.count == 2 {
                     let cardMainName = cardParts[0].lowercased()
                     let cardSubName = cardParts[1].lowercased()
-                    
+
                     if cardMainName.contains(possibleMainName) && cardSubName.contains(possibleSubName) {
+                        print("✅ [Scan] Partial split match: \(card.name)")
+                        return card
+                    }
+                }
+            }
+
+            // Priority 3: Subname matches (for when we have subname but main name is common)
+            for card in cards {
+                let cardParts = card.name.components(separatedBy: " - ")
+                if cardParts.count == 2 {
+                    let cardSubName = cardParts[1].lowercased()
+
+                    if cardSubName == possibleSubName || cardSubName.contains(possibleSubName) {
+                        print("✅ [Scan] Subname match: \(card.name)")
                         return card
                     }
                 }
             }
         }
-        
-        // Look for exact matches
-        if let exactMatch = cards.first(where: { $0.name.lowercased() == lowercaseSearch }) {
-            return exactMatch
-        }
-        
-        // Look for cards where the main name (before " - ") matches exactly
-        for card in cards {
+
+        // Priority 4: Main name exact match (for single-word searches like just "MAUI" or "RAYA")
+        // When there are multiple cards with same main name, use all detected texts to disambiguate
+        let mainNameMatches = cards.filter { card in
             let mainName = card.name.components(separatedBy: " - ").first?.lowercased() ?? ""
-            if mainName == lowercaseSearch {
-                return card
-            }
+            return mainName == lowercaseSearch
         }
-        
-        // Look for cards where the main name contains the search term
-        for card in cards {
-            let mainName = card.name.components(separatedBy: " - ").first?.lowercased() ?? ""
-            if mainName.contains(lowercaseSearch) {
-                return card
+
+        if mainNameMatches.count == 1 {
+            print("✅ [Scan] Single main name match: \(mainNameMatches[0].name)")
+            return mainNameMatches.first
+        } else if mainNameMatches.count > 1 {
+            print("⚠️ [Scan] Multiple variants found for '\(searchTerm)': \(mainNameMatches.map { $0.name }.joined(separator: ", "))")
+
+            // Try to disambiguate by checking if any subtitle words appear in ALL detected texts
+            let allTextLowercased = allDetectedTexts.map { $0.lowercased() }.joined(separator: " ")
+
+            for card in mainNameMatches {
+                let cardParts = card.name.components(separatedBy: " - ")
+                if cardParts.count == 2 {
+                    let subName = cardParts[1].lowercased()
+                    let subWords = subName.components(separatedBy: " ")
+
+                    // Check if any significant word from the subtitle appears in the detected text
+                    for word in subWords where word.count > 3 {  // Only check words longer than 3 chars
+                        if allTextLowercased.contains(word) {
+                            print("✅ [Scan] Disambiguated using subtitle word '\(word)': \(card.name)")
+                            return card
+                        }
+                    }
+                }
             }
+
+            // If we can't disambiguate, prefer more recent sets (higher set number typically = newer)
+            let sortedBySet = mainNameMatches.sorted { card1, card2 in
+                // Sort by set name descending (newer sets typically come later alphabetically)
+                return card1.setName > card2.setName
+            }
+
+            print("⚠️ [Scan] Could not disambiguate, preferring most recent set: \(sortedBySet[0].name) from \(sortedBySet[0].setName)")
+            return sortedBySet.first
         }
-        
-        // Look for cards that start with the search term
+
+        // Priority 5: Cards that start with the search term
         let startsWithMatches = cards.filter { $0.name.lowercased().hasPrefix(lowercaseSearch) }
         if !startsWithMatches.isEmpty {
+            print("✅ [Scan] Prefix match: \(startsWithMatches.first!.name)")
             return startsWithMatches.first
         }
-        
-        // Look for cards that contain the search term anywhere
+
+        // Priority 6: Cards that contain the search term anywhere
         let containsMatches = cards.filter { $0.name.lowercased().contains(lowercaseSearch) }
         if !containsMatches.isEmpty {
+            print("✅ [Scan] Contains match: \(containsMatches.first!.name)")
             return containsMatches.first
         }
-        
-        // Return the first result if no better match is found
+
+        // Last resort: return first result
         if let first = cards.first {
+            print("⚠️ [Scan] No good match, returning first: \(first.name)")
         }
         return cards.first
     }

@@ -26,7 +26,10 @@ class CollectedCard {
     var isWishlisted: Bool
     var notes: String
     var variant: String?
-    
+    var inkColor: String?
+    var uniqueId: String?
+    var cardNumber: Int?
+
     var cardRarity: CardRarity {
         get { CardRarity(rawValue: rarity) ?? .common }
         set { rarity = newValue.rawValue }
@@ -40,7 +43,7 @@ class CollectedCard {
         set { variant = newValue.rawValue }
     }
     
-    init(cardId: String, name: String, cost: Int, type: String, rarity: CardRarity, setName: String, cardText: String = "", imageUrl: String, price: Double? = nil, quantity: Int = 1, condition: String = "Near Mint", isWishlisted: Bool = false, notes: String = "", variant: CardVariant = .normal) {
+    init(cardId: String, name: String, cost: Int, type: String, rarity: CardRarity, setName: String, cardText: String = "", imageUrl: String, price: Double? = nil, quantity: Int = 1, condition: String = "Near Mint", isWishlisted: Bool = false, notes: String = "", variant: CardVariant = .normal, inkColor: String? = nil, uniqueId: String? = nil, cardNumber: Int? = nil) {
         self.cardId = cardId
         self.name = name
         self.cost = cost
@@ -56,10 +59,13 @@ class CollectedCard {
         self.isWishlisted = isWishlisted
         self.notes = notes
         self.variant = variant.rawValue
+        self.inkColor = inkColor
+        self.uniqueId = uniqueId
+        self.cardNumber = cardNumber
     }
     
     var toLorcanaCard: LorcanaCard {
-        LorcanaCard(
+        let card = LorcanaCard(
             id: cardId,
             name: name,
             cost: cost,
@@ -69,8 +75,20 @@ class CollectedCard {
             cardText: cardText,
             imageUrl: imageUrl,
             price: price,
-            variant: cardVariant
+            variant: cardVariant,
+            cardNumber: cardNumber,
+            uniqueId: uniqueId,
+            inkColor: inkColor,
+            dateAdded: dateAdded
         )
+
+        print("🔄 [toLorcanaCard] Loading card from database:")
+        print("   Name: \(name)")
+        print("   Variant: \(cardVariant.rawValue)")
+        print("   uniqueId: \(uniqueId ?? "nil")")
+        print("   cardNumber: \(cardNumber?.description ?? "nil")")
+
+        return card
     }
 
     /// Get the best available image URL - prefers local, falls back to remote

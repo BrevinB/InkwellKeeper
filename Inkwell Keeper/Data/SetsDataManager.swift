@@ -108,7 +108,12 @@ class SetsDataManager: ObservableObject {
             "azurite_sea": "azurite_sea.json",
             "fabled": "fabled.json",
             "archazias_island": "archazias_island.json",
-            "reign_of_jafar": "reign_of_jafar.json"
+            "reign_of_jafar": "reign_of_jafar.json",
+            "whispers_in_the_well": "whispers_in_the_well.json",
+            "promo_set_1": "promo_set_1.json",
+            "promo_set_2": "promo_set_2.json",
+            "d23_collection": "d23_collection.json",
+            "challenge_promo": "challenge_promo.json"
         ]
 
         for (setId, filename) in setFilenames {
@@ -327,8 +332,8 @@ class PriceCache: ObservableObject {
     
     @Published private(set) var isRefreshing = false
     @Published private(set) var lastRefresh: Date?
-    
-    private let priceService = PricingService()
+
+    private let priceService = PricingService.shared
     private let userDefaults = UserDefaults.standard
     private let pricePrefix = "price_"
     private let timestampPrefix = "price_timestamp_"

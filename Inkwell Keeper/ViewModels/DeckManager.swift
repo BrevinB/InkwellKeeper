@@ -96,24 +96,52 @@ class DeckManager: ObservableObject {
     func addCard(_ card: LorcanaCard, to deck: Deck, quantity: Int = 1) {
         guard let context = modelContext else { return }
 
+        var cardToUpdate: DeckCard?
+
         // Check if card already exists in deck
         if let existingCard = deck.cards.first(where: { $0.cardId == card.id }) {
             // Increment quantity (respecting max copies)
             let newQuantity = min(existingCard.quantity + quantity, deck.deckFormat.maxCopiesPerCard)
             existingCard.quantity = newQuantity
+            cardToUpdate = existingCard
         } else {
             // Add new card
             let deckCard = DeckCard(from: card, quantity: min(quantity, deck.deckFormat.maxCopiesPerCard))
             deck.cards.append(deckCard)
             context.insert(deckCard)
+            cardToUpdate = deckCard
         }
 
         deck.lastModified = Date()
 
         do {
             try context.save()
+
+            // Fetch price for the card in background
+            if let deckCard = cardToUpdate {
+                Task {
+                    await updateCardPrice(deckCard)
+                }
+            }
         } catch {
             // Handle error silently
+        }
+    }
+
+    // MARK: - Update Card Price
+    private func updateCardPrice(_ deckCard: DeckCard) async {
+        let card = deckCard.toLorcanaCard
+        do {
+            if let pricing = try await PricingService.shared.getPricing(for: card) {
+                let averagePrice = pricing.prices.map { $0.price }.reduce(0, +) / Double(pricing.prices.count)
+
+                await MainActor.run {
+                    deckCard.price = averagePrice
+                    try? modelContext?.save()
+                }
+            }
+        } catch {
+            // Pricing failed - card will remain with nil/0 price
         }
     }
 
@@ -210,7 +238,7 @@ class DeckManager: ObservableObject {
         }
 
         output += "\n"
-        output += "Exported from Inkwell Keeper\n"
+        output += "Exported from Ink Well Keeper\n"
 
         return output
     }

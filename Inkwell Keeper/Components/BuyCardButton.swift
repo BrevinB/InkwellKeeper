@@ -13,7 +13,7 @@ struct BuyCardOptionsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Buy This Card")
+            Text("Check Prices")
                 .font(.headline)
                 .foregroundColor(.lorcanaGold)
 
@@ -91,8 +91,8 @@ struct CompactBuyButton: View {
             showingOptions = true
         }) {
             HStack(spacing: 6) {
-                Image(systemName: "cart")
-                Text("Buy")
+                Image(systemName: "dollarsign.circle")
+                Text("Check Prices")
             }
             .font(.caption)
             .fontWeight(.semibold)
@@ -134,14 +134,7 @@ struct BuyCardSheet: View {
                             .font(.headline)
                             .foregroundColor(.white)
 
-                        HStack {
-                            RarityBadge(rarity: card.rarity)
-                            if let price = card.price {
-                                Text("Est. $\(price, specifier: "%.2f")")
-                                    .font(.caption)
-                                    .foregroundColor(.lorcanaGold)
-                            }
-                        }
+                        RarityBadge(rarity: card.rarity)
                     }
 
                     Spacer()
@@ -156,7 +149,7 @@ struct BuyCardSheet: View {
 
                 Spacer()
 
-                Text("Prices may vary. Links support app development.")
+                Text("Prices shown are from affiliated retailers.")
                     .font(.caption2)
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.center)
@@ -164,7 +157,7 @@ struct BuyCardSheet: View {
             }
             .padding()
             .background(LorcanaBackground())
-            .navigationTitle("Buy Card")
+            .navigationTitle("Check Prices")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

@@ -149,7 +149,8 @@ struct SetCompletionCard: View {
             "Azurite Sea",
             "Archazia's Island",
             "Fabled",
-            "Reign of Jafar"
+            "Reign of Jafar",
+            "Whispers in the Well"
         ]
 
         return allSets.compactMap { setName in

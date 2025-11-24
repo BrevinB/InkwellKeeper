@@ -13,7 +13,7 @@ struct SetsView: View {
     @State private var selectedSet: LorcanaSet?
     
     var body: some View {
-        NavigationView {
+        navigationWrapper {
             VStack {
                 if dataManager.isLoading {
                     VStack(spacing: 16) {
@@ -72,7 +72,10 @@ struct SetsView: View {
             .navigationTitle("Card Sets")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { 
+                    Button(action: {
+                        // Refresh collection data to update counts
+                        collectionManager.loadCollection()
+                        // Also refresh prices in background
                         dataManager.refreshPricesInBackground()
                     }) {
                         Image(systemName: "arrow.clockwise")
@@ -84,6 +87,17 @@ struct SetsView: View {
         .sheet(item: $selectedSet) { set in
             SetDetailView(set: set)
                 .environmentObject(collectionManager)
+        }
+    }
+
+    @ViewBuilder
+    private func navigationWrapper<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        if #available(iOS 18.0, *), UIDevice.current.userInterfaceIdiom == .pad {
+            content()
+        } else {
+            NavigationView {
+                content()
+            }
         }
     }
 }

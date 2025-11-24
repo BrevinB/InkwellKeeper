@@ -1,0 +1,234 @@
+//
+//  WhatsNewView.swift
+//  Inkwell Keeper
+//
+//  View to display changelog and new features
+//
+
+import SwiftUI
+
+struct WhatsNewView: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var currentVersion: String = ""
+
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Header
+                    headerSection
+
+                    // Version history
+                    ForEach(changelogEntries, id: \.version) { entry in
+                        changelogSection(for: entry)
+                    }
+                }
+                .padding()
+            }
+            .background(LorcanaBackground())
+            .navigationTitle("What's New")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        // Mark this version as seen
+                        WhatsNewManager.shared.markVersionAsSeen()
+                        dismiss()
+                    }
+                }
+            }
+        }
+        .onAppear {
+            currentVersion = WhatsNewManager.shared.currentVersion
+        }
+    }
+
+    // MARK: - View Components
+
+    private var headerSection: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 60))
+                .foregroundColor(.lorcanaGold)
+
+            Text("What's New in Ink Well Keeper")
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+
+            Text("Version \(currentVersion)")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.lorcanaDark.opacity(0.6))
+        )
+    }
+
+    private func changelogSection(for entry: ChangelogEntry) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Version header
+            HStack {
+                Text("Version \(entry.version)")
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+
+                if entry.version == currentVersion {
+                    Text("LATEST")
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.lorcanaGold)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            Capsule()
+                                .fill(Color.lorcanaGold.opacity(0.2))
+                        )
+                }
+
+                Spacer()
+            }
+
+            Text(entry.date)
+                .font(.subheadline)
+                .foregroundColor(.gray)
+
+            // Features
+            if !entry.features.isEmpty {
+                featureGroup(title: "✨ New Features", items: entry.features, color: .green)
+            }
+
+            // Improvements
+            if !entry.improvements.isEmpty {
+                featureGroup(title: "🔧 Improvements", items: entry.improvements, color: .blue)
+            }
+
+            // Bug Fixes
+            if !entry.bugFixes.isEmpty {
+                featureGroup(title: "🐛 Bug Fixes", items: entry.bugFixes, color: .orange)
+            }
+
+            // In Progress
+            if !entry.inProgress.isEmpty {
+                featureGroup(title: "🚧 In Progress", items: entry.inProgress, color: .yellow)
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.lorcanaDark.opacity(0.4))
+        )
+    }
+
+    private func featureGroup(title: String, items: [String], color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.headline)
+                .foregroundColor(color)
+                .padding(.top, 8)
+
+            ForEach(items, id: \.self) { item in
+                HStack(alignment: .top, spacing: 8) {
+                    Text("•")
+                        .foregroundColor(color)
+                        .fontWeight(.bold)
+
+                    Text(item)
+                        .font(.body)
+                        .foregroundColor(.white)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Changelog Data
+
+struct ChangelogEntry {
+    let version: String
+    let date: String
+    let features: [String]
+    let improvements: [String]
+    let bugFixes: [String]
+    let inProgress: [String]
+}
+
+// Add new versions at the top of this array
+private let changelogEntries: [ChangelogEntry] = [
+    ChangelogEntry(
+        version: "1.1.0",
+        date: "November 2025",
+        features: [
+            "DISCLAIMER: A big overhaul happend to get all the missing cards into the app, if you notice any issues with your cards they may have to be re-added. We apologize for the inconvenience",
+            "Enhanced character normalization for imports - Better handling of special characters like apostrophes and ellipsis",
+            "Improved image loading for newly added cards",
+        ],
+        improvements: [
+            "Fixed set count display for reprinted cards",
+            "Promo variants now correctly treated as separate cards",
+            "Better matching of cards across different sets",
+            "More reliable image caching and display",
+            "Added enchanted, epic and iconic images",
+            "Pricing has been inaccurate, until I can get TCGPlayer API access I've temporarily removed the pricing. there are still links that take you to TCGPlayer and eBay"
+        ],
+        bugFixes: [
+            "Fixed incorrect set counts showing for collections",
+            "Fixed Promo cards incorrectly matching with Normal variants",
+            "Resolved import failures for cards with special characters"
+        ],
+        inProgress: [
+            "Dreamborn.ink export format - Working on improving export compatibility with Dreamborn.ink bulk import (currently in testing)"
+        ]
+    ),
+    ChangelogEntry(
+        version: "1.0.0",
+        date: "October 2025",
+        features: [
+            "Track your Lorcana card collection",
+            "Create and manage wishlists",
+            "Scan cards using your camera",
+            "Import collections from CSV files",
+            "Import collection from Dreamborn",
+            "Export your collection data",
+            "View card prices and market data",
+            "Filter and sort your collection",
+            "Track collection progress by set"
+        ],
+        improvements: [],
+        bugFixes: [],
+        inProgress: []
+    )
+]
+
+// MARK: - What's New Manager
+
+class WhatsNewManager {
+    static let shared = WhatsNewManager()
+
+    private let lastSeenVersionKey = "LastSeenWhatsNewVersion"
+
+    var currentVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+    }
+
+    var shouldShowWhatsNew: Bool {
+        let lastSeenVersion = UserDefaults.standard.string(forKey: lastSeenVersionKey)
+        return lastSeenVersion != currentVersion
+    }
+
+    func markVersionAsSeen() {
+        UserDefaults.standard.set(currentVersion, forKey: lastSeenVersionKey)
+    }
+
+    private init() {}
+}
+
+#Preview {
+    WhatsNewView()
+}

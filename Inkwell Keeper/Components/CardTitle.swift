@@ -17,8 +17,11 @@ struct CardTile: View {
     @State private var marketPrice: Double?
     @State private var loadingPrice = false
     @State private var priceChange: Double?
+    @State private var priceConfidence: PricingService.PriceConfidence?
+    @State private var imageLoadTrigger = UUID() // Force image reload
     @EnvironmentObject var collectionManager: CollectionManager
-    @StateObject private var pricingService = PricingService()
+
+    private let pricingService = PricingService.shared
     
     private var collectedCard: CollectedCard? {
         collectionManager.getCollectedCardData(for: card)
@@ -29,9 +32,18 @@ struct CardTile: View {
             AsyncImage(url: card.bestImageUrl()) { phase in
                 switch phase {
                 case .success(let image):
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
+                    Group {
+                        if card.variant == .foil {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .foilEffect(isAnimated: true)
+                        } else {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                        }
+                    }
                 case .failure(let error):
                     RoundedRectangle(cornerRadius: 12)
                         .fill(
@@ -80,6 +92,7 @@ struct CardTile: View {
                         }
                 }
             }
+            .id("\(imageLoadTrigger)")  // Force reload when trigger changes
             .frame(height: 200)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(
@@ -157,67 +170,7 @@ struct CardTile: View {
                     CostBadge(cost: card.cost)
                 }
                 
-                if let _ = marketPrice {
-                    Button(action: {
-                        openEbayListing()
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "cart")
-                                .font(.caption)
-                            Text("Buy on eBay")
-                                .font(.caption)
-                                .fontWeight(.medium)
-                        }
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(Color.blue.opacity(0.8))
-                        )
-                    }
-                }
-                
-                HStack {
-                    if loadingPrice {
-                        HStack(spacing: 4) {
-                            ProgressView()
-                                .scaleEffect(0.7)
-                                .foregroundColor(.lorcanaGold)
-                            Text("Loading price...")
-                                .font(.caption2)
-                                .foregroundColor(.gray)
-                        }
-                    } else if let price = marketPrice {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("$\(price, specifier: "%.2f")")
-                                .font(.caption)
-                                .foregroundColor(.lorcanaGold)
-                                .fontWeight(.semibold)
-                            
-                            if let change = priceChange {
-                                HStack(spacing: 2) {
-                                    Image(systemName: change > 0 ? "arrow.up" : change < 0 ? "arrow.down" : "minus")
-                                        .font(.caption2)
-                                        .foregroundColor(change > 0 ? .green : change < 0 ? .red : .gray)
-                                    Text("\(abs(change), specifier: "%.1f")%")
-                                        .font(.caption2)
-                                        .foregroundColor(change > 0 ? .green : change < 0 ? .red : .gray)
-                                }
-                            }
-                        }
-                    } else if let price = card.price {
-                        Text("$\(price, specifier: "%.2f")")
-                            .font(.caption)
-                            .foregroundColor(.lorcanaGold)
-                            .fontWeight(.semibold)
-                    } else {
-                        Text("Price unavailable")
-                            .font(.caption2)
-                            .foregroundColor(.gray)
-                    }
-                    Spacer()
-                }
+                // Price/buy button removed from tile view - available in detail view
             }
         }
         .onAppear {
@@ -226,6 +179,8 @@ struct CardTile: View {
             if let price = card.price {
                 self.marketPrice = price
             }
+            // Force image reload by generating new trigger
+            imageLoadTrigger = UUID()
         }
         .padding()
         .background(
@@ -266,40 +221,15 @@ struct CardTile: View {
     
     private func loadMarketPrice() async {
         loadingPrice = true
-        
-        do {
-            let price = await pricingService.getMarketPrice(for: card)
-            let priceChangeInfo = pricingService.getRecentPriceChange(for: card)
-            
-            await MainActor.run {
-                self.marketPrice = price
-                self.priceChange = priceChangeInfo.changePercent
-                self.loadingPrice = false
-                
-                if let changePercent = priceChangeInfo.changePercent {
-                }
-            }
-        } catch {
-            await MainActor.run {
-                self.loadingPrice = false
-            }
-        }
-    }
-    
-    private func openEbayListing() {
-        if let affiliateLink = pricingService.generateEbayAffiliateLink(for: card) {
-            if let url = URL(string: affiliateLink) {
-                UIApplication.shared.open(url)
-            }
-        } else {
-            // Fallback to regular eBay search if no affiliate setup
-            let searchQuery = "\(card.name) Lorcana \(card.setName)"
-            let encodedQuery = searchQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-            let regularLink = "https://www.ebay.com/sch/i.html?_nkw=\(encodedQuery)&_sacat=183454"
-            
-            if let url = URL(string: regularLink) {
-                UIApplication.shared.open(url)
-            }
+
+        let priceData = await pricingService.getPriceWithConfidence(for: card)
+        let priceChangeInfo = pricingService.getRecentPriceChange(for: card)
+
+        await MainActor.run {
+            self.marketPrice = priceData.price
+            self.priceConfidence = priceData.confidence
+            self.priceChange = priceChangeInfo.changePercent
+            self.loadingPrice = false
         }
     }
 }

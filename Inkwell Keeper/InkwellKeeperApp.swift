@@ -7,12 +7,16 @@
 
 import SwiftUI
 import SwiftData
+import RevenueCat
 
 @main
 struct InkwellKeeperApp: App {
     init() {
         // Initialize optimized image cache on app launch
         _ = ImageCache.shared
+
+        // Configure RevenueCat
+        TipJarManager.shared.configure()
     }
 
     var body: some Scene {
