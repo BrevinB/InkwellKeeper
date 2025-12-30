@@ -881,6 +881,7 @@ struct AddCardGroupModal: View {
     @State private var selectedVariant: CardVariant = .normal
     @State private var quantity: Int = 1
     @State private var showingSuccessBanner = false
+    @State private var isImageExpanded = false
 
     var selectedCard: LorcanaCard {
         // Use primary card (most recent set) for adding
@@ -926,6 +927,11 @@ struct AddCardGroupModal: View {
                         }
                     }
                     .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .onTapGesture {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                            isImageExpanded = true
+                        }
+                    }
                     .id(selectedCard.id)  // Force reload when set/variant changes
 
                     VStack(alignment: .leading, spacing: 8) {
@@ -1147,6 +1153,55 @@ struct AddCardGroupModal: View {
                     Spacer()
                 }
                 .animation(.spring(), value: showingSuccessBanner)
+            )
+            .overlay(
+                // Expanded image overlay
+                Group {
+                    if isImageExpanded {
+                        Color.black.opacity(0.85)
+                            .ignoresSafeArea()
+                            .onTapGesture {
+                                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                    isImageExpanded = false
+                                }
+                            }
+
+                        VStack {
+                            AsyncImage(url: selectedCard.bestImageUrl()) { image in
+                                Group {
+                                    if selectedVariant == .foil {
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .staticFoilEffect()
+                                    } else {
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                    }
+                                }
+                            } placeholder: {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.gray.opacity(0.3))
+                                    .aspectRatio(0.7, contentMode: .fit)
+                            }
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .shadow(color: .black.opacity(0.5), radius: 20, x: 0, y: 10)
+                            .padding(40)
+
+                            Text("Tap anywhere to close")
+                                .font(.caption)
+                                .foregroundColor(.white.opacity(0.6))
+                                .padding(.bottom, 20)
+                        }
+                        .transition(.scale(scale: 0.3).combined(with: .opacity))
+                        .onTapGesture {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                isImageExpanded = false
+                            }
+                        }
+                    }
+                }
             )
             .onAppear {
                 // Initialize selected variant to match the card's actual variant

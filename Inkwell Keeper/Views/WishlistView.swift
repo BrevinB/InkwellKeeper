@@ -100,6 +100,7 @@ struct WishlistView: View {
             }
             .background(LorcanaBackground())
             .navigationTitle("Wishlist")
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingAddToWishlist = true }) {
