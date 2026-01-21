@@ -73,3 +73,45 @@ enum SortOption: CaseIterable {
         }
     }
 }
+
+enum VariantFilter: String, CaseIterable {
+    case all = "All"
+    case normal = "Normal"
+    case foil = "Foil"
+    case enchanted = "Enchanted"
+    case promo = "Promo"
+    case special = "Special"  // Epic, Iconic, Borderless
+
+    var displayName: String {
+        return rawValue
+    }
+
+    var icon: String {
+        switch self {
+        case .all: return "square.stack.3d.up"
+        case .normal: return "rectangle.portrait"
+        case .foil: return "sparkles"
+        case .enchanted: return "wand.and.stars"
+        case .promo: return "star.circle"
+        case .special: return "crown"
+        }
+    }
+
+    /// Returns true if the given CardVariant matches this filter
+    func matches(_ variant: CardVariant) -> Bool {
+        switch self {
+        case .all:
+            return true
+        case .normal:
+            return variant == .normal
+        case .foil:
+            return variant == .foil
+        case .enchanted:
+            return variant == .enchanted
+        case .promo:
+            return variant == .promo
+        case .special:
+            return variant == .epic || variant == .iconic || variant == .borderless
+        }
+    }
+}

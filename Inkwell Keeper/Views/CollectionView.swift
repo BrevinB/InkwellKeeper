@@ -13,6 +13,7 @@ struct CollectionView: View {
     @State private var searchText = ""
     @State private var selectedFilter: CardFilter = .all
     @State private var selectedInkColor: InkColorFilter = .all
+    @State private var selectedVariant: VariantFilter = .all
     @State private var sortOption: SortOption = .recentlyAdded
     @State private var showingManualAdd = false
     @State private var showingBulkImport = false
@@ -54,6 +55,11 @@ struct CollectionView: View {
             }
         }
 
+        // Filter by variant
+        if selectedVariant != .all {
+            cards = cards.filter { selectedVariant.matches($0.variant) }
+        }
+
         switch sortOption {
         case .recentlyAdded:
             cards = cards.sorted { card1, card2 in
@@ -86,6 +92,7 @@ struct CollectionView: View {
                     FilterBar(
                         selectedFilter: $selectedFilter,
                         selectedInkColor: $selectedInkColor,
+                        selectedVariant: $selectedVariant,
                         sortOption: $sortOption
                     )
                 }

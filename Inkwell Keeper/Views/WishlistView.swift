@@ -13,6 +13,7 @@ struct WishlistView: View {
     @State private var searchText = ""
     @State private var selectedFilter: CardFilter = .all
     @State private var selectedInkColor: InkColorFilter = .all
+    @State private var selectedVariant: VariantFilter = .all
     @State private var sortOption: SortOption = .recentlyAdded
 
     private var filteredCards: [LorcanaCard] {
@@ -47,6 +48,11 @@ struct WishlistView: View {
             }
         }
 
+        // Filter by variant
+        if selectedVariant != .all {
+            cards = cards.filter { selectedVariant.matches($0.variant) }
+        }
+
         switch sortOption {
         case .recentlyAdded:
             cards = cards.sorted { card1, card2 in
@@ -78,6 +84,7 @@ struct WishlistView: View {
                     FilterBar(
                         selectedFilter: $selectedFilter,
                         selectedInkColor: $selectedInkColor,
+                        selectedVariant: $selectedVariant,
                         sortOption: $sortOption
                     )
                 }

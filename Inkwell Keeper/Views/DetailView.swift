@@ -878,14 +878,36 @@ struct AddCardGroupModal: View {
     let onAdd: (LorcanaCard, Int) -> Void
     let isWishlist: Bool
 
-    @State private var selectedVariant: CardVariant = .normal
-    @State private var quantity: Int = 1
+    // For regular cards (Normal/Foil), use multi-quantity mode
+    @State private var normalQuantity: Int = 1
+    @State private var foilQuantity: Int = 0
+
+    // For special variants, use single selection mode
+    @State private var selectedSpecialVariant: CardVariant = .enchanted
+    @State private var specialQuantity: Int = 1
+
     @State private var showingSuccessBanner = false
     @State private var isImageExpanded = false
+    @State private var successMessage = ""
 
-    var selectedCard: LorcanaCard {
-        // Use primary card (most recent set) for adding
-        cardGroup.primaryCard.withVariant(selectedVariant)
+    /// Whether this card supports multi-variant adding (Normal + Foil)
+    private var supportsMultiVariant: Bool {
+        let variants = cardGroup.primaryCard.availableVariants()
+        return variants.contains(.normal) && variants.contains(.foil)
+    }
+
+    /// For display purposes, show the normal card by default
+    var displayCard: LorcanaCard {
+        cardGroup.primaryCard.withVariant(.normal)
+    }
+
+    /// Total cards being added
+    private var totalQuantity: Int {
+        if supportsMultiVariant {
+            return normalQuantity + foilQuantity
+        } else {
+            return specialQuantity
+        }
     }
 
     var body: some View {
@@ -895,36 +917,15 @@ struct AddCardGroupModal: View {
                     // Card image and basic info
                 HStack(spacing: 16) {
                     ZStack(alignment: .topTrailing) {
-                        AsyncImage(url: selectedCard.bestImageUrl()) { image in
-                            Group {
-                                if selectedVariant == .foil {
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .staticFoilEffect()
-                                } else {
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                }
-                            }
+                        AsyncImage(url: displayCard.bestImageUrl()) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
                         } placeholder: {
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color.gray.opacity(0.3))
                         }
                         .frame(width: 80, height: 110)
-
-                        // Show variant badge if not normal
-                        if selectedVariant != .normal {
-                            Text(selectedVariant.shortName)
-                                .font(.caption2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                                .padding(4)
-                                .background(Color.lorcanaGold)
-                                .clipShape(RoundedRectangle(cornerRadius: 4))
-                                .padding(4)
-                        }
                     }
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .onTapGesture {
@@ -932,20 +933,18 @@ struct AddCardGroupModal: View {
                             isImageExpanded = true
                         }
                     }
-                    .id(selectedCard.id)  // Force reload when set/variant changes
+                    .id(displayCard.id)
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(selectedCard.name)
+                        Text(displayCard.name)
                             .font(.headline)
                             .foregroundColor(.white)
 
                         HStack {
-                            RarityBadge(rarity: selectedCard.rarity)
+                            RarityBadge(rarity: displayCard.rarity)
                             Spacer()
-                            CostBadge(cost: selectedCard.cost)
+                            CostBadge(cost: displayCard.cost)
                         }
-
-                        // Price display removed
                     }
 
                     Spacer()
@@ -1002,85 +1001,122 @@ struct AddCardGroupModal: View {
                     )
                 }
 
-                // Variant selection - only show available variants
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Card Variant")
-                        .font(.headline)
-                        .foregroundColor(.lorcanaGold)
+                // Variant and Quantity selection
+                if supportsMultiVariant {
+                    // Multi-variant mode: Normal + Foil side by side
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Add Cards")
+                            .font(.headline)
+                            .foregroundColor(.lorcanaGold)
 
+                        Text("Set quantities for each variant you want to add")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+
+                        HStack(spacing: 16) {
+                            // Normal quantity
+                            variantQuantityView(
+                                variant: .normal,
+                                quantity: $normalQuantity,
+                                icon: "rectangle.portrait",
+                                color: .white
+                            )
+
+                            // Foil quantity
+                            variantQuantityView(
+                                variant: .foil,
+                                quantity: $foilQuantity,
+                                icon: "sparkles",
+                                color: .lorcanaGold
+                            )
+                        }
+                    }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.lorcanaDark.opacity(0.6))
+                    )
+                } else {
+                    // Special variant mode: single selection
                     let availableVariants = cardGroup.primaryCard.availableVariants()
 
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
-                        ForEach(availableVariants, id: \.self) { variant in
-                            Button(action: {
-                                selectedVariant = variant
-                            }) {
-                                VStack(spacing: 4) {
-                                    Text(variant.shortName)
-                                        .font(.caption)
-                                        .fontWeight(.bold)
-                                    Text(variant.displayName)
-                                        .font(.caption2)
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Card Variant")
+                            .font(.headline)
+                            .foregroundColor(.lorcanaGold)
+
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
+                            ForEach(availableVariants, id: \.self) { variant in
+                                Button(action: {
+                                    selectedSpecialVariant = variant
+                                }) {
+                                    VStack(spacing: 4) {
+                                        Text(variant.shortName)
+                                            .font(.caption)
+                                            .fontWeight(.bold)
+                                        Text(variant.displayName)
+                                            .font(.caption2)
+                                    }
+                                    .foregroundColor(selectedSpecialVariant == variant ? .white : .gray)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(8)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(selectedSpecialVariant == variant ? Color.lorcanaGold.opacity(0.3) : Color.clear)
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(selectedSpecialVariant == variant ? Color.lorcanaGold : Color.gray.opacity(0.3), lineWidth: 1)
+                                    )
                                 }
-                                .foregroundColor(selectedVariant == variant ? .white : .gray)
-                                .frame(maxWidth: .infinity)
-                                .padding(8)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(selectedVariant == variant ? Color.lorcanaGold.opacity(0.3) : Color.clear)
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(selectedVariant == variant ? Color.lorcanaGold : Color.gray.opacity(0.3), lineWidth: 1)
-                                )
                             }
                         }
                     }
-                }
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.lorcanaDark.opacity(0.6))
-                )
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.lorcanaDark.opacity(0.6))
+                    )
 
-                // Quantity selection
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Quantity")
-                        .font(.headline)
-                        .foregroundColor(.lorcanaGold)
+                    // Quantity selection for special variants
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Quantity")
+                            .font(.headline)
+                            .foregroundColor(.lorcanaGold)
 
-                    HStack {
-                        Button(action: {
-                            if quantity > 1 {
-                                quantity -= 1
+                        HStack {
+                            Button(action: {
+                                if specialQuantity > 1 {
+                                    specialQuantity -= 1
+                                }
+                            }) {
+                                Image(systemName: "minus.circle.fill")
+                                    .font(.title2)
+                                    .foregroundColor(specialQuantity > 1 ? .lorcanaGold : .gray)
                             }
-                        }) {
-                            Image(systemName: "minus.circle.fill")
-                                .font(.title2)
-                                .foregroundColor(quantity > 1 ? .lorcanaGold : .gray)
-                        }
-                        .disabled(quantity <= 1)
+                            .disabled(specialQuantity <= 1)
 
-                        Text("\(quantity)")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .frame(minWidth: 50)
-
-                        Button(action: {
-                            quantity += 1
-                        }) {
-                            Image(systemName: "plus.circle.fill")
+                            Text("\(specialQuantity)")
                                 .font(.title2)
-                                .foregroundColor(.lorcanaGold)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .frame(minWidth: 50)
+
+                            Button(action: {
+                                specialQuantity += 1
+                            }) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.title2)
+                                    .foregroundColor(.lorcanaGold)
+                            }
                         }
                     }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.lorcanaDark.opacity(0.6))
+                    )
                 }
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.lorcanaDark.opacity(0.6))
-                )
 
                 // Buy options (for cards you don't own yet)
                 VStack(alignment: .leading, spacing: 8) {
@@ -1089,24 +1125,19 @@ struct AddCardGroupModal: View {
                         .foregroundColor(.gray)
                         .padding(.horizontal)
 
-                    BuyCardOptionsView(card: selectedCard)
+                    BuyCardOptionsView(card: displayCard)
                 }
 
                 // Add button
                 Button(action: {
-                    onAdd(selectedCard, quantity)
-                    showingSuccessBanner = true
-
-                    // Dismiss after showing success banner briefly
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                        isPresented = false
-                    }
+                    addCards()
                 }) {
-                    Text("Add \(quantity) \(selectedVariant.displayName) card\(quantity > 1 ? "s" : "") to \(isWishlist ? "Wishlist" : "Collection")")
+                    Text(addButtonText)
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(LorcanaButtonStyle())
+                .disabled(totalQuantity == 0)
                 .padding()
                 }
                 .padding()
@@ -1134,7 +1165,7 @@ struct AddCardGroupModal: View {
                                 Text("Success!")
                                     .font(.headline)
                                     .foregroundColor(.white)
-                                Text("Added \(quantity) \(selectedVariant.displayName) card\(quantity > 1 ? "s" : "")")
+                                Text(successMessage)
                                     .font(.caption)
                                     .foregroundColor(.white.opacity(0.9))
                             }
@@ -1167,19 +1198,10 @@ struct AddCardGroupModal: View {
                             }
 
                         VStack {
-                            AsyncImage(url: selectedCard.bestImageUrl()) { image in
-                                Group {
-                                    if selectedVariant == .foil {
-                                        image
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                            .staticFoilEffect()
-                                    } else {
-                                        image
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                    }
-                                }
+                            AsyncImage(url: displayCard.bestImageUrl()) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
                             } placeholder: {
                                 RoundedRectangle(cornerRadius: 12)
                                     .fill(Color.gray.opacity(0.3))
@@ -1204,10 +1226,119 @@ struct AddCardGroupModal: View {
                 }
             )
             .onAppear {
-                // Initialize selected variant to match the card's actual variant
+                // Initialize selected variant for special cards
                 // For promo cards, this ensures it starts as .promo
-                selectedVariant = cardGroup.primaryCard.variant
+                selectedSpecialVariant = cardGroup.primaryCard.variant
             }
+        }
+    }
+
+    // MARK: - Helper Views
+
+    private func variantQuantityView(variant: CardVariant, quantity: Binding<Int>, icon: String, color: Color) -> some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.caption)
+                    .foregroundColor(color)
+                Text(variant.displayName)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(color)
+            }
+
+            HStack(spacing: 12) {
+                Button(action: {
+                    if quantity.wrappedValue > 0 {
+                        quantity.wrappedValue -= 1
+                    }
+                }) {
+                    Image(systemName: "minus.circle.fill")
+                        .font(.title3)
+                        .foregroundColor(quantity.wrappedValue > 0 ? color : .gray.opacity(0.5))
+                }
+                .disabled(quantity.wrappedValue <= 0)
+
+                Text("\(quantity.wrappedValue)")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .frame(minWidth: 30)
+
+                Button(action: {
+                    quantity.wrappedValue += 1
+                }) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title3)
+                        .foregroundColor(color)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(quantity.wrappedValue > 0 ? color.opacity(0.15) : Color.clear)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(quantity.wrappedValue > 0 ? color.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 1)
+                )
+        )
+    }
+
+    // MARK: - Helper Properties
+
+    private var addButtonText: String {
+        if supportsMultiVariant {
+            var parts: [String] = []
+            if normalQuantity > 0 {
+                parts.append("\(normalQuantity) Normal")
+            }
+            if foilQuantity > 0 {
+                parts.append("\(foilQuantity) Foil")
+            }
+            if parts.isEmpty {
+                return "Select quantity to add"
+            }
+            return "Add \(parts.joined(separator: " + ")) to \(isWishlist ? "Wishlist" : "Collection")"
+        } else {
+            return "Add \(specialQuantity) \(selectedSpecialVariant.displayName) to \(isWishlist ? "Wishlist" : "Collection")"
+        }
+    }
+
+    // MARK: - Actions
+
+    private func addCards() {
+        if supportsMultiVariant {
+            var addedParts: [String] = []
+
+            // Add normal cards if quantity > 0
+            if normalQuantity > 0 {
+                let normalCard = cardGroup.primaryCard.withVariant(.normal)
+                onAdd(normalCard, normalQuantity)
+                addedParts.append("\(normalQuantity) Normal")
+            }
+
+            // Add foil cards if quantity > 0
+            if foilQuantity > 0 {
+                let foilCard = cardGroup.primaryCard.withVariant(.foil)
+                onAdd(foilCard, foilQuantity)
+                addedParts.append("\(foilQuantity) Foil")
+            }
+
+            successMessage = "Added \(addedParts.joined(separator: " + ")) card\(totalQuantity > 1 ? "s" : "")"
+        } else {
+            // Special variant - single add
+            let specialCard = cardGroup.primaryCard.withVariant(selectedSpecialVariant)
+            onAdd(specialCard, specialQuantity)
+            successMessage = "Added \(specialQuantity) \(selectedSpecialVariant.displayName) card\(specialQuantity > 1 ? "s" : "")"
+        }
+
+        showingSuccessBanner = true
+
+        // Dismiss after showing success banner briefly
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            isPresented = false
         }
     }
 }
