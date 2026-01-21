@@ -21,6 +21,13 @@ struct SettingsView: View {
     @State private var showingTipJar = false
     @State private var showingWhatsNew = false
 
+    // Debug options
+    @State private var showingAddSomeConfirmation = false
+    @State private var showingAddMoreConfirmation = false
+    @State private var showingAddAllConfirmation = false
+    @State private var isAddingCards = false
+    @State private var addCardsProgress: String = ""
+
     var body: some View {
         navigationWrapper {
             List {
@@ -41,6 +48,11 @@ struct SettingsView: View {
 
                 // Data Management Section
                 dataSection
+
+                // Debug Section (for testing)
+                #if DEBUG
+                debugSection
+                #endif
 
                 // Community Code Policy Section
                 communityCodeSection
@@ -70,6 +82,30 @@ struct SettingsView: View {
                 }
             } message: {
                 Text("This will permanently delete all your collected cards, wishlist, decks, and all associated data. This action cannot be undone.")
+            }
+            .alert("Add Some Cards?", isPresented: $showingAddSomeConfirmation) {
+                Button("Cancel", role: .cancel) { }
+                Button("Add 50 Cards") {
+                    addDebugCards(count: 50)
+                }
+            } message: {
+                Text("This will add 50 random cards to your collection for testing.")
+            }
+            .alert("Add More Cards?", isPresented: $showingAddMoreConfirmation) {
+                Button("Cancel", role: .cancel) { }
+                Button("Add 200 Cards") {
+                    addDebugCards(count: 200)
+                }
+            } message: {
+                Text("This will add 200 random cards to your collection for testing.")
+            }
+            .alert("Add All Cards?", isPresented: $showingAddAllConfirmation) {
+                Button("Cancel", role: .cancel) { }
+                Button("Add All") {
+                    addAllDebugCards()
+                }
+            } message: {
+                Text("This will add ALL available cards to your collection. This may take a moment.")
             }
         }
     }
@@ -246,6 +282,42 @@ struct SettingsView: View {
         }
     }
 
+    #if DEBUG
+    private var debugSection: some View {
+        Section("Debug Options") {
+            if isAddingCards {
+                HStack {
+                    ProgressView()
+                        .padding(.trailing, 8)
+                    Text(addCardsProgress)
+                        .foregroundColor(.gray)
+                }
+            } else {
+                Button(action: {
+                    showingAddSomeConfirmation = true
+                }) {
+                    Label("Add Some Cards (50)", systemImage: "plus.rectangle.on.rectangle")
+                        .foregroundColor(.orange)
+                }
+
+                Button(action: {
+                    showingAddMoreConfirmation = true
+                }) {
+                    Label("Add More Cards (200)", systemImage: "plus.rectangle.fill.on.rectangle.fill")
+                        .foregroundColor(.orange)
+                }
+
+                Button(action: {
+                    showingAddAllConfirmation = true
+                }) {
+                    Label("Add All Cards", systemImage: "rectangle.stack.fill.badge.plus")
+                        .foregroundColor(.orange)
+                }
+            }
+        }
+    }
+    #endif
+
     // MARK: - Actions
 
     private func resetOnboarding() {
@@ -385,6 +457,54 @@ struct SettingsView: View {
             await collectionManager.deleteAllData()
         }
     }
+
+    #if DEBUG
+    private func addDebugCards(count: Int) {
+        isAddingCards = true
+        addCardsProgress = "Adding cards..."
+
+        Task {
+            let allCards = SetsDataManager.shared.getAllCards()
+            let shuffledCards = allCards.shuffled()
+            let cardsToAdd = Array(shuffledCards.prefix(count))
+
+            for (index, card) in cardsToAdd.enumerated() {
+                await MainActor.run {
+                    addCardsProgress = "Adding card \(index + 1) of \(cardsToAdd.count)..."
+                }
+                collectionManager.addCard(card, quantity: 1)
+            }
+
+            await MainActor.run {
+                isAddingCards = false
+                addCardsProgress = ""
+            }
+        }
+    }
+
+    private func addAllDebugCards() {
+        isAddingCards = true
+        addCardsProgress = "Adding all cards..."
+
+        Task {
+            let allCards = SetsDataManager.shared.getAllCards()
+
+            for (index, card) in allCards.enumerated() {
+                if index % 50 == 0 {
+                    await MainActor.run {
+                        addCardsProgress = "Adding card \(index + 1) of \(allCards.count)..."
+                    }
+                }
+                collectionManager.addCard(card, quantity: 1)
+            }
+
+            await MainActor.run {
+                isAddingCards = false
+                addCardsProgress = ""
+            }
+        }
+    }
+    #endif
 
     @ViewBuilder
     private func navigationWrapper<Content: View>(@ViewBuilder content: () -> Content) -> some View {
