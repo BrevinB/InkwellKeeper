@@ -20,6 +20,8 @@ struct CardTile: View {
     @State private var priceConfidence: PricingService.PriceConfidence?
     @State private var imageLoadTrigger = UUID() // Force image reload
     @EnvironmentObject var collectionManager: CollectionManager
+    @ObservedObject private var motionManager = MotionManager.shared
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let pricingService = PricingService.shared
     
@@ -32,18 +34,14 @@ struct CardTile: View {
             AsyncImage(url: card.bestImageUrl()) { phase in
                 switch phase {
                 case .success(let image):
-                    Group {
-                        if card.variant == .foil {
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .foilEffect(isAnimated: true)
-                        } else {
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                        }
-                    }
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .interactiveHolographicEffect(
+                            pitch: reduceMotion ? 0 : motionManager.pitch,
+                            roll: reduceMotion ? 0 : motionManager.roll,
+                            variant: card.variant
+                        )
                 case .failure(let error):
                     RoundedRectangle(cornerRadius: 12)
                         .fill(
@@ -181,6 +179,13 @@ struct CardTile: View {
             }
             // Force image reload by generating new trigger
             imageLoadTrigger = UUID()
+            // Start motion updates for holographic effect
+            if !reduceMotion {
+                motionManager.start()
+            }
+        }
+        .onDisappear {
+            motionManager.stop()
         }
         .padding()
         .background(

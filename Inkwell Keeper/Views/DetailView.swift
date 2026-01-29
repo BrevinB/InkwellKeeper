@@ -80,31 +80,16 @@ struct CollectionCardDetailView: View {
     @State private var collectedCard: CollectedCard?
     @State private var tempQuantity: Int = 1
     @State private var showingDeleteConfirmation = false
+    @State private var showingFullscreenViewer = false
 
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
-                    AsyncImage(url: card.bestImageUrl()) { image in
-                        Group {
-                            if card.variant == .foil {
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .foilEffect(isAnimated: true)
-                            } else {
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                            }
-                        }
-                    } placeholder: {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.gray.opacity(0.3))
-                            .aspectRatio(0.7, contentMode: .fit)
+                    InteractiveCardView(card: card) {
+                        showingFullscreenViewer = true
                     }
-                    .frame(maxWidth: 250)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .frame(width: 250, height: 350)
                     
                     VStack(alignment: .leading, spacing: 16) {
                         Text(card.name)
@@ -283,8 +268,11 @@ struct CollectionCardDetailView: View {
         } message: {
             Text("Are you sure you want to remove \(card.name) from your collection?")
         }
+        .fullScreenCover(isPresented: $showingFullscreenViewer) {
+            FullscreenCardViewer(card: card)
+        }
     }
-    
+
     private func loadCollectedCardData() {
         collectedCard = collectionManager.getCollectedCardData(for: card)
         tempQuantity = collectedCard?.quantity ?? 1
@@ -301,31 +289,16 @@ struct WishlistCardDetailView: View {
     @Binding var isPresented: Bool
     @EnvironmentObject var collectionManager: CollectionManager
     @State private var showingMoveConfirmation = false
+    @State private var showingFullscreenViewer = false
 
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
-                    AsyncImage(url: card.bestImageUrl()) { image in
-                        Group {
-                            if card.variant == .foil {
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .foilEffect(isAnimated: true)
-                            } else {
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                            }
-                        }
-                    } placeholder: {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.gray.opacity(0.3))
-                            .aspectRatio(0.7, contentMode: .fit)
+                    InteractiveCardView(card: card) {
+                        showingFullscreenViewer = true
                     }
-                    .frame(maxWidth: 250)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .frame(width: 250, height: 350)
                     
                     VStack(alignment: .leading, spacing: 16) {
                         Text(card.name)
@@ -418,8 +391,11 @@ struct WishlistCardDetailView: View {
         } message: {
             Text("Move \(card.name) from your wishlist to your collection?")
         }
+        .fullScreenCover(isPresented: $showingFullscreenViewer) {
+            FullscreenCardViewer(card: card)
+        }
     }
-    
+
     @MainActor
     private func moveCardToCollection() async {
         
