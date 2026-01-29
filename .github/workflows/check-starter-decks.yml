@@ -1,0 +1,76 @@
+name: Check for Missing Starter Decks
+
+on:
+  schedule:
+    # Run every Monday at 10am UTC (1 hour after card check)
+    - cron: '0 10 * * 1'
+  workflow_dispatch:  # Allow manual triggering
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  check-starter-decks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run starter deck check
+        id: check
+        run: |
+          python Scripts/check_starter_decks.py --github-action
+        continue-on-error: true
+
+      - name: Create issue if decks missing
+        if: steps.check.outputs.has_missing == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `Missing starter decks detected - ${new Date().toISOString().split('T')[0]}`;
+
+            // Check if an open issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'starter-decks'
+            });
+
+            const existingIssue = issues.data.find(issue =>
+              issue.title.startsWith('Missing starter decks detected')
+            );
+
+            const body = `${{ steps.check.outputs.report }}
+
+            ---
+            *This issue was automatically created by the starter deck checker.*
+            `;
+
+            if (existingIssue) {
+              // Update existing issue
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: body
+              });
+              console.log(`Updated existing issue #${existingIssue.number}`);
+            } else {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['starter-decks']
+              });
+              console.log('Created new issue');
+            }

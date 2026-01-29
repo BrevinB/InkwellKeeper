@@ -24,8 +24,8 @@
       "id": "into_the_inklands",
       "name": "Into the Inklands",
       "setCode": "ITI",
-      "releaseDate": "2024-02-23", 
-      "cardCount": 204,
+      "releaseDate": "2024-02-23",
+      "cardCount": 227,
       "description": "Journey deeper into the magical realm with new characters and locations.",
       "isReleased": true
     },
@@ -106,7 +106,7 @@
       "name": "Promo Set 1",
       "setCode": "P1",
       "releaseDate": "2023-08-18",
-      "cardCount": 41,
+      "cardCount": 42,
       "description": "First wave of promotional cards from various events",
       "isReleased": true
     },

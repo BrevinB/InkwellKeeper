@@ -162,6 +162,25 @@ struct ChangelogEntry {
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
     ChangelogEntry(
+        version: "1.3.0",
+        date: "January 2026",
+        features: [
+            "Winterspell Set - Added support for the new Winterspell set with 175 cards (more coming as they're revealed)",
+            "6 New Starter Decks - Added starter decks for Azurite Sea, Archazia's Island, and Reign of Jafar",
+            "Automated Updates - Card data now automatically checked weekly for new cards and sets"
+        ],
+        improvements: [
+            "All card data synced with latest from LorCast API",
+            "Added Dalmatian Puppy variant cards (4a-4e) to Into the Inklands",
+            "Added Mickey Mouse international promo variants (Japanese & Chinese)",
+            "Updated set card counts to match official totals"
+        ],
+        bugFixes: [],
+        inProgress: [
+            "Winterspell starter decks will be added after the set releases on February 13th"
+        ]
+    ),
+    ChangelogEntry(
         version: "1.2.0",
         date: "January 2026",
         features: [
