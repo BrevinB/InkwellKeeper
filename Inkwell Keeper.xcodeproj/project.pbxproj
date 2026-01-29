@@ -84,6 +84,7 @@
 		BAB5F67CCE4E4CB1957A5C74 /* DataMigrationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3D652CBA4843E9BA303B2E /* DataMigrationService.swift */; };
 		BF694AC2893B440FAD2DF586 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AA815C9650049DB84CB04F7 /* OnboardingView.swift */; };
 		F9FA8CEF18B640868AFA0847 /* whispers_in_the_well.json in Resources */ = {isa = PBXBuildFile; fileRef = B281D76F664D42E898C5AFFB /* whispers_in_the_well.json */; };
+		A1B2C3D4E5F6789012345679 /* winterspell.json in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345678 /* winterspell.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -164,6 +165,7 @@
 		23D9D44D2EA45ACE0089D552 /* ink.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = ink.icon; sourceTree = "<group>"; };
 		6AA815C9650049DB84CB04F7 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		B281D76F664D42E898C5AFFB /* whispers_in_the_well.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = whispers_in_the_well.json; sourceTree = "<group>"; };
+		A1B2C3D4E5F6789012345678 /* winterspell.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = winterspell.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -231,6 +233,7 @@
 				233365512E779F3F00BE5BD4 /* sets.json */,
 				233365522E779F3F00BE5BD4 /* SetsDataManager.swift */,
 				B281D76F664D42E898C5AFFB /* whispers_in_the_well.json */,
+				A1B2C3D4E5F6789012345678 /* winterspell.json */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -445,6 +448,7 @@
 				233365682E77B05400BE5BD4 /* reign_of_jafar.json in Resources */,
 				233365692E77B05400BE5BD4 /* rise_of_the_floodborn.json in Resources */,
 				F9FA8CEF18B640868AFA0847 /* whispers_in_the_well.json in Resources */,
+				A1B2C3D4E5F6789012345679 /* winterspell.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -663,7 +667,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -699,7 +703,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

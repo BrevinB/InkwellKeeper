@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-11-10",
+  "lastUpdated": "2026-01-28",
   "sets": [
     {
       "id": "the_first_chapter",
@@ -90,6 +90,15 @@
       "releaseDate": "2025-11-14",
       "cardCount": 204,
       "description": "Strange specters and mysterious whispers emerge from the well, introducing the new Boost mechanic.",
+      "isReleased": true
+    },
+    {
+      "id": "winterspell",
+      "name": "Winterspell",
+      "setCode": "WIN",
+      "releaseDate": "2026-02-13",
+      "cardCount": 184,
+      "description": "A frosty new chapter brings winter magic and icy adventures to the realm of Lorcana.",
       "isReleased": true
     },
     {

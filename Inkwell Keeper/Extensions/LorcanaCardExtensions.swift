@@ -52,6 +52,7 @@ extension LorcanaCard {
             "Archazia's Island": "archazias_island",
             "Reign of Jafar": "reign_of_jafar",
             "Whispers in the Well": "whispers_in_the_well",
+            "Winterspell": "winterspell",
             "Promo Set 1": "promo_set_1",
             "Promo Set 2": "promo_set_2",
             "Challenge Promo": "challenge_promo",

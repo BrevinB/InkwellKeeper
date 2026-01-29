@@ -1,0 +1,72 @@
+name: Check for Lorcana Card Updates
+
+on:
+  schedule:
+    # Run every Monday at 9am UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  check-updates:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run update check
+        id: check
+        run: |
+          python Scripts/check_for_updates.py --github-action
+        continue-on-error: true
+
+      - name: Create issue if updates found
+        if: steps.check.outputs.has_updates == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `New Lorcana cards detected - ${new Date().toISOString().split('T')[0]}`;
+
+            // Check if an open issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'lorcana-updates'
+            });
+
+            const existingIssue = issues.data.find(issue =>
+              issue.title.startsWith('New Lorcana cards detected')
+            );
+
+            const body = `${{ steps.check.outputs.report }}
+
+            ---
+            *This issue was automatically created by the Lorcana update checker.*
+            `;
+
+            if (existingIssue) {
+              // Update existing issue
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: body
+              });
+              console.log(`Updated existing issue #${existingIssue.number}`);
+            } else {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['lorcana-updates']
+              });
+              console.log('Created new issue');
+            }

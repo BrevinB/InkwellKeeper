@@ -110,6 +110,7 @@ class SetsDataManager: ObservableObject {
             "archazias_island": "archazias_island.json",
             "reign_of_jafar": "reign_of_jafar.json",
             "whispers_in_the_well": "whispers_in_the_well.json",
+            "winterspell": "winterspell.json",
             "promo_set_1": "promo_set_1.json",
             "promo_set_2": "promo_set_2.json",
             "d23_collection": "d23_collection.json",

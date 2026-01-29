@@ -83,30 +83,6 @@ struct SettingsView: View {
             } message: {
                 Text("This will permanently delete all your collected cards, wishlist, decks, and all associated data. This action cannot be undone.")
             }
-            .alert("Add Some Cards?", isPresented: $showingAddSomeConfirmation) {
-                Button("Cancel", role: .cancel) { }
-                Button("Add 50 Cards") {
-                    addDebugCards(count: 50)
-                }
-            } message: {
-                Text("This will add 50 random cards to your collection for testing.")
-            }
-            .alert("Add More Cards?", isPresented: $showingAddMoreConfirmation) {
-                Button("Cancel", role: .cancel) { }
-                Button("Add 200 Cards") {
-                    addDebugCards(count: 200)
-                }
-            } message: {
-                Text("This will add 200 random cards to your collection for testing.")
-            }
-            .alert("Add All Cards?", isPresented: $showingAddAllConfirmation) {
-                Button("Cancel", role: .cancel) { }
-                Button("Add All") {
-                    addAllDebugCards()
-                }
-            } message: {
-                Text("This will add ALL available cards to your collection. This may take a moment.")
-            }
         }
     }
 

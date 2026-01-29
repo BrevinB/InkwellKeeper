@@ -162,10 +162,31 @@ struct ChangelogEntry {
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
     ChangelogEntry(
+        version: "1.2.0",
+        date: "January 2026",
+        features: [
+            "Dynamic Export Fields - Choose exactly which fields to include in your export from 19 available options including card number, rarity, ink color, stats, price, and more",
+            "Multiple Export Formats - Export to Custom CSV, Dreamborn Bulk Add, Dreamborn Collection, Lorcana HQ, or JSON Backup",
+            "Variant Filtering - Filter your collection by Normal, Foil, Enchanted, Promo, or Special variants to easily track your master set progress",
+            "Multi-Variant Adding - Add both Normal and Foil copies of a card at the same time instead of searching twice",
+            "Collapsible Filter Bar - Filters now collapse to save screen space, with active filters shown as removable pills"
+        ],
+        improvements: [
+            "Export now includes card collector numbers",
+            "Quick export presets (Basic, Standard, Full) for fast field selection",
+            "Filter bar shows count of active filters",
+            "Clear All Filters button to quickly reset filters",
+            "Sort option always visible even when filters collapsed",
+            "Export formats show file type badges (.csv, .json)"
+        ],
+        bugFixes: [],
+        inProgress: []
+    ),
+    ChangelogEntry(
         version: "1.1.0",
         date: "November 2025",
         features: [
-            "DISCLAIMER: A big overhaul happend to get all the missing cards into the app, if you notice any issues with your cards they may have to be re-added. We apologize for the inconvenience",
+            "DISCLAIMER: A big overhaul happened to get all the missing cards into the app, if you notice any issues with your cards they may have to be re-added. We apologize for the inconvenience",
             "Enhanced character normalization for imports - Better handling of special characters like apostrophes and ellipsis",
             "Improved image loading for newly added cards",
         ],
@@ -175,16 +196,14 @@ private let changelogEntries: [ChangelogEntry] = [
             "Better matching of cards across different sets",
             "More reliable image caching and display",
             "Added enchanted, epic and iconic images",
-            "Pricing has been inaccurate, until I can get TCGPlayer API access I've temporarily removed the pricing. there are still links that take you to TCGPlayer and eBay"
+            "Pricing has been inaccurate, until I can get TCGPlayer API access I've temporarily removed the pricing. There are still links that take you to TCGPlayer and eBay"
         ],
         bugFixes: [
             "Fixed incorrect set counts showing for collections",
             "Fixed Promo cards incorrectly matching with Normal variants",
             "Resolved import failures for cards with special characters"
         ],
-        inProgress: [
-            "Dreamborn.ink export format - Working on improving export compatibility with Dreamborn.ink bulk import (currently in testing)"
-        ]
+        inProgress: []
     ),
     ChangelogEntry(
         version: "1.0.0",
