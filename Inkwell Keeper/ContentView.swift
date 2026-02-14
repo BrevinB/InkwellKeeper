@@ -68,6 +68,12 @@ struct ContentView: View {
                     Label("Support", systemImage: "heart.fill")
                 }
                 .tag(7)
+
+            RulesAssistantView()
+                .tabItem {
+                    Label("Rules", systemImage: "book.circle")
+                }
+                .tag(8)
         }
         .apply { view in
             if #available(iOS 18.0, *) {

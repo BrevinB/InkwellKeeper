@@ -20,8 +20,10 @@ class MotionManager: ObservableObject {
     private var motionManager: CMMotionManager?
     private let updateInterval: TimeInterval = 1.0 / 60.0  // 60fps
 
-    // Low-pass filter coefficients for smoothing
-    private let filterFactor: Double = 0.15
+    // Low-pass filter coefficients for smoothing (higher = more responsive)
+    private let filterFactor: Double = 0.25
+    // Sensitivity multiplier (higher = less tilt needed for full effect)
+    private let sensitivity: Double = 3.5
     private var filteredPitch: Double = 0.0
     private var filteredRoll: Double = 0.0
 
@@ -84,11 +86,12 @@ class MotionManager: ObservableObject {
             // Get attitude (device orientation relative to reference frame)
             let attitude = motion.attitude
 
-            // Convert to normalized range (-1 to 1)
+            // Convert to normalized range (-1 to 1) with sensitivity boost
             // Pitch: tilting device forward/backward
             // Roll: tilting device left/right
-            let rawPitch = Self.clampValue(attitude.pitch / .pi * 2, min: -1.0, max: 1.0)
-            let rawRoll = Self.clampValue(attitude.roll / .pi * 2, min: -1.0, max: 1.0)
+            // Higher sensitivity means less tilt needed for full effect
+            let rawPitch = Self.clampValue(attitude.pitch * self.sensitivity, min: -1.0, max: 1.0)
+            let rawRoll = Self.clampValue(attitude.roll * self.sensitivity, min: -1.0, max: 1.0)
 
             Task { @MainActor [weak self] in
                 guard let self = self else { return }
@@ -110,17 +113,17 @@ class MotionManager: ObservableObject {
 
     @MainActor
     private func startSimulatorFallback() {
-        // Gentle time-based animation for simulator/devices without gyroscope
+        // Animated motion for simulator/devices without gyroscope
         simulatorTimer = Timer.scheduledTimer(withTimeInterval: updateInterval, repeats: true) { [weak self] _ in
             guard let self = self else { return }
 
             Task { @MainActor [weak self] in
                 guard let self = self else { return }
-                self.simulatorPhase += self.updateInterval * 0.5  // Slow, gentle movement
+                self.simulatorPhase += self.updateInterval * 0.8  // Moderate movement speed
 
-                // Create subtle figure-8 pattern
-                self.pitch = sin(self.simulatorPhase) * 0.15
-                self.roll = sin(self.simulatorPhase * 0.7) * 0.15
+                // Create figure-8 pattern with good amplitude
+                self.pitch = sin(self.simulatorPhase) * 0.5
+                self.roll = sin(self.simulatorPhase * 0.7) * 0.5
             }
         }
     }

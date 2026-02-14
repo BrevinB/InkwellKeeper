@@ -14,12 +14,18 @@ struct SettingsView: View {
     let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
     let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
 
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
+
     @State private var showingPrivacyPolicy = false
     @State private var showingDisclaimer = false
     @State private var showingSupport = false
     @State private var showingDeleteConfirmation = false
     @State private var showingTipJar = false
     @State private var showingWhatsNew = false
+    @State private var showingSubscription = false
+    @State private var showRestoreSuccess = false
+    @State private var showRestoreFailure = false
+    @State private var restoreError: String?
 
     // Debug options
     @State private var showingAddSomeConfirmation = false
@@ -42,6 +48,9 @@ struct SettingsView: View {
 
                 // Help & Feedback Section
                 feedbackSection
+
+                // Subscription Section
+                subscriptionSection
 
                 // Support Development Section
                 tipJarSection
@@ -74,6 +83,39 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showingWhatsNew) {
                 WhatsNewView()
+            }
+            .sheet(isPresented: $showingSubscription) {
+                NavigationView {
+                    SubscriptionPaywallView()
+                        .toolbar {
+                            ToolbarItem(placement: .navigationBarTrailing) {
+                                Button("Done") {
+                                    showingSubscription = false
+                                }
+                                .foregroundColor(.lorcanaGold)
+                            }
+                        }
+                }
+            }
+            .alert("Purchases Restored", isPresented: $showRestoreSuccess) {
+                Button("OK") { }
+            } message: {
+                Text("Your subscription has been restored successfully.")
+            }
+            .alert("No Subscription Found", isPresented: $showRestoreFailure) {
+                Button("OK") { }
+            } message: {
+                Text("No active subscription was found for your account.")
+            }
+            .alert("Restore Failed", isPresented: .init(
+                get: { restoreError != nil },
+                set: { if !$0 { restoreError = nil } }
+            )) {
+                Button("OK") { restoreError = nil }
+            } message: {
+                if let error = restoreError {
+                    Text(error)
+                }
             }
             .alert("Delete All Data?", isPresented: $showingDeleteConfirmation) {
                 Button("Cancel", role: .cancel) { }
@@ -202,6 +244,70 @@ struct SettingsView: View {
             Button(action: shareApp) {
                 Label("Share App", systemImage: "square.and.arrow.up.fill")
                     .foregroundColor(.primary)
+            }
+        }
+    }
+
+    private var subscriptionSection: some View {
+        Section {
+            if subscriptionManager.isSubscribed {
+                HStack {
+                    Label("Rules Assistant", systemImage: "book.circle.fill")
+                        .foregroundColor(.primary)
+                    Spacer()
+                    Text("Active")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            Capsule()
+                                .fill(Color.lorcanaGold)
+                        )
+                }
+            } else {
+                Button(action: { showingSubscription = true }) {
+                    HStack {
+                        Label("Rules Assistant", systemImage: "book.circle")
+                            .foregroundColor(.primary)
+                        Spacer()
+                        Text("Subscribe")
+                            .font(.caption)
+                            .foregroundColor(.lorcanaGold)
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+                }
+            }
+
+            Button(action: {
+                Task {
+                    do {
+                        try await subscriptionManager.restorePurchases()
+                        if subscriptionManager.isSubscribed {
+                            showRestoreSuccess = true
+                        } else {
+                            showRestoreFailure = true
+                        }
+                    } catch {
+                        restoreError = error.localizedDescription
+                    }
+                }
+            }) {
+                Label("Restore Purchases", systemImage: "arrow.clockwise")
+                    .foregroundColor(.primary)
+            }
+        } header: {
+            Text("Subscription")
+        } footer: {
+            if subscriptionManager.isSubscribed {
+                Text("You have access to the AI Rules Assistant. Manage your subscription in iOS Settings > Apple ID > Subscriptions.")
+                    .font(.caption)
+            } else {
+                Text("Subscribe to unlock the AI-powered Rules Assistant for instant answers to Lorcana rules questions.")
+                    .font(.caption)
             }
         }
     }
