@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-01-28",
+  "lastUpdated": "2026-02-14",
   "sets": [
     {
       "id": "the_first_chapter",
@@ -97,7 +97,7 @@
       "name": "Winterspell",
       "setCode": "WIN",
       "releaseDate": "2026-02-13",
-      "cardCount": 184,
+      "cardCount": 242,
       "description": "A frosty new chapter brings winter magic and icy adventures to the realm of Lorcana.",
       "isReleased": true
     },

@@ -28,6 +28,7 @@ SET_NAME_MAP = {
     "Archazia's Island": "Archazia's Island",
     "Reign of Jafar": "Reign of Jafar",
     "Whispers in the Well": "Whispers in the Well",
+    "Winterspell": "Winterspell",
     "Promo": "Promo Set 1",
 }
 
@@ -43,6 +44,7 @@ SET_CODE_MAP = {
     "Archazia's Island": "ARI",
     "Reign of Jafar": "ROJ",
     "Whispers in the Well": "WIW",
+    "Winterspell": "WIN",
     "Promo Set 1": "P1",
     "Promo Set 2": "P2",
     "Challenge Promo": "CP",
