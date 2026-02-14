@@ -15,7 +15,7 @@ struct RulesAssistantView: View {
     @State private var showingSaveAlert = false
     @State private var showingCardSearch = false
     @State private var chatTitleInput = ""
-    @State private var attachedCard: LorcanaCard?
+    @State private var attachedCards: [LorcanaCard] = []
     @FocusState private var isInputFocused: Bool
 
     var initialCard: LorcanaCard?
@@ -80,7 +80,7 @@ struct RulesAssistantView: View {
         .onAppear {
             if let card = initialCard, service.messages.isEmpty {
                 Task {
-                    await service.sendMessage("Tell me about the rules for this card and how to use it effectively.", cardContext: card)
+                    await service.sendMessage("Tell me about the rules for this card and how to use it effectively.", cardContexts: [card])
                 }
             }
         }
@@ -266,39 +266,51 @@ struct RulesAssistantView: View {
     // MARK: - Input Bar
     private var inputBar: some View {
         VStack(spacing: 0) {
-            // Attached card preview
-            if let card = attachedCard {
-                HStack(spacing: 10) {
-                    AsyncImage(url: card.bestImageUrl()) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                    } placeholder: {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.gray.opacity(0.3))
-                    }
-                    .frame(width: 30, height: 42)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
+            // Attached cards preview
+            if !attachedCards.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(attachedCards, id: \.id) { card in
+                            HStack(spacing: 6) {
+                                AsyncImage(url: card.bestImageUrl()) { image in
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                } placeholder: {
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(Color.gray.opacity(0.3))
+                                }
+                                .frame(width: 24, height: 34)
+                                .clipShape(RoundedRectangle(cornerRadius: 3))
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(card.name)
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundColor(.white)
-                            .lineLimit(1)
-                        Text("Card attached")
-                            .font(.caption2)
-                            .foregroundColor(.lorcanaGold)
-                    }
+                                Text(card.name)
+                                    .font(.caption2)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.white)
+                                    .lineLimit(1)
 
-                    Spacer()
-
-                    Button(action: { attachedCard = nil }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.gray)
+                                Button(action: {
+                                    attachedCards.removeAll { $0.id == card.id }
+                                }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.caption2)
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color.lorcanaDark.opacity(0.9))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.lorcanaGold.opacity(0.3), lineWidth: 1)
+                                    )
+                            )
+                        }
                     }
+                    .padding(.horizontal, 16)
                 }
-                .padding(.horizontal, 16)
                 .padding(.vertical, 8)
                 .background(Color.lorcanaDark.opacity(0.95))
             }
@@ -309,9 +321,20 @@ struct RulesAssistantView: View {
             HStack(spacing: 10) {
                 // Attach card button
                 Button(action: { showingCardSearch = true }) {
-                    Image(systemName: attachedCard != nil ? "rectangle.stack.badge.checkmark" : "rectangle.stack.badge.plus")
-                        .font(.system(size: 20))
-                        .foregroundColor(attachedCard != nil ? .lorcanaGold : .gray)
+                    ZStack(alignment: .topTrailing) {
+                        Image(systemName: attachedCards.isEmpty ? "rectangle.stack.badge.plus" : "rectangle.stack.badge.checkmark")
+                            .font(.system(size: 20))
+                            .foregroundColor(attachedCards.isEmpty ? .gray : .lorcanaGold)
+
+                        if attachedCards.count > 1 {
+                            Text("\(attachedCards.count)")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundColor(.black)
+                                .frame(width: 14, height: 14)
+                                .background(Circle().fill(Color.lorcanaGold))
+                                .offset(x: 4, y: -4)
+                        }
+                    }
                 }
 
                 TextField("Ask about rules...", text: $inputText, axis: .vertical)
@@ -346,7 +369,7 @@ struct RulesAssistantView: View {
             .background(Color.lorcanaDark.opacity(0.98))
         }
         .sheet(isPresented: $showingCardSearch) {
-            CardSearchSheet(selectedCard: $attachedCard, isPresented: $showingCardSearch)
+            CardSearchSheet(attachedCards: $attachedCards, isPresented: $showingCardSearch)
         }
     }
 
@@ -358,12 +381,12 @@ struct RulesAssistantView: View {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
 
-        let cardToSend = attachedCard
+        let cardsToSend = attachedCards
         inputText = ""
-        attachedCard = nil
+        attachedCards = []
 
         Task {
-            await service.sendMessage(text, cardContext: cardToSend)
+            await service.sendMessage(text, cardContexts: cardsToSend)
         }
     }
 
@@ -767,11 +790,17 @@ struct TypingIndicator: View {
 // MARK: - Card Search Sheet
 struct CardSearchSheet: View {
     @StateObject private var dataManager = SetsDataManager.shared
-    @Binding var selectedCard: LorcanaCard?
+    @Binding var attachedCards: [LorcanaCard]
     @Binding var isPresented: Bool
     @State private var searchText = ""
     @State private var searchResults: [LorcanaCard] = []
     @State private var searchTask: Task<Void, Never>?
+
+    private let maxAttachedCards = 4
+
+    private func isCardAttached(_ card: LorcanaCard) -> Bool {
+        attachedCards.contains { $0.id == card.id }
+    }
 
     var body: some View {
         NavigationView {
@@ -779,6 +808,56 @@ struct CardSearchSheet: View {
                 LorcanaBackground()
 
                 VStack(spacing: 0) {
+                    // Attached cards summary
+                    if !attachedCards.isEmpty {
+                        VStack(spacing: 6) {
+                            HStack {
+                                Text("\(attachedCards.count) card\(attachedCards.count == 1 ? "" : "s") attached")
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.lorcanaGold)
+                                Spacer()
+                                if attachedCards.count > 1 {
+                                    Button("Clear All") {
+                                        attachedCards.removeAll()
+                                    }
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                                }
+                            }
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 6) {
+                                    ForEach(attachedCards, id: \.id) { card in
+                                        HStack(spacing: 4) {
+                                            Text(card.name)
+                                                .font(.caption2)
+                                                .foregroundColor(.white)
+                                                .lineLimit(1)
+
+                                            Button(action: {
+                                                attachedCards.removeAll { $0.id == card.id }
+                                            }) {
+                                                Image(systemName: "xmark.circle.fill")
+                                                    .font(.caption2)
+                                                    .foregroundColor(.gray)
+                                            }
+                                        }
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 6)
+                                                .fill(Color.lorcanaGold.opacity(0.2))
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.lorcanaDark.opacity(0.95))
+                    }
+
                     // Search bar
                     HStack {
                         Image(systemName: "magnifyingglass")
@@ -821,10 +900,10 @@ struct CardSearchSheet: View {
                             Image(systemName: "rectangle.stack.badge.plus")
                                 .font(.system(size: 50))
                                 .foregroundColor(.gray)
-                            Text("Search for a card to attach")
+                            Text(attachedCards.isEmpty ? "Search for a card to attach" : "Search for another card")
                                 .font(.headline)
                                 .foregroundColor(.white)
-                            Text("The AI will use the card's details to answer your question")
+                            Text("Attach up to \(maxAttachedCards) cards to ask about interactions")
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                                 .multilineTextAlignment(.center)
@@ -845,9 +924,13 @@ struct CardSearchSheet: View {
                     } else {
                         // Results list
                         List(searchResults, id: \.id) { card in
+                            let alreadyAttached = isCardAttached(card)
                             Button(action: {
-                                selectedCard = card
-                                isPresented = false
+                                if alreadyAttached {
+                                    attachedCards.removeAll { $0.id == card.id }
+                                } else if attachedCards.count < maxAttachedCards {
+                                    attachedCards.append(card)
+                                }
                             }) {
                                 HStack(spacing: 12) {
                                     AsyncImage(url: card.bestImageUrl()) { image in
@@ -883,19 +966,33 @@ struct CardSearchSheet: View {
 
                                     Spacer()
 
-                                    Image(systemName: "plus.circle")
-                                        .foregroundColor(.lorcanaGold)
+                                    if alreadyAttached {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(.lorcanaGold)
+                                    } else if attachedCards.count >= maxAttachedCards {
+                                        Image(systemName: "circle")
+                                            .foregroundColor(.gray.opacity(0.3))
+                                    } else {
+                                        Image(systemName: "plus.circle")
+                                            .foregroundColor(.lorcanaGold)
+                                    }
                                 }
                                 .padding(.vertical, 4)
+                                .opacity((!alreadyAttached && attachedCards.count >= maxAttachedCards) ? 0.5 : 1.0)
                             }
-                            .listRowBackground(Color.lorcanaDark.opacity(0.6))
+                            .disabled(!alreadyAttached && attachedCards.count >= maxAttachedCards)
+                            .listRowBackground(
+                                alreadyAttached
+                                    ? Color.lorcanaGold.opacity(0.1)
+                                    : Color.lorcanaDark.opacity(0.6)
+                            )
                         }
                         .scrollContentBackground(.hidden)
                         .listStyle(.plain)
                     }
                 }
             }
-            .navigationTitle("Attach Card")
+            .navigationTitle("Attach Cards")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -903,6 +1000,16 @@ struct CardSearchSheet: View {
                         isPresented = false
                     }
                     .foregroundColor(.lorcanaGold)
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if !attachedCards.isEmpty {
+                        Button("Done") {
+                            isPresented = false
+                        }
+                        .fontWeight(.semibold)
+                        .foregroundColor(.lorcanaGold)
+                    }
                 }
             }
         }
