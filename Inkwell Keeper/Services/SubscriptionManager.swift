@@ -17,8 +17,8 @@ class SubscriptionManager: ObservableObject {
     @Published var isLoading = false
     @Published var error: String?
 
-    static let entitlementID = "rules_assistant_pro"
-    static let offeringID = "rules_assistant"
+    static let entitlementID = "pro"
+    static let offeringID = "default"
 
     private init() {}
 

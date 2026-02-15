@@ -26,7 +26,7 @@ struct RulesPaywallView: View {
 
                 // Title and description
                 VStack(spacing: 12) {
-                    Text("Rules Assistant Pro")
+                    Text("Inkwell Pro")
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
@@ -262,7 +262,7 @@ struct SubscriptionOptionCard: View {
 
 // MARK: - Subscription Period Title
 
-extension StoreProduct.SubscriptionPeriod {
+extension SubscriptionPeriod {
     var periodTitle: String {
         switch unit {
         case .day:
