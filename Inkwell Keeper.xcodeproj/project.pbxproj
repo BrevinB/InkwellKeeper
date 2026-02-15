@@ -28,6 +28,8 @@
 		233365672E77B05400BE5BD4 /* azurite_sea.json in Resources */ = {isa = PBXBuildFile; fileRef = 233365592E77B05400BE5BD4 /* azurite_sea.json */; };
 		233365682E77B05400BE5BD4 /* reign_of_jafar.json in Resources */ = {isa = PBXBuildFile; fileRef = 2333655C2E77B05400BE5BD4 /* reign_of_jafar.json */; };
 		233365692E77B05400BE5BD4 /* rise_of_the_floodborn.json in Resources */ = {isa = PBXBuildFile; fileRef = 2333655D2E77B05400BE5BD4 /* rise_of_the_floodborn.json */; };
+		234EDF472F41766B0016D086 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 234EDF462F41766B0016D086 /* SubscriptionManager.swift */; };
+		234EDF492F4176860016D086 /* RulesPaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 234EDF482F4176860016D086 /* RulesPaywallView.swift */; };
 		23B90AFC2E66323500214C40 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90AF82E66323500214C40 /* ContentView.swift */; };
 		23B90AFD2E66323500214C40 /* InkwellKeeperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90AF92E66323500214C40 /* InkwellKeeperApp.swift */; };
 		23B90AFE2E66323500214C40 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 23B90AF72E66323500214C40 /* Assets.xcassets */; };
@@ -118,6 +120,8 @@
 		2333655E2E77B05400BE5BD4 /* shimmering_skies.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = shimmering_skies.json; sourceTree = "<group>"; };
 		2333655F2E77B05400BE5BD4 /* the_first_chapter.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = the_first_chapter.json; sourceTree = "<group>"; };
 		233365602E77B05400BE5BD4 /* ursulas_return.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ursulas_return.json; sourceTree = "<group>"; };
+		234EDF462F41766B0016D086 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
+		234EDF482F4176860016D086 /* RulesPaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesPaywallView.swift; sourceTree = "<group>"; };
 		23B90AF72E66323500214C40 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		23B90AF82E66323500214C40 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		23B90AF92E66323500214C40 /* InkwellKeeperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkwellKeeperApp.swift; sourceTree = "<group>"; };
@@ -305,6 +309,7 @@
 		23B90B012E66324900214C40 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				234EDF462F41766B0016D086 /* SubscriptionManager.swift */,
 				23D2466C2F2D9DEB00CF4128 /* RulesAssistantService.swift */,
 				D1E2F3A4B5C6D7E8F9A0B1C1 /* CloudKitKeyService.swift */,
 				D1E2F3A4B5C6D7E8F9A0B1C3 /* OpenAIService.swift */,
@@ -322,6 +327,7 @@
 		23B90B022E66324F00214C40 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				234EDF482F4176860016D086 /* RulesPaywallView.swift */,
 				23D2466A2F2D9DCE00CF4128 /* RulesAssistantView.swift */,
 				23CA3B3A2ED3EA1F006786F7 /* SupportView.swift */,
 				23CA3B382ED3CB48006786F7 /* WhatsNewView.swift */,
@@ -502,6 +508,7 @@
 				23B90B372E66338800214C40 /* LorcanaCard.swift in Sources */,
 				23B90B2B2E66336100214C40 /* StatsView.swift in Sources */,
 				23B90B312E66337800214C40 /* FilterModels.swift in Sources */,
+				234EDF492F4176860016D086 /* RulesPaywallView.swift in Sources */,
 				23CB6E272EB8DF3F00630416 /* SettingsView.swift in Sources */,
 				23D2466D2F2D9DEB00CF4128 /* RulesAssistantService.swift in Sources */,
 				23CA3B392ED3CB48006786F7 /* WhatsNewView.swift in Sources */,
@@ -529,6 +536,7 @@
 				233365502E77961C00BE5BD4 /* SetDetailView.swift in Sources */,
 				23B90B0F2E6632E500214C40 /* FilterChip.swift in Sources */,
 				23D9D4412EA319310089D552 /* LorcanaCardExtensions.swift in Sources */,
+				234EDF472F41766B0016D086 /* SubscriptionManager.swift in Sources */,
 				23D9D4422EA319310089D552 /* AsyncImageExtensions.swift in Sources */,
 				23D9D44A2EA3FF1A0089D552 /* DeckModels.swift in Sources */,
 				23B90B072E66327400214C40 /* Color+Extensions.swift in Sources */,

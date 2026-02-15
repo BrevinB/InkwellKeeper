@@ -10,6 +10,7 @@ import SwiftUI
 struct RulesAssistantView: View {
     @StateObject private var service = RulesAssistantService.shared
     @StateObject private var dataManager = SetsDataManager.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var inputText = ""
     @State private var showingHistory = false
     @State private var showingSaveAlert = false
@@ -25,7 +26,9 @@ struct RulesAssistantView: View {
             ZStack {
                 LorcanaBackground()
 
-                if service.availability == .available {
+                if !subscriptionManager.isSubscribed {
+                    RulesPaywallView()
+                } else if service.availability == .available {
                     availableContent
                 } else if service.availability == .checking {
                     checkingContent
@@ -37,7 +40,7 @@ struct RulesAssistantView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    if service.availability == .available {
+                    if subscriptionManager.isSubscribed && service.availability == .available {
                         Button(action: { showingHistory = true }) {
                             Image(systemName: "clock.arrow.circlepath")
                                 .foregroundColor(.lorcanaGold)
@@ -46,7 +49,7 @@ struct RulesAssistantView: View {
                 }
 
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    if service.availability == .available {
+                    if subscriptionManager.isSubscribed && service.availability == .available {
                         if !service.messages.isEmpty {
                             Button(action: { showingSaveAlert = true }) {
                                 Image(systemName: "square.and.arrow.down")
@@ -78,7 +81,8 @@ struct RulesAssistantView: View {
             }
         }
         .onAppear {
-            if let card = initialCard, service.messages.isEmpty {
+            subscriptionManager.checkSubscriptionStatus()
+            if let card = initialCard, service.messages.isEmpty, subscriptionManager.isSubscribed {
                 Task {
                     await service.sendMessage("Tell me about the rules for this card and how to use it effectively.", cardContexts: [card])
                 }
