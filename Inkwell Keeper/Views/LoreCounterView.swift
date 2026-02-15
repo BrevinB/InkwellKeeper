@@ -13,54 +13,108 @@ struct LoreCounterView: View {
     @State private var playerCount = 2
     @State private var showGame = false
 
+    private let playerOptions: [(count: Int, icon: String, label: String)] = [
+        (2, "person.2.fill", "2 Players"),
+        (3, "person.3.fill", "3 Players"),
+        (4, "person.line.dotted.person.fill", "4 Players")
+    ]
+
     var body: some View {
         ZStack {
             LorcanaBackground()
 
-            VStack(spacing: 32) {
+            VStack(spacing: 0) {
                 Spacer()
 
-                // Title
-                VStack(spacing: 8) {
+                // Lore icon + title
+                VStack(spacing: 16) {
+                    // Decorative lore symbol
+                    ZStack {
+                        Circle()
+                            .stroke(Color.lorcanaGold.opacity(0.3), lineWidth: 2)
+                            .frame(width: 80, height: 80)
+
+                        Circle()
+                            .stroke(Color.lorcanaGold.opacity(0.15), lineWidth: 1)
+                            .frame(width: 100, height: 100)
+
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 32))
+                            .foregroundColor(.lorcanaGold)
+                    }
+                    .padding(.bottom, 8)
+
                     Text("Lore Counter")
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
 
-                    Text("Select number of players")
+                    Text("Track lore for your game")
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(.white.opacity(0.6))
                 }
 
+                Spacer()
+                    .frame(height: 48)
+
                 // Player count buttons
-                VStack(spacing: 16) {
-                    ForEach([2, 3, 4], id: \.self) { count in
+                VStack(spacing: 14) {
+                    ForEach(playerOptions, id: \.count) { option in
                         Button {
-                            playerCount = count
+                            playerCount = option.count
                             showGame = true
                         } label: {
-                            HStack {
-                                Image(systemName: "person.\(count).fill")
-                                    .font(.title2)
-                                Text("\(count) Players")
+                            HStack(spacing: 14) {
+                                Image(systemName: option.icon)
+                                    .font(.title3)
+                                    .foregroundColor(.lorcanaGold)
+                                    .frame(width: 32)
+
+                                Text(option.label)
                                     .font(.title3)
                                     .fontWeight(.semibold)
+                                    .foregroundColor(.white)
+
+                                Spacer()
+
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.white.opacity(0.4))
                             }
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 20)
                             .padding(.vertical, 18)
                             .background(
                                 RoundedRectangle(cornerRadius: 16)
-                                    .fill(Color.lorcanaDark.opacity(0.85))
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [
+                                                Color.lorcanaDark.opacity(0.9),
+                                                Color.lorcanaDark.opacity(0.7)
+                                            ],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 16)
-                                            .stroke(Color.lorcanaGold.opacity(0.5), lineWidth: 2)
+                                            .stroke(
+                                                LinearGradient(
+                                                    colors: [
+                                                        Color.lorcanaGold.opacity(0.4),
+                                                        Color.lorcanaGold.opacity(0.1)
+                                                    ],
+                                                    startPoint: .leading,
+                                                    endPoint: .trailing
+                                                ),
+                                                lineWidth: 1
+                                            )
                                     )
                             )
                         }
                     }
                 }
-                .padding(.horizontal, 40)
+                .padding(.horizontal, 32)
 
                 Spacer()
                 Spacer()
@@ -87,44 +141,18 @@ private struct LoreGameView: View {
 
     var body: some View {
         ZStack {
-            LorcanaBackground()
+            // Dark base background (no animated particles during gameplay)
+            Color.lorcanaDark.ignoresSafeArea()
 
             // Player grid
             playerGrid
-                .padding(.horizontal, 8)
-                .padding(.top, 48)
-                .padding(.bottom, 8)
+                .padding(.horizontal, 6)
+                .padding(.top, 44)
+                .padding(.bottom, 6)
 
-            // Floating buttons
+            // Floating control bar
             VStack {
-                HStack {
-                    // Close button (top-left)
-                    Button { dismiss() } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title2)
-                            .foregroundColor(.white.opacity(0.7))
-                    }
-                    .padding()
-
-                    Spacer()
-
-                    // Reset + History buttons (top-right)
-                    HStack(spacing: 16) {
-                        Button { showResetAlert = true } label: {
-                            Image(systemName: "arrow.counterclockwise")
-                                .font(.title3)
-                                .foregroundColor(.lorcanaGold)
-                        }
-
-                        Button { showHistory = true } label: {
-                            Image(systemName: "clock.arrow.circlepath")
-                                .font(.title3)
-                                .foregroundColor(.lorcanaGold)
-                        }
-                    }
-                    .padding()
-                }
-
+                controlBar
                 Spacer()
             }
         }
@@ -146,11 +174,50 @@ private struct LoreGameView: View {
         }
     }
 
+    // MARK: - Control Bar
+
+    private var controlBar: some View {
+        HStack {
+            // Close button
+            Button { dismiss() } label: {
+                Image(systemName: "xmark")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(.white.opacity(0.9))
+                    .frame(width: 32, height: 32)
+                    .background(.ultraThinMaterial, in: Circle())
+            }
+
+            Spacer()
+
+            HStack(spacing: 12) {
+                // Reset button
+                Button { showResetAlert = true } label: {
+                    Image(systemName: "arrow.counterclockwise")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.lorcanaGold)
+                        .frame(width: 32, height: 32)
+                        .background(.ultraThinMaterial, in: Circle())
+                }
+
+                // History button
+                Button { showHistory = true } label: {
+                    Image(systemName: "clock.arrow.circlepath")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.lorcanaGold)
+                        .frame(width: 32, height: 32)
+                        .background(.ultraThinMaterial, in: Circle())
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+    }
+
     // MARK: - Player Grid
 
     private var playerGrid: some View {
         GeometryReader { geo in
-            let spacing: CGFloat = 8
+            let spacing: CGFloat = 6
             switch playerCount {
             case 2:
                 twoPlayerLayout(size: geo.size, spacing: spacing)
@@ -162,7 +229,7 @@ private struct LoreGameView: View {
         }
     }
 
-    // 2 players: vertical split, top rotated 180°
+    // 2 players: vertical split, top rotated 180
     private func twoPlayerLayout(size: CGSize, spacing: CGFloat) -> some View {
         let cardHeight = (size.height - spacing) / 2
         return VStack(spacing: spacing) {
@@ -195,7 +262,7 @@ private struct LoreGameView: View {
         }
     }
 
-    // 4 players: 2×2, top row rotated
+    // 4 players: 2x2, top row rotated
     private func fourPlayerLayout(size: CGSize, spacing: CGFloat) -> some View {
         let rowHeight = (size.height - spacing) / 2
         return VStack(spacing: spacing) {
