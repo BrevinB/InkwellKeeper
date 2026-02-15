@@ -42,32 +42,38 @@ struct ContentView: View {
                 }
                 .tag(3)
 
+            LoreCounterView()
+                .tabItem {
+                    Label("Play", systemImage: "gamecontroller.fill")
+                }
+                .tag(4)
+
             StatsView()
                 .environmentObject(collectionManager)
                 .tabItem {
                     Label("Stats", systemImage: "chart.bar.fill")
                 }
-                .tag(4)
+                .tag(5)
 
             WishlistView()
                 .environmentObject(collectionManager)
                 .tabItem {
                     Label("Wishlist", systemImage: "star.fill")
                 }
-                .tag(5)
+                .tag(6)
 
             SettingsView()
                 .environmentObject(collectionManager)
                 .tabItem {
                     Label("Settings", systemImage: "gear")
                 }
-                .tag(6)
+                .tag(7)
 
             SupportView()
                 .tabItem {
                     Label("Support", systemImage: "heart.fill")
                 }
-                .tag(7)
+                .tag(8)
         }
         .apply { view in
             if #available(iOS 18.0, *) {
