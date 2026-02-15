@@ -13,6 +13,7 @@ struct RulesPaywallView: View {
     @State private var selectedPackage: Package?
     @State private var isPurchasing = false
     @State private var showError = false
+    @State private var showingPrivacyPolicy = false
 
     var body: some View {
         ScrollView {
@@ -101,6 +102,16 @@ struct RulesPaywallView: View {
                 }
                 .disabled(isPurchasing)
 
+                // Official rules link
+                Link(destination: URL(string: "https://www.disneylorcana.com/en-US/resources#checks-and-balances")!) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "doc.text")
+                        Text("Read the Official Rules")
+                    }
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                }
+
                 // Legal
                 VStack(spacing: 6) {
                     Text("Subscriptions auto-renew unless cancelled at least 24 hours before the end of the current period. Manage subscriptions in Settings.")
@@ -109,11 +120,13 @@ struct RulesPaywallView: View {
                         .multilineTextAlignment(.center)
 
                     HStack(spacing: 16) {
-                        Link("Privacy Policy", destination: URL(string: "https://inkwellkeeper.app/privacy")!)
-                            .font(.caption2)
-                            .foregroundColor(.lorcanaGold.opacity(0.6))
+                        Button("Privacy Policy") {
+                            showingPrivacyPolicy = true
+                        }
+                        .font(.caption2)
+                        .foregroundColor(.lorcanaGold.opacity(0.6))
 
-                        Link("Terms of Use", destination: URL(string: "https://inkwellkeeper.app/terms")!)
+                        Link("Terms of Use", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
                             .font(.caption2)
                             .foregroundColor(.lorcanaGold.opacity(0.6))
                     }
@@ -130,6 +143,9 @@ struct RulesPaywallView: View {
                let first = subscriptionManager.currentOffering?.availablePackages.first {
                 selectedPackage = first
             }
+        }
+        .sheet(isPresented: $showingPrivacyPolicy) {
+            PrivacyPolicyView()
         }
         .alert("Error", isPresented: $showError) {
             Button("OK") { subscriptionManager.error = nil }
