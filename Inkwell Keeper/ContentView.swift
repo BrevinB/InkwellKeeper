@@ -64,7 +64,7 @@ struct ContentView: View {
                 .environmentObject(collectionManager)
                 .tabItem {
                     Label("Settings", systemImage: "gear")
-
+                }
             SupportView()
                 .tabItem {
                     Label("Support", systemImage: "heart.fill")
