@@ -284,6 +284,7 @@ private struct LoreGameView: View {
     @State private var history: [LoreHistoryEntry] = []
     @State private var showResetAlert = false
     @State private var showHistory = false
+    @State private var showRulesAssistant = false
     @State private var topSafeArea: CGFloat = 0
 
     private var playerCount: Int { players.count }
@@ -317,6 +318,9 @@ private struct LoreGameView: View {
         .sheet(isPresented: $showHistory) {
             historySheet
         }
+        .sheet(isPresented: $showRulesAssistant) {
+            RulesAssistantView()
+        }
         .onAppear {
             if players.isEmpty {
                 players = initialPlayers
@@ -332,6 +336,12 @@ private struct LoreGameView: View {
 
     private var optionsButton: some View {
         Menu {
+            Button {
+                showRulesAssistant = true
+            } label: {
+                Label("Rules Assistant", systemImage: "book.closed")
+            }
+
             Button {
                 showHistory = true
             } label: {
