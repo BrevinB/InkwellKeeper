@@ -18,33 +18,33 @@ struct PlayerLoreCard: View {
     @State private var winGlow = false
     @State private var hapticTrigger = 0
     @State private var winHapticTrigger = 0
+    @State private var plusPressed = false
+    @State private var minusPressed = false
 
     private let winThreshold = 20
     private let dragThreshold: CGFloat = 40
 
     var body: some View {
         ZStack {
-            // Card background
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.lorcanaDark.opacity(0.85))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(player.inkColor.color.opacity(hasWon ? 1.0 : 0.5), lineWidth: hasWon ? 3 : 2)
-                )
-                .shadow(color: hasWon ? Color.lorcanaGold.opacity(winGlow ? 0.8 : 0.3) : .clear, radius: hasWon ? 20 : 0)
+            // Card background with ink-tinted gradient
+            cardBackground
 
-            VStack(spacing: 8) {
+            VStack(spacing: 0) {
                 playerHeader
+                    .padding(.top, 10)
 
                 Spacer(minLength: 0)
 
-                loreCounter
+                // Lore ring + number
+                loreRing
 
                 Spacer(minLength: 0)
 
-                inkColorSelector
+                // +/- controls
+                loreControls
+                    .padding(.bottom, 10)
             }
-            .padding(12)
+            .padding(.horizontal, 12)
         }
         .contentShape(Rectangle())
         .gesture(dragGesture)
@@ -65,6 +65,50 @@ struct PlayerLoreCard: View {
         }
     }
 
+    // MARK: - Card Background
+
+    private var cardBackground: some View {
+        ZStack {
+            // Base dark fill with ink color gradient
+            RoundedRectangle(cornerRadius: 20)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            player.inkColor.color.opacity(0.25),
+                            Color.lorcanaDark.opacity(0.95),
+                            Color.lorcanaDark.opacity(0.9),
+                            player.inkColor.color.opacity(0.15)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+
+            // Border
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            player.inkColor.color.opacity(hasWon ? 1.0 : 0.6),
+                            player.inkColor.color.opacity(hasWon ? 0.8 : 0.2),
+                            player.inkColor.color.opacity(hasWon ? 1.0 : 0.4)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: hasWon ? 3 : 1.5
+                )
+
+            // Win glow
+            if hasWon {
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color.lorcanaGold.opacity(winGlow ? 0.6 : 0.1), lineWidth: 4)
+                    .blur(radius: 8)
+            }
+        }
+        .shadow(color: hasWon ? Color.lorcanaGold.opacity(winGlow ? 0.5 : 0.15) : player.inkColor.color.opacity(0.15), radius: hasWon ? 16 : 6)
+    }
+
     // MARK: - Subviews
 
     private var playerHeader: some View {
@@ -76,29 +120,105 @@ struct PlayerLoreCard: View {
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                     .textFieldStyle(.plain)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 10))
                     .onSubmit { isEditingName = false }
             } else {
-                Text(player.name)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white.opacity(0.9))
-                    .onTapGesture { isEditingName = true }
+                HStack(spacing: 6) {
+                    Image(systemName: "person.fill")
+                        .font(.caption2)
+                        .foregroundColor(player.inkColor.color.opacity(0.8))
+
+                    Text(player.name)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white.opacity(0.9))
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 5)
+                .background(Color.white.opacity(0.06), in: Capsule())
+                .onTapGesture { isEditingName = true }
             }
         }
     }
 
-    private var loreCounter: some View {
-        HStack(spacing: 16) {
+    // MARK: - Lore Ring
+
+    private var loreRing: some View {
+        GeometryReader { geo in
+            let size = min(geo.size.width, geo.size.height) * 0.85
+            ZStack {
+                // Track ring
+                Circle()
+                    .stroke(player.inkColor.color.opacity(0.15), lineWidth: 6)
+
+                // Progress ring
+                Circle()
+                    .trim(from: 0, to: CGFloat(player.lore) / CGFloat(winThreshold))
+                    .stroke(
+                        AngularGradient(
+                            colors: [
+                                player.inkColor.color.opacity(0.4),
+                                player.inkColor.color,
+                                hasWon ? Color.lorcanaGold : player.inkColor.color
+                            ],
+                            center: .center
+                        ),
+                        style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
+                    .animation(.easeInOut(duration: 0.4), value: player.lore)
+
+                // Lore number
+                Text("\(player.lore)")
+                    .font(.system(size: size * 0.45, weight: .bold, design: .rounded))
+                    .foregroundColor(hasWon ? .lorcanaGold : .white)
+                    .contentTransition(.numericText())
+                    .animation(.snappy, value: player.lore)
+
+                // Win label
+                if hasWon {
+                    Text("VICTORY")
+                        .font(.system(size: 9, weight: .black, design: .rounded))
+                        .foregroundColor(.lorcanaGold)
+                        .tracking(2)
+                        .offset(y: size * 0.28)
+                }
+            }
+            .frame(width: size, height: size)
+            .position(x: geo.size.width / 2, y: geo.size.height / 2)
+        }
+        .onTapGesture {
+            customValue = player.lore
+            showCustomValuePicker = true
+        }
+    }
+
+    // MARK: - Lore Controls
+
+    private var loreControls: some View {
+        HStack(spacing: 0) {
             // Minus button
             Button {
+                minusPressed = true
                 adjustLore(by: -1)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { minusPressed = false }
             } label: {
-                Image(systemName: "minus.circle.fill")
-                    .font(.system(size: 36))
-                    .foregroundColor(player.inkColor.color)
+                ZStack {
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(player.inkColor.color.opacity(minusPressed ? 0.4 : 0.15))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(player.inkColor.color.opacity(0.3), lineWidth: 1)
+                        )
+
+                    Image(systemName: "minus")
+                        .font(.title2.weight(.bold))
+                        .foregroundColor(player.inkColor.color)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
             }
             .simultaneousGesture(
                 LongPressGesture(minimumDuration: 0.5).onEnded { _ in
@@ -107,20 +227,29 @@ struct PlayerLoreCard: View {
                 }
             )
 
-            // Lore number
-            Text("\(player.lore)")
-                .font(.system(size: 64, weight: .bold, design: .rounded))
-                .foregroundColor(hasWon ? .lorcanaGold : .white)
-                .contentTransition(.numericText())
-                .animation(.snappy, value: player.lore)
+            Spacer()
+                .frame(width: 12)
 
             // Plus button
             Button {
+                plusPressed = true
                 adjustLore(by: 1)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { plusPressed = false }
             } label: {
-                Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 36))
-                    .foregroundColor(player.inkColor.color)
+                ZStack {
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(player.inkColor.color.opacity(plusPressed ? 0.4 : 0.15))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(player.inkColor.color.opacity(0.3), lineWidth: 1)
+                        )
+
+                    Image(systemName: "plus")
+                        .font(.title2.weight(.bold))
+                        .foregroundColor(player.inkColor.color)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
             }
             .simultaneousGesture(
                 LongPressGesture(minimumDuration: 0.5).onEnded { _ in
@@ -129,26 +258,7 @@ struct PlayerLoreCard: View {
                 }
             )
         }
-    }
-
-    private var inkColorSelector: some View {
-        HStack(spacing: 6) {
-            ForEach(InkColor.allCases, id: \.self) { ink in
-                let isSelected = player.inkColor == ink
-                Circle()
-                    .fill(ink.color)
-                    .frame(width: isSelected ? 16 : 12, height: isSelected ? 16 : 12)
-                    .overlay(
-                        Circle()
-                            .stroke(Color.white, lineWidth: isSelected ? 2 : 0)
-                    )
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            player.inkColor = ink
-                        }
-                    }
-            }
-        }
+        .padding(.horizontal, 4)
     }
 
     private var customValueSheet: some View {
