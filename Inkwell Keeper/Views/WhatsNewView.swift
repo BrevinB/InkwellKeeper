@@ -162,6 +162,24 @@ struct ChangelogEntry {
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
     ChangelogEntry(
+        version: "1.4.0",
+        date: "February 2026",
+        features: [
+            "Lore Counter - Track lore for two players with a built-in game counter, includes quick access to official rules",
+            "Rules Assistant - AI-powered rules assistant that can answer questions about Lorcana rules and card interactions",
+            "Multi-Card References - Attach up to 4 cards at once to ask the Rules Assistant about card interactions",
+            "Interactive Foil Effect - Foil cards now feature a holographic tilt effect using your device's motion sensors"
+        ],
+        improvements: [
+            "Updated Winterspell set with all released cards",
+            "Improved Play tab UI with lore counter and rules access",
+            "Enhanced LLM rules logic with comprehensive game rules coverage",
+            "Card text is now used as the authoritative source for rules questions"
+        ],
+        bugFixes: [],
+        inProgress: []
+    ),
+    ChangelogEntry(
         version: "1.3.0",
         date: "January 2026",
         features: [
@@ -176,9 +194,7 @@ private let changelogEntries: [ChangelogEntry] = [
             "Updated set card counts to match official totals"
         ],
         bugFixes: [],
-        inProgress: [
-            "Winterspell starter decks will be added after the set releases on February 13th"
-        ]
+        inProgress: []
     ),
     ChangelogEntry(
         version: "1.2.0",
