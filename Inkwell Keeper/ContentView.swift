@@ -42,26 +42,28 @@ struct ContentView: View {
                 }
                 .tag(3)
 
+            LoreCounterView()
+                .tabItem {
+                    Label("Play", systemImage: "gamecontroller.fill")
+                }
+                .tag(9)
+
             StatsView()
                 .environmentObject(collectionManager)
                 .tabItem {
                     Label("Stats", systemImage: "chart.bar.fill")
                 }
-                .tag(4)
 
             WishlistView()
                 .environmentObject(collectionManager)
                 .tabItem {
                     Label("Wishlist", systemImage: "star.fill")
                 }
-                .tag(5)
 
             SettingsView()
                 .environmentObject(collectionManager)
                 .tabItem {
                     Label("Settings", systemImage: "gear")
-                }
-                .tag(6)
 
             SupportView()
                 .tabItem {
