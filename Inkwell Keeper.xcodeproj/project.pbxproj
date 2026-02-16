@@ -31,6 +31,8 @@
 		233365672E77B05400BE5BD4 /* azurite_sea.json in Resources */ = {isa = PBXBuildFile; fileRef = 233365592E77B05400BE5BD4 /* azurite_sea.json */; };
 		233365682E77B05400BE5BD4 /* reign_of_jafar.json in Resources */ = {isa = PBXBuildFile; fileRef = 2333655C2E77B05400BE5BD4 /* reign_of_jafar.json */; };
 		233365692E77B05400BE5BD4 /* rise_of_the_floodborn.json in Resources */ = {isa = PBXBuildFile; fileRef = 2333655D2E77B05400BE5BD4 /* rise_of_the_floodborn.json */; };
+		234EDF472F41766B0016D086 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 234EDF462F41766B0016D086 /* SubscriptionManager.swift */; };
+		234EDF492F4176860016D086 /* RulesPaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 234EDF482F4176860016D086 /* RulesPaywallView.swift */; };
 		23B90AFC2E66323500214C40 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90AF82E66323500214C40 /* ContentView.swift */; };
 		23B90AFD2E66323500214C40 /* InkwellKeeperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90AF92E66323500214C40 /* InkwellKeeperApp.swift */; };
 		23B90AFE2E66323500214C40 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 23B90AF72E66323500214C40 /* Assets.xcassets */; };
@@ -75,6 +77,8 @@
 		23CB6DD12EB8546600630416 /* ImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23CB6DD02EB8546600630416 /* ImportService.swift */; };
 		23CB6E252EB8DBDB00630416 /* ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23CB6E242EB8DBDB00630416 /* ExportView.swift */; };
 		23CB6E272EB8DF3F00630416 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23CB6E262EB8DF3F00630416 /* SettingsView.swift */; };
+		23D2466B2F2D9DCE00CF4128 /* RulesAssistantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23D2466A2F2D9DCE00CF4128 /* RulesAssistantView.swift */; };
+		23D2466D2F2D9DEB00CF4128 /* RulesAssistantService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23D2466C2F2D9DEB00CF4128 /* RulesAssistantService.swift */; };
 		23D9D43E2EA3120F0089D552 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23D9D43D2EA3120F0089D552 /* ImageCache.swift */; };
 		23D9D4412EA319310089D552 /* LorcanaCardExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23D9D4402EA319310089D552 /* LorcanaCardExtensions.swift */; };
 		23D9D4422EA319310089D552 /* AsyncImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23D9D43F2EA319310089D552 /* AsyncImageExtensions.swift */; };
@@ -91,6 +95,8 @@
 		C1D2E3F4A5B6C7D8E9F0A1B4 /* InteractiveHolographicEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6C7D8E9F0A1B3 /* InteractiveHolographicEffect.swift */; };
 		C1D2E3F4A5B6C7D8E9F0A1B6 /* InteractiveCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6C7D8E9F0A1B5 /* InteractiveCardView.swift */; };
 		C1D2E3F4A5B6C7D8E9F0A1B8 /* FullscreenCardViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6C7D8E9F0A1B7 /* FullscreenCardViewer.swift */; };
+		D1E2F3A4B5C6D7E8F9A0B1C2 /* CloudKitKeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C1 /* CloudKitKeyService.swift */; };
+		D1E2F3A4B5C6D7E8F9A0B1C4 /* OpenAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C3 /* OpenAIService.swift */; };
 		F9FA8CEF18B640868AFA0847 /* whispers_in_the_well.json in Resources */ = {isa = PBXBuildFile; fileRef = B281D76F664D42E898C5AFFB /* whispers_in_the_well.json */; };
 /* End PBXBuildFile section */
 
@@ -120,6 +126,8 @@
 		2333655E2E77B05400BE5BD4 /* shimmering_skies.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = shimmering_skies.json; sourceTree = "<group>"; };
 		2333655F2E77B05400BE5BD4 /* the_first_chapter.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = the_first_chapter.json; sourceTree = "<group>"; };
 		233365602E77B05400BE5BD4 /* ursulas_return.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ursulas_return.json; sourceTree = "<group>"; };
+		234EDF462F41766B0016D086 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
+		234EDF482F4176860016D086 /* RulesPaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesPaywallView.swift; sourceTree = "<group>"; };
 		23B90AF72E66323500214C40 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		23B90AF82E66323500214C40 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		23B90AF92E66323500214C40 /* InkwellKeeperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkwellKeeperApp.swift; sourceTree = "<group>"; };
@@ -164,6 +172,8 @@
 		23CB6DD02EB8546600630416 /* ImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportService.swift; sourceTree = "<group>"; };
 		23CB6E242EB8DBDB00630416 /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
 		23CB6E262EB8DF3F00630416 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		23D2466A2F2D9DCE00CF4128 /* RulesAssistantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesAssistantView.swift; sourceTree = "<group>"; };
+		23D2466C2F2D9DEB00CF4128 /* RulesAssistantService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesAssistantService.swift; sourceTree = "<group>"; };
 		23D9D43D2EA3120F0089D552 /* ImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
 		23D9D43F2EA319310089D552 /* AsyncImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncImageExtensions.swift; sourceTree = "<group>"; };
 		23D9D4402EA319310089D552 /* LorcanaCardExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LorcanaCardExtensions.swift; sourceTree = "<group>"; };
@@ -180,6 +190,9 @@
 		C1D2E3F4A5B6C7D8E9F0A1B3 /* InteractiveHolographicEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractiveHolographicEffect.swift; sourceTree = "<group>"; };
 		C1D2E3F4A5B6C7D8E9F0A1B5 /* InteractiveCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractiveCardView.swift; sourceTree = "<group>"; };
 		C1D2E3F4A5B6C7D8E9F0A1B7 /* FullscreenCardViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullscreenCardViewer.swift; sourceTree = "<group>"; };
+		D1E2F3A4B5C6D7E8F9A0B1C1 /* CloudKitKeyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitKeyService.swift; sourceTree = "<group>"; };
+		D1E2F3A4B5C6D7E8F9A0B1C3 /* OpenAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIService.swift; sourceTree = "<group>"; };
+		D1E2F3A4B5C6D7E8F9A0B1C5 /* Inkwell Keeper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Inkwell Keeper.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -255,6 +268,7 @@
 		23B90AFA2E66323500214C40 /* Inkwell Keeper */ = {
 			isa = PBXGroup;
 			children = (
+				D1E2F3A4B5C6D7E8F9A0B1C5 /* Inkwell Keeper.entitlements */,
 				230CAD1F2EB0602800978724 /* Resources */,
 				23D9D44D2EA45ACE0089D552 /* ink.icon */,
 				233365542E779F3F00BE5BD4 /* Data */,
@@ -302,6 +316,10 @@
 		23B90B012E66324900214C40 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				234EDF462F41766B0016D086 /* SubscriptionManager.swift */,
+				23D2466C2F2D9DEB00CF4128 /* RulesAssistantService.swift */,
+				D1E2F3A4B5C6D7E8F9A0B1C1 /* CloudKitKeyService.swift */,
+				D1E2F3A4B5C6D7E8F9A0B1C3 /* OpenAIService.swift */,
 				1E3D652CBA4843E9BA303B2E /* DataMigrationService.swift */,
 				232D42942ECE321D00FF9283 /* TipJarManager.swift */,
 				23CB6DD02EB8546600630416 /* ImportService.swift */,
@@ -316,6 +334,8 @@
 		23B90B022E66324F00214C40 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				234EDF482F4176860016D086 /* RulesPaywallView.swift */,
+				23D2466A2F2D9DCE00CF4128 /* RulesAssistantView.swift */,
 				AA1B2C3D4E5F678901234564 /* LoreCounterView.swift */,
 				23CA3B3A2ED3EA1F006786F7 /* SupportView.swift */,
 				23CA3B382ED3CB48006786F7 /* WhatsNewView.swift */,
@@ -500,7 +520,9 @@
 				23B90B372E66338800214C40 /* LorcanaCard.swift in Sources */,
 				23B90B2B2E66336100214C40 /* StatsView.swift in Sources */,
 				23B90B312E66337800214C40 /* FilterModels.swift in Sources */,
+				234EDF492F4176860016D086 /* RulesPaywallView.swift in Sources */,
 				23CB6E272EB8DF3F00630416 /* SettingsView.swift in Sources */,
+				23D2466D2F2D9DEB00CF4128 /* RulesAssistantService.swift in Sources */,
 				23CA3B392ED3CB48006786F7 /* WhatsNewView.swift in Sources */,
 				23B90B1D2E66332A00214C40 /* EmptyStates.swift in Sources */,
 				23D9D4462EA3F1C80089D552 /* AffiliateService.swift in Sources */,
@@ -526,6 +548,7 @@
 				233365502E77961C00BE5BD4 /* SetDetailView.swift in Sources */,
 				23B90B0F2E6632E500214C40 /* FilterChip.swift in Sources */,
 				23D9D4412EA319310089D552 /* LorcanaCardExtensions.swift in Sources */,
+				234EDF472F41766B0016D086 /* SubscriptionManager.swift in Sources */,
 				23D9D4422EA319310089D552 /* AsyncImageExtensions.swift in Sources */,
 				23D9D44A2EA3FF1A0089D552 /* DeckModels.swift in Sources */,
 				23B90B072E66327400214C40 /* Color+Extensions.swift in Sources */,
@@ -536,6 +559,7 @@
 				23B90B272E66335700214C40 /* DetailView.swift in Sources */,
 				23B90B392E66339400214C40 /* CollectionManager.swift in Sources */,
 				23B90B132E66330000214C40 /* WishlistComponents.swift in Sources */,
+				23D2466B2F2D9DCE00CF4128 /* RulesAssistantView.swift in Sources */,
 				23B90D1F2E6CCB7900214C40 /* PricingService.swift in Sources */,
 				23B90B1F2E66333000214C40 /* CostBadge.swift in Sources */,
 				23CB6DCF2EB8544500630416 /* BulkImportView.swift in Sources */,
@@ -544,6 +568,8 @@
 				C1D2E3F4A5B6C7D8E9F0A1B4 /* InteractiveHolographicEffect.swift in Sources */,
 				C1D2E3F4A5B6C7D8E9F0A1B6 /* InteractiveCardView.swift in Sources */,
 				C1D2E3F4A5B6C7D8E9F0A1B8 /* FullscreenCardViewer.swift in Sources */,
+				D1E2F3A4B5C6D7E8F9A0B1C2 /* CloudKitKeyService.swift in Sources */,
+				D1E2F3A4B5C6D7E8F9A0B1C4 /* OpenAIService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -676,6 +702,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = ink;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Inkwell Keeper/Inkwell Keeper.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = YFXZ6WNN53;
@@ -712,6 +739,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = ink;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Inkwell Keeper/Inkwell Keeper.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = YFXZ6WNN53;

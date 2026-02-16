@@ -46,32 +46,34 @@ struct ContentView: View {
                 .tabItem {
                     Label("Play", systemImage: "gamecontroller.fill")
                 }
-                .tag(4)
+                .tag(9)
 
             StatsView()
                 .environmentObject(collectionManager)
                 .tabItem {
                     Label("Stats", systemImage: "chart.bar.fill")
                 }
-                .tag(5)
 
             WishlistView()
                 .environmentObject(collectionManager)
                 .tabItem {
                     Label("Wishlist", systemImage: "star.fill")
                 }
-                .tag(6)
 
             SettingsView()
                 .environmentObject(collectionManager)
                 .tabItem {
                     Label("Settings", systemImage: "gear")
                 }
-                .tag(7)
-
             SupportView()
                 .tabItem {
                     Label("Support", systemImage: "heart.fill")
+                }
+                .tag(7)
+
+            RulesAssistantView()
+                .tabItem {
+                    Label("Rules", systemImage: "book.circle")
                 }
                 .tag(8)
         }

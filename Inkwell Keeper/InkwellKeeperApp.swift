@@ -17,6 +17,9 @@ struct InkwellKeeperApp: App {
 
         // Configure RevenueCat
         TipJarManager.shared.configure()
+
+        // Check subscription status on launch
+        SubscriptionManager.shared.checkSubscriptionStatus()
     }
 
     var body: some Scene {
