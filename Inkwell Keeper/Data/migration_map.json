@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "migration_date": "2025-11-22",
-  "total_mappings": 2341,
+  "total_mappings": 2506,
   "mappings": {
     "Archazia's_Island_1_Rhino___Motivational_Speaker": {
       "old_id": "Archazia's_Island_1_Rhino___Motivational_Speaker",
@@ -6321,8 +6321,8 @@
       "variant": "Iconic",
       "match_method": "uniqueId"
     },
-    "Into_the_Inklands_0_Dalmatian_Puppy___Tail_Wagger": {
-      "old_id": "Into_the_Inklands_0_Dalmatian_Puppy___Tail_Wagger",
+    "Into_the_Inklands_4e_Dalmatian_Puppy___Tail_Wagger": {
+      "old_id": "Into_the_Inklands_4e_Dalmatian_Puppy___Tail_Wagger",
       "new_id": "Into_the_Inklands_0_Dalmatian_Puppy___Tail_Wagger",
       "new_unique_id": null,
       "name": "Dalmatian Puppy - Tail Wagger",
@@ -8319,8 +8319,8 @@
       "variant": "Enchanted",
       "match_method": "uniqueId"
     },
-    "Promo_Set_1_0_Mickey_Mouse___True_Friend_Promo": {
-      "old_id": "Promo_Set_1_0_Mickey_Mouse___True_Friend_Promo",
+    "Promo_Set_1_25zh_Mickey_Mouse___True_Friend": {
+      "old_id": "Promo_Set_1_25zh_Mickey_Mouse___True_Friend",
       "new_id": "Promo_Set_1_0_Mickey_Mouse___True_Friend_Promo",
       "new_unique_id": null,
       "name": "Mickey Mouse - True Friend",
@@ -21071,6 +21071,1491 @@
       "set": "Whispers in the Well",
       "variant": "Iconic",
       "match_method": "uniqueId"
+    },
+    "Winterspell_1_Thomas___Wide_Eyed_Recruit": {
+      "old_id": "Winterspell_1_Thomas___Wide_Eyed_Recruit",
+      "new_id": "Winterspell_1_Thomas___Wide_Eyed_Recruit",
+      "new_unique_id": "11-001",
+      "name": "Thomas - Wide-Eyed Recruit",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_2_Lilo___Snow_Artist": {
+      "old_id": "Winterspell_2_Lilo___Snow_Artist",
+      "new_id": "Winterspell_2_Lilo___Snow_Artist",
+      "new_unique_id": "11-002",
+      "name": "Lilo - Snow Artist",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_3_Pudge___Controls_the_Weather": {
+      "old_id": "Winterspell_3_Pudge___Controls_the_Weather",
+      "new_id": "Winterspell_3_Pudge___Controls_the_Weather",
+      "new_unique_id": "11-003",
+      "name": "Pudge - Controls the Weather",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_4_Pumbaa___Winter_Warthog": {
+      "old_id": "Winterspell_4_Pumbaa___Winter_Warthog",
+      "new_id": "Winterspell_4_Pumbaa___Winter_Warthog",
+      "new_unique_id": "11-004",
+      "name": "Pumbaa - Winter Warthog",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_5_Tiana___Warm_and_Happy": {
+      "old_id": "Winterspell_5_Tiana___Warm_and_Happy",
+      "new_id": "Winterspell_205_Tiana___Warm_and_Happy_Epic",
+      "new_unique_id": "11-205",
+      "name": "Tiana - Warm and Happy",
+      "set": "Winterspell",
+      "variant": "Epic",
+      "match_method": "name+set"
+    },
+    "Winterspell_6_Nakoma___Waiting_Out_the_Storm": {
+      "old_id": "Winterspell_6_Nakoma___Waiting_Out_the_Storm",
+      "new_id": "Winterspell_6_Nakoma___Waiting_Out_the_Storm",
+      "new_unique_id": "11-006",
+      "name": "Nakoma - Waiting Out the Storm",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_207_Stitch___Carefree_Snowboarder": {
+      "old_id": "Winterspell_207_Stitch___Carefree_Snowboarder",
+      "new_id": "Winterspell_207_Stitch___Carefree_Snowboarder_Epic",
+      "new_unique_id": "11-207",
+      "name": "Stitch - Carefree Snowboarder",
+      "set": "Winterspell",
+      "variant": "Epic",
+      "match_method": "name+set"
+    },
+    "Winterspell_8_Pocahontas___Finding_the_Way": {
+      "old_id": "Winterspell_8_Pocahontas___Finding_the_Way",
+      "new_id": "Winterspell_8_Pocahontas___Finding_the_Way",
+      "new_unique_id": "11-008",
+      "name": "Pocahontas - Finding the Way",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_9_David___Protective_Snowboarder": {
+      "old_id": "Winterspell_9_David___Protective_Snowboarder",
+      "new_id": "Winterspell_9_David___Protective_Snowboarder",
+      "new_unique_id": "11-009",
+      "name": "David - Protective Snowboarder",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_10_Fangmeyr___Icy_Officer": {
+      "old_id": "Winterspell_10_Fangmeyr___Icy_Officer",
+      "new_id": "Winterspell_10_Fangmeyer___Icy_Officer",
+      "new_unique_id": "11-010",
+      "name": "Fangmeyer - Icy Officer",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_14_Cobra_Bubbles___Dedicated_Official": {
+      "old_id": "Winterspell_14_Cobra_Bubbles___Dedicated_Official",
+      "new_id": "Winterspell_14_Cobra_Bubbles___Dedicated_Official",
+      "new_unique_id": "11-014",
+      "name": "Cobra Bubbles - Dedicated Official",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_15_John_Smith___Snow_Tracker": {
+      "old_id": "Winterspell_15_John_Smith___Snow_Tracker",
+      "new_id": "Winterspell_15_John_Smith___Snow_Tracker",
+      "new_unique_id": "11-015",
+      "name": "John Smith - Snow Tracker",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_16_Timon___Snowball_Swiper": {
+      "old_id": "Winterspell_16_Timon___Snowball_Swiper",
+      "new_id": "Winterspell_16_Timon___Snowball_Swiper",
+      "new_unique_id": "11-016",
+      "name": "Timon - Snowball Swiper",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_18_Pleakley___Arctic_Naturalist": {
+      "old_id": "Winterspell_18_Pleakley___Arctic_Naturalist",
+      "new_id": "Winterspell_18_Pleakley___Arctic_Naturalist",
+      "new_unique_id": "11-018",
+      "name": "Pleakley - Arctic Naturalist",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_19_Jumba_Jookiba___Prolific_Inventor": {
+      "old_id": "Winterspell_19_Jumba_Jookiba___Prolific_Inventor",
+      "new_id": "Winterspell_19_Jumba_Jookiba___Prolific_Inventor",
+      "new_unique_id": "11-019",
+      "name": "Jumba Jookiba - Prolific Inventor",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_20_Nani___Stage_Manager": {
+      "old_id": "Winterspell_20_Nani___Stage_Manager",
+      "new_id": "Winterspell_20_Nani___Stage_Manager",
+      "new_unique_id": "11-020",
+      "name": "Nani - Stage Manager",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_21_Reuben___Sandwich_Expert": {
+      "old_id": "Winterspell_21_Reuben___Sandwich_Expert",
+      "new_id": "Winterspell_21_Reuben___Sandwich_Expert",
+      "new_unique_id": "11-021",
+      "name": "Reuben - Sandwich Expert",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_241_Pocahontas___Peacekeeper": {
+      "old_id": "Winterspell_241_Pocahontas___Peacekeeper",
+      "new_id": "Winterspell_241_Pocahontas___Peacekeeper_Iconic",
+      "new_unique_id": "11-241",
+      "name": "Pocahontas - Peacekeeper",
+      "set": "Winterspell",
+      "variant": "Iconic",
+      "match_method": "name+set"
+    },
+    "Winterspell_23_Simba___Playful_Pouncer": {
+      "old_id": "Winterspell_23_Simba___Playful_Pouncer",
+      "new_id": "Winterspell_23_Simba___Playful_Pouncer",
+      "new_unique_id": "11-023",
+      "name": "Simba - Playful Pouncer",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_24_Bambi___Ethereal_Fawn": {
+      "old_id": "Winterspell_24_Bambi___Ethereal_Fawn",
+      "new_id": "Winterspell_24_Bambi___Ethereal_Fawn",
+      "new_unique_id": "11-024",
+      "name": "Bambi - Ethereal Fawn",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_25_Angel___Siren_Singer": {
+      "old_id": "Winterspell_25_Angel___Siren_Singer",
+      "new_id": "Winterspell_25_Angel___Siren_Singer",
+      "new_unique_id": "11-025",
+      "name": "Angel - Siren Singer",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_26_Widow_Tweed___Kindly_Soul": {
+      "old_id": "Winterspell_26_Widow_Tweed___Kindly_Soul",
+      "new_id": "Winterspell_26_Widow_Tweed___Kindly_Soul",
+      "new_unique_id": "11-026",
+      "name": "Widow Tweed - Kindly Soul",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_27_Percy___Pupsicle": {
+      "old_id": "Winterspell_27_Percy___Pupsicle",
+      "new_id": "Winterspell_27_Percy___Pupsicle",
+      "new_unique_id": "11-027",
+      "name": "Percy - Pupsicle",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_29_Akood_Et_Emuti": {
+      "old_id": "Winterspell_29_Akood_Et_Emuti",
+      "new_id": "Winterspell_29_Akood_et_Emuti",
+      "new_unique_id": "11-029",
+      "name": "Akood et Emuti",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_31_Wisdom_Of_The_Willow": {
+      "old_id": "Winterspell_31_Wisdom_Of_The_Willow",
+      "new_id": "Winterspell_31_Wisdom_of_the_Willow",
+      "new_unique_id": "11-031",
+      "name": "Wisdom of the Willow",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_32_Ohana_Means_Family": {
+      "old_id": "Winterspell_32_Ohana_Means_Family",
+      "new_id": "Winterspell_224_Ohana_Means_Family_Enchanted",
+      "new_unique_id": "11-224",
+      "name": "Ohana Means Family",
+      "set": "Winterspell",
+      "variant": "Enchanted",
+      "match_method": "name+set"
+    },
+    "Winterspell_33_John_Smiths_Compass": {
+      "old_id": "Winterspell_33_John_Smiths_Compass",
+      "new_id": "Winterspell_33_John_Smiths_Compass",
+      "new_unique_id": "11-033",
+      "name": "John Smith's Compass",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_35_Nala___Romping_in_the_Snow": {
+      "old_id": "Winterspell_35_Nala___Romping_in_the_Snow",
+      "new_id": "Winterspell_35_Nala___Romping_in_the_Snow",
+      "new_unique_id": "11-035",
+      "name": "Nala - Romping in the Snow",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_36_Alice___Well_Read_Whisper": {
+      "old_id": "Winterspell_36_Alice___Well_Read_Whisper",
+      "new_id": "Winterspell_36_Alice___Well_Read_Whisper",
+      "new_unique_id": "11-036",
+      "name": "Alice - Well-Read Whisper",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_37_Tigger___Bouncing_All_the_Way": {
+      "old_id": "Winterspell_37_Tigger___Bouncing_All_the_Way",
+      "new_id": "Winterspell_208_Tigger___Bouncing_All_the_Way_Epic",
+      "new_unique_id": "11-208",
+      "name": "Tigger - Bouncing All the Way",
+      "set": "Winterspell",
+      "variant": "Epic",
+      "match_method": "name+set"
+    },
+    "Winterspell_38_Isis_Vanderchill___Ice_Queen_of_St._Canard": {
+      "old_id": "Winterspell_38_Isis_Vanderchill___Ice_Queen_of_St._Canard",
+      "new_id": "Winterspell_38_Isis_Vanderchill___Ice_Queen_of_St._Canard",
+      "new_unique_id": "11-038",
+      "name": "Isis Vanderchill - Ice Queen of St. Canard",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_39_Flit___Reflective_Hummingbird": {
+      "old_id": "Winterspell_39_Flit___Reflective_Hummingbird",
+      "new_id": "Winterspell_39_Flit___Reflective_Hummingbird",
+      "new_unique_id": "11-039",
+      "name": "Flit - Reflective Hummingbird",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_40_Morgana_Macawber___Self_Centered_Spellcaster": {
+      "old_id": "Winterspell_40_Morgana_Macawber___Self_Centered_Spellcaster",
+      "new_id": "Winterspell_40_Morgana_Macawber___Self_Centered_Spellcaster",
+      "new_unique_id": "11-040",
+      "name": "Morgana Macawber - Self-Centered Spellcaster",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_41_Rabbit___Fed_Up": {
+      "old_id": "Winterspell_41_Rabbit___Fed_Up",
+      "new_id": "Winterspell_41_Rabbit___Fed_Up",
+      "new_unique_id": "11-041",
+      "name": "Rabbit - Fed Up",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_42_Pocahontas___Following_the_Wind": {
+      "old_id": "Winterspell_42_Pocahontas___Following_the_Wind",
+      "new_id": "Winterspell_42_Pocahontas___Following_the_Wind",
+      "new_unique_id": "11-042",
+      "name": "Pocahontas - Following the Wind",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_43_Darkwing_Duck___Darkwolf_Dog": {
+      "old_id": "Winterspell_43_Darkwing_Duck___Darkwolf_Dog",
+      "new_id": "Winterspell_43_Darkwing_Duck___Darkwolf_Dog",
+      "new_unique_id": "11-043",
+      "name": "Darkwing Duck - Darkwolf Dog",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_44_Taran___Magically_Armed": {
+      "old_id": "Winterspell_44_Taran___Magically_Armed",
+      "new_id": "Winterspell_44_Taran___Magically_Armed",
+      "new_unique_id": "11-044",
+      "name": "Taran - Magically Armed",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_226_Eeyore___In_the_Way": {
+      "old_id": "Winterspell_226_Eeyore___In_the_Way",
+      "new_id": "Winterspell_226_Eeyore___In_the_Way_Enchanted",
+      "new_unique_id": "11-226",
+      "name": "Eeyore - In the Way",
+      "set": "Winterspell",
+      "variant": "Enchanted",
+      "match_method": "name+set"
+    },
+    "Winterspell_46_Meeko___Skittish_Scrounger": {
+      "old_id": "Winterspell_46_Meeko___Skittish_Scrounger",
+      "new_id": "Winterspell_46_Meeko___Skittish_Scrounger",
+      "new_unique_id": "11-046",
+      "name": "Meeko - Skittish Scrounger",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_47_Morgana_Macawber___Reformed_Spellcaster": {
+      "old_id": "Winterspell_47_Morgana_Macawber___Reformed_Spellcaster",
+      "new_id": "Winterspell_47_Morgana_Macawber___Reformed_Spellcaster",
+      "new_unique_id": "11-047",
+      "name": "Morgana Macawber - Reformed Spellcaster",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_48_Tinker_Bell___Snowflake_Collector": {
+      "old_id": "Winterspell_48_Tinker_Bell___Snowflake_Collector",
+      "new_id": "Winterspell_48_Tinker_Bell___Snowflake_Collector",
+      "new_unique_id": "11-048",
+      "name": "Tinker Bell - Snowflake Collector",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_210_Genie___Magical_Researcher": {
+      "old_id": "Winterspell_210_Genie___Magical_Researcher",
+      "new_id": "Winterspell_210_Genie___Magical_Researcher_Epic",
+      "new_unique_id": "11-210",
+      "name": "Genie - Magical Researcher",
+      "set": "Winterspell",
+      "variant": "Epic",
+      "match_method": "name+set"
+    },
+    "Winterspell_50_Anna___Soothing_Sister": {
+      "old_id": "Winterspell_50_Anna___Soothing_Sister",
+      "new_id": "Winterspell_227_Anna___Soothing_Sister_Enchanted",
+      "new_unique_id": "11-227",
+      "name": "Anna - Soothing Sister",
+      "set": "Winterspell",
+      "variant": "Enchanted",
+      "match_method": "name+set"
+    },
+    "Winterspell_51_Kristoff___Icy_Explorer": {
+      "old_id": "Winterspell_51_Kristoff___Icy_Explorer",
+      "new_id": "Winterspell_51_Kristoff___Icy_Explorer",
+      "new_unique_id": "11-051",
+      "name": "Kristoff - Icy Explorer",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_52_Anna___Little_Sister": {
+      "old_id": "Winterspell_52_Anna___Little_Sister",
+      "new_id": "Winterspell_209_Anna___Little_Sister_Epic",
+      "new_unique_id": "11-209",
+      "name": "Anna - Little Sister",
+      "set": "Winterspell",
+      "variant": "Epic",
+      "match_method": "name+set"
+    },
+    "Winterspell_53_Marshmallow___Cranky_Climber": {
+      "old_id": "Winterspell_53_Marshmallow___Cranky_Climber",
+      "new_id": "Winterspell_53_Marshmallow___Cranky_Climber",
+      "new_unique_id": "11-053",
+      "name": "Marshmallow - Cranky Climber",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_55_Christopher_Robin___Joining_the_Fun": {
+      "old_id": "Winterspell_55_Christopher_Robin___Joining_the_Fun",
+      "new_id": "Winterspell_55_Christopher_Robin___Joining_the_Fun",
+      "new_unique_id": "11-055",
+      "name": "Christopher Robin - Joining the Fun",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_56_Lumpy___Playful_Heffalump": {
+      "old_id": "Winterspell_56_Lumpy___Playful_Heffalump",
+      "new_id": "Winterspell_56_Lumpy___Playful_Heffalump",
+      "new_unique_id": "11-056",
+      "name": "Lumpy - Playful Heffalump",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_57_Witches_Of_Morva___Orddu,_Orwen,_and_Orgoch": {
+      "old_id": "Winterspell_57_Witches_Of_Morva___Orddu,_Orwen,_and_Orgoch",
+      "new_id": "Winterspell_57_Witches_of_Morva___Orddu,_Orwen,_and_Orgoch",
+      "new_unique_id": "11-057",
+      "name": "Witches of Morva - Orddu, Orwen, and Orgoch",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_58_Heihei___Persistent_Presence": {
+      "old_id": "Winterspell_58_Heihei___Persistent_Presence",
+      "new_id": "Winterspell_58_Heihei___Persistent_Presence",
+      "new_unique_id": "11-058",
+      "name": "Heihei - Persistent Presence",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_59_Pua___Disgruntled_Pig": {
+      "old_id": "Winterspell_59_Pua___Disgruntled_Pig",
+      "new_id": "Winterspell_59_Pua___Disgruntled_Pig",
+      "new_unique_id": "11-059",
+      "name": "Pua - Disgruntled Pig",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_61_Do_You_Want_To_Build_A_Snowman?": {
+      "old_id": "Winterspell_61_Do_You_Want_To_Build_A_Snowman?",
+      "new_id": "Winterspell_61_Do_You_Want_to_Build_A_Snowman?",
+      "new_unique_id": "11-061",
+      "name": "Do You Want to Build A Snowman?",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_62_Come_Out_And_Fight!": {
+      "old_id": "Winterspell_62_Come_Out_And_Fight!",
+      "new_id": "Winterspell_62_Come_Out_and_Fight!",
+      "new_unique_id": "11-062",
+      "name": "Come Out and Fight!",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_63_Swordplay": {
+      "old_id": "Winterspell_63_Swordplay",
+      "new_id": "Winterspell_63_Swordplay",
+      "new_unique_id": "11-063",
+      "name": "Swordplay",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_64_Colors_Of_The_Wind": {
+      "old_id": "Winterspell_64_Colors_Of_The_Wind",
+      "new_id": "Winterspell_64_Colors_of_the_Wind",
+      "new_unique_id": "11-064",
+      "name": "Colors of the Wind",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_65_Mothers_Necklace": {
+      "old_id": "Winterspell_65_Mothers_Necklace",
+      "new_id": "Winterspell_65_Mothers_Necklace",
+      "new_unique_id": "11-065",
+      "name": "Mother's Necklace",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_66_Mystical_Inkcaster": {
+      "old_id": "Winterspell_66_Mystical_Inkcaster",
+      "new_id": "Winterspell_66_Mystical_Inkcaster",
+      "new_unique_id": "11-066",
+      "name": "Mystical Inkcaster",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_67_Pot_Of_Honey": {
+      "old_id": "Winterspell_67_Pot_Of_Honey",
+      "new_id": "Winterspell_67_Pot_of_Honey",
+      "new_unique_id": "11-067",
+      "name": "Pot of Honey",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_68_The_Frost_Vine___Monstrous_Plant": {
+      "old_id": "Winterspell_68_The_Frost_Vine___Monstrous_Plant",
+      "new_id": "Winterspell_68_The_Frozen_Vine___Monstrous_Plant",
+      "new_unique_id": "11-068",
+      "name": "The Frozen Vine - Monstrous Plant",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_69_Mulan___Resourceful_Recruit": {
+      "old_id": "Winterspell_69_Mulan___Resourceful_Recruit",
+      "new_id": "Winterspell_229_Mulan___Resourceful_Recruit_Enchanted",
+      "new_unique_id": "11-229",
+      "name": "Mulan - Resourceful Recruit",
+      "set": "Winterspell",
+      "variant": "Enchanted",
+      "match_method": "name+set"
+    },
+    "Winterspell_70_Stitch___Naughty_Experiment": {
+      "old_id": "Winterspell_70_Stitch___Naughty_Experiment",
+      "new_id": "Winterspell_70_Stitch___Naughty_Experiment",
+      "new_unique_id": "11-070",
+      "name": "Stitch - Naughty Experiment",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_72_Minnie_Mouse___Spinning_Skater": {
+      "old_id": "Winterspell_72_Minnie_Mouse___Spinning_Skater",
+      "new_id": "Winterspell_72_Minnie_Mouse___Spinning_Skater",
+      "new_unique_id": "11-072",
+      "name": "Minnie Mouse - Spinning Skater",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_73_Yao___Snow_Warrior": {
+      "old_id": "Winterspell_73_Yao___Snow_Warrior",
+      "new_id": "Winterspell_73_Yao___Snow_Warrior",
+      "new_unique_id": "11-073",
+      "name": "Yao - Snow Warrior",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_74_Chien_po___Snow_Warrior": {
+      "old_id": "Winterspell_74_Chien_po___Snow_Warrior",
+      "new_id": "Winterspell_74_Chien_Po___Snow_Warrior",
+      "new_unique_id": "11-074",
+      "name": "Chien-Po - Snow Warrior",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_75_Ling___Snow_Warrior": {
+      "old_id": "Winterspell_75_Ling___Snow_Warrior",
+      "new_id": "Winterspell_75_Ling___Snow_Warrior",
+      "new_unique_id": "11-075",
+      "name": "Ling - Snow Warrior",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_79_Stegmutt___Clumsy_Dinosaur": {
+      "old_id": "Winterspell_79_Stegmutt___Clumsy_Dinosaur",
+      "new_id": "Winterspell_79_Stegmutt___Clumsy_Dinosaur",
+      "new_unique_id": "11-079",
+      "name": "Stegmutt - Clumsy Dinosaur",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_81_Aladdin___On_the_Edge_of_Adventure": {
+      "old_id": "Winterspell_81_Aladdin___On_the_Edge_of_Adventure",
+      "new_id": "Winterspell_211_Aladdin___On_the_Edge_of_Adventure_Epic",
+      "new_unique_id": "11-211",
+      "name": "Aladdin - On the Edge of Adventure",
+      "set": "Winterspell",
+      "variant": "Epic",
+      "match_method": "name+set"
+    },
+    "Winterspell_82_Mushu___Sneaky_Dragon": {
+      "old_id": "Winterspell_82_Mushu___Sneaky_Dragon",
+      "new_id": "Winterspell_212_Mushu___Sneaky_Dragon_Epic",
+      "new_unique_id": "11-212",
+      "name": "Mushu - Sneaky Dragon",
+      "set": "Winterspell",
+      "variant": "Epic",
+      "match_method": "name+set"
+    },
+    "Winterspell_83_Goofy___Ghost_of_Jacob_Marley": {
+      "old_id": "Winterspell_83_Goofy___Ghost_of_Jacob_Marley",
+      "new_id": "Winterspell_83_Goofy___Ghost_of_Jacob_Marley",
+      "new_unique_id": "11-083",
+      "name": "Goofy - Ghost of Jacob Marley",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_84_Copper___Champion_of_the_Forest": {
+      "old_id": "Winterspell_84_Copper___Champion_of_the_Forest",
+      "new_id": "Winterspell_84_Copper___Champion_of_the_Forest",
+      "new_unique_id": "11-084",
+      "name": "Copper - Champion of the Forest",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_86_Vixey___Forest_Friend": {
+      "old_id": "Winterspell_86_Vixey___Forest_Friend",
+      "new_id": "Winterspell_86_Vixey___Forest_Friend",
+      "new_unique_id": "11-086",
+      "name": "Vixey - Forest Friend",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_89_White_Rabbit___Late_Again": {
+      "old_id": "Winterspell_89_White_Rabbit___Late_Again",
+      "new_id": "Winterspell_89_White_Rabbit___Late_Again",
+      "new_unique_id": "11-089",
+      "name": "White Rabbit - Late Again",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_90_Tod___Playful_Kit": {
+      "old_id": "Winterspell_90_Tod___Playful_Kit",
+      "new_id": "Winterspell_90_Tod___Playful_Kit",
+      "new_unique_id": "11-090",
+      "name": "Tod - Playful Kit",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_91_Mickey_Mouse___Snowboard_Ace": {
+      "old_id": "Winterspell_91_Mickey_Mouse___Snowboard_Ace",
+      "new_id": "Winterspell_91_Mickey_Mouse___Snowboard_Ace",
+      "new_unique_id": "11-091",
+      "name": "Mickey Mouse - Snowboard Ace",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_230_Tod___Knows_All_the_Tricks": {
+      "old_id": "Winterspell_230_Tod___Knows_All_the_Tricks",
+      "new_id": "Winterspell_230_Tod___Knows_All_the_Tricks_Enchanted",
+      "new_unique_id": "11-230",
+      "name": "Tod - Knows All the Tricks",
+      "set": "Winterspell",
+      "variant": "Enchanted",
+      "match_method": "name+set"
+    },
+    "Winterspell_93_Donald_Duck___Fred_Honeywell": {
+      "old_id": "Winterspell_93_Donald_Duck___Fred_Honeywell",
+      "new_id": "Winterspell_93_Donald_Duck___Fred_Honeywell",
+      "new_unique_id": "11-093",
+      "name": "Donald Duck - Fred Honeywell",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_94_Strike_A_Good_Match": {
+      "old_id": "Winterspell_94_Strike_A_Good_Match",
+      "new_id": "Winterspell_94_Strike_A_Good_Match",
+      "new_unique_id": "11-094",
+      "name": "Strike A Good Match",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_95_Snowball_Fight": {
+      "old_id": "Winterspell_95_Snowball_Fight",
+      "new_id": "Winterspell_95_Snowball_Fight",
+      "new_unique_id": "11-095",
+      "name": "Snowball Fight",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_231_Freeze_the_Vine": {
+      "old_id": "Winterspell_231_Freeze_the_Vine",
+      "new_id": "Winterspell_231_Freeze_the_Vine_Enchanted",
+      "new_unique_id": "11-231",
+      "name": "Freeze the Vine",
+      "set": "Winterspell",
+      "variant": "Enchanted",
+      "match_method": "name+set"
+    },
+    "Winterspell_97_Education_Or_Elimination": {
+      "old_id": "Winterspell_97_Education_Or_Elimination",
+      "new_id": "Winterspell_97_Education_or_Elimination",
+      "new_unique_id": "11-097",
+      "name": "Education or Elimination",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_98_Snow_Fort": {
+      "old_id": "Winterspell_98_Snow_Fort",
+      "new_id": "Winterspell_98_Snow_Fort",
+      "new_unique_id": "11-098",
+      "name": "Snow Fort",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_99_Rafikis_Bakora_Staff": {
+      "old_id": "Winterspell_99_Rafikis_Bakora_Staff",
+      "new_id": "Winterspell_99_Rafikis_Bakora_Staff",
+      "new_unique_id": "11-099",
+      "name": "Rafiki's Bakora Staff",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_100_Retro_Evolution_Device": {
+      "old_id": "Winterspell_100_Retro_Evolution_Device",
+      "new_id": "Winterspell_100_Retro_Evolution_Device",
+      "new_unique_id": "11-100",
+      "name": "Retro Evolution Device",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_101_Battering_Ram": {
+      "old_id": "Winterspell_101_Battering_Ram",
+      "new_id": "Winterspell_101_Battering_Ram",
+      "new_unique_id": "11-101",
+      "name": "Battering Ram",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_103_Wreck_it_Ralph___Raging_Wrecker": {
+      "old_id": "Winterspell_103_Wreck_it_Ralph___Raging_Wrecker",
+      "new_id": "Winterspell_103_Wreck_it_Ralph___Raging_Wrecker",
+      "new_unique_id": "11-103",
+      "name": "Wreck-it Ralph - Raging Wrecker",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_105_Donald_Duck___Nephew_Fred": {
+      "old_id": "Winterspell_105_Donald_Duck___Nephew_Fred",
+      "new_id": "Winterspell_105_Donald_Duck___Nephew_Fred",
+      "new_unique_id": "11-105",
+      "name": "Donald Duck - Nephew Fred",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_107_Copper___On_the_Scent": {
+      "old_id": "Winterspell_107_Copper___On_the_Scent",
+      "new_id": "Winterspell_107_Copper___On_the_Scent",
+      "new_unique_id": "11-107",
+      "name": "Copper - On the Scent",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_108_Mulan___Ready_for_Battle": {
+      "old_id": "Winterspell_108_Mulan___Ready_for_Battle",
+      "new_id": "Winterspell_108_Mulan___Ready_for_Battle",
+      "new_unique_id": "11-108",
+      "name": "Mulan - Ready for Battle",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_109_Maui___Snow_Slider": {
+      "old_id": "Winterspell_109_Maui___Snow_Slider",
+      "new_id": "Winterspell_109_Maui___Snow_Slider",
+      "new_unique_id": "11-109",
+      "name": "Maui - Snow Slider",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_111_Liquidator___Iced_Over": {
+      "old_id": "Winterspell_111_Liquidator___Iced_Over",
+      "new_id": "Winterspell_111_Liquidator___Iced_Over",
+      "new_unique_id": "11-111",
+      "name": "Liquidator - Iced Over",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_112_Elisa_Maza___Transformed_Gargoyle": {
+      "old_id": "Winterspell_112_Elisa_Maza___Transformed_Gargoyle",
+      "new_id": "Winterspell_112_Elisa_Maza___Transformed_Gargoyle",
+      "new_unique_id": "11-112",
+      "name": "Elisa Maza - Transformed Gargoyle",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_113_Iduna___Alarmed_Queen": {
+      "old_id": "Winterspell_113_Iduna___Alarmed_Queen",
+      "new_id": "Winterspell_113_Iduna___Alarmed_Queen",
+      "new_unique_id": "11-113",
+      "name": "Iduna - Alarmed Queen",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_114_Agnarr___King_of_Arendelle": {
+      "old_id": "Winterspell_114_Agnarr___King_of_Arendelle",
+      "new_id": "Winterspell_114_Agnarr___King_of_Arendelle",
+      "new_unique_id": "11-114",
+      "name": "Agnarr - King of Arendelle",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_115_Negaduck___Evil_Doppelganger": {
+      "old_id": "Winterspell_115_Negaduck___Evil_Doppelganger",
+      "new_id": "Winterspell_115_Negaduck___Evil_Doppelganger",
+      "new_unique_id": "11-115",
+      "name": "Negaduck - Evil Doppelganger",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_116_Negaduck___Public_Enemy_Number_One": {
+      "old_id": "Winterspell_116_Negaduck___Public_Enemy_Number_One",
+      "new_id": "Winterspell_232_Negaduck___Public_Enemy_Number_One_Enchanted",
+      "new_unique_id": "11-232",
+      "name": "Negaduck - Public Enemy Number One",
+      "set": "Winterspell",
+      "variant": "Enchanted",
+      "match_method": "name+set"
+    },
+    "Winterspell_117_Hercules___Spectral_Demigod": {
+      "old_id": "Winterspell_117_Hercules___Spectral_Demigod",
+      "new_id": "Winterspell_214_Hercules___Spectral_Demigod_Epic",
+      "new_unique_id": "11-214",
+      "name": "Hercules - Spectral Demigod",
+      "set": "Winterspell",
+      "variant": "Epic",
+      "match_method": "name+set"
+    },
+    "Winterspell_118_Beast___Snowfield_Troublemaker": {
+      "old_id": "Winterspell_118_Beast___Snowfield_Troublemaker",
+      "new_id": "Winterspell_118_Beast___Snowfield_Troublemaker",
+      "new_unique_id": "11-118",
+      "name": "Beast - Snowfield Troublemaker",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_119_Slushy___Glacial_Guster": {
+      "old_id": "Winterspell_119_Slushy___Glacial_Guster",
+      "new_id": "Winterspell_119_Slushy___Glacial_Guster",
+      "new_unique_id": "11-119",
+      "name": "Slushy - Glacial Guster",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_120_Goofy___Marleys_Clumsy_Spirit": {
+      "old_id": "Winterspell_120_Goofy___Marleys_Clumsy_Spirit",
+      "new_id": "Winterspell_120_Goofy___Marleys_Clumsy_Spirit",
+      "new_unique_id": "11-120",
+      "name": "Goofy - Marley's Clumsy Spirit",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_121_Goofy___Klutzy_Skier": {
+      "old_id": "Winterspell_121_Goofy___Klutzy_Skier",
+      "new_id": "Winterspell_216_Goofy___Klutzy_Skier_Epic",
+      "new_unique_id": "11-216",
+      "name": "Goofy - Klutzy Skier",
+      "set": "Winterspell",
+      "variant": "Epic",
+      "match_method": "name+set"
+    },
+    "Winterspell_233_Elsa___Ice_Artisan": {
+      "old_id": "Winterspell_233_Elsa___Ice_Artisan",
+      "new_id": "Winterspell_233_Elsa___Ice_Artisan_Enchanted",
+      "new_unique_id": "11-233",
+      "name": "Elsa - Ice Artisan",
+      "set": "Winterspell",
+      "variant": "Enchanted",
+      "match_method": "name+set"
+    },
+    "Winterspell_125_Elsa___Concerned_Sister": {
+      "old_id": "Winterspell_125_Elsa___Concerned_Sister",
+      "new_id": "Winterspell_215_Elsa___Concerned_Sister_Epic",
+      "new_unique_id": "11-215",
+      "name": "Elsa - Concerned Sister",
+      "set": "Winterspell",
+      "variant": "Epic",
+      "match_method": "name+set"
+    },
+    "Winterspell_126_Willie_The_Giant___Ghost_of_Christmas_Present": {
+      "old_id": "Winterspell_126_Willie_The_Giant___Ghost_of_Christmas_Present",
+      "new_id": "Winterspell_126_Willie_the_Giant___Ghost_of_Christmas_Present",
+      "new_unique_id": "11-126",
+      "name": "Willie the Giant - Ghost of Christmas Present",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_128_Force_Of_A_Great_Typhoon": {
+      "old_id": "Winterspell_128_Force_Of_A_Great_Typhoon",
+      "new_id": "Winterspell_128_Force_of_a_Great_Typhoon",
+      "new_unique_id": "11-128",
+      "name": "Force of a Great Typhoon",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_130_The_Cold_Never_Bothered_Me": {
+      "old_id": "Winterspell_130_The_Cold_Never_Bothered_Me",
+      "new_id": "Winterspell_234_The_Cold_Never_Bothered_Me_Enchanted",
+      "new_unique_id": "11-234",
+      "name": "The Cold Never Bothered Me",
+      "set": "Winterspell",
+      "variant": "Enchanted",
+      "match_method": "name+set"
+    },
+    "Winterspell_131_Grab_Your_Bow": {
+      "old_id": "Winterspell_131_Grab_Your_Bow",
+      "new_id": "Winterspell_131_Grab_Your_Bow",
+      "new_unique_id": "11-131",
+      "name": "Grab Your Bow",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_132_Lonely_Grave": {
+      "old_id": "Winterspell_132_Lonely_Grave",
+      "new_id": "Winterspell_132_Lonely_Grave",
+      "new_unique_id": "11-132",
+      "name": "Lonely Grave",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_133_Kristoffs_Lute": {
+      "old_id": "Winterspell_133_Kristoffs_Lute",
+      "new_id": "Winterspell_133_Kristoffs_Lute",
+      "new_unique_id": "11-133",
+      "name": "Kristoff's Lute",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_135_Graveyard_of_Christmas_Future___Lonely_Resting_Place": {
+      "old_id": "Winterspell_135_Graveyard_of_Christmas_Future___Lonely_Resting_Place",
+      "new_id": "Winterspell_135_Graveyard_of_Christmas_Future___Lonely_Resting_Place",
+      "new_unique_id": "11-135",
+      "name": "Graveyard of Christmas Future - Lonely Resting Place",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_136_Beasts_Castle___Winter_Gardens": {
+      "old_id": "Winterspell_136_Beasts_Castle___Winter_Gardens",
+      "new_id": "Winterspell_136_Beasts_Castle___Winter_Gardens",
+      "new_unique_id": "11-136",
+      "name": "Beast's Castle - Winter Gardens",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_137_Roo___Little_Helper": {
+      "old_id": "Winterspell_137_Roo___Little_Helper",
+      "new_id": "Winterspell_137_Roo___Little_Helper",
+      "new_unique_id": "11-137",
+      "name": "Roo - Little Helper",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_138_Kanga___Peaceful_Gatherer": {
+      "old_id": "Winterspell_138_Kanga___Peaceful_Gatherer",
+      "new_id": "Winterspell_138_Kanga___Peaceful_Gatherer",
+      "new_unique_id": "11-138",
+      "name": "Kanga - Peaceful Gatherer",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_139_Piglet___Entranced_by_Snow": {
+      "old_id": "Winterspell_139_Piglet___Entranced_by_Snow",
+      "new_id": "Winterspell_139_Piglet___Entranced_by_Snow",
+      "new_unique_id": "11-139",
+      "name": "Piglet - Entranced by Snow",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_140_Mickey_Mouse___Tiny_Tim\u2019s_Father": {
+      "old_id": "Winterspell_140_Mickey_Mouse___Tiny_Tim\u2019s_Father",
+      "new_id": "Winterspell_140_Mickey_Mouse___Tiny_Tims_Father",
+      "new_unique_id": "11-140",
+      "name": "Mickey Mouse - Tiny Tim's Father",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_141_Minnie_Mouse___Tiny_Tim\u2019s_Mother": {
+      "old_id": "Winterspell_141_Minnie_Mouse___Tiny_Tim\u2019s_Mother",
+      "new_id": "Winterspell_141_Minnie_Mouse___Tiny_Tims_Mother",
+      "new_unique_id": "11-141",
+      "name": "Minnie Mouse - Tiny Tim's Mother",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_142_Sina___Vigilant_Parent": {
+      "old_id": "Winterspell_142_Sina___Vigilant_Parent",
+      "new_id": "Winterspell_142_Sina___Vigilant_Parent",
+      "new_unique_id": "11-142",
+      "name": "Sina - Vigilant Parent",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_144_Daisy_Duck___Isabel": {
+      "old_id": "Winterspell_144_Daisy_Duck___Isabel",
+      "new_id": "Winterspell_144_Daisy_Duck___Isabel",
+      "new_unique_id": "11-144",
+      "name": "Daisy Duck - Isabel",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_145_Darkwing_Duck___Drake_Mallard": {
+      "old_id": "Winterspell_145_Darkwing_Duck___Drake_Mallard",
+      "new_id": "Winterspell_145_Darkwing_Duck___Drake_Mallard",
+      "new_unique_id": "11-145",
+      "name": "Darkwing Duck - Drake Mallard",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_218_Jiminy_Cricket___Ghost_of_Christmas_Past": {
+      "old_id": "Winterspell_218_Jiminy_Cricket___Ghost_of_Christmas_Past",
+      "new_id": "Winterspell_218_Jiminy_Cricket___Ghost_of_Christmas_Past_Epic",
+      "new_unique_id": "11-218",
+      "name": "Jiminy Cricket - Ghost of Christmas Past",
+      "set": "Winterspell",
+      "variant": "Epic",
+      "match_method": "name+set"
+    },
+    "Winterspell_147_Piglet___Cocoa_Maker": {
+      "old_id": "Winterspell_147_Piglet___Cocoa_Maker",
+      "new_id": "Winterspell_147_Piglet___Cocoa_Maker",
+      "new_unique_id": "11-147",
+      "name": "Piglet - Cocoa Maker",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_148_Gramma_Tala___Connected_to_Nature": {
+      "old_id": "Winterspell_148_Gramma_Tala___Connected_to_Nature",
+      "new_id": "Winterspell_148_Gramma_Tala___Connected_to_Nature",
+      "new_unique_id": "11-148",
+      "name": "Gramma Tala - Connected to Nature",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_150_Darkwing_Duck___Dashing_Gadgeteer": {
+      "old_id": "Winterspell_150_Darkwing_Duck___Dashing_Gadgeteer",
+      "new_id": "Winterspell_150_Darkwing_Duck___Dashing_Gadgeteer",
+      "new_unique_id": "11-150",
+      "name": "Darkwing Duck - Dashing Gadgeteer",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_151_Winnie_The_Pooh___Hungry_Bear": {
+      "old_id": "Winterspell_151_Winnie_The_Pooh___Hungry_Bear",
+      "new_id": "Winterspell_151_Winnie_the_Pooh___Hungry_Bear",
+      "new_unique_id": "11-151",
+      "name": "Winnie the Pooh - Hungry Bear",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_152_Scrooge_Mcduck___Reformed_Ebenezer": {
+      "old_id": "Winterspell_152_Scrooge_Mcduck___Reformed_Ebenezer",
+      "new_id": "Winterspell_152_Scrooge_McDuck___Reformed_Ebenezer",
+      "new_unique_id": "11-152",
+      "name": "Scrooge McDuck - Reformed Ebenezer",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_153_Splatter_Phoenix___Rejected_Artist": {
+      "old_id": "Winterspell_153_Splatter_Phoenix___Rejected_Artist",
+      "new_id": "Winterspell_153_Splatter_Phoenix___Rejected_Artist",
+      "new_unique_id": "11-153",
+      "name": "Splatter Phoenix - Rejected Artist",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_154_Pete___Ghost_of_Christmas_Future": {
+      "old_id": "Winterspell_154_Pete___Ghost_of_Christmas_Future",
+      "new_id": "Winterspell_154_Pete___Ghost_of_Christmas_Future",
+      "new_unique_id": "11-154",
+      "name": "Pete - Ghost of Christmas Future",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_242_Moana___Curious_Explorer": {
+      "old_id": "Winterspell_242_Moana___Curious_Explorer",
+      "new_id": "Winterspell_242_Moana___Curious_Explorer_Iconic",
+      "new_unique_id": "11-242",
+      "name": "Moana - Curious Explorer",
+      "set": "Winterspell",
+      "variant": "Iconic",
+      "match_method": "name+set"
+    },
+    "Winterspell_156_Tamatoa___Seeker_of_Shine": {
+      "old_id": "Winterspell_156_Tamatoa___Seeker_of_Shine",
+      "new_id": "Winterspell_237_Tamatoa___Seeker_of_Shine_Enchanted",
+      "new_unique_id": "11-237",
+      "name": "Tamatoa - Seeker of Shine",
+      "set": "Winterspell",
+      "variant": "Enchanted",
+      "match_method": "name+set"
+    },
+    "Winterspell_157_Morty_Fieldmouse___Tiny_Tim": {
+      "old_id": "Winterspell_157_Morty_Fieldmouse___Tiny_Tim",
+      "new_id": "Winterspell_157_Morty_Fieldmouse___Tiny_Tim",
+      "new_unique_id": "11-157",
+      "name": "Morty Fieldmouse - Tiny Tim",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_158_Belle___Snowfield_Strategist": {
+      "old_id": "Winterspell_158_Belle___Snowfield_Strategist",
+      "new_id": "Winterspell_236_Belle___Snowfield_Strategist_Enchanted",
+      "new_unique_id": "11-236",
+      "name": "Belle - Snowfield Strategist",
+      "set": "Winterspell",
+      "variant": "Enchanted",
+      "match_method": "name+set"
+    },
+    "Winterspell_160_Scrooge_Mcduck___Miserly_Ebenezer": {
+      "old_id": "Winterspell_160_Scrooge_Mcduck___Miserly_Ebenezer",
+      "new_id": "Winterspell_160_Scrooge_McDuck___Miserly_Ebenezer",
+      "new_unique_id": "11-160",
+      "name": "Scrooge McDuck - Miserly Ebenezer",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_161_Chief_Tui___Weaving_a_Tale": {
+      "old_id": "Winterspell_161_Chief_Tui___Weaving_a_Tale",
+      "new_id": "Winterspell_161_Chief_Tui___Weaving_a_Tale",
+      "new_unique_id": "11-161",
+      "name": "Chief Tui - Weaving a Tale",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_162_Visiting_Christmas_Past": {
+      "old_id": "Winterspell_162_Visiting_Christmas_Past",
+      "new_id": "Winterspell_162_Visiting_Christmas_Past",
+      "new_unique_id": "11-162",
+      "name": "Visiting Christmas Past",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_163_Let_It_Go": {
+      "old_id": "Winterspell_163_Let_It_Go",
+      "new_id": "Winterspell_163_Let_It_Go",
+      "new_unique_id": "11-163",
+      "name": "Let It Go",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_164_Distract": {
+      "old_id": "Winterspell_164_Distract",
+      "new_id": "Winterspell_164_Distract",
+      "new_unique_id": "11-164",
+      "name": "Distract",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_166_Blue_Smoke": {
+      "old_id": "Winterspell_166_Blue_Smoke",
+      "new_id": "Winterspell_166_Blue_Smoke",
+      "new_unique_id": "11-166",
+      "name": "Blue Smoke",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_167_Tiny_Tims_Crutch": {
+      "old_id": "Winterspell_167_Tiny_Tims_Crutch",
+      "new_id": "Winterspell_167_Tiny_Tims_Crutch",
+      "new_unique_id": "11-167",
+      "name": "Tiny Tim's Crutch",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_168_Darkwings_Chair_Set": {
+      "old_id": "Winterspell_168_Darkwings_Chair_Set",
+      "new_id": "Winterspell_168_Darkwings_Chair_Set",
+      "new_unique_id": "11-168",
+      "name": "Darkwing's Chair Set",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_169_Darkwings_Gas_Device": {
+      "old_id": "Winterspell_169_Darkwings_Gas_Device",
+      "new_id": "Winterspell_169_Darkwings_Gas_Device",
+      "new_unique_id": "11-169",
+      "name": "Darkwing's Gas Device",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_170_Hidden_Trap": {
+      "old_id": "Winterspell_170_Hidden_Trap",
+      "new_id": "Winterspell_170_Hidden_Trap",
+      "new_unique_id": "11-170",
+      "name": "Hidden Trap",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_222_Rapunzel___Ethereal_Protector": {
+      "old_id": "Winterspell_222_Rapunzel___Ethereal_Protector",
+      "new_id": "Winterspell_222_Rapunzel___Ethereal_Protector_Epic",
+      "new_unique_id": "11-222",
+      "name": "Rapunzel - Ethereal Protector",
+      "set": "Winterspell",
+      "variant": "Epic",
+      "match_method": "name+set"
+    },
+    "Winterspell_173_Prince_Naveen___Bundled_Up": {
+      "old_id": "Winterspell_173_Prince_Naveen___Bundled_Up",
+      "new_id": "Winterspell_173_Prince_Naveen___Bundled_Up",
+      "new_unique_id": "11-173",
+      "name": "Prince Naveen - Bundled Up",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_175_Li_Shang___Solemn_Son": {
+      "old_id": "Winterspell_175_Li_Shang___Solemn_Son",
+      "new_id": "Winterspell_175_Li_Shang___Solemn_Son",
+      "new_unique_id": "11-175",
+      "name": "Li Shang - Solemn Son",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_176_Gantu___Hamsterviel\u2019s_Accomplice": {
+      "old_id": "Winterspell_176_Gantu___Hamsterviel\u2019s_Accomplice",
+      "new_id": "Winterspell_176_Gantu___Hamsterviels_Accomplice",
+      "new_unique_id": "11-176",
+      "name": "Gantu - Hamsterviel's Accomplice",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_177_Launchpad___Trusty_Sidekick": {
+      "old_id": "Winterspell_177_Launchpad___Trusty_Sidekick",
+      "new_id": "Winterspell_177_Launchpad___Trusty_Sidekick",
+      "new_unique_id": "11-177",
+      "name": "Launchpad - Trusty Sidekick",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_178_Donald_Duck___Along_for_the_Ride": {
+      "old_id": "Winterspell_178_Donald_Duck___Along_for_the_Ride",
+      "new_id": "Winterspell_220_Donald_Duck___Along_for_the_Ride_Epic",
+      "new_unique_id": "11-220",
+      "name": "Donald Duck - Along for the Ride",
+      "set": "Winterspell",
+      "variant": "Epic",
+      "match_method": "name+set"
+    },
+    "Winterspell_179_Chief___Seasoned_Tracker": {
+      "old_id": "Winterspell_179_Chief___Seasoned_Tracker",
+      "new_id": "Winterspell_179_Chief___Seasoned_Tracker",
+      "new_unique_id": "11-179",
+      "name": "Chief - Seasoned Tracker",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_180_Amos_Slade___Tenacious_Tracker": {
+      "old_id": "Winterspell_180_Amos_Slade___Tenacious_Tracker",
+      "new_id": "Winterspell_180_Amos_Slade___Tenacious_Tracker",
+      "new_unique_id": "11-180",
+      "name": "Amos Slade - Tenacious Tracker",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_181_Mchorn___Ice_Cold_Officer": {
+      "old_id": "Winterspell_181_Mchorn___Ice_Cold_Officer",
+      "new_id": "Winterspell_181_McHorn___Ice_Cold_Officer",
+      "new_unique_id": "11-181",
+      "name": "McHorn - Ice-Cold Officer",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_182_Duke_Weaselton___Surly_Crook": {
+      "old_id": "Winterspell_182_Duke_Weaselton___Surly_Crook",
+      "new_id": "Winterspell_182_Duke_Weaselton___Surly_Crook",
+      "new_unique_id": "11-182",
+      "name": "Duke Weaselton - Surly Crook",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_184_Nani___No_Worries": {
+      "old_id": "Winterspell_184_Nani___No_Worries",
+      "new_id": "Winterspell_184_Nani___No_Worries",
+      "new_unique_id": "11-184",
+      "name": "Nani - No Worries",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_185_Stitch___High_Badness_Level": {
+      "old_id": "Winterspell_185_Stitch___High_Badness_Level",
+      "new_id": "Winterspell_185_Stitch___High_Badness_Level",
+      "new_unique_id": "11-185",
+      "name": "Stitch - High Badness Level",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_186_Dr._Hamsterviel___Infamous_Scientist": {
+      "old_id": "Winterspell_186_Dr._Hamsterviel___Infamous_Scientist",
+      "new_id": "Winterspell_186_Dr._Hamsterviel___Infamous_Scientist",
+      "new_unique_id": "11-186",
+      "name": "Dr. Hamsterviel - Infamous Scientist",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_189_Gigi___Best_in_Snow": {
+      "old_id": "Winterspell_189_Gigi___Best_in_Snow",
+      "new_id": "Winterspell_189_Gigi___Best_in_Snow",
+      "new_unique_id": "11-189",
+      "name": "Gigi - Best in Snow",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_190_Grand_Councilwoman___Galactic_Authority": {
+      "old_id": "Winterspell_190_Grand_Councilwoman___Galactic_Authority",
+      "new_id": "Winterspell_190_Grand_Councilwoman___Galactic_Authority",
+      "new_unique_id": "11-190",
+      "name": "Grand Councilwoman - Galactic Authority",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_191_Angel___Experiment_624": {
+      "old_id": "Winterspell_191_Angel___Experiment_624",
+      "new_id": "Winterspell_238_Angel___Experiment_624_Enchanted",
+      "new_unique_id": "11-238",
+      "name": "Angel - Experiment 624",
+      "set": "Winterspell",
+      "variant": "Enchanted",
+      "match_method": "name+set"
+    },
+    "Winterspell_192_Darkwing_Duck___Cool_Under_Pressure": {
+      "old_id": "Winterspell_192_Darkwing_Duck___Cool_Under_Pressure",
+      "new_id": "Winterspell_239_Darkwing_Duck___Cool_Under_Pressure_Enchanted",
+      "new_unique_id": "11-239",
+      "name": "Darkwing Duck - Cool Under Pressure",
+      "set": "Winterspell",
+      "variant": "Enchanted",
+      "match_method": "name+set"
+    },
+    "Winterspell_193_John_Smith___Undaunted_Protector": {
+      "old_id": "Winterspell_193_John_Smith___Undaunted_Protector",
+      "new_id": "Winterspell_193_John_Smith___Undaunted_Protector",
+      "new_unique_id": "11-193",
+      "name": "John Smith - Undaunted Protector",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_194_Judy_Hopps___Snowball_Patrol": {
+      "old_id": "Winterspell_194_Judy_Hopps___Snowball_Patrol",
+      "new_id": "Winterspell_221_Judy_Hopps___Snowball_Patrol_Epic",
+      "new_unique_id": "11-221",
+      "name": "Judy Hopps - Snowball Patrol",
+      "set": "Winterspell",
+      "variant": "Epic",
+      "match_method": "name+set"
+    },
+    "Winterspell_195_Lilo___Bundled_Up": {
+      "old_id": "Winterspell_195_Lilo___Bundled_Up",
+      "new_id": "Winterspell_195_Lilo___Bundled_Up",
+      "new_unique_id": "11-195",
+      "name": "Lilo - Bundled Up",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_196_Keep_The_Ancient_Ways": {
+      "old_id": "Winterspell_196_Keep_The_Ancient_Ways",
+      "new_id": "Winterspell_196_Keep_the_Ancient_Ways",
+      "new_unique_id": "11-196",
+      "name": "Keep the Ancient Ways",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_198_Lets_Get_Dangerous": {
+      "old_id": "Winterspell_198_Lets_Get_Dangerous",
+      "new_id": "Winterspell_240_Lets_Get_Dangerous_Enchanted",
+      "new_unique_id": "11-240",
+      "name": "Let's Get Dangerous",
+      "set": "Winterspell",
+      "variant": "Enchanted",
+      "match_method": "name+set"
+    },
+    "Winterspell_199_Winterspell": {
+      "old_id": "Winterspell_199_Winterspell",
+      "new_id": "Winterspell_199_Winterspell",
+      "new_unique_id": "11-199",
+      "name": "Winterspell",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_200_Nearly_Indestructible": {
+      "old_id": "Winterspell_200_Nearly_Indestructible",
+      "new_id": "Winterspell_200_Nearly_Indestructible",
+      "new_unique_id": "11-200",
+      "name": "Nearly Indestructible",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
+    },
+    "Winterspell_201_Infra_pink_Ultra_Scan_Specs": {
+      "old_id": "Winterspell_201_Infra_pink_Ultra_Scan_Specs",
+      "new_id": "Winterspell_201_Infra_Pink_Ultra_Scan_Specs",
+      "new_unique_id": "11-201",
+      "name": "Infra-Pink Ultra Scan Specs",
+      "set": "Winterspell",
+      "variant": "Normal",
+      "match_method": "name+set"
     }
   }
 }

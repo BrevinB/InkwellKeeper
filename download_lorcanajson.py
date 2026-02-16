@@ -64,7 +64,8 @@ def fetch_json(url: str) -> Any:
     """Fetch JSON data from URL"""
     print(f"📥 Fetching: {url}")
     try:
-        with urllib.request.urlopen(url) as response:
+        req = urllib.request.Request(url, headers={'User-Agent': 'InkwellKeeper/1.0'})
+        with urllib.request.urlopen(req) as response:
             return json.loads(response.read())
     except Exception as e:
         print(f"❌ Error fetching {url}: {e}")
