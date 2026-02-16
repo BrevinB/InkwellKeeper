@@ -81,6 +81,7 @@ struct CollectionCardDetailView: View {
     @State private var tempQuantity: Int = 1
     @State private var showingDeleteConfirmation = false
     @State private var showingFullscreenViewer = false
+    @State private var showingRulesAssistant = false
 
     var body: some View {
         NavigationView {
@@ -201,6 +202,19 @@ struct CollectionCardDetailView: View {
                     BuyCardOptionsView(card: card)
                         .padding(.horizontal)
 
+                    // Ask About Rules button
+                    Button(action: {
+                        showingRulesAssistant = true
+                    }) {
+                        HStack {
+                            Image(systemName: "book.circle")
+                            Text("Ask About Rules")
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(LorcanaButtonStyle(style: .secondary))
+                    .padding(.horizontal)
+
                     // Action buttons - show different buttons based on ownership
                     VStack(spacing: 12) {
                         if collectedCard != nil {
@@ -270,6 +284,9 @@ struct CollectionCardDetailView: View {
         }
         .fullScreenCover(isPresented: $showingFullscreenViewer) {
             FullscreenCardViewer(card: card)
+        }
+        .sheet(isPresented: $showingRulesAssistant) {
+            RulesAssistantView(initialCard: card)
         }
     }
 
