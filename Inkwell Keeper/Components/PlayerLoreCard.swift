@@ -42,10 +42,6 @@ struct PlayerLoreCard: View {
 
                 // +/- controls
                 loreControls
-                    .padding(.bottom, 6)
-
-                // Ink color selector
-                inkColorSelector
                     .padding(.bottom, 10)
             }
             .padding(.horizontal, 12)
@@ -263,31 +259,6 @@ struct PlayerLoreCard: View {
             )
         }
         .padding(.horizontal, 4)
-    }
-
-    private var inkColorSelector: some View {
-        HStack(spacing: 8) {
-            ForEach(InkColor.allCases, id: \.self) { ink in
-                let isSelected = player.inkColor == ink
-                ZStack {
-                    Circle()
-                        .fill(ink.color.opacity(isSelected ? 1.0 : 0.5))
-                        .frame(width: isSelected ? 20 : 14, height: isSelected ? 20 : 14)
-
-                    if isSelected {
-                        Circle()
-                            .stroke(Color.white.opacity(0.9), lineWidth: 2)
-                            .frame(width: 24, height: 24)
-                    }
-                }
-                .animation(.easeInOut(duration: 0.2), value: isSelected)
-                .onTapGesture {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        player.inkColor = ink
-                    }
-                }
-            }
-        }
     }
 
     private var customValueSheet: some View {
