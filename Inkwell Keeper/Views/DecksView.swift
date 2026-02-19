@@ -14,6 +14,7 @@ struct DecksView: View {
     @StateObject private var deckManager = DeckManager()
     @State private var showingCreateDeck = false
     @State private var showingStarterDecks = false
+    @State private var showingAIDeckBuilder = false
 
     var body: some View {
         navigationWrapper {
@@ -51,9 +52,16 @@ struct DecksView: View {
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showingCreateDeck = true }) {
-                        Image(systemName: "plus")
-                            .foregroundColor(.lorcanaGold)
+                    HStack(spacing: 16) {
+                        Button(action: { showingAIDeckBuilder = true }) {
+                            Image(systemName: "sparkles")
+                                .foregroundColor(.lorcanaGold)
+                        }
+
+                        Button(action: { showingCreateDeck = true }) {
+                            Image(systemName: "plus")
+                                .foregroundColor(.lorcanaGold)
+                        }
                     }
                 }
             }
@@ -69,6 +77,10 @@ struct DecksView: View {
             StarterDecksView()
                 .environmentObject(deckManager)
                 .environmentObject(collectionManager)
+        }
+        .sheet(isPresented: $showingAIDeckBuilder) {
+            AIDeckBuilderView()
+                .environmentObject(deckManager)
         }
     }
 
@@ -88,6 +100,7 @@ struct DecksView: View {
 struct EmptyDecksView: View {
     @Binding var showingCreateDeck: Bool
     @State private var showingStarterDecks = false
+    @State private var showingAIDeckBuilder = false
     @EnvironmentObject var deckManager: DeckManager
     @EnvironmentObject var collectionManager: CollectionManager
 
@@ -124,6 +137,26 @@ struct EmptyDecksView: View {
                     .cornerRadius(10)
                 }
 
+                Button(action: { showingAIDeckBuilder = true }) {
+                    HStack {
+                        Image(systemName: "sparkles")
+                        Text("AI Deck Builder")
+                    }
+                    .font(.headline)
+                    .foregroundColor(.lorcanaDark)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        LinearGradient(
+                            colors: [Color.lorcanaGold, Color.lorcanaGold.opacity(0.8)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(10)
+                }
+
                 Button(action: { showingStarterDecks = true }) {
                     HStack {
                         Image(systemName: "square.stack.3d.down.right.fill")
@@ -147,6 +180,10 @@ struct EmptyDecksView: View {
             StarterDecksView()
                 .environmentObject(deckManager)
                 .environmentObject(collectionManager)
+        }
+        .sheet(isPresented: $showingAIDeckBuilder) {
+            AIDeckBuilderView()
+                .environmentObject(deckManager)
         }
     }
 }
@@ -434,6 +471,7 @@ struct DeckDetailView: View {
     @State private var showingExport = false
     @State private var showingDeleteConfirm = false
     @State private var showingEditDeck = false
+    @State private var showingAICompleter = false
     @State private var exportedText = ""
 
     var statistics: DeckStatistics {
@@ -543,6 +581,10 @@ struct DeckDetailView: View {
                             Label("Add Cards", systemImage: "plus.circle")
                         }
 
+                        Button(action: { showingAICompleter = true }) {
+                            Label("AI Complete Deck", systemImage: "sparkles")
+                        }
+
                         Button(action: { showingEditDeck = true }) {
                             Label("Edit Deck Info", systemImage: "pencil")
                         }
@@ -576,6 +618,10 @@ struct DeckDetailView: View {
             DeckBuilderView(deck: deck)
                 .environmentObject(deckManager)
                 .environmentObject(collectionManager)
+        }
+        .sheet(isPresented: $showingAICompleter) {
+            AIDeckCompleterView(deck: deck)
+                .environmentObject(deckManager)
         }
         .sheet(isPresented: $showingExport) {
             ExportDeckView(deckText: exportedText, deckName: deck.name)
