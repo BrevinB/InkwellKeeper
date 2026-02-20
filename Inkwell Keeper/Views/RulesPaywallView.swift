@@ -42,6 +42,7 @@ struct RulesPaywallView: View {
                 // Features list
                 VStack(alignment: .leading, spacing: 16) {
                     featureRow(icon: "sparkles", title: "AI Rules Expert", description: "Ask any rules question and get accurate answers with rule citations")
+                    featureRow(icon: "wand.and.stars", title: "AI Deck Builder", description: "Generate complete decks from a description or get AI suggestions to finish partial decks")
                     featureRow(icon: "rectangle.stack.badge.plus", title: "Card Analysis", description: "Attach up to 4 cards to ask about specific interactions")
                     featureRow(icon: "bubble.left.and.bubble.right", title: "Chat History", description: "Save, pin, and revisit your past conversations")
                     featureRow(icon: "bolt.fill", title: "Streaming Responses", description: "See answers as they're generated in real time")
