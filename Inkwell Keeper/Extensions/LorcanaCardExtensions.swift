@@ -222,8 +222,17 @@ extension LorcanaCard {
 
     /// Create a new card instance with a different variant
     func withVariant(_ variant: CardVariant) -> LorcanaCard {
+        // Generate ID using the same format as LorcanaCard's JSON decoder to ensure consistency
+        let setCode = setName.prefix(3).uppercased().replacingOccurrences(of: " ", with: "")
+        let cardNum = cardNumber ?? 0
+        let variantCode = variant.shortName
+        let safeName = name
+            .replacingOccurrences(of: " ", with: "_")
+            .replacingOccurrences(of: "'", with: "")
+            .replacingOccurrences(of: "-", with: "_")
+        let newId = "\(setCode)_\(String(format: "%03d", cardNum))_\(variantCode)_\(safeName)"
         return LorcanaCard(
-            id: "\(self.setName)_\(self.cardNumber ?? 0)_\(variant.rawValue)_\(self.name.replacingOccurrences(of: " ", with: "_"))",
+            id: newId,
             name: self.name,
             cost: self.cost,
             type: self.type,
