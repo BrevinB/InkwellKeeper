@@ -27,14 +27,23 @@ class CollectionManager: ObservableObject {
     }
     
     func loadCollection() {
-        guard let context = modelContext else { return }
+        guard let context = modelContext else {
+            print("❌ [loadCollection] modelContext is nil")
+            return
+        }
 
         do {
+            // Fetch all cards (no predicate) first to see total count
+            let allDescriptor = FetchDescriptor<CollectedCard>()
+            let allCards = try context.fetch(allDescriptor)
+            print("📊 [loadCollection] Total cards in store: \(allCards.count)")
+
             let collectedDescriptor = FetchDescriptor<CollectedCard>(
                 predicate: #Predicate { $0.isWishlisted == false },
                 sortBy: [SortDescriptor(\.dateAdded, order: .reverse)]
             )
             let collectedData = try context.fetch(collectedDescriptor)
+            print("📊 [loadCollection] Fetched \(collectedData.count) collected, \(allCards.count - collectedData.count) wishlisted")
             let newCollectedCards = collectedData.map { $0.toLorcanaCard }
 
             let wishlistDescriptor = FetchDescriptor<CollectedCard>(
@@ -56,7 +65,7 @@ class CollectionManager: ObservableObject {
             }
 
         } catch {
-            // Handle error silently
+            print("❌ [loadCollection] Fetch error: \(error)")
         }
     }
     
@@ -71,12 +80,33 @@ class CollectionManager: ObservableObject {
         print("   uniqueId: \(card.uniqueId ?? "nil")")
         print("   cardNumber: \(card.cardNumber?.description ?? "nil")")
 
-        let descriptor = FetchDescriptor<CollectedCard>(
-            predicate: #Predicate<CollectedCard> { $0.cardId == card.id && $0.isWishlisted == false }
-        )
-
         do {
-            let existing = try context.fetch(descriptor).first
+            // Use uniqueId + variant for deduplication (more reliable than card.id which has format inconsistencies)
+            let existing: CollectedCard?
+            if let uniqueId = card.uniqueId, !uniqueId.isEmpty {
+                let variantString = card.variant.rawValue
+                let descriptor = FetchDescriptor<CollectedCard>(
+                    predicate: #Predicate<CollectedCard> {
+                        $0.uniqueId == uniqueId &&
+                        $0.variant == variantString &&
+                        $0.isWishlisted == false
+                    }
+                )
+                existing = try context.fetch(descriptor).first
+            } else {
+                let cardName = card.name
+                let setName = card.setName
+                let variantString = card.variant.rawValue
+                let descriptor = FetchDescriptor<CollectedCard>(
+                    predicate: #Predicate<CollectedCard> {
+                        $0.name == cardName &&
+                        $0.setName == setName &&
+                        $0.variant == variantString &&
+                        $0.isWishlisted == false
+                    }
+                )
+                existing = try context.fetch(descriptor).first
+            }
 
             if let existingCard = existing {
                 existingCard.quantity += quantity
@@ -103,17 +133,27 @@ class CollectionManager: ObservableObject {
             }
 
             try context.save()
+            print("   ✅ Saved successfully")
 
-            // Reload collection immediately after save
-            loadCollection()
-
-            // Update price in background
-            Task {
-                await updateCardPrice(card)
+            // Verify: count all cards in context right after save
+            let verifyDescriptor = FetchDescriptor<CollectedCard>()
+            if let verifyCards = try? context.fetch(verifyDescriptor) {
+                print("   📊 Context now has \(verifyCards.count) total card(s) after save")
+                for c in verifyCards {
+                    print("     - \(c.name) | uniqueId: \(c.uniqueId ?? "nil") | wishlisted: \(c.isWishlisted)")
+                }
             }
 
         } catch {
-            // Handle error silently
+            print("   ❌ [addCard] Error: \(error)")
+        }
+
+        // Always reload collection regardless of save success/failure
+        loadCollection()
+
+        // Update price on main actor to safely access ModelContext
+        Task { @MainActor in
+            await updateCardPrice(card)
         }
     }
     
@@ -392,6 +432,7 @@ class CollectionManager: ObservableObject {
         }
     }
     
+    @MainActor
     private func updateCardPrice(_ card: LorcanaCard) async {
         guard let context = modelContext else { return }
 
@@ -399,27 +440,36 @@ class CollectionManager: ObservableObject {
             let price = await pricingService.getMarketPrice(for: card)
 
             if let updatedPrice = price {
-                let descriptor = FetchDescriptor<CollectedCard>(
-                    predicate: #Predicate<CollectedCard> { $0.cardId == card.id }
-                )
+                // Match by uniqueId or name+set to find the stored card
+                let cardsToUpdate: [CollectedCard]
+                if let uniqueId = card.uniqueId, !uniqueId.isEmpty {
+                    let descriptor = FetchDescriptor<CollectedCard>(
+                        predicate: #Predicate<CollectedCard> { $0.uniqueId == uniqueId }
+                    )
+                    cardsToUpdate = try context.fetch(descriptor)
+                } else {
+                    let cardName = card.name
+                    let setName = card.setName
+                    let descriptor = FetchDescriptor<CollectedCard>(
+                        predicate: #Predicate<CollectedCard> { $0.name == cardName && $0.setName == setName }
+                    )
+                    cardsToUpdate = try context.fetch(descriptor)
+                }
 
-                let cardsToUpdate = try context.fetch(descriptor)
                 for cardData in cardsToUpdate {
                     cardData.price = updatedPrice
                 }
 
                 try context.save()
-
-                DispatchQueue.main.async {
-                    self.loadCollection()
-                }
+                loadCollection()
             }
         } catch {
-            // Handle error silently
+            print("❌ [updateCardPrice] Error: \(error)")
         }
     }
 
     /// Refresh prices for all cards in collection (call manually, not on every load)
+    @MainActor
     func refreshAllPrices() async {
         guard let context = modelContext else { return }
 
@@ -444,12 +494,9 @@ class CollectionManager: ObservableObject {
             }
 
             try context.save()
-
-            DispatchQueue.main.async {
-                self.loadCollection()
-            }
+            loadCollection()
         } catch {
-            // Handle error silently
+            print("❌ [refreshAllPrices] Error: \(error)")
         }
     }
     

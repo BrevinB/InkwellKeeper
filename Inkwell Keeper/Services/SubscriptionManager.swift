@@ -17,7 +17,7 @@ class SubscriptionManager: ObservableObject {
     @Published var isLoading = false
     @Published var error: String?
 
-    static let entitlementID = "pro"
+    static let entitlementID = "Ink Well Keeper Pro"
     static let offeringID = "default"
 
     private init() {}
@@ -64,10 +64,29 @@ class SubscriptionManager: ObservableObject {
             let result = try await Purchases.shared.purchase(package: package)
 
             if result.userCancelled {
+                print("[SubscriptionManager] Purchase cancelled by user")
                 return false
             }
 
-            let isNowSubscribed = result.customerInfo.entitlements[Self.entitlementID]?.isActive == true
+            // Log all entitlements so we can verify the entitlement ID is correct
+            let entitlements = result.customerInfo.entitlements.all
+            print("[SubscriptionManager] Purchase complete. Active entitlements: \(entitlements.keys.joined(separator: ", "))")
+            for (key, info) in entitlements {
+                print("[SubscriptionManager]   '\(key)' — isActive: \(info.isActive), productID: \(info.productIdentifier)")
+            }
+
+            var isNowSubscribed = result.customerInfo.entitlements[Self.entitlementID]?.isActive == true
+
+            // If the entitlement isn't showing yet (can happen in sandbox), invalidate
+            // the cache and re-fetch once to give RevenueCat a chance to sync.
+            if !isNowSubscribed {
+                print("[SubscriptionManager] Entitlement '\(Self.entitlementID)' not active in purchase result — forcing refresh...")
+                Purchases.shared.invalidateCustomerInfoCache()
+                let refreshed = try await Purchases.shared.customerInfo()
+                isNowSubscribed = refreshed.entitlements[Self.entitlementID]?.isActive == true
+                print("[SubscriptionManager] After refresh — isSubscribed: \(isNowSubscribed)")
+            }
+
             await MainActor.run {
                 self.isSubscribed = isNowSubscribed
             }
