@@ -99,6 +99,7 @@
 		C1D2E3F4A5B6C7D8E9F0A1B8 /* FullscreenCardViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6C7D8E9F0A1B7 /* FullscreenCardViewer.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C2 /* CloudKitKeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C1 /* CloudKitKeyService.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C4 /* OpenAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C3 /* OpenAIService.swift */; };
+		E2F3A4B5C6D7E8F9A0B1C3D5 /* MultiScanReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F3A4B5C6D7E8F9A0B1C3D4 /* MultiScanReviewView.swift */; };
 		F9FA8CEF18B640868AFA0847 /* whispers_in_the_well.json in Resources */ = {isa = PBXBuildFile; fileRef = B281D76F664D42E898C5AFFB /* whispers_in_the_well.json */; };
 /* End PBXBuildFile section */
 
@@ -196,6 +197,7 @@
 		C1D2E3F4A5B6C7D8E9F0A1B7 /* FullscreenCardViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullscreenCardViewer.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C6D7E8F9A0B1C1 /* CloudKitKeyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitKeyService.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C6D7E8F9A0B1C3 /* OpenAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIService.swift; sourceTree = "<group>"; };
+		E2F3A4B5C6D7E8F9A0B1C3D4 /* MultiScanReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiScanReviewView.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C6D7E8F9A0B1C5 /* Inkwell Keeper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Inkwell Keeper.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -355,6 +357,7 @@
 				2333654E2E77961C00BE5BD4 /* SetsView.swift */,
 				23B90B242E66334F00214C40 /* CollectionView.swift */,
 				23B90B2C2E66336400214C40 /* ScannerView.swift */,
+				E2F3A4B5C6D7E8F9A0B1C3D4 /* MultiScanReviewView.swift */,
 				23B90B2A2E66335E00214C40 /* StatsView.swift */,
 				23B90B282E66335A00214C40 /* WishlistView.swift */,
 				23B90B262E66335500214C40 /* DetailView.swift */,
@@ -538,6 +541,7 @@
 				23BC47A92F4ABE8100E7037B /* AIDeckBuilderView.swift in Sources */,
 				23B90AFC2E66323500214C40 /* ContentView.swift in Sources */,
 				23B90B2D2E66336600214C40 /* ScannerView.swift in Sources */,
+				E2F3A4B5C6D7E8F9A0B1C3D5 /* MultiScanReviewView.swift in Sources */,
 				23CB6DCD2EB6B02200630416 /* PriceWithConfidenceView.swift in Sources */,
 				23B90B232E66333D00214C40 /* CardTitle.swift in Sources */,
 				23B90B0B2E6632C700214C40 /* SearchBar.swift in Sources */,

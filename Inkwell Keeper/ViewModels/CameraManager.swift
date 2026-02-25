@@ -10,6 +10,13 @@ internal import AVFoundation
 import Vision
 import Combine
 
+struct ScannedCardEntry: Identifiable {
+    let id = UUID()
+    let card: LorcanaCard
+    var quantity: Int
+    let scannedAt: Date
+}
+
 class CameraManager: NSObject, ObservableObject {
     @Published var isSessionRunning = false
     @Published var detectedCard: LorcanaCard?
@@ -21,6 +28,11 @@ class CameraManager: NSObject, ObservableObject {
     @Published var isAutoScanPaused = false
     @Published var autoScanStatus: String? = nil
     @Published var debugText: String? = nil  // For showing detected OCR text
+
+    // Multi-scan mode
+    @Published var isMultiScanMode = false
+    @Published var scannedCards: [ScannedCardEntry] = []
+    @Published var lastScannedCardName: String? = nil
     
     private let captureSession = AVCaptureSession()
     private var currentDevice: AVCaptureDevice?
@@ -265,6 +277,65 @@ class CameraManager: NSObject, ObservableObject {
             startAutoScan()
         }
     }
+
+    // MARK: - Multi-Scan Mode
+
+    func toggleMultiScanMode() {
+        isMultiScanMode.toggle()
+
+        if isMultiScanMode {
+            // Auto-enable auto-scan when entering multi-scan mode
+            if !isAutoScanEnabled {
+                isAutoScanEnabled = true
+                startAutoScan()
+            }
+        }
+    }
+
+    private func addToScannedCards(_ card: LorcanaCard) {
+        // Check if this card was already scanned (by name + set to handle variants)
+        if let index = scannedCards.firstIndex(where: { $0.card.name == card.name && $0.card.setName == card.setName }) {
+            scannedCards[index].quantity += 1
+        } else {
+            scannedCards.append(ScannedCardEntry(card: card, quantity: 1, scannedAt: Date()))
+        }
+
+        lastScannedCardName = card.name
+
+        // Haptic feedback for successful scan
+        let feedback = UINotificationFeedbackGenerator()
+        feedback.notificationOccurred(.success)
+
+        // Clear the last scanned name after a moment
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+            if self?.lastScannedCardName == card.name {
+                self?.lastScannedCardName = nil
+            }
+        }
+    }
+
+    func removeScannedCard(at index: Int) {
+        guard index >= 0 && index < scannedCards.count else { return }
+        scannedCards.remove(at: index)
+    }
+
+    func updateScannedCardQuantity(at index: Int, quantity: Int) {
+        guard index >= 0 && index < scannedCards.count else { return }
+        if quantity <= 0 {
+            scannedCards.remove(at: index)
+        } else {
+            scannedCards[index].quantity = quantity
+        }
+    }
+
+    func clearScannedCards() {
+        scannedCards.removeAll()
+        lastScannedCardName = nil
+    }
+
+    var totalScannedCount: Int {
+        scannedCards.reduce(0) { $0 + $1.quantity }
+    }
 }
 
 extension CameraManager: AVCapturePhotoCaptureDelegate {
@@ -319,11 +390,16 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
             // Rectangle detection is now just a hint, not a hard requirement
             if let card = recognizedCard {
                 self.lastSuccessfulScanTime = Date()
-                self.detectedCard = card
+
+                if self.isMultiScanMode {
+                    self.addToScannedCards(card)
+                } else {
+                    self.detectedCard = card
+                }
             } else {
 
                 // Only show error for manual captures, not auto scan
-                if !self.isAutoScanEnabled {
+                if !self.isAutoScanEnabled && !self.isMultiScanMode {
                     if !cardDetected {
                         self.errorMessage = "No card detected. Try adjusting angle or lighting."
                     } else {
@@ -334,7 +410,7 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
                         self.errorMessage = nil
                     }
                 } else {
-                    // Show brief status for auto scan
+                    // Show brief status for auto scan / multi-scan
                     self.autoScanStatus = !cardDetected ? "Searching for card..." : "Reading card text..."
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                         self.autoScanStatus = nil

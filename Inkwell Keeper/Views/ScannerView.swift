@@ -14,8 +14,9 @@ struct ScannerView: View {
     @State private var showingManualAdd = false
     @State private var detectedCard: LorcanaCard?
     @State private var showingCardDetail = false
+    @State private var showingMultiScanReview = false
     @Binding var isActive: Bool  // Track if this tab is active
-    
+
     var body: some View {
         navigationWrapper {
             ZStack {
@@ -25,7 +26,7 @@ struct ScannerView: View {
                 } else {
                     Color.black.ignoresSafeArea(.all)
                 }
-                
+
                 // Capture flash effect
                 if cameraManager.showCaptureFlash {
                     Color.white
@@ -33,19 +34,19 @@ struct ScannerView: View {
                         .opacity(0.7)
                         .animation(.easeOut(duration: 0.2), value: cameraManager.showCaptureFlash)
                 }
-                
+
                 if let errorMessage = cameraManager.errorMessage {
                     VStack(spacing: 20) {
                         Image(systemName: "camera.fill")
                             .font(.system(size: 50))
                             .foregroundColor(.gray)
-                        
+
                         Text(errorMessage)
                             .font(.title2)
                             .multilineTextAlignment(.center)
                             .foregroundColor(.white)
                             .padding(.horizontal)
-                        
+
                         if cameraManager.permissionStatus == .denied {
                             Button("Open Settings") {
                                 if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
@@ -54,7 +55,7 @@ struct ScannerView: View {
                             }
                             .buttonStyle(LorcanaButtonStyle())
                         }
-                        
+
                         // Always show manual add when camera is unavailable
                         Button(action: { showingManualAdd = true }) {
                             HStack(spacing: 8) {
@@ -73,11 +74,16 @@ struct ScannerView: View {
                     }
                 } else {
                     VStack {
+                        // Multi-scan banner at top
+                        if cameraManager.isMultiScanMode {
+                            multiScanBanner
+                        }
+
                         Spacer()
-                        
+
                         ZStack {
                             ScanOverlay()
-                            
+
                             if cameraManager.isProcessingCard {
                                 RoundedRectangle(cornerRadius: 12)
                                     .fill(Color.black.opacity(0.7))
@@ -92,10 +98,31 @@ struct ScannerView: View {
                                         }
                                     )
                             }
+
+                            // Last scanned card toast in multi-scan mode
+                            if cameraManager.isMultiScanMode, let cardName = cameraManager.lastScannedCardName {
+                                VStack {
+                                    Spacer()
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(.green)
+                                        Text(cardName)
+                                            .foregroundColor(.white)
+                                            .fontWeight(.semibold)
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 10)
+                                    .background(Color.black.opacity(0.8))
+                                    .cornerRadius(20)
+                                    .padding(.bottom, 8)
+                                }
+                                .transition(.move(edge: .bottom).combined(with: .opacity))
+                                .animation(.easeInOut(duration: 0.3), value: cameraManager.lastScannedCardName)
+                            }
                         }
-                        
+
                         Spacer()
-                        
+
                         VStack(spacing: 20) {
                             // Auto scan status indicator
                             if cameraManager.isAutoScanEnabled {
@@ -128,7 +155,7 @@ struct ScannerView: View {
                                 .background(Color.black.opacity(0.7))
                                 .cornerRadius(20)
                             }
-                            
+
                             HStack(spacing: 40) {
                                 Button(action: { showingManualAdd = true }) {
                                     VStack {
@@ -139,7 +166,7 @@ struct ScannerView: View {
                                     }
                                     .foregroundColor(.lorcanaGold)
                                 }
-                                
+
                                 Button(action: cameraManager.capturePhoto) {
                                     Circle()
                                         .fill(Color.lorcanaGold)
@@ -159,7 +186,7 @@ struct ScannerView: View {
                                         )
                                 }
                                 .disabled(!cameraManager.isSessionRunning || cameraManager.isProcessingCard)
-                                
+
                                 Button(action: cameraManager.switchCamera) {
                                     VStack {
                                         Image(systemName: "camera.rotate.fill")
@@ -171,22 +198,41 @@ struct ScannerView: View {
                                 }
                                 .disabled(!cameraManager.isSessionRunning)
                             }
-                            
-                            // Auto scan toggle
-                            Button(action: cameraManager.toggleAutoScan) {
-                                HStack(spacing: 8) {
-                                    Image(systemName: cameraManager.isAutoScanEnabled ? "timer" : "timer.slash")
-                                        .font(.title2)
-                                    Text(cameraManager.isAutoScanEnabled ? "Stop Auto Scan" : "Start Auto Scan")
-                                        .font(.headline)
+
+                            // Scan mode toggles
+                            HStack(spacing: 16) {
+                                // Auto scan toggle
+                                Button(action: cameraManager.toggleAutoScan) {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: cameraManager.isAutoScanEnabled ? "timer" : "timer.slash")
+                                            .font(.body)
+                                        Text(cameraManager.isAutoScanEnabled ? "Auto Scan" : "Auto Scan")
+                                            .font(.subheadline)
+                                    }
+                                    .foregroundColor(cameraManager.isAutoScanEnabled ? .white : .lorcanaGold)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 10)
+                                    .background(cameraManager.isAutoScanEnabled ? Color.lorcanaGold.opacity(0.8) : Color.black.opacity(0.7))
+                                    .cornerRadius(25)
                                 }
-                                .foregroundColor(.lorcanaGold)
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 10)
-                                .background(Color.black.opacity(0.7))
-                                .cornerRadius(25)
+                                .disabled(!cameraManager.isSessionRunning)
+
+                                // Multi-scan toggle
+                                Button(action: cameraManager.toggleMultiScanMode) {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: cameraManager.isMultiScanMode ? "rectangle.stack.fill" : "rectangle.stack")
+                                            .font(.body)
+                                        Text("Multi Scan")
+                                            .font(.subheadline)
+                                    }
+                                    .foregroundColor(cameraManager.isMultiScanMode ? .white : .lorcanaGold)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 10)
+                                    .background(cameraManager.isMultiScanMode ? Color.lorcanaGold.opacity(0.8) : Color.black.opacity(0.7))
+                                    .cornerRadius(25)
+                                }
+                                .disabled(!cameraManager.isSessionRunning)
                             }
-                            .disabled(!cameraManager.isSessionRunning)
                         }
                         .padding(.bottom, 50)
                     }
@@ -210,6 +256,10 @@ struct ScannerView: View {
                 }, isWishlist: false)
                 .environmentObject(collectionManager)
             }
+        }
+        .sheet(isPresented: $showingMultiScanReview) {
+            MultiScanReviewView(cameraManager: cameraManager, isPresented: $showingMultiScanReview)
+                .environmentObject(collectionManager)
         }
         .onChange(of: cameraManager.detectedCard) { card in
             if let card = card {
@@ -247,6 +297,56 @@ struct ScannerView: View {
         .onDisappear {
             // Always stop when view disappears (app backgrounded, etc.)
             cameraManager.stopSession()
+        }
+    }
+
+    // MARK: - Multi-Scan Banner
+
+    private var multiScanBanner: some View {
+        Button(action: { showingMultiScanReview = true }) {
+            HStack(spacing: 12) {
+                // Scanned cards count badge
+                ZStack {
+                    Circle()
+                        .fill(Color.lorcanaGold)
+                        .frame(width: 36, height: 36)
+                    Text("\(cameraManager.totalScannedCount)")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.black)
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Multi Scan Mode")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                    Text(cameraManager.scannedCards.isEmpty
+                         ? "Scan cards to build a batch"
+                         : "\(cameraManager.scannedCards.count) unique card\(cameraManager.scannedCards.count == 1 ? "" : "s") scanned")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+
+                Spacer()
+
+                if !cameraManager.scannedCards.isEmpty {
+                    Text("Review")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.lorcanaGold)
+                        .cornerRadius(12)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(.ultraThinMaterial)
+            .cornerRadius(16)
+            .padding(.horizontal, 16)
+            .padding(.top, 60)
         }
     }
 
