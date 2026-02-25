@@ -61,6 +61,8 @@
 		23B90B392E66339400214C40 /* CollectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90B382E66338B00214C40 /* CollectionManager.swift */; };
 		23B90B3B2E6633AB00214C40 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90B3A2E6633A600214C40 /* CameraManager.swift */; };
 		23B90D1F2E6CCB7900214C40 /* PricingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90D1E2E6CCB7900214C40 /* PricingService.swift */; };
+		23BC47A72F4ABE7A00E7037B /* AIDeckService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23BC47A62F4ABE7A00E7037B /* AIDeckService.swift */; };
+		23BC47A92F4ABE8100E7037B /* AIDeckBuilderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23BC47A82F4ABE8100E7037B /* AIDeckBuilderView.swift */; };
 		23CA3B392ED3CB48006786F7 /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23CA3B382ED3CB48006786F7 /* WhatsNewView.swift */; };
 		23CA3B3B2ED3EA1F006786F7 /* SupportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23CA3B3A2ED3EA1F006786F7 /* SupportView.swift */; };
 		23CAFB0D2ECF3E6D006786F7 /* FoilEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23CAFB0C2ECF3E6D006786F7 /* FoilEffect.swift */; };
@@ -156,6 +158,8 @@
 		23B90B382E66338B00214C40 /* CollectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionManager.swift; sourceTree = "<group>"; };
 		23B90B3A2E6633A600214C40 /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
 		23B90D1E2E6CCB7900214C40 /* PricingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PricingService.swift; sourceTree = "<group>"; };
+		23BC47A62F4ABE7A00E7037B /* AIDeckService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIDeckService.swift; sourceTree = "<group>"; };
+		23BC47A82F4ABE8100E7037B /* AIDeckBuilderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIDeckBuilderView.swift; sourceTree = "<group>"; };
 		23CA3B382ED3CB48006786F7 /* WhatsNewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
 		23CA3B3A2ED3EA1F006786F7 /* SupportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportView.swift; sourceTree = "<group>"; };
 		23CAFB0C2ECF3E6D006786F7 /* FoilEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoilEffect.swift; sourceTree = "<group>"; };
@@ -316,6 +320,7 @@
 		23B90B012E66324900214C40 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				23BC47A62F4ABE7A00E7037B /* AIDeckService.swift */,
 				234EDF462F41766B0016D086 /* SubscriptionManager.swift */,
 				23D2466C2F2D9DEB00CF4128 /* RulesAssistantService.swift */,
 				D1E2F3A4B5C6D7E8F9A0B1C1 /* CloudKitKeyService.swift */,
@@ -334,6 +339,7 @@
 		23B90B022E66324F00214C40 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				23BC47A82F4ABE8100E7037B /* AIDeckBuilderView.swift */,
 				234EDF482F4176860016D086 /* RulesPaywallView.swift */,
 				23D2466A2F2D9DCE00CF4128 /* RulesAssistantView.swift */,
 				AA1B2C3D4E5F678901234564 /* LoreCounterView.swift */,
@@ -529,6 +535,7 @@
 				23D9D4482EA3FEFE0089D552 /* DecksView.swift in Sources */,
 				232D42952ECE321D00FF9283 /* TipJarManager.swift in Sources */,
 				23B90B1B2E66332100214C40 /* ScanOverlay.swift in Sources */,
+				23BC47A92F4ABE8100E7037B /* AIDeckBuilderView.swift in Sources */,
 				23B90AFC2E66323500214C40 /* ContentView.swift in Sources */,
 				23B90B2D2E66336600214C40 /* ScannerView.swift in Sources */,
 				23CB6DCD2EB6B02200630416 /* PriceWithConfidenceView.swift in Sources */,
@@ -538,6 +545,7 @@
 				23B90AFD2E66323500214C40 /* InkwellKeeperApp.swift in Sources */,
 				230F91D92EA89EA1006E5A70 /* StarterDeckModels.swift in Sources */,
 				23CB6DD12EB8546600630416 /* ImportService.swift in Sources */,
+				23BC47A72F4ABE7A00E7037B /* AIDeckService.swift in Sources */,
 				233365572E779F3F00BE5BD4 /* SetsDataManager.swift in Sources */,
 				23D9D44C2EA3FF210089D552 /* DeckManager.swift in Sources */,
 				23B90B192E66331200214C40 /* LorcanaBackground.swift in Sources */,

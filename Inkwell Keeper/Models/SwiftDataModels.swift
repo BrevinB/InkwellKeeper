@@ -82,12 +82,6 @@ class CollectedCard {
             dateAdded: dateAdded
         )
 
-        print("🔄 [toLorcanaCard] Loading card from database:")
-        print("   Name: \(name)")
-        print("   Variant: \(cardVariant.rawValue)")
-        print("   uniqueId: \(uniqueId ?? "nil")")
-        print("   cardNumber: \(cardNumber?.description ?? "nil")")
-
         return card
     }
 

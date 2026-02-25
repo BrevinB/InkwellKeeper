@@ -472,6 +472,7 @@ struct DeckDetailView: View {
     @State private var showingDeleteConfirm = false
     @State private var showingEditDeck = false
     @State private var showingAICompleter = false
+    @State private var showingAIStrategy = false
     @State private var exportedText = ""
 
     var statistics: DeckStatistics {
@@ -585,6 +586,10 @@ struct DeckDetailView: View {
                             Label("AI Complete Deck", systemImage: "sparkles")
                         }
 
+                        Button(action: { showingAIStrategy = true }) {
+                            Label("AI Strategy Guide", systemImage: "brain.head.profile")
+                        }
+
                         Button(action: { showingEditDeck = true }) {
                             Label("Edit Deck Info", systemImage: "pencil")
                         }
@@ -622,6 +627,10 @@ struct DeckDetailView: View {
         .sheet(isPresented: $showingAICompleter) {
             AIDeckCompleterView(deck: deck)
                 .environmentObject(deckManager)
+                .environmentObject(collectionManager)
+        }
+        .sheet(isPresented: $showingAIStrategy) {
+            AIDeckStrategyView(deck: deck)
         }
         .sheet(isPresented: $showingExport) {
             ExportDeckView(deckText: exportedText, deckName: deck.name)
