@@ -16,6 +16,8 @@ class CollectionManager: ObservableObject {
 
     @Published var collectedCards: [LorcanaCard] = []
     @Published var wishlistCards: [LorcanaCard] = []
+    /// Card name → total owned quantity (normal + foil), for AI deck building
+    @Published var collectedCardQuantities: [String: Int] = [:]
     
     init() {
         // Don't load mock data - start with empty collections
@@ -46,6 +48,16 @@ class CollectionManager: ObservableObject {
             print("📊 [loadCollection] Fetched \(collectedData.count) collected, \(allCards.count - collectedData.count) wishlisted")
             let newCollectedCards = collectedData.map { $0.toLorcanaCard }
 
+            // Build card name → total owned quantity (normal + foil only)
+            var quantities: [String: Int] = [:]
+            for card in collectedData {
+                let variant = CardVariant(rawValue: card.variant ?? "Normal") ?? .normal
+                if variant == .normal || variant == .foil {
+                    quantities[card.name, default: 0] += card.quantity
+                }
+            }
+            let newQuantities = quantities
+
             let wishlistDescriptor = FetchDescriptor<CollectedCard>(
                 predicate: #Predicate { $0.isWishlisted == true },
                 sortBy: [SortDescriptor(\.dateAdded, order: .reverse)]
@@ -57,10 +69,12 @@ class CollectionManager: ObservableObject {
             if Thread.isMainThread {
                 self.collectedCards = newCollectedCards
                 self.wishlistCards = newWishlistCards
+                self.collectedCardQuantities = newQuantities
             } else {
                 DispatchQueue.main.async {
                     self.collectedCards = newCollectedCards
                     self.wishlistCards = newWishlistCards
+                    self.collectedCardQuantities = newQuantities
                 }
             }
 
@@ -505,16 +519,6 @@ class CollectionManager: ObservableObject {
 
         // Get all cards in this set from the data manager
         let cardsInSet = dataManager.getCardsForSet(setName)
-
-        print("🔍 [getSetProgress] Checking set: \(setName)")
-        print("   Cards in set: \(cardsInSet.count)")
-        print("   Total collected cards: \(collectedCards.count)")
-        if collectedCards.count > 0 {
-            print("   All collected cards:")
-            for (idx, card) in collectedCards.enumerated() {
-                print("     \(idx + 1). \(card.name) - \(card.setName) (\(card.variant.rawValue)) - uniqueId: \(card.uniqueId ?? "nil")")
-            }
-        }
 
         // Count how many we have collected FROM THIS SPECIFIC SET
         var collectedCount = 0

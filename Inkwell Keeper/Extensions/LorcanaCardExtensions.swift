@@ -82,37 +82,6 @@ extension LorcanaCard {
             variantSuffix = "-iconic"
         }
 
-        print("🔍 [localImageUrl] Looking for image:")
-        print("   Card: \(name)")
-        print("   uniqueId: \(uniqueId)")
-        print("   Variant: \(variant.rawValue)")
-        print("   Folder: \(folderName)")
-        print("   Suffix: \(variantSuffix)")
-
-        // Debug: List what's actually in the bundle
-        if let bundlePath = Bundle.main.resourcePath {
-            print("   Bundle path: \(bundlePath)")
-
-            // Try to list the whispers_in_the_well folder contents
-            let possiblePaths = [
-                "\(bundlePath)/CardImages/\(folderName)",
-                "\(bundlePath)/Resources/CardImages/\(folderName)",
-                "\(bundlePath)/\(folderName)"
-            ]
-
-            for path in possiblePaths {
-                if FileManager.default.fileExists(atPath: path) {
-                    print("   📁 Found folder at: \(path)")
-                    if let contents = try? FileManager.default.contentsOfDirectory(atPath: path) {
-                        let enchantedFiles = contents.filter { $0.contains("enchanted") }.prefix(3)
-                        if !enchantedFiles.isEmpty {
-                            print("   Sample enchanted files: \(enchantedFiles.joined(separator: ", "))")
-                        }
-                    }
-                    break
-                }
-            }
-        }
 
         // Try both .png and .jpg extensions
         let extensions = ["jpg", "png", "avif"]
@@ -126,7 +95,6 @@ extension LorcanaCard {
                 forResource: filename.replacingOccurrences(of: ".\(ext)", with: ""),
                 withExtension: ext
             ) {
-                print("   ✅ Found: \(url.lastPathComponent) at bundle root")
                 return url
             }
 
