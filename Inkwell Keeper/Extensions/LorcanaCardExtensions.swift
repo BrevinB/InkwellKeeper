@@ -83,8 +83,8 @@ extension LorcanaCard {
         }
 
 
-        // Try both .png and .jpg extensions
-        let extensions = ["jpg", "png", "avif"]
+        // Try avif first (primary format from API, verified correct), then fallback formats
+        let extensions = ["avif", "jpg", "png"]
 
         for ext in extensions {
             let filename = "\(uniqueId)\(variantSuffix).\(ext)"
@@ -255,7 +255,7 @@ extension LorcanaCard {
         }
 
         // Check for file existence in bundle
-        let extensions = ["jpg", "png", "avif"]
+        let extensions = ["avif", "jpg", "png"]
         for ext in extensions {
             let filename = "\(uniqueId)\(variantSuffix)"
             if Bundle.main.url(forResource: filename, withExtension: ext) != nil {
