@@ -17,11 +17,24 @@ struct SetDetailView: View {
     @State private var showFilterOptions = false
     @State private var filterOption: FilterOption = .all
     @State private var searchText = ""
+    @State private var isBulkSelectMode = false
+    @State private var selectedCardIds: Set<String> = []
+    @State private var showBulkAddConfirmation = false
+    @State private var showQuickAddBanner = false
+    @State private var quickAddCardName = ""
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     private var gridHelper: AdaptiveGridHelper {
         AdaptiveGridHelper(horizontalSizeClass: horizontalSizeClass)
+    }
+
+    private var missingCards: [LorcanaCard] {
+        cards.filter { !isCardCollectedInSet($0) }
+    }
+
+    private var selectedCards: [LorcanaCard] {
+        cards.filter { selectedCardIds.contains($0.id) }
     }
     
     enum FilterOption: String, CaseIterable {
@@ -118,6 +131,32 @@ struct SetDetailView: View {
                         }
                     }
 
+                    // Bulk select controls
+                    if isBulkSelectMode {
+                        HStack {
+                            Button(action: {
+                                if selectedCardIds.count == missingCards.count {
+                                    selectedCardIds.removeAll()
+                                } else {
+                                    selectedCardIds = Set(missingCards.map { $0.id })
+                                }
+                            }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: selectedCardIds.count == missingCards.count ? "checkmark.circle.fill" : "circle")
+                                    Text(selectedCardIds.count == missingCards.count ? "Deselect All" : "Select All Missing")
+                                }
+                                .font(.caption)
+                                .foregroundColor(.lorcanaGold)
+                            }
+
+                            Spacer()
+
+                            Text("\(selectedCardIds.count) selected")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+                    }
+
                     // Search bar
                     SearchBar(text: $searchText)
                     
@@ -180,26 +219,84 @@ struct SetDetailView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    ScrollView {
-                        LazyVGrid(columns: gridHelper.setDetailColumns(), spacing: gridHelper.gridSpacing) {
-                            ForEach(filteredCards) { card in
-                                SetCardView(
-                                    card: card,
-                                    isCollected: isCardCollectedInSet(card),
-                                    quantity: getCardQuantityInSet(card),
-                                    onTap: {
-                                        if isCardCollectedInSet(card) {
-                                            // Show detail view for collected cards
-                                            selectedCard = card
-                                        } else {
-                                            // Show add modal for uncollected cards
-                                            selectedCardGroupForAdd = createCardGroup(from: card)
+                    ZStack(alignment: .bottom) {
+                        ScrollView {
+                            LazyVGrid(columns: gridHelper.setDetailColumns(), spacing: gridHelper.gridSpacing) {
+                                ForEach(filteredCards) { card in
+                                    SetCardView(
+                                        card: card,
+                                        isCollected: isCardCollectedInSet(card),
+                                        quantity: getCardQuantityInSet(card),
+                                        isBulkSelectMode: isBulkSelectMode,
+                                        isSelected: selectedCardIds.contains(card.id),
+                                        onTap: {
+                                            if isBulkSelectMode {
+                                                toggleCardSelection(card)
+                                            } else if isCardCollectedInSet(card) {
+                                                selectedCard = card
+                                            } else {
+                                                selectedCardGroupForAdd = createCardGroup(from: card)
+                                            }
+                                        },
+                                        onQuickAdd: {
+                                            quickAddCard(card)
                                         }
-                                    }
-                                )
+                                    )
+                                }
+                            }
+                            .padding(gridHelper.viewPadding)
+                            // Extra bottom padding when bulk add bar is visible
+                            if isBulkSelectMode {
+                                Spacer().frame(height: 80)
                             }
                         }
-                        .padding(gridHelper.viewPadding)
+
+                        // Bulk add floating bar
+                        if isBulkSelectMode && !selectedCardIds.isEmpty {
+                            VStack(spacing: 0) {
+                                Divider()
+                                    .background(Color.lorcanaGold.opacity(0.3))
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("\(selectedCardIds.count) card\(selectedCardIds.count == 1 ? "" : "s") selected")
+                                            .font(.subheadline)
+                                            .fontWeight(.medium)
+                                            .foregroundColor(.white)
+                                        Text("Will be added as Normal variant")
+                                            .font(.caption2)
+                                            .foregroundColor(.gray)
+                                    }
+
+                                    Spacer()
+
+                                    Button(action: {
+                                        showBulkAddConfirmation = true
+                                    }) {
+                                        HStack(spacing: 6) {
+                                            Image(systemName: "plus.circle.fill")
+                                            Text("Add All")
+                                        }
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.lorcanaDark)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 10)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .fill(Color.lorcanaGold)
+                                        )
+                                    }
+                                }
+                                .padding(.horizontal)
+                                .padding(.vertical, 12)
+                                .background(
+                                    Color.lorcanaDark.opacity(0.95)
+                                        .shadow(color: .black.opacity(0.3), radius: 10, y: -5)
+                                )
+                            }
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                            .animation(.spring(response: 0.3), value: selectedCardIds.isEmpty)
+                        }
                     }
                 }
             }
@@ -208,18 +305,41 @@ struct SetDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") {
-                        dismiss()
+                    if isBulkSelectMode {
+                        Button("Cancel") {
+                            isBulkSelectMode = false
+                            selectedCardIds.removeAll()
+                        }
+                    } else {
+                        Button("Done") {
+                            dismiss()
+                        }
                     }
                 }
-                
+
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { 
-                        dataManager.refreshPricesInBackground()
-                        loadCards()
-                    }) {
-                        Image(systemName: "arrow.clockwise")
-                            .foregroundColor(.lorcanaGold)
+                    HStack(spacing: 12) {
+                        if !isBulkSelectMode {
+                            Button(action: {
+                                isBulkSelectMode = true
+                                selectedCardIds.removeAll()
+                            }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "checklist")
+                                    Text("Bulk Add")
+                                        .font(.caption)
+                                }
+                                .foregroundColor(.lorcanaGold)
+                            }
+                        }
+
+                        Button(action: {
+                            dataManager.refreshPricesInBackground()
+                            loadCards()
+                        }) {
+                            Image(systemName: "arrow.clockwise")
+                                .foregroundColor(.lorcanaGold)
+                        }
                     }
                 }
             }
@@ -248,6 +368,46 @@ struct SetDetailView: View {
             )
             .environmentObject(collectionManager)
         }
+        .confirmationDialog(
+            "Add \(selectedCardIds.count) card\(selectedCardIds.count == 1 ? "" : "s") to collection?",
+            isPresented: $showBulkAddConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Add as Normal") {
+                bulkAddSelectedCards()
+            }
+            Button("Cancel", role: .cancel) {
+                showBulkAddConfirmation = false
+            }
+        } message: {
+            Text("All selected cards will be added as Normal variant with quantity 1.")
+        }
+        .overlay(
+            // Quick add success banner
+            VStack {
+                if showQuickAddBanner {
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.white)
+                        Text("\(quickAddCardName) added!")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.white)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.green.opacity(0.9))
+                    )
+                    .padding(.horizontal)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                }
+                Spacer()
+            }
+            .animation(.spring(response: 0.3), value: showQuickAddBanner)
+        )
     }
     
     private func loadCards() {
@@ -282,6 +442,36 @@ struct SetDetailView: View {
             name: card.name,
             cards: reprints.isEmpty ? [card] : reprints
         )
+    }
+
+    private func toggleCardSelection(_ card: LorcanaCard) {
+        if selectedCardIds.contains(card.id) {
+            selectedCardIds.remove(card.id)
+        } else {
+            // Only allow selecting uncollected cards
+            if !isCardCollectedInSet(card) {
+                selectedCardIds.insert(card.id)
+            }
+        }
+    }
+
+    private func quickAddCard(_ card: LorcanaCard) {
+        let normalCard = card.variant == .normal ? card : card.withVariant(.normal)
+        collectionManager.addCard(normalCard, quantity: 1)
+        quickAddCardName = card.name
+        showQuickAddBanner = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            showQuickAddBanner = false
+        }
+    }
+
+    private func bulkAddSelectedCards() {
+        for card in selectedCards {
+            let normalCard = card.variant == .normal ? card : card.withVariant(.normal)
+            collectionManager.addCard(normalCard, quantity: 1)
+        }
+        selectedCardIds.removeAll()
+        isBulkSelectMode = false
     }
 
     // Helper function to check if a specific card is collected
@@ -360,8 +550,11 @@ struct SetCardView: View {
     let card: LorcanaCard
     let isCollected: Bool
     let quantity: Int
+    var isBulkSelectMode: Bool = false
+    var isSelected: Bool = false
     let onTap: () -> Void
-    
+    var onQuickAdd: (() -> Void)? = nil
+
     var body: some View {
         VStack(spacing: 8) {
             ZStack {
@@ -378,22 +571,41 @@ struct SetCardView: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(
-                            isCollected ? card.rarity.color : Color.gray.opacity(0.5),
-                            lineWidth: isCollected ? 2 : 1
+                            isBulkSelectMode && isSelected ? Color.lorcanaGold :
+                            (isCollected ? card.rarity.color : Color.gray.opacity(0.5)),
+                            lineWidth: isBulkSelectMode && isSelected ? 3 : (isCollected ? 2 : 1)
                         )
                 )
-                
+
                 // Collection status overlay
                 VStack {
                     HStack {
                         Spacer()
-                        
-                        if isCollected {
+
+                        if isBulkSelectMode && !isCollected {
+                            // Bulk select checkbox
+                            ZStack {
+                                Circle()
+                                    .fill(isSelected ? Color.lorcanaGold : Color.black.opacity(0.5))
+                                    .frame(width: 26, height: 26)
+
+                                if isSelected {
+                                    Image(systemName: "checkmark")
+                                        .font(.caption)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.lorcanaDark)
+                                } else {
+                                    Circle()
+                                        .stroke(Color.white.opacity(0.7), lineWidth: 2)
+                                        .frame(width: 22, height: 22)
+                                }
+                            }
+                        } else if isCollected {
                             ZStack {
                                 Circle()
                                     .fill(Color.green)
                                     .frame(width: 24, height: 24)
-                                
+
                                 if quantity > 1 {
                                     Text("\(quantity)")
                                         .font(.caption2)
@@ -421,7 +633,32 @@ struct SetCardView: View {
                     Spacer()
                 }
                 .padding(6)
-                
+
+                // Quick add button (bottom-right, only for uncollected cards not in bulk mode)
+                if !isCollected && !isBulkSelectMode {
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                onQuickAdd?()
+                            }) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.lorcanaGold)
+                                        .frame(width: 28, height: 28)
+                                    Image(systemName: "plus")
+                                        .font(.caption)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.lorcanaDark)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(6)
+                }
+
                 // Rarity indicator
                 VStack {
                     Spacer()
@@ -432,7 +669,7 @@ struct SetCardView: View {
                 }
                 .padding(6)
             }
-            
+
             Text(card.name)
                 .font(.caption)
                 .fontWeight(.medium)
@@ -440,13 +677,13 @@ struct SetCardView: View {
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
 
-            // Show buy button for cards not in collection
-            if !isCollected {
+            // Show buy button for cards not in collection (hide in bulk mode)
+            if !isCollected && !isBulkSelectMode {
                 CompactBuyButton(card: card)
                     .padding(.top, 4)
             }
         }
-        .opacity(isCollected ? 1.0 : 0.6)
+        .opacity(isCollected ? 1.0 : (isBulkSelectMode && isSelected ? 1.0 : 0.6))
         .contentShape(Rectangle())
         .onTapGesture {
             onTap()
