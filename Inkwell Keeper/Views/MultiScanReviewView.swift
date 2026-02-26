@@ -47,19 +47,25 @@ struct MultiScanReviewView: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 16) {
-            Spacer()
+        VStack(spacing: 24) {
             Image(systemName: "rectangle.stack.badge.minus")
-                .font(.system(size: 50))
-                .foregroundColor(.gray)
-            Text("No cards scanned yet")
-                .font(.title3)
-                .foregroundColor(.gray)
-            Text("Go back and scan some cards!")
-                .font(.caption)
-                .foregroundColor(.gray.opacity(0.8))
-            Spacer()
+                .font(.system(size: 60))
+                .foregroundColor(.lorcanaGold.opacity(0.6))
+
+            VStack(spacing: 8) {
+                Text("No Cards Scanned Yet")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+
+                Text("Go back and scan some cards!")
+                    .font(.body)
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+            }
         }
+        .padding(40)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var cardList: some View {
@@ -97,17 +103,11 @@ struct MultiScanReviewView: View {
 
             Button(action: addAllToCollection) {
                 HStack(spacing: 8) {
-                    if addedAll {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.title2)
-                        Text("Added to Collection!")
-                            .font(.headline)
-                    } else {
-                        Image(systemName: "plus.rectangle.on.folder.fill")
-                            .font(.title2)
-                        Text("Add All to Collection")
-                            .font(.headline)
-                    }
+                    Image(systemName: addedAll ? "checkmark.circle.fill" : "plus.rectangle.on.folder.fill")
+                        .font(.title2)
+                        .contentTransition(.symbolEffect(.replace))
+                    Text(addedAll ? "Added to Collection!" : "Add All to Collection")
+                        .font(.headline)
                 }
                 .foregroundColor(addedAll ? .white : .black)
                 .frame(maxWidth: .infinity)
@@ -129,7 +129,9 @@ struct MultiScanReviewView: View {
             }
         }
 
-        addedAll = true
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+            addedAll = true
+        }
 
         // Haptic feedback
         let feedback = UINotificationFeedbackGenerator()
@@ -188,7 +190,10 @@ struct ScannedCardRow: View {
                     Image(systemName: "minus.circle.fill")
                         .font(.title3)
                         .foregroundColor(entry.quantity <= 1 ? .red.opacity(0.6) : .lorcanaGold)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.borderless)
 
                 Text("\(entry.quantity)")
                     .font(.headline)
@@ -201,7 +206,10 @@ struct ScannedCardRow: View {
                     Image(systemName: "plus.circle.fill")
                         .font(.title3)
                         .foregroundColor(.lorcanaGold)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.borderless)
             }
         }
         .padding(.vertical, 4)
