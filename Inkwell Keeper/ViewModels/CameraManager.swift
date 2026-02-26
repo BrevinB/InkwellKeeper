@@ -10,6 +10,13 @@ internal import AVFoundation
 import Vision
 import Combine
 
+struct ScannedCardEntry: Identifiable {
+    let id = UUID()
+    let card: LorcanaCard
+    var quantity: Int
+    let scannedAt: Date
+}
+
 class CameraManager: NSObject, ObservableObject {
     @Published var isSessionRunning = false
     @Published var detectedCard: LorcanaCard?
@@ -20,7 +27,10 @@ class CameraManager: NSObject, ObservableObject {
     @Published var isAutoScanEnabled = false
     @Published var isAutoScanPaused = false
     @Published var autoScanStatus: String? = nil
-    @Published var debugText: String? = nil  // For showing detected OCR text
+    // Multi-scan mode
+    @Published var isMultiScanMode = false
+    @Published var scannedCards: [ScannedCardEntry] = []
+    @Published var lastScannedCardName: String? = nil
     
     private let captureSession = AVCaptureSession()
     private var currentDevice: AVCaptureDevice?
@@ -265,6 +275,57 @@ class CameraManager: NSObject, ObservableObject {
             startAutoScan()
         }
     }
+
+    // MARK: - Multi-Scan Mode
+
+    func toggleMultiScanMode() {
+        isMultiScanMode.toggle()
+    }
+
+    private func addToScannedCards(_ card: LorcanaCard) {
+        // Check if this card was already scanned (by name + set to handle variants)
+        if let index = scannedCards.firstIndex(where: { $0.card.name == card.name && $0.card.setName == card.setName }) {
+            scannedCards[index].quantity += 1
+        } else {
+            scannedCards.append(ScannedCardEntry(card: card, quantity: 1, scannedAt: Date()))
+        }
+
+        lastScannedCardName = card.name
+
+        // Haptic feedback for successful scan
+        let feedback = UINotificationFeedbackGenerator()
+        feedback.notificationOccurred(.success)
+
+        // Clear the last scanned name after a moment
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+            if self?.lastScannedCardName == card.name {
+                self?.lastScannedCardName = nil
+            }
+        }
+    }
+
+    func removeScannedCard(at index: Int) {
+        guard index >= 0 && index < scannedCards.count else { return }
+        scannedCards.remove(at: index)
+    }
+
+    func updateScannedCardQuantity(at index: Int, quantity: Int) {
+        guard index >= 0 && index < scannedCards.count else { return }
+        if quantity <= 0 {
+            scannedCards.remove(at: index)
+        } else {
+            scannedCards[index].quantity = quantity
+        }
+    }
+
+    func clearScannedCards() {
+        scannedCards.removeAll()
+        lastScannedCardName = nil
+    }
+
+    var totalScannedCount: Int {
+        scannedCards.reduce(0) { $0 + $1.quantity }
+    }
 }
 
 extension CameraManager: AVCapturePhotoCaptureDelegate {
@@ -319,11 +380,16 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
             // Rectangle detection is now just a hint, not a hard requirement
             if let card = recognizedCard {
                 self.lastSuccessfulScanTime = Date()
-                self.detectedCard = card
+
+                if self.isMultiScanMode {
+                    self.addToScannedCards(card)
+                } else {
+                    self.detectedCard = card
+                }
             } else {
 
                 // Only show error for manual captures, not auto scan
-                if !self.isAutoScanEnabled {
+                if !self.isAutoScanEnabled && !self.isMultiScanMode {
                     if !cardDetected {
                         self.errorMessage = "No card detected. Try adjusting angle or lighting."
                     } else {
@@ -334,7 +400,7 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
                         self.errorMessage = nil
                     }
                 } else {
-                    // Show brief status for auto scan
+                    // Show brief status for auto scan / multi-scan
                     self.autoScanStatus = !cardDetected ? "Searching for card..." : "Reading card text..."
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                         self.autoScanStatus = nil
@@ -368,11 +434,6 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
                 observation.topCandidates(1).first?.string
             }
 
-
-            // Update debug text for troubleshooting
-            DispatchQueue.main.async {
-                self.debugText = detectedTexts.prefix(10).joined(separator: "\n")
-            }
 
             self.searchForCard(with: detectedTexts, completion: completion)
         }
@@ -408,42 +469,30 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
                 }
             }
 
-            print("📝 [Scan] Detected texts: \(detectedTexts.prefix(10).joined(separator: " | "))")
-
             // First, try to find card names in the detected text
             let potentialNames = extractCardNames(from: detectedTexts)
-
-            print("🔍 [Scan] Extracted potential names: \(potentialNames.prefix(5).joined(separator: " | "))")
 
             for name in potentialNames {
                 let results = setsDataManager.searchCards(query: name)
 
-                print("📊 [Scan] Search '\(name)' returned \(results.count) results")
-
                 if !results.isEmpty {
                     if let bestMatch = findBestMatch(for: name, in: results, allDetectedTexts: detectedTexts) {
-                        print("✅ [Scan] Found card: \(bestMatch.name)")
                         completion(bestMatch)
                         return
                     }
                 }
             }
 
-            print("⚠️ [Scan] No match found from extracted names")
-
             // If no specific searches found results, try broader search with all text combined
             let combinedText = detectedTexts.filter { $0.count > 2 }.joined(separator: " ")
             if !combinedText.isEmpty {
-                print("🔍 [Scan] Trying fallback search with combined text")
                 let fallbackResults = setsDataManager.searchCards(query: combinedText)
                 if let bestMatch = fallbackResults.first {
-                    print("✅ [Scan] Fallback found: \(bestMatch.name)")
                     completion(bestMatch)
                     return
                 }
             }
 
-            print("❌ [Scan] No card found")
             completion(nil)
         }
     }
@@ -577,13 +626,10 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
     }
     
     private func findBestMatch(for searchTerm: String, in cards: [LorcanaCard], allDetectedTexts: [String]) -> LorcanaCard? {
-        print("🔎 [Scan] Finding best match for: '\(searchTerm)' in \(cards.count) cards")
-
         let lowercaseSearch = searchTerm.lowercased()
 
         // Look for exact matches first (highest priority)
         if let exactMatch = cards.first(where: { $0.name.lowercased() == lowercaseSearch }) {
-            print("✅ [Scan] Exact match found: \(exactMatch.name)")
             return exactMatch
         }
 
@@ -606,8 +652,6 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
                 possibleSubName = words.dropFirst().joined(separator: " ").lowercased()
             }
 
-            print("🔍 [Scan] Split search - Main: '\(possibleMainName)', Sub: '\(possibleSubName)'")
-
             // Priority 1: Both parts match exactly
             for card in cards {
                 let cardParts = card.name.components(separatedBy: " - ")
@@ -616,7 +660,6 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
                     let cardSubName = cardParts[1].lowercased().trimmingCharacters(in: .whitespaces)
 
                     if cardMainName == possibleMainName && cardSubName == possibleSubName {
-                        print("✅ [Scan] Exact split match: \(card.name)")
                         return card
                     }
                 }
@@ -630,7 +673,6 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
                     let cardSubName = cardParts[1].lowercased()
 
                     if cardMainName.contains(possibleMainName) && cardSubName.contains(possibleSubName) {
-                        print("✅ [Scan] Partial split match: \(card.name)")
                         return card
                     }
                 }
@@ -643,7 +685,6 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
                     let cardSubName = cardParts[1].lowercased()
 
                     if cardSubName == possibleSubName || cardSubName.contains(possibleSubName) {
-                        print("✅ [Scan] Subname match: \(card.name)")
                         return card
                     }
                 }
@@ -658,10 +699,8 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
         }
 
         if mainNameMatches.count == 1 {
-            print("✅ [Scan] Single main name match: \(mainNameMatches[0].name)")
             return mainNameMatches.first
         } else if mainNameMatches.count > 1 {
-            print("⚠️ [Scan] Multiple variants found for '\(searchTerm)': \(mainNameMatches.map { $0.name }.joined(separator: ", "))")
 
             // Try to disambiguate by checking if any subtitle words appear in ALL detected texts
             let allTextLowercased = allDetectedTexts.map { $0.lowercased() }.joined(separator: " ")
@@ -675,7 +714,6 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
                     // Check if any significant word from the subtitle appears in the detected text
                     for word in subWords where word.count > 3 {  // Only check words longer than 3 chars
                         if allTextLowercased.contains(word) {
-                            print("✅ [Scan] Disambiguated using subtitle word '\(word)': \(card.name)")
                             return card
                         }
                     }
@@ -688,28 +726,22 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
                 return card1.setName > card2.setName
             }
 
-            print("⚠️ [Scan] Could not disambiguate, preferring most recent set: \(sortedBySet[0].name) from \(sortedBySet[0].setName)")
             return sortedBySet.first
         }
 
         // Priority 5: Cards that start with the search term
         let startsWithMatches = cards.filter { $0.name.lowercased().hasPrefix(lowercaseSearch) }
         if !startsWithMatches.isEmpty {
-            print("✅ [Scan] Prefix match: \(startsWithMatches.first!.name)")
             return startsWithMatches.first
         }
 
         // Priority 6: Cards that contain the search term anywhere
         let containsMatches = cards.filter { $0.name.lowercased().contains(lowercaseSearch) }
         if !containsMatches.isEmpty {
-            print("✅ [Scan] Contains match: \(containsMatches.first!.name)")
             return containsMatches.first
         }
 
         // Last resort: return first result
-        if let first = cards.first {
-            print("⚠️ [Scan] No good match, returning first: \(first.name)")
-        }
         return cards.first
     }
 }
