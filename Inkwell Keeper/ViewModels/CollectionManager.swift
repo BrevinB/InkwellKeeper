@@ -13,6 +13,7 @@ import Combine
 class CollectionManager: ObservableObject {
     private var modelContext: ModelContext?
     private let pricingService = PricingService.shared
+    private let imageStorage = CardImageStorageService.shared
 
     @Published var collectedCards: [LorcanaCard] = []
     @Published var wishlistCards: [LorcanaCard] = []
@@ -173,14 +174,17 @@ class CollectionManager: ObservableObject {
     
     func removeCard(_ card: LorcanaCard) {
         guard let context = modelContext else { return }
-        
+
         let descriptor = FetchDescriptor<CollectedCard>(
             predicate: #Predicate<CollectedCard> { $0.cardId == card.id && $0.isWishlisted == false }
         )
-        
+
         do {
             let cardsToDelete = try context.fetch(descriptor)
             for cardData in cardsToDelete {
+                // Clean up attached images from disk
+                let fileNames = (cardData.imageAttachments ?? []).map { $0.fileName }
+                imageStorage.deleteImages(fileNames: fileNames)
                 context.delete(cardData)
             }
             try context.save()
@@ -278,6 +282,8 @@ class CollectionManager: ObservableObject {
             let allCards = try context.fetch(descriptor)
 
             for card in allCards {
+                let fileNames = (card.imageAttachments ?? []).map { $0.fileName }
+                imageStorage.deleteImages(fileNames: fileNames)
                 context.delete(card)
             }
 
@@ -298,10 +304,12 @@ class CollectionManager: ObservableObject {
         guard let context = modelContext else { return }
 
         do {
-            // Delete all CollectedCards (collection and wishlist)
+            // Delete all CollectedCards (collection and wishlist) and their image files
             let collectedDescriptor = FetchDescriptor<CollectedCard>()
             let allCollectedCards = try context.fetch(collectedDescriptor)
             for card in allCollectedCards {
+                let fileNames = (card.imageAttachments ?? []).map { $0.fileName }
+                imageStorage.deleteImages(fileNames: fileNames)
                 context.delete(card)
             }
 
@@ -741,6 +749,42 @@ class CollectionManager: ObservableObject {
         } catch {
             return 0
         }
+    }
+
+    // MARK: - Image Attachments
+
+    func addImageAttachment(to collectedCard: CollectedCard, image: UIImage) -> CardImageAttachment? {
+        guard let context = modelContext else { return nil }
+        guard let fileName = imageStorage.saveImage(image) else { return nil }
+
+        let attachment = CardImageAttachment(fileName: fileName, card: collectedCard)
+        context.insert(attachment)
+
+        do {
+            try context.save()
+            return attachment
+        } catch {
+            print("❌ [addImageAttachment] Error: \(error)")
+            imageStorage.deleteImage(fileName: fileName)
+            return nil
+        }
+    }
+
+    func removeImageAttachment(_ attachment: CardImageAttachment) {
+        guard let context = modelContext else { return }
+
+        imageStorage.deleteImage(fileName: attachment.fileName)
+        context.delete(attachment)
+
+        do {
+            try context.save()
+        } catch {
+            print("❌ [removeImageAttachment] Error: \(error)")
+        }
+    }
+
+    func getImageAttachments(for collectedCard: CollectedCard) -> [CardImageAttachment] {
+        return (collectedCard.imageAttachments ?? []).sorted { $0.dateAdded < $1.dateAdded }
     }
 }
 

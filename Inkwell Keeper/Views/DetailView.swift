@@ -198,6 +198,16 @@ struct CollectionCardDetailView: View {
                             .fill(Color.lorcanaDark.opacity(0.8))
                     )
 
+                    // User card photos section (only for owned cards)
+                    if let collected = collectedCard {
+                        CardImageAttachmentView(collectedCard: collected)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color.lorcanaDark.opacity(0.8))
+                            )
+                    }
+
                     // Check Prices section
                     BuyCardOptionsView(card: card)
                         .padding(.horizontal)

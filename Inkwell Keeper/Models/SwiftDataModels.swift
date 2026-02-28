@@ -30,6 +30,9 @@ class CollectedCard {
     var uniqueId: String?
     var cardNumber: Int?
 
+    @Relationship(deleteRule: .cascade, inverse: \CardImageAttachment.card)
+    var imageAttachments: [CardImageAttachment]?
+
     var cardRarity: CardRarity {
         get { CardRarity(rawValue: rarity) ?? .common }
         set { rarity = newValue.rawValue }
@@ -146,5 +149,22 @@ class PriceHistory {
         self.price = price
         self.date = Date()
         self.source = source
+    }
+}
+
+@Model
+class CardImageAttachment {
+    @Attribute(.unique) var id: UUID
+    var fileName: String
+    var dateAdded: Date
+
+    @Relationship(deleteRule: .nullify)
+    var card: CollectedCard?
+
+    init(fileName: String, card: CollectedCard) {
+        self.id = UUID()
+        self.fileName = fileName
+        self.dateAdded = Date()
+        self.card = card
     }
 }

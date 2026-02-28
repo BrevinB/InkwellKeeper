@@ -41,6 +41,7 @@ struct InkwellKeeperApp: App {
             let c = try ModelContainer(
                 for: CollectedCard.self, CardSet.self, CollectionStats.self,
                 PriceHistory.self, Deck.self, DeckCard.self,
+                CardImageAttachment.self,
                 configurations: config
             )
             print("✅ [ModelContainer] Opened successfully at \(config.url.path)")
@@ -65,6 +66,7 @@ struct InkwellKeeperApp: App {
             let c = try ModelContainer(
                 for: CollectedCard.self, CardSet.self, CollectionStats.self,
                 PriceHistory.self, Deck.self, DeckCard.self,
+                CardImageAttachment.self,
                 configurations: config
             )
             print("✅ [ModelContainer] Recovery successful — fresh store created")
