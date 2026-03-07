@@ -16,6 +16,7 @@ struct ScannerView: View {
     @State private var showingCardDetail = false
     @State private var showingMultiScanReview = false
     @State private var isCapturePressed = false
+    @State private var showingCorrectionSearch = false
     @Binding var isActive: Bool  // Track if this tab is active
 
     var body: some View {
@@ -88,20 +89,65 @@ struct ScannerView: View {
                             }
 
                             // Last scanned card toast in multi-scan mode
-                            if cameraManager.isMultiScanMode, let cardName = cameraManager.lastScannedCardName {
+                            if cameraManager.isMultiScanMode, let entry = cameraManager.lastScannedEntry {
                                 VStack {
                                     Spacer()
-                                    HStack(spacing: 8) {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(.green)
-                                        Text(cardName)
-                                            .foregroundColor(.white)
-                                            .fontWeight(.semibold)
+                                    HStack(spacing: 10) {
+                                        // Card thumbnail
+                                        AsyncImage(url: entry.card.bestImageUrl()) { image in
+                                            image
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fit)
+                                        } placeholder: {
+                                            RoundedRectangle(cornerRadius: 4)
+                                                .fill(Color.gray.opacity(0.3))
+                                        }
+                                        .frame(width: 32, height: 45)
+                                        .clipShape(RoundedRectangle(cornerRadius: 4))
+
+                                        // Card name (tappable area)
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            HStack(spacing: 4) {
+                                                Image(systemName: "checkmark.circle.fill")
+                                                    .foregroundColor(.green)
+                                                    .font(.caption)
+                                                Text(entry.card.name)
+                                                    .foregroundColor(.white)
+                                                    .fontWeight(.semibold)
+                                                    .font(.subheadline)
+                                                    .lineLimit(1)
+                                            }
+                                            Text("Tap to correct")
+                                                .font(.caption2)
+                                                .foregroundColor(.gray)
+                                        }
+                                        .onTapGesture {
+                                            showingCorrectionSearch = true
+                                        }
+
+                                        Spacer()
+
+                                        // Undo button
+                                        Button(action: {
+                                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                                cameraManager.undoLastScan()
+                                            }
+                                        }) {
+                                            Text("Undo")
+                                                .font(.caption)
+                                                .fontWeight(.bold)
+                                                .foregroundColor(.lorcanaGold)
+                                                .padding(.horizontal, 10)
+                                                .padding(.vertical, 6)
+                                                .background(Color.lorcanaGold.opacity(0.2))
+                                                .cornerRadius(12)
+                                        }
                                     }
-                                    .padding(.horizontal, 16)
+                                    .padding(.horizontal, 14)
                                     .padding(.vertical, 10)
-                                    .background(Color.black.opacity(0.8))
-                                    .cornerRadius(20)
+                                    .background(Color.black.opacity(0.85))
+                                    .cornerRadius(16)
+                                    .padding(.horizontal, 16)
                                     .padding(.bottom, 8)
                                 }
                                 .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -139,6 +185,9 @@ struct ScannerView: View {
             MultiScanReviewView(cameraManager: cameraManager, isPresented: $showingMultiScanReview)
                 .environmentObject(collectionManager)
         }
+        .sheet(isPresented: $showingCorrectionSearch) {
+            ScanCorrectionSearchView(cameraManager: cameraManager, isPresented: $showingCorrectionSearch)
+        }
         .onChange(of: cameraManager.detectedCard) { card in
             if let card = card {
                 detectedCard = card
@@ -157,6 +206,17 @@ struct ScannerView: View {
                 // Add 2-second buffer to allow user to reposition phone
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                     if cameraManager.isAutoScanEnabled && !showingCardDetail {
+                        cameraManager.resumeAutoScan()
+                    }
+                }
+            }
+        }
+        .onChange(of: showingCorrectionSearch) { isShowing in
+            if isShowing {
+                cameraManager.pauseAutoScan()
+            } else if cameraManager.isAutoScanEnabled {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    if cameraManager.isAutoScanEnabled && !showingCorrectionSearch {
                         cameraManager.resumeAutoScan()
                     }
                 }
@@ -289,7 +349,7 @@ struct ScannerView: View {
             }
 
             // Scan mode toggles
-            HStack(spacing: 16) {
+            HStack(spacing: 12) {
                 ScanToggleButton(
                     label: "Auto Scan",
                     icon: cameraManager.isAutoScanEnabled ? "timer" : "timer.slash",
@@ -303,6 +363,14 @@ struct ScannerView: View {
                     icon: cameraManager.isMultiScanMode ? "rectangle.stack.fill" : "rectangle.stack",
                     isActive: cameraManager.isMultiScanMode,
                     action: cameraManager.toggleMultiScanMode
+                )
+                .disabled(!cameraManager.isSessionRunning)
+
+                ScanToggleButton(
+                    label: "Foil",
+                    icon: cameraManager.isFoilMode ? "sparkles" : "sparkles",
+                    isActive: cameraManager.isFoilMode,
+                    action: { cameraManager.isFoilMode.toggle() }
                 )
                 .disabled(!cameraManager.isSessionRunning)
             }
@@ -410,6 +478,87 @@ struct ScannerView: View {
 }
 
 // MARK: - Scan Toggle Button
+
+// MARK: - Scan Correction Search View
+
+struct ScanCorrectionSearchView: View {
+    @ObservedObject var cameraManager: CameraManager
+    @Binding var isPresented: Bool
+    @StateObject private var dataManager = SetsDataManager.shared
+    @State private var searchText = ""
+    @State private var searchResults: [LorcanaCard] = []
+    @State private var searchTask: Task<Void, Never>?
+
+    var body: some View {
+        NavigationView {
+            VStack {
+                SearchBar(text: $searchText)
+                    .padding()
+                    .onChange(of: searchText) { newValue in
+                        searchTask?.cancel()
+                        searchTask = Task {
+                            try? await Task.sleep(nanoseconds: 200_000_000)
+                            if !Task.isCancelled {
+                                await MainActor.run {
+                                    searchCards(query: newValue)
+                                }
+                            }
+                        }
+                    }
+
+                if searchResults.isEmpty && !searchText.isEmpty {
+                    VStack(spacing: 16) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.largeTitle)
+                            .foregroundColor(.gray)
+                        Text("No cards found")
+                            .foregroundColor(.gray)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if searchText.isEmpty {
+                    VStack(spacing: 16) {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                            .font(.largeTitle)
+                            .foregroundColor(.gray)
+                        Text("Search for the correct card")
+                            .foregroundColor(.gray)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    List(searchResults, id: \.id) { card in
+                        SimpleCardSearchRow(card: card) {
+                            cameraManager.replaceLastScannedCard(with: card)
+                            isPresented = false
+                        }
+                    }
+                    .listStyle(PlainListStyle())
+                    .scrollContentBackground(.hidden)
+                }
+            }
+            .background(LorcanaBackground())
+            .navigationTitle("Correct Card")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Cancel") {
+                        isPresented = false
+                    }
+                }
+            }
+        }
+        .onDisappear {
+            searchTask?.cancel()
+        }
+    }
+
+    private func searchCards(query: String) {
+        guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            searchResults = []
+            return
+        }
+        searchResults = dataManager.searchCards(query: query)
+    }
+}
 
 private struct ScanToggleButton: View {
     let label: String

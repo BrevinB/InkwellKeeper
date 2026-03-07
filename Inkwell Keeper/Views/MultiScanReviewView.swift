@@ -75,6 +75,9 @@ struct MultiScanReviewView: View {
                     entry: entry,
                     onQuantityChange: { newQuantity in
                         cameraManager.updateScannedCardQuantity(at: index, quantity: newQuantity)
+                    },
+                    onVariantChange: { newVariant in
+                        cameraManager.updateScannedCardVariant(at: index, variant: newVariant)
                     }
                 )
                 .listRowBackground(Color.white.opacity(0.05))
@@ -124,8 +127,9 @@ struct MultiScanReviewView: View {
 
     private func addAllToCollection() {
         for entry in cameraManager.scannedCards {
+            let card = entry.card.withVariant(entry.variant)
             for _ in 0..<entry.quantity {
-                collectionManager.addCard(entry.card)
+                collectionManager.addCard(card)
             }
         }
 
@@ -148,6 +152,7 @@ struct MultiScanReviewView: View {
 struct ScannedCardRow: View {
     let entry: ScannedCardEntry
     let onQuantityChange: (Int) -> Void
+    let onVariantChange: (CardVariant) -> Void
 
     var body: some View {
         HStack(spacing: 12) {
@@ -177,6 +182,16 @@ struct ScannedCardRow: View {
                         .foregroundColor(.gray)
 
                     RarityBadge(rarity: entry.card.rarity)
+                }
+
+                // Variant picker
+                HStack(spacing: 6) {
+                    VariantChip(label: "Normal", isSelected: entry.variant == .normal) {
+                        onVariantChange(.normal)
+                    }
+                    VariantChip(label: "Foil", isSelected: entry.variant == .foil) {
+                        onVariantChange(.foil)
+                    }
                 }
             }
 
@@ -213,5 +228,25 @@ struct ScannedCardRow: View {
             }
         }
         .padding(.vertical, 4)
+    }
+}
+
+private struct VariantChip: View {
+    let label: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(label)
+                .font(.caption2)
+                .fontWeight(isSelected ? .bold : .regular)
+                .foregroundColor(isSelected ? .black : .gray)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(isSelected ? Color.lorcanaGold : Color.white.opacity(0.1))
+                .cornerRadius(8)
+        }
+        .buttonStyle(.borderless)
     }
 }

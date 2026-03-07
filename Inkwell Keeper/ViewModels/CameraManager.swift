@@ -12,9 +12,10 @@ import Combine
 
 struct ScannedCardEntry: Identifiable {
     let id = UUID()
-    let card: LorcanaCard
+    var card: LorcanaCard
     var quantity: Int
     let scannedAt: Date
+    var variant: CardVariant = .normal
 }
 
 class CameraManager: NSObject, ObservableObject {
@@ -31,6 +32,8 @@ class CameraManager: NSObject, ObservableObject {
     @Published var isMultiScanMode = false
     @Published var scannedCards: [ScannedCardEntry] = []
     @Published var lastScannedCardName: String? = nil
+    @Published var lastScannedEntry: ScannedCardEntry? = nil
+    @Published var isFoilMode = false
     
     private let captureSession = AVCaptureSession()
     private var currentDevice: AVCaptureDevice?
@@ -283,23 +286,85 @@ class CameraManager: NSObject, ObservableObject {
     }
 
     private func addToScannedCards(_ card: LorcanaCard) {
-        // Check if this card was already scanned (by name + set to handle variants)
-        if let index = scannedCards.firstIndex(where: { $0.card.name == card.name && $0.card.setName == card.setName }) {
+        let variant: CardVariant = isFoilMode ? .foil : .normal
+        let cardWithVariant = card.withVariant(variant)
+
+        // Check if this card+variant was already scanned
+        if let index = scannedCards.firstIndex(where: { $0.card.name == card.name && $0.card.setName == card.setName && $0.variant == variant }) {
             scannedCards[index].quantity += 1
         } else {
-            scannedCards.append(ScannedCardEntry(card: card, quantity: 1, scannedAt: Date()))
+            scannedCards.append(ScannedCardEntry(card: cardWithVariant, quantity: 1, scannedAt: Date(), variant: variant))
         }
 
         lastScannedCardName = card.name
+        lastScannedEntry = scannedCards.first(where: { $0.card.name == card.name && $0.card.setName == card.setName })
 
         // Haptic feedback for successful scan
         let feedback = UINotificationFeedbackGenerator()
         feedback.notificationOccurred(.success)
 
-        // Clear the last scanned name after a moment
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+        // Clear the last scanned info after a moment (longer to allow undo/correction)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) { [weak self] in
             if self?.lastScannedCardName == card.name {
                 self?.lastScannedCardName = nil
+                self?.lastScannedEntry = nil
+            }
+        }
+    }
+
+    func undoLastScan() {
+        guard let entry = lastScannedEntry else { return }
+
+        // Find the matching card in scannedCards and decrement or remove
+        if let index = scannedCards.firstIndex(where: { $0.card.name == entry.card.name && $0.card.setName == entry.card.setName }) {
+            if scannedCards[index].quantity > 1 {
+                scannedCards[index].quantity -= 1
+            } else {
+                scannedCards.remove(at: index)
+            }
+        }
+
+        // Clear toast immediately
+        lastScannedCardName = nil
+        lastScannedEntry = nil
+
+        // Haptic feedback for undo
+        let feedback = UIImpactFeedbackGenerator(style: .light)
+        feedback.impactOccurred()
+    }
+
+    func replaceLastScannedCard(with newCard: LorcanaCard) {
+        guard let entry = lastScannedEntry else { return }
+
+        // Remove the wrongly scanned card
+        if let index = scannedCards.firstIndex(where: { $0.card.name == entry.card.name && $0.card.setName == entry.card.setName }) {
+            if scannedCards[index].quantity > 1 {
+                scannedCards[index].quantity -= 1
+            } else {
+                scannedCards.remove(at: index)
+            }
+        }
+
+        // Add the correct card
+        if let existingIndex = scannedCards.firstIndex(where: { $0.card.name == newCard.name && $0.card.setName == newCard.setName }) {
+            scannedCards[existingIndex].quantity += 1
+        } else {
+            scannedCards.append(ScannedCardEntry(card: newCard, quantity: 1, scannedAt: Date()))
+        }
+
+        // Update toast to show the corrected card
+        lastScannedCardName = newCard.name
+        lastScannedEntry = scannedCards.first(where: { $0.card.name == newCard.name && $0.card.setName == newCard.setName })
+
+        // Haptic feedback
+        let feedback = UINotificationFeedbackGenerator()
+        feedback.notificationOccurred(.success)
+
+        // Clear after delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) { [weak self] in
+            if self?.lastScannedCardName == newCard.name {
+                self?.lastScannedCardName = nil
+                self?.lastScannedEntry = nil
             }
         }
     }
@@ -316,6 +381,12 @@ class CameraManager: NSObject, ObservableObject {
         } else {
             scannedCards[index].quantity = quantity
         }
+    }
+
+    func updateScannedCardVariant(at index: Int, variant: CardVariant) {
+        guard index >= 0 && index < scannedCards.count else { return }
+        scannedCards[index].variant = variant
+        scannedCards[index].card = scannedCards[index].card.withVariant(variant)
     }
 
     func clearScannedCards() {

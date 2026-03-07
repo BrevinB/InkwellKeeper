@@ -212,18 +212,26 @@ class SetsDataManager: ObservableObject {
         return groupCards(cards)
     }
 
-    /// Group cards by name (for handling reprints)
+    /// Group cards by name, keeping special variants (Enchanted/Promo/Epic/Iconic) separate
     private func groupCards(_ cards: [LorcanaCard]) -> [CardGroup] {
         var grouped: [String: [LorcanaCard]] = [:]
 
         for card in cards {
-            grouped[card.name, default: []].append(card)
+            // Special variants are distinct cards (different art/rarity), so group them separately
+            let isSpecial = card.variant == .enchanted || card.variant == .promo ||
+                            card.variant == .epic || card.variant == .iconic
+            let groupKey = isSpecial ? "\(card.name)_\(card.variant.rawValue)_\(card.uniqueId ?? card.setName)" : card.name
+            grouped[groupKey, default: []].append(card)
         }
 
-        return grouped.map { name, cards in
-            CardGroup(
-                id: name.replacingOccurrences(of: " ", with: "_"),
-                name: name,
+        return grouped.map { key, cards in
+            let displayName = cards[0].name
+            let isSpecial = cards[0].variant == .enchanted || cards[0].variant == .promo ||
+                            cards[0].variant == .epic || cards[0].variant == .iconic
+            let suffix = isSpecial ? " (\(cards[0].variant.displayName))" : ""
+            return CardGroup(
+                id: key.replacingOccurrences(of: " ", with: "_"),
+                name: displayName + suffix,
                 cards: cards.sorted { ($0.setName, $0.uniqueId ?? "") > ($1.setName, $1.uniqueId ?? "") }
             )
         }.sorted { $0.name < $1.name }

@@ -50,8 +50,6 @@ class DataMigrationService {
         migrationMapPath: String = "Inkwell Keeper/Data/migration_map.json",
         dataManager: SetsDataManager
     ) async throws -> MigrationResult {
-        print("🔄 Starting collection migration...")
-
         // Load migration map
         guard let migrationData = loadMigrationMap(path: migrationMapPath) else {
             throw MigrationError.invalidMigrationMap
@@ -62,8 +60,6 @@ class DataMigrationService {
         // Fetch all collected cards
         let descriptor = FetchDescriptor<CollectedCard>()
         let collectedCards = try context.fetch(descriptor)
-
-        print("   Found \(collectedCards.count) cards in collection")
 
         var successCount = 0
         var failCount = 0
@@ -123,15 +119,11 @@ class DataMigrationService {
 
                 successCount += 1
                 migratedCards.append((oldId, newCard.id, matchMethod))
-
-                print("   ✅ Migrated: \(cardName) (\(matchMethod))")
             } else {
                 // No match found - preserve existing data
                 preserveCount += 1
                 failCount += 1
                 unmatchedCards.append((cardName, setName))
-
-                print("   ⚠️  Preserved (no match): \(cardName) from \(setName)")
             }
         }
 
@@ -147,19 +139,11 @@ class DataMigrationService {
             unmatchedCards: unmatchedCards
         )
 
-        print()
-        print("✅ Migration complete!")
-        print("   Total: \(result.totalCards)")
-        print("   Migrated: \(result.successfulMigrations) (\(String(format: "%.1f", result.successRate))%)")
-        print("   Preserved: \(result.preservedCards)")
-
         return result
     }
 
     /// Create a backup of the current database state
     func createBackup(context: ModelContext) throws -> URL {
-        print("💾 Creating database backup...")
-
         let backupDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Backups")
 
@@ -192,15 +176,11 @@ class DataMigrationService {
         let jsonData = try encoder.encode(exportData)
         try jsonData.write(to: backupFile)
 
-        print("   ✅ Backup saved to: \(backupFile.lastPathComponent)")
-
         return backupFile
     }
 
     /// Restore collection from backup
     func restoreFromBackup(context: ModelContext, backupURL: URL) throws {
-        print("♻️ Restoring from backup...")
-
         let jsonData = try Data(contentsOf: backupURL)
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
@@ -241,14 +221,12 @@ class DataMigrationService {
 
         try context.save()
 
-        print("   ✅ Restored \(backupData.count) cards")
     }
 
     // MARK: - Helper Methods
 
     private func loadMigrationMap(path: String) -> [String: Any]? {
         guard let url = Bundle.main.url(forResource: path.replacingOccurrences(of: ".json", with: ""), withExtension: "json") else {
-            print("   ⚠️  Migration map not found at: \(path)")
             return nil
         }
 
@@ -257,7 +235,6 @@ class DataMigrationService {
             let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
             return json
         } catch {
-            print("   ❌ Error loading migration map: \(error)")
             return nil
         }
     }

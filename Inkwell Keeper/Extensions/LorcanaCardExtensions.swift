@@ -36,7 +36,6 @@ extension LorcanaCard {
     /// Returns nil if local image not found
     func localImageUrl() -> URL? {
         guard let uniqueId = self.uniqueId else {
-            print("⚠️ [localImageUrl] No uniqueId for card: \(name)")
             return nil
         }
 
@@ -60,7 +59,6 @@ extension LorcanaCard {
         ]
 
         guard let folderName = setFolderMap[setName] else {
-            print("⚠️ [localImageUrl] No folder mapping for set: \(setName)")
             return nil
         }
 
@@ -88,7 +86,6 @@ extension LorcanaCard {
 
         for ext in extensions {
             let filename = "\(uniqueId)\(variantSuffix).\(ext)"
-            print("   Trying: \(filename)")
 
             // Try at bundle root (no subdirectory) - Xcode flattens folder references
             if let url = Bundle.main.url(
@@ -111,13 +108,11 @@ extension LorcanaCard {
                     withExtension: ext,
                     subdirectory: subdirectory
                 ) {
-                    print("   ✅ Found: \(url.lastPathComponent) in \(subdirectory)")
                     return url
                 }
             }
         }
 
-        print("   ❌ No local image found in any path")
         return nil
     }
 

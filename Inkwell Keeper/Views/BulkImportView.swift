@@ -449,12 +449,8 @@ struct BulkImportView: View {
         switch result {
         case .success(let urls):
             guard let url = urls.first else {
-                print("❌ [Import] No URL selected")
-                return
+                    return
             }
-
-            print("📂 [Import] Selected file: \(url.lastPathComponent)")
-            print("📂 [Import] File path: \(url.path)")
 
             // Start accessing security-scoped resource (important for iOS)
             let didStartAccessing = url.startAccessingSecurityScopedResource()
@@ -466,23 +462,18 @@ struct BulkImportView: View {
 
             do {
                 let text = try String(contentsOf: url, encoding: .utf8)
-                print("✅ [Import] Successfully read file: \(text.count) characters")
                 importText = text
                 isFileImport = true
                 fileName = url.lastPathComponent
             } catch {
-                print("❌ [Import] Failed to read file: \(error)")
-                print("❌ [Import] Error details: \(error.localizedDescription)")
-
                 // Show alert to user
                 DispatchQueue.main.async {
                     // You could set a @State error message here to show in UI
                 }
             }
 
-        case .failure(let error):
-            print("❌ [Import] File picker error: \(error)")
-            print("❌ [Import] Error details: \(error.localizedDescription)")
+        case .failure:
+            break
         }
     }
 
@@ -493,7 +484,6 @@ struct BulkImportView: View {
         Task {
             // Auto-detect format based on content
             let detectedFormat = detectFormat(from: importText)
-            print("🔍 [Import] Auto-detected format: \(detectedFormat.description)")
 
             let result = await ImportService.shared.importFromText(
                 importText,

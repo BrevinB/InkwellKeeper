@@ -29,7 +29,7 @@ struct CollectionOverviewCard: View {
                 }
                 
                 VStack {
-                    Text("$\(totalValue, specifier: "%.2f")")
+                    Text(PricingService.formatPrice(totalValue))
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundColor(.lorcanaGold)
@@ -232,7 +232,7 @@ struct CollectionStatsButton: View {
     
     var body: some View {
         VStack(alignment: .trailing, spacing: 2) {
-            Text("$\(stats.totalValue, specifier: "%.0f")")
+            Text(PricingService.formatPrice(stats.totalValue))
                 .font(.headline)
                 .foregroundColor(.lorcanaGold)
             Text("\(stats.cardCount) cards")

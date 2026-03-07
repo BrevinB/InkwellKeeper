@@ -26,7 +26,10 @@ struct CardTile: View {
     private let pricingService = PricingService.shared
     
     private var collectedCard: CollectedCard? {
-        collectionManager.getCollectedCardData(for: card)
+        if card.variant == .normal || card.variant == .foil {
+            return collectionManager.getCollectedCardDataForVariant(card)
+        }
+        return collectionManager.getCollectedCardData(for: card)
     }
     
     var body: some View {
