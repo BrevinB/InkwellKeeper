@@ -11,17 +11,28 @@ import Combine
 class PricingService: ObservableObject {
     static let shared = PricingService()
 
+    static func formatPrice(_ value: Double) -> String {
+        let currency = UserDefaults.standard.string(forKey: "preferredCurrency") ?? "USD"
+        let symbol = currency == "EUR" ? "€" : "$"
+        return String(format: "%@%.2f", symbol, value)
+    }
+
+    static var preferredCurrency: String {
+        UserDefaults.standard.string(forKey: "preferredCurrency") ?? "USD"
+    }
+
     private let session = URLSession.shared
     private var priceHistory: [String: PriceHistory] = [:]
     private var pricingCache: [String: (pricing: CardPricing, cachedAt: Date)] = [:]
     private let cacheExpirationMinutes: TimeInterval = 60 // Cache for 1 hour
 
     private init() {
-        print("🚀 [Pricing] PricingService initialized as singleton")
     }
     
     // MARK: - Pricing Providers
     enum PricingProvider: String, Codable {
+        case inkwellAPI
+        case lorcanaAPI
         case ximilar
         case priceCharting
         case tcgPlayer
@@ -92,48 +103,37 @@ class PricingService: ObservableObject {
         if let cached = pricingCache[cacheKey] {
             let cacheAge = Date().timeIntervalSince(cached.cachedAt)
             if cacheAge < cacheExpirationMinutes * 60 {
-                print("💾 [Pricing] Using cached price for: \(card.name) (age: \(Int(cacheAge/60))m)")
                 return cached.pricing
             } else {
-                print("⏰ [Pricing] Cache expired for: \(card.name)")
             }
         }
 
         // Try multiple providers in order of preference
-        // eBay provides the most accurate pricing (actual sold listings)
-        // TCGPlayer web scraping may fail due to JavaScript-loaded prices
-        let providers: [PricingProvider] = [.eBayAverage, .tcgPlayer, .ximilar, .priceCharting]
-
-        print("💎 [Pricing] Fetching price for: \(card.name)")
+        // Lorcana Prices API provides real-time Cardmarket data (most accurate for Lorcana)
+        // eBay provides actual sold listings as a fallback
+        let providers: [PricingProvider] = [.inkwellAPI, .lorcanaAPI, .eBayAverage, .tcgPlayer, .ximilar, .priceCharting]
 
         var rateLimitHit = false
 
         for provider in providers {
-            print("🔄 [Pricing] Trying provider: \(provider.description)")
             do {
                 let pricing = try await fetchPricing(for: card, condition: condition, provider: provider)
-                print("✅ [Pricing] Success with \(provider.description)")
 
                 // Cache the successful result
                 pricingCache[cacheKey] = (pricing, Date())
-                print("💾 [Pricing] Cached result for: \(card.name)")
 
                 return pricing
             } catch PricingError.rateLimitExceeded(let resetTime) {
-                print("⏱️ [Pricing] \(provider.description) rate limit exceeded")
                 rateLimitHit = true
                 continue
             } catch {
-                print("⚠️ [Pricing] \(provider.description) failed: \(error.localizedDescription)")
                 continue
             }
         }
 
         // If all providers fail, return estimated pricing
         if rateLimitHit {
-            print("📊 [Pricing] Rate limit hit, using estimation (eBay resets daily)")
         } else {
-            print("📊 [Pricing] All providers failed, using estimation")
         }
 
         let estimatedPricing = generateEstimatedPricing(for: card, condition: condition)
@@ -149,23 +149,28 @@ class PricingService: ObservableObject {
             guard let pricing = try await getPricing(for: card, condition: condition) else {
                 return estimatePrice(for: card)
             }
-            
-            // Calculate average price for the requested condition
-            let relevantPrices = pricing.prices.filter { $0.condition == condition }
+
+            // Prefer prices matching the user's preferred currency
+            let preferred = PricingService.preferredCurrency
+            let preferredPrices = pricing.prices.filter { $0.currency == preferred && $0.condition == condition }
+            let relevantPrices = preferredPrices.isEmpty ? pricing.prices.filter { $0.condition == condition } : preferredPrices
+
             guard !relevantPrices.isEmpty else {
-                // If no prices for specific condition, use all prices
-                let averagePrice = pricing.prices.map { $0.price }.reduce(0, +) / Double(pricing.prices.count)
+                // If no prices for specific condition, use all preferred-currency prices or all prices
+                let allPreferred = pricing.prices.filter { $0.currency == preferred }
+                let allPrices = allPreferred.isEmpty ? pricing.prices : allPreferred
+                let averagePrice = allPrices.map { $0.price }.reduce(0, +) / Double(allPrices.count)
                 trackPrice(for: card, price: averagePrice, condition: condition, source: pricing.source)
                 return averagePrice
             }
-            
+
             let averagePrice = relevantPrices.map { $0.price }.reduce(0, +) / Double(relevantPrices.count)
-            
+
             // Track the price for historical purposes
             trackPrice(for: card, price: averagePrice, condition: condition, source: pricing.source)
-            
+
             return averagePrice
-            
+
         } catch {
             let estimatedPrice = estimatePrice(for: card)
             return estimatedPrice
@@ -179,8 +184,21 @@ class PricingService: ObservableObject {
                 return (estimatePrice(for: card), .estimated)
             }
 
-            let relevantPrices = pricing.prices.filter { $0.condition == condition }
-            let allPrices = relevantPrices.isEmpty ? pricing.prices : relevantPrices
+            // Prefer prices matching the user's preferred currency
+            let preferred = PricingService.preferredCurrency
+            let preferredConditionPrices = pricing.prices.filter { $0.currency == preferred && $0.condition == condition }
+            let conditionPrices = pricing.prices.filter { $0.condition == condition }
+            let preferredAllPrices = pricing.prices.filter { $0.currency == preferred }
+            let allPrices: [PriceData]
+            if !preferredConditionPrices.isEmpty {
+                allPrices = preferredConditionPrices
+            } else if !conditionPrices.isEmpty {
+                allPrices = conditionPrices
+            } else if !preferredAllPrices.isEmpty {
+                allPrices = preferredAllPrices
+            } else {
+                allPrices = pricing.prices
+            }
 
             if allPrices.isEmpty {
                 return (estimatePrice(for: card), .estimated)
@@ -195,8 +213,16 @@ class PricingService: ObservableObject {
                 // Pure estimation
                 confidence = .estimated
 
+            case .inkwellAPI:
+                // Inkwell Keeper Backend — pre-cached, aggregated prices
+                confidence = .high
+
+            case .lorcanaAPI:
+                // Lorcana Prices API - real-time Cardmarket data, highest confidence
+                confidence = .high
+
             case .eBayAverage:
-                // eBay sold listings - highest confidence
+                // eBay sold listings - high confidence
                 if allPrices.count >= 5 {
                     confidence = .high
                 } else if allPrices.count >= 2 {
@@ -256,6 +282,10 @@ class PricingService: ObservableObject {
     // MARK: - Private Methods
     private func fetchPricing(for card: LorcanaCard, condition: CardCondition, provider: PricingProvider) async throws -> CardPricing {
         switch provider {
+        case .inkwellAPI:
+            return try await fetchInkwellAPIPricing(for: card, condition: condition)
+        case .lorcanaAPI:
+            return try await fetchLorcanaAPIPricing(for: card, condition: condition)
         case .ximilar:
             return try await fetchXimilarPricing(for: card, condition: condition)
         case .eBayAverage:
@@ -270,6 +300,456 @@ class PricingService: ObservableObject {
         }
     }
     
+    // MARK: - Inkwell Keeper Backend API
+
+    private let inkwellAPIBaseURL = "https://29kwvipys3.execute-api.us-east-2.amazonaws.com"
+
+    private struct InkwellPriceResponse: Codable {
+        let uniqueId: String
+        let cardName: String
+        let bestPriceUsd: Double?
+        let priceConfidence: String
+        let prices: [InkwellPrice]
+
+        enum CodingKeys: String, CodingKey {
+            case uniqueId = "unique_id"
+            case cardName = "card_name"
+            case bestPriceUsd = "best_price_usd"
+            case priceConfidence = "price_confidence"
+            case prices
+        }
+    }
+
+    private struct InkwellPrice: Codable {
+        let source: String
+        let priceUsd: Double?
+        let priceEur: Double?
+        let marketplace: String
+        let condition: String
+        let confidence: Double?
+        let fetchedAt: String
+
+        enum CodingKeys: String, CodingKey {
+            case source
+            case priceUsd = "price_usd"
+            case priceEur = "price_eur"
+            case marketplace
+            case condition
+            case confidence
+            case fetchedAt = "fetched_at"
+        }
+    }
+
+    private static let setCodeMap: [String: String] = [
+        "The First Chapter": "TFC",
+        "Rise of the Floodborn": "ROF",
+        "Into the Inklands": "ITI",
+        "Ursula's Return": "URR",
+        "Shimmering Skies": "SSK",
+        "Azurite Sea": "AZS",
+        "Archazia's Island": "ARI",
+        "Fabled": "FAB",
+        "Reign of Jafar": "ROJ",
+        "Whispers in the Well": "WIW",
+    ]
+
+    private static func setCode(for setName: String) -> String {
+        setCodeMap[setName] ?? String(setName.prefix(3)).uppercased()
+    }
+
+    private func buildUniqueId(for card: LorcanaCard) -> String {
+        // Always construct from set code + card number to match backend format (e.g., "TFC-1")
+        let code = PricingService.setCode(for: card.setName)
+        if let cardNum = card.cardNumber {
+            return "\(code)-\(cardNum)"
+        }
+        // Fall back to stored uniqueId, stripping any leading zeros after the dash
+        if let existingId = card.uniqueId, !existingId.isEmpty {
+            let parts = existingId.split(separator: "-", maxSplits: 1)
+            if parts.count == 2, let num = Int(parts[1]) {
+                return "\(parts[0])-\(num)"
+            }
+            return existingId
+        }
+        return "\(code)-\(card.id)"
+    }
+
+    private func fetchInkwellAPIPricing(for card: LorcanaCard, condition: CardCondition) async throws -> CardPricing {
+        let uniqueId = buildUniqueId(for: card)
+        let urlString = "\(inkwellAPIBaseURL)/prices/\(uniqueId)"
+
+        guard let url = URL(string: urlString) else {
+            throw PricingError.invalidResponse
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 10
+
+        let (data, response) = try await session.data(for: request)
+
+        if let httpResponse = response as? HTTPURLResponse {
+            guard httpResponse.statusCode == 200 else {
+                throw PricingError.noDataFound
+            }
+        }
+
+        let decoder = JSONDecoder()
+        let inkwellResponse = try decoder.decode(InkwellPriceResponse.self, from: data)
+
+        let prices: [PriceData] = inkwellResponse.prices.flatMap { p -> [PriceData] in
+            let cardCondition = CardCondition(rawValue: p.condition) ?? condition
+            var entries: [PriceData] = []
+            if let usd = p.priceUsd {
+                entries.append(PriceData(
+                    price: usd,
+                    condition: cardCondition,
+                    currency: "USD",
+                    marketplace: p.marketplace,
+                    url: nil,
+                    confidence: p.confidence
+                ))
+            }
+            if let eur = p.priceEur {
+                entries.append(PriceData(
+                    price: eur,
+                    condition: cardCondition,
+                    currency: "EUR",
+                    marketplace: p.marketplace,
+                    url: nil,
+                    confidence: p.confidence
+                ))
+            }
+            return entries
+        }
+
+        guard !prices.isEmpty else {
+            throw PricingError.noDataFound
+        }
+
+        return CardPricing(
+            cardName: card.name,
+            prices: prices,
+            lastUpdated: Date(),
+            source: .inkwellAPI
+        )
+    }
+
+    // MARK: - Lorcana Prices API (Cardmarket data via RapidAPI)
+
+    private var rapidAPIKey: String?
+
+    private func getRapidAPIKey() async -> String? {
+        if let cached = rapidAPIKey {
+            return cached
+        }
+
+        do {
+            let key = try await CloudKitKeyService.shared.fetchAPIKey("rapidapi")
+            rapidAPIKey = key
+            return key
+        } catch {
+            return nil
+        }
+    }
+
+    private func fetchLorcanaAPIPricing(for card: LorcanaCard, condition: CardCondition) async throws -> CardPricing {
+        guard let apiKey = await getRapidAPIKey() else {
+            throw PricingError.apiKeyRequired
+        }
+
+        // Build search query from card name
+        let searchQuery = card.name
+            .replacingOccurrences(of: " - ", with: " ")
+            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+
+        let urlString = "https://cardmarket-api-tcg.p.rapidapi.com/lorcana/cards?search=\(searchQuery)"
+
+        guard let url = URL(string: urlString) else {
+            throw PricingError.invalidResponse
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue(apiKey, forHTTPHeaderField: "x-rapidapi-key")
+        request.setValue("cardmarket-api-tcg.p.rapidapi.com", forHTTPHeaderField: "x-rapidapi-host")
+
+        do {
+            let (data, response) = try await session.data(for: request)
+
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpResponse.statusCode == 429 {
+                    throw PricingError.rateLimitExceeded(resetTime: nil)
+                }
+
+                guard httpResponse.statusCode == 200 else {
+                    throw PricingError.invalidResponse
+                }
+            }
+
+            // Parse the response - try array format first, then object with data array
+            let cards: [LorcanaAPICard]
+            if let directArray = try? JSONDecoder().decode([LorcanaAPICard].self, from: data) {
+                cards = directArray
+            } else if let wrappedResponse = try? JSONDecoder().decode(LorcanaAPIResponse.self, from: data) {
+                cards = wrappedResponse.data
+            } else {
+                throw PricingError.invalidResponse
+            }
+
+            guard !cards.isEmpty else {
+                throw PricingError.noDataFound
+            }
+
+            // Find the best match by comparing card name and set
+            let matchedCard = findBestMatch(for: card, in: cards)
+
+            guard let matched = matchedCard else {
+                throw PricingError.noDataFound
+            }
+
+            return buildLorcanaAPIPricing(from: matched, card: card, condition: condition)
+
+        } catch let error as PricingError {
+            throw error
+        } catch {
+            throw error
+        }
+    }
+
+    private func findBestMatch(for card: LorcanaCard, in results: [LorcanaAPICard]) -> LorcanaAPICard? {
+        let normalizedName = card.name.lowercased()
+            .replacingOccurrences(of: " - ", with: " ")
+            .replacingOccurrences(of: "-", with: " ")
+        let normalizedSet = card.setName.lowercased()
+
+        // Score each result for relevance
+        var bestMatch: (card: LorcanaAPICard, score: Int)?
+
+        for apiCard in results {
+            var score = 0
+            let apiName = apiCard.name.lowercased()
+                .replacingOccurrences(of: " - ", with: " ")
+                .replacingOccurrences(of: "-", with: " ")
+
+            // Exact name match is highest priority
+            if apiName == normalizedName {
+                score += 100
+            } else if apiName.contains(normalizedName) || normalizedName.contains(apiName) {
+                score += 50
+            }
+
+            // Set match
+            if let episodeName = apiCard.episode?.name?.lowercased() {
+                if episodeName == normalizedSet {
+                    score += 30
+                } else if episodeName.contains(normalizedSet) || normalizedSet.contains(episodeName) {
+                    score += 15
+                }
+            }
+
+            // Card number match
+            if let apiNum = apiCard.card_number, let cardNum = card.cardNumber {
+                let apiNumInt = Int(apiNum.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression))
+                if apiNumInt == cardNum {
+                    score += 20
+                }
+            }
+
+            // Rarity match
+            if let apiRarity = apiCard.rarity?.lowercased() {
+                let cardRarity = card.rarity.rawValue.lowercased()
+                if apiRarity == cardRarity {
+                    score += 10
+                }
+            }
+
+            if score > (bestMatch?.score ?? 0) {
+                bestMatch = (apiCard, score)
+            }
+        }
+
+        return bestMatch?.card
+    }
+
+    private func buildLorcanaAPIPricing(from apiCard: LorcanaAPICard, card: LorcanaCard, condition: CardCondition) -> CardPricing {
+        var prices: [PriceData] = []
+
+        if let cardmarketPrices = apiCard.prices?.cardmarket {
+            // Near Mint price from Cardmarket
+            if let nmPrice = cardmarketPrices.lowest_near_mint, nmPrice > 0 {
+                // Convert EUR to approximate USD (1 EUR ~ 1.08 USD)
+                let usdPrice = nmPrice * 1.08
+                prices.append(PriceData(
+                    price: usdPrice,
+                    condition: .nearMint,
+                    currency: "USD",
+                    marketplace: "Cardmarket (NM)",
+                    url: nil,
+                    confidence: 0.95
+                ))
+
+                // Also add the EUR price
+                prices.append(PriceData(
+                    price: nmPrice,
+                    condition: .nearMint,
+                    currency: "EUR",
+                    marketplace: "Cardmarket (NM, EUR)",
+                    url: nil,
+                    confidence: 0.95
+                ))
+            }
+
+            // Regional prices for additional data points
+            if let dePrice = cardmarketPrices.lowest_near_mint_DE, dePrice > 0 {
+                prices.append(PriceData(
+                    price: dePrice * 1.08,
+                    condition: .nearMint,
+                    currency: "USD",
+                    marketplace: "Cardmarket DE",
+                    url: nil,
+                    confidence: 0.9
+                ))
+            }
+
+            if let frPrice = cardmarketPrices.lowest_near_mint_FR, frPrice > 0 {
+                prices.append(PriceData(
+                    price: frPrice * 1.08,
+                    condition: .nearMint,
+                    currency: "USD",
+                    marketplace: "Cardmarket FR",
+                    url: nil,
+                    confidence: 0.9
+                ))
+            }
+
+            if let itPrice = cardmarketPrices.lowest_near_mint_IT, itPrice > 0 {
+                prices.append(PriceData(
+                    price: itPrice * 1.08,
+                    condition: .nearMint,
+                    currency: "USD",
+                    marketplace: "Cardmarket IT",
+                    url: nil,
+                    confidence: 0.9
+                ))
+            }
+        }
+
+        // If we got TCGPlayer/US prices too
+        if let tcgPrices = apiCard.prices?.tcgplayer {
+            if let marketPrice = tcgPrices.market, marketPrice > 0 {
+                prices.append(PriceData(
+                    price: marketPrice,
+                    condition: .nearMint,
+                    currency: "USD",
+                    marketplace: "TCGPlayer (Market)",
+                    url: nil,
+                    confidence: 0.95
+                ))
+            }
+            if let lowPrice = tcgPrices.low, lowPrice > 0 {
+                prices.append(PriceData(
+                    price: lowPrice,
+                    condition: .nearMint,
+                    currency: "USD",
+                    marketplace: "TCGPlayer (Low)",
+                    url: nil,
+                    confidence: 0.9
+                ))
+            }
+            if let midPrice = tcgPrices.mid, midPrice > 0 {
+                prices.append(PriceData(
+                    price: midPrice,
+                    condition: .nearMint,
+                    currency: "USD",
+                    marketplace: "TCGPlayer (Mid)",
+                    url: nil,
+                    confidence: 0.9
+                ))
+            }
+        }
+
+        if prices.isEmpty {
+        } else {
+        }
+
+        guard !prices.isEmpty else {
+            // Card exists in API but has no pricing data yet
+            let estimatedPrice = estimatePrice(for: card)
+            return CardPricing(
+                cardName: card.name,
+                prices: [PriceData(
+                    price: estimatedPrice,
+                    condition: condition,
+                    currency: "USD",
+                    marketplace: "Estimated (no market data)",
+                    url: nil,
+                    confidence: 0.6
+                )],
+                lastUpdated: Date(),
+                source: .estimation
+            )
+        }
+
+        return CardPricing(
+            cardName: card.name,
+            prices: prices,
+            lastUpdated: Date(),
+            source: .lorcanaAPI
+        )
+    }
+
+    // MARK: - Lorcana Prices API Response Models
+
+    struct LorcanaAPIResponse: Codable {
+        let data: [LorcanaAPICard]
+    }
+
+    struct LorcanaAPICard: Codable {
+        let id: Int?
+        let name: String
+        let name_numbered: String?
+        let slug: String?
+        let type: String?
+        let card_number: String?
+        let rarity: String?
+        let prices: LorcanaAPIPrices?
+        let episode: LorcanaAPIEpisode?
+        let artist: LorcanaAPIArtist?
+        let image: String?
+    }
+
+    struct LorcanaAPIPrices: Codable {
+        let cardmarket: LorcanaCardmarketPrices?
+        let tcgplayer: LorcanaTCGPlayerPrices?
+    }
+
+    struct LorcanaCardmarketPrices: Codable {
+        let currency: String?
+        let lowest_near_mint: Double?
+        let lowest_near_mint_DE: Double?
+        let lowest_near_mint_FR: Double?
+        let lowest_near_mint_IT: Double?
+    }
+
+    struct LorcanaTCGPlayerPrices: Codable {
+        let market: Double?
+        let low: Double?
+        let mid: Double?
+        let high: Double?
+    }
+
+    struct LorcanaAPIEpisode: Codable {
+        let id: Int?
+        let name: String?
+        let slug: String?
+        let released_at: String?
+    }
+
+    struct LorcanaAPIArtist: Codable {
+        let id: Int?
+        let name: String?
+    }
+
     private func fetchXimilarPricing(for card: LorcanaCard, condition: CardCondition) async throws -> CardPricing {
         // Implementation for Ximilar API
         // This would require API key and proper endpoint
@@ -279,14 +759,12 @@ class PricingService: ObservableObject {
     private func fetcheBayAveragePricing(for card: LorcanaCard, condition: CardCondition) async throws -> CardPricing {
         // eBay API implementation
         guard let apiKey = getEbayAPIKey() else {
-            print("❌ [eBay] No API key found")
             throw PricingError.apiKeyRequired
         }
 
         let searchQuery = "\(card.name) Lorcana \(card.setName) \(condition.rawValue)"
         let encodedQuery = searchQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
 
-        print("🔍 [eBay] Searching for: '\(searchQuery)'")
 
         // eBay Finding API endpoint for sold listings
         let urlString = "https://svcs.ebay.com/services/search/FindingService/v1" +
@@ -303,24 +781,12 @@ class PricingService: ObservableObject {
                        "&sortOrder=EndTimeSoonest" +
                        "&paginationInput.entriesPerPage=20"
 
-        print("📡 [eBay] API URL: \(urlString)")
-
         guard let url = URL(string: urlString) else {
-            print("❌ [eBay] Invalid URL")
             throw PricingError.invalidResponse
         }
 
         do {
             let (data, response) = try await session.data(from: url)
-
-            if let httpResponse = response as? HTTPURLResponse {
-                print("📥 [eBay] Response status: \(httpResponse.statusCode)")
-            }
-
-            // Debug: Print raw response
-            if let rawString = String(data: data, encoding: .utf8) {
-                print("📄 [eBay] Raw response (first 500 chars): \(String(rawString.prefix(500)))")
-            }
 
             let ebayResponse = try JSONDecoder().decode(EbayResponse.self, from: data)
 
@@ -329,8 +795,6 @@ class PricingService: ObservableObject {
                let firstError = errorMessages.first?.error.first {
                 let errorId = firstError.errorId.first ?? "unknown"
                 let errorMsg = firstError.message.first ?? "Unknown error"
-
-                print("❌ [eBay] API Error \(errorId): \(errorMsg)")
 
                 // Check if it's a rate limit error (error ID 10001)
                 if errorId == "10001" {
@@ -344,11 +808,8 @@ class PricingService: ObservableObject {
                   let searchResult = findCompletedResponse.first,
                   let items = searchResult.searchResult.first?.item,
                   !items.isEmpty else {
-                print("⚠️ [eBay] No items found in response")
                 throw PricingError.noDataFound
             }
-
-            print("✅ [eBay] Found \(items.count) items")
 
             let priceData = items.compactMap { item -> PriceData? in
                 guard let sellingStatus = item.sellingStatus?.first,
@@ -366,8 +827,6 @@ class PricingService: ObservableObject {
                 )
             }
 
-            print("💰 [eBay] Successfully parsed \(priceData.count) prices")
-
             return CardPricing(
                 cardName: card.name,
                 prices: priceData,
@@ -376,10 +835,8 @@ class PricingService: ObservableObject {
             )
 
         } catch let decodingError as DecodingError {
-            print("❌ [eBay] Decoding error: \(decodingError)")
             throw PricingError.invalidResponse
         } catch {
-            print("❌ [eBay] Network error: \(error.localizedDescription)")
             throw error
         }
     }
@@ -409,7 +866,6 @@ class PricingService: ObservableObject {
            let privateKey = getTCGPlayerPrivateKey() {
             return try await fetchTCGPlayerAPIPricing(for: card, condition: condition, publicKey: publicKey, privateKey: privateKey)
         } else {
-            print("⚠️ [TCGPlayer] No API credentials found, falling back to web scraping")
             return try await fetchTCGPlayerWebPrice(for: card, condition: condition)
         }
     }
@@ -436,8 +892,6 @@ class PricingService: ObservableObject {
             return cached.token
         }
 
-        print("🔑 [TCGPlayer] Requesting new bearer token")
-
         // Request new bearer token
         let tokenURL = URL(string: "https://api.tcgplayer.com/token")!
         var request = URLRequest(url: tokenURL)
@@ -451,7 +905,6 @@ class PricingService: ObservableObject {
 
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode == 200 else {
-            print("❌ [TCGPlayer] Token request failed")
             throw PricingError.invalidResponse
         }
 
@@ -466,8 +919,6 @@ class PricingService: ObservableObject {
         // Cache the token (expires_in is in seconds, usually 2 weeks)
         let expiresAt = Date().addingTimeInterval(TimeInterval(tokenResponse.expires_in - 300)) // 5 min buffer
         tcgPlayerBearerToken = (tokenResponse.access_token, expiresAt)
-
-        print("✅ [TCGPlayer] Bearer token obtained, expires in \(tokenResponse.expires_in / 3600) hours")
 
         return tokenResponse.access_token
     }
@@ -504,8 +955,6 @@ class PricingService: ObservableObject {
     }
 
     private func fetchTCGPlayerAPIPricing(for card: LorcanaCard, condition: CardCondition, publicKey: String, privateKey: String) async throws -> CardPricing {
-        print("🔍 [TCGPlayer API] Searching for: \(card.name)")
-
         // Step 1: Get bearer token
         let bearerToken = try await getTCGPlayerBearerToken(publicKey: publicKey, privateKey: privateKey)
 
@@ -530,18 +979,14 @@ class PricingService: ObservableObject {
         }
 
         guard httpResponse.statusCode == 200 else {
-            print("❌ [TCGPlayer API] Search failed with status: \(httpResponse.statusCode)")
             throw PricingError.invalidResponse
         }
 
         let searchResult = try JSONDecoder().decode(TCGProductSearchResponse.self, from: searchData)
 
         guard let product = searchResult.results.first else {
-            print("⚠️ [TCGPlayer API] No products found for: \(card.name)")
             throw PricingError.noDataFound
         }
-
-        print("✅ [TCGPlayer API] Found product: \(product.name) (ID: \(product.productId))")
 
         // Step 3: Get pricing for the product
         let priceURL = URL(string: "https://api.tcgplayer.com/pricing/product/\(product.productId)")!
@@ -554,7 +999,6 @@ class PricingService: ObservableObject {
 
         guard let pricingHttpResponse = priceResponse as? HTTPURLResponse,
               pricingHttpResponse.statusCode == 200 else {
-            print("❌ [TCGPlayer API] Pricing request failed")
             throw PricingError.invalidResponse
         }
 
@@ -574,14 +1018,11 @@ class PricingService: ObservableObject {
             // If no exact match, use all pricing data
             let allPricing = pricingResult.results
             guard !allPricing.isEmpty else {
-                print("⚠️ [TCGPlayer API] No pricing data found")
                 throw PricingError.noDataFound
             }
 
             return buildPricingResponse(from: allPricing, card: card, condition: condition, product: product)
         }
-
-        print("✅ [TCGPlayer API] Found pricing data with \(relevantPricing.count) entries")
 
         return buildPricingResponse(from: relevantPricing, card: card, condition: condition, product: product)
     }
@@ -651,10 +1092,7 @@ class PricingService: ObservableObject {
         let searchQuery = "\(card.name) \(card.setName)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let urlString = "https://www.tcgplayer.com/search/lorcana/product?q=\(searchQuery)"
 
-        print("🔍 [TCGPlayer] Searching: \(card.name)")
-
         guard let url = URL(string: urlString) else {
-            print("❌ [TCGPlayer] Invalid URL")
             throw PricingError.invalidResponse
         }
 
@@ -663,16 +1101,10 @@ class PricingService: ObservableObject {
 
         let (data, response) = try await session.data(for: request)
 
-        if let httpResponse = response as? HTTPURLResponse {
-            print("📥 [TCGPlayer] Response status: \(httpResponse.statusCode)")
-        }
-
         // Simple price extraction from HTML (basic implementation)
         if let htmlString = String(data: data, encoding: .utf8) {
-            print("📄 [TCGPlayer] HTML length: \(htmlString.count) chars")
 
             if let extractedPrice = extractPriceFromHTML(htmlString) {
-                print("💰 [TCGPlayer] Extracted price from HTML: $\(extractedPrice)")
 
                 let priceData = PriceData(
                     price: extractedPrice,
@@ -690,7 +1122,6 @@ class PricingService: ObservableObject {
                     source: .tcgPlayer
                 )
             } else {
-                print("⚠️ [TCGPlayer] HTML extraction failed, falling back to estimation")
                 let estimatedPrice = estimatePrice(for: card)
 
                 let priceData = PriceData(
@@ -711,7 +1142,6 @@ class PricingService: ObservableObject {
             }
         }
 
-        print("❌ [TCGPlayer] Failed to decode HTML")
         throw PricingError.noDataFound
     }
     
@@ -736,13 +1166,11 @@ class PricingService: ObservableObject {
                let priceRange = Range(match.range(at: 1), in: html) {
                 let priceString = String(html[priceRange])
                 if let price = Double(priceString), price > 0 {
-                    print("✅ [TCGPlayer] Extracted price using pattern: \(pattern)")
                     return price
                 }
             }
         }
 
-        print("⚠️ [TCGPlayer] No price patterns matched in HTML")
         return nil
     }
 
@@ -764,14 +1192,12 @@ class PricingService: ObservableObject {
         // Look for offers.price or price in the JSON-LD
         if let offers = json["offers"] as? [String: Any],
            let price = offers["price"] as? Double {
-            print("✅ [TCGPlayer] Extracted price from JSON-LD offers")
             return price
         }
 
         if let offers = json["offers"] as? [String: Any],
            let priceString = offers["price"] as? String,
            let price = Double(priceString) {
-            print("✅ [TCGPlayer] Extracted price from JSON-LD offers (string)")
             return price
         }
 
@@ -803,34 +1229,39 @@ class PricingService: ObservableObject {
     }
     
     private func estimatePrice(for card: LorcanaCard) -> Double {
-        // Enhanced price estimation with variant support
+        // Conservative price estimation — avoid inflating cheap cards
         let basePrice = getBasePriceForRarity(card.rarity)
         let variantMultiplier = getVariantMultiplier(card.variant)
         let setMultiplier = getSetMultiplier(card.setName)
-        let typeMultiplier = getTypeMultiplier(card.type)
-        let popularityMultiplier = getPopularityMultiplier(card.name)
-        let abilityMultiplier = getAbilityMultiplier(card)
-        
+
+        // Only apply character/popularity/ability multipliers to rare+ cards
+        // Common and uncommon cards are almost always bulk regardless of character
+        let isHighRarity = card.rarity == .rare || card.rarity == .superRare ||
+            card.rarity == .legendary || card.rarity == .enchanted
+        let typeMultiplier = isHighRarity ? getTypeMultiplier(card.type) : 1.0
+        let popularityMultiplier = isHighRarity ? getPopularityMultiplier(card.name) : 1.0
+        let abilityMultiplier = isHighRarity ? getAbilityMultiplier(card) : 1.0
+
         let finalPrice = basePrice * variantMultiplier * setMultiplier * typeMultiplier * popularityMultiplier * abilityMultiplier
-        
+
         // Apply minimum price floor
-        return max(finalPrice, 0.10)
+        return max(finalPrice, 0.02)
     }
     
     private func getBasePriceForRarity(_ rarity: CardRarity) -> Double {
         switch rarity {
         case .common:
-            return 0.25
+            return 0.05
         case .uncommon:
-            return 0.65
+            return 0.15
         case .rare:
-            return 3.25
+            return 1.50
         case .superRare:
-            return 11.50
+            return 6.00
         case .legendary:
-            return 24.00
+            return 15.00
         case .enchanted:
-            return 125.00  // Increased base for enchanted
+            return 80.00
         }
     }
     
@@ -1121,7 +1552,6 @@ class PricingService: ObservableObject {
 
     func clearPricingCache() {
         pricingCache.removeAll()
-        print("🗑️ [Pricing] Cache cleared")
     }
 
     func getCacheStats() -> (count: Int, oldestAge: TimeInterval?) {
@@ -1231,6 +1661,8 @@ class PricingService: ObservableObject {
 extension PricingService.PricingProvider: CustomStringConvertible {
     var description: String {
         switch self {
+        case .inkwellAPI: return "Inkwell Keeper Backend"
+        case .lorcanaAPI: return "Lorcana Prices (Cardmarket)"
         case .ximilar: return "Ximilar AI"
         case .priceCharting: return "PriceCharting"
         case .tcgPlayer: return "TCGPlayer"

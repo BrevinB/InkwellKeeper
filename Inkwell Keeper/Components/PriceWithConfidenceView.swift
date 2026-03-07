@@ -29,7 +29,7 @@ struct PriceWithConfidenceView: View {
 
     private var inlineView: some View {
         HStack(spacing: 4) {
-            Text("$\(price, specifier: "%.2f")")
+            Text(PricingService.formatPrice(price))
                 .font(.caption)
                 .foregroundColor(.lorcanaGold)
                 .fontWeight(.semibold)
@@ -52,7 +52,7 @@ struct PriceWithConfidenceView: View {
     private var detailedView: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
-                Text("$\(price, specifier: "%.2f")")
+                Text(PricingService.formatPrice(price))
                     .font(.headline)
                     .foregroundColor(.lorcanaGold)
 

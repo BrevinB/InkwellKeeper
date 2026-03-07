@@ -19,12 +19,12 @@ struct DebugPricingView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     // Instructions
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("eBay API Debug Tool")
+                        Text("Pricing API Debug Tool")
                             .font(.title2)
                             .fontWeight(.bold)
                             .foregroundColor(.lorcanaGold)
 
-                        Text("This tool tests the eBay Finding API integration. Check the Xcode console for detailed logs.")
+                        Text("This tool tests the pricing API integration (Lorcana Prices, eBay, TCGPlayer). Check the Xcode console for detailed logs.")
                             .font(.body)
                             .foregroundColor(.gray)
                     }
@@ -89,7 +89,7 @@ struct DebugPricingView: View {
                                 Text("Testing...")
                             } else {
                                 Image(systemName: "play.circle.fill")
-                                Text("Test eBay API")
+                                Text("Test Pricing API")
                             }
                         }
                         .font(.headline)
@@ -123,39 +123,44 @@ struct DebugPricingView: View {
                             .fill(Color.lorcanaDark.opacity(0.6))
                     )
 
-                    // Known Issues
+                    // Provider Info
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Known Issues")
+                        Text("Pricing Providers")
                             .font(.headline)
-                            .foregroundColor(.orange)
+                            .foregroundColor(.blue)
 
                         VStack(alignment: .leading, spacing: 8) {
                             issueRow(
-                                icon: "exclamationmark.triangle.fill",
-                                text: "Sandbox App ID: Your eBay App ID contains '-SBX-' which is for testing only. You need a production App ID."
+                                icon: "1.circle.fill",
+                                text: "Lorcana Prices API: Real-time Cardmarket data via RapidAPI. Requires 'rapidapi' key in CloudKit."
                             )
 
                             issueRow(
-                                icon: "network",
-                                text: "Finding API: eBay Finding API may have usage limits or require additional authentication."
+                                icon: "2.circle.fill",
+                                text: "eBay Finding API: Searches sold listings for price averages. Falls back if Lorcana API unavailable."
                             )
 
                             issueRow(
-                                icon: "key.fill",
-                                text: "Get Production Key: Visit developer.ebay.com and create a production App ID."
+                                icon: "3.circle.fill",
+                                text: "TCGPlayer: API or web scraping fallback. Requires API credentials for best results."
+                            )
+
+                            issueRow(
+                                icon: "function",
+                                text: "Estimation: Algorithmic fallback based on rarity, variant, and card attributes."
                             )
                         }
                     }
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.orange.opacity(0.2))
+                            .fill(Color.blue.opacity(0.2))
                     )
                 }
                 .padding()
             }
             .background(LorcanaBackground())
-            .navigationTitle("eBay API Debug")
+            .navigationTitle("Pricing API Debug")
             .navigationBarTitleDisplayMode(.inline)
         }
         .onAppear {

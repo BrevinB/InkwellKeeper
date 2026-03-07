@@ -30,7 +30,6 @@ class CollectionManager: ObservableObject {
     
     func loadCollection() {
         guard let context = modelContext else {
-            print("❌ [loadCollection] modelContext is nil")
             return
         }
 
@@ -38,14 +37,12 @@ class CollectionManager: ObservableObject {
             // Fetch all cards (no predicate) first to see total count
             let allDescriptor = FetchDescriptor<CollectedCard>()
             let allCards = try context.fetch(allDescriptor)
-            print("📊 [loadCollection] Total cards in store: \(allCards.count)")
 
             let collectedDescriptor = FetchDescriptor<CollectedCard>(
                 predicate: #Predicate { $0.isWishlisted == false },
                 sortBy: [SortDescriptor(\.dateAdded, order: .reverse)]
             )
             let collectedData = try context.fetch(collectedDescriptor)
-            print("📊 [loadCollection] Fetched \(collectedData.count) collected, \(allCards.count - collectedData.count) wishlisted")
             let newCollectedCards = collectedData.map { $0.toLorcanaCard }
 
             // Build card name → total owned quantity (normal + foil only)
@@ -79,7 +76,7 @@ class CollectionManager: ObservableObject {
             }
 
         } catch {
-            print("❌ [loadCollection] Fetch error: \(error)")
+            // Handle error silently
         }
     }
     
@@ -87,12 +84,6 @@ class CollectionManager: ObservableObject {
         guard let context = modelContext else {
             return
         }
-
-        print("📝 [addCard] Saving card:")
-        print("   Name: \(card.name)")
-        print("   Variant: \(card.variant.rawValue)")
-        print("   uniqueId: \(card.uniqueId ?? "nil")")
-        print("   cardNumber: \(card.cardNumber?.description ?? "nil")")
 
         do {
             // Use uniqueId + variant for deduplication (more reliable than card.id which has format inconsistencies)
@@ -124,7 +115,6 @@ class CollectionManager: ObservableObject {
 
             if let existingCard = existing {
                 existingCard.quantity += quantity
-                print("   ✅ Updated existing card quantity to \(existingCard.quantity)")
             } else {
                 let newCard = CollectedCard(
                     cardId: card.id,
@@ -143,23 +133,12 @@ class CollectionManager: ObservableObject {
                     cardNumber: card.cardNumber
                 )
                 context.insert(newCard)
-                print("   ✅ Inserted new card")
             }
 
             try context.save()
-            print("   ✅ Saved successfully")
-
-            // Verify: count all cards in context right after save
-            let verifyDescriptor = FetchDescriptor<CollectedCard>()
-            if let verifyCards = try? context.fetch(verifyDescriptor) {
-                print("   📊 Context now has \(verifyCards.count) total card(s) after save")
-                for c in verifyCards {
-                    print("     - \(c.name) | uniqueId: \(c.uniqueId ?? "nil") | wishlisted: \(c.isWishlisted)")
-                }
-            }
 
         } catch {
-            print("   ❌ [addCard] Error: \(error)")
+            // Handle error silently
         }
 
         // Always reload collection regardless of save success/failure
@@ -173,13 +152,26 @@ class CollectionManager: ObservableObject {
     
     func removeCard(_ card: LorcanaCard) {
         guard let context = modelContext else { return }
-        
-        let descriptor = FetchDescriptor<CollectedCard>(
-            predicate: #Predicate<CollectedCard> { $0.cardId == card.id && $0.isWishlisted == false }
-        )
-        
+
         do {
-            let cardsToDelete = try context.fetch(descriptor)
+            let cardsToDelete: [CollectedCard]
+            if let uniqueId = card.uniqueId, !uniqueId.isEmpty {
+                let variantString = card.variant.rawValue
+                let descriptor = FetchDescriptor<CollectedCard>(
+                    predicate: #Predicate<CollectedCard> {
+                        $0.uniqueId == uniqueId &&
+                        $0.variant == variantString &&
+                        $0.isWishlisted == false
+                    }
+                )
+                cardsToDelete = try context.fetch(descriptor)
+            } else {
+                let descriptor = FetchDescriptor<CollectedCard>(
+                    predicate: #Predicate<CollectedCard> { $0.cardId == card.id && $0.isWishlisted == false }
+                )
+                cardsToDelete = try context.fetch(descriptor)
+            }
+
             for cardData in cardsToDelete {
                 context.delete(cardData)
             }
@@ -423,16 +415,66 @@ class CollectionManager: ObservableObject {
             return nil
         }
     }
-    
+
+    /// Fetches a collected card matching a specific variant (Normal vs Foil treated separately).
+    func getCollectedCardDataForVariant(_ card: LorcanaCard) -> CollectedCard? {
+        guard let context = modelContext else { return nil }
+
+        let variantString = card.variant.rawValue
+
+        do {
+            if let uniqueId = card.uniqueId, !uniqueId.isEmpty {
+                let descriptor = FetchDescriptor<CollectedCard>(
+                    predicate: #Predicate<CollectedCard> {
+                        $0.uniqueId == uniqueId &&
+                        $0.variant == variantString &&
+                        $0.isWishlisted == false
+                    }
+                )
+                return try context.fetch(descriptor).first
+            } else {
+                let cardName = card.name
+                let setName = card.setName
+                let descriptor = FetchDescriptor<CollectedCard>(
+                    predicate: #Predicate<CollectedCard> {
+                        $0.name == cardName &&
+                        $0.setName == setName &&
+                        $0.variant == variantString &&
+                        $0.isWishlisted == false
+                    }
+                )
+                return try context.fetch(descriptor).first
+            }
+        } catch {
+            return nil
+        }
+    }
+
     func updateCardQuantity(_ card: LorcanaCard, newQuantity: Int) {
         guard let context = modelContext else { return }
-        
+
         do {
-            let descriptor = FetchDescriptor<CollectedCard>(
-                predicate: #Predicate<CollectedCard> { $0.cardId == card.id && $0.isWishlisted == false }
-            )
-            
-            if let existingCard = try context.fetch(descriptor).first {
+            // Find the card using the same matching logic as addCard
+            let existing: CollectedCard?
+            if let uniqueId = card.uniqueId, !uniqueId.isEmpty {
+                let variantString = card.variant.rawValue
+                let descriptor = FetchDescriptor<CollectedCard>(
+                    predicate: #Predicate<CollectedCard> {
+                        $0.uniqueId == uniqueId &&
+                        $0.variant == variantString &&
+                        $0.isWishlisted == false
+                    }
+                )
+                existing = try context.fetch(descriptor).first
+            } else {
+                // Fallback to cardId matching
+                let descriptor = FetchDescriptor<CollectedCard>(
+                    predicate: #Predicate<CollectedCard> { $0.cardId == card.id && $0.isWishlisted == false }
+                )
+                existing = try context.fetch(descriptor).first
+            }
+
+            if let existingCard = existing {
                 if newQuantity <= 0 {
                     context.delete(existingCard)
                 } else {
@@ -478,7 +520,7 @@ class CollectionManager: ObservableObject {
                 loadCollection()
             }
         } catch {
-            print("❌ [updateCardPrice] Error: \(error)")
+            // Handle error silently
         }
     }
 
@@ -510,7 +552,7 @@ class CollectionManager: ObservableObject {
             try context.save()
             loadCollection()
         } catch {
-            print("❌ [refreshAllPrices] Error: \(error)")
+            // Handle error silently
         }
     }
     
@@ -526,21 +568,6 @@ class CollectionManager: ObservableObject {
         for card in cardsInSet {
             // Check if we own this card (from ANY set, counting reprints)
             let isOwned = collectedCards.contains { collected in
-                // Try matching by uniqueId first (if both have non-empty uniqueIds)
-                if let cardUniqueId = card.uniqueId, let collectedUniqueId = collected.uniqueId,
-                   !cardUniqueId.isEmpty, !collectedUniqueId.isEmpty {
-                    // If uniqueIds match exactly, this is definitely the same card
-                    if collectedUniqueId == cardUniqueId {
-                        print("✅ [getSetProgress] UniqueId match: \(card.name) - uniqueId: \(cardUniqueId)")
-                        return true
-                    }
-                    // UniqueIds don't match, but this might still be a reprint
-                    // Fall through to name matching below
-                }
-
-                // Match by name across ALL sets (for reprints)
-                // For Enchanted/Epic/Iconic/Promo, they are separate cards so match variant too
-                // For Normal/Foil, they're the same card so ignore variant (but exclude special variants)
                 let cardIsSpecialVariant = card.variant == .enchanted ||
                                           card.variant == .epic ||
                                           card.variant == .iconic ||
@@ -551,20 +578,16 @@ class CollectionManager: ObservableObject {
                                                collected.variant == .iconic ||
                                                collected.variant == .promo
 
+                // For special variants, use uniqueId for precise matching (they have unique art)
                 if cardIsSpecialVariant {
-                    // For special variants, match name + variant (regardless of set)
-                    let matched = collected.name == card.name && collected.variant == card.variant
-                    if matched {
-                        print("✅ [getSetProgress] Special variant match: \(card.name) (\(card.variant.rawValue))")
+                    if let cardUniqueId = card.uniqueId, let collectedUniqueId = collected.uniqueId,
+                       !cardUniqueId.isEmpty, !collectedUniqueId.isEmpty {
+                        return collectedUniqueId == cardUniqueId
                     }
-                    return matched
+                    return collected.name == card.name && collected.variant == card.variant
                 } else {
-                    // For Normal/Foil, match name only but EXCLUDE special variants
-                    let matched = collected.name == card.name && !collectedIsSpecialVariant
-                    if matched {
-                        print("✅ [getSetProgress] Name match: \(card.name) (set: \(setName), collected from: \(collected.setName))")
-                    }
-                    return matched
+                    // Normal/Foil: match by name across sets (reprints), exclude special variants
+                    return collected.name == card.name && !collectedIsSpecialVariant
                 }
             }
 
@@ -572,8 +595,6 @@ class CollectionManager: ObservableObject {
                 collectedCount += 1
             }
         }
-
-        print("📊 [getSetProgress] Set: \(setName) - Collected: \(collectedCount) / \(totalCardsInSet)")
 
         let percentage = totalCardsInSet > 0 ? Double(collectedCount) / Double(totalCardsInSet) * 100 : 0
         return (collected: collectedCount, total: totalCardsInSet, percentage: percentage)

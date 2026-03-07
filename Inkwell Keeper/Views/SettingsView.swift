@@ -28,11 +28,17 @@ struct SettingsView: View {
     @State private var isAddingCards = false
     @State private var addCardsProgress: String = ""
 
+    // Preferences
+    @State private var preferredCurrency: String = UserDefaults.standard.string(forKey: "preferredCurrency") ?? "USD"
+
     var body: some View {
         navigationWrapper {
             List {
                 // App Info Section
                 appInfoSection
+
+                // Preferences Section
+                preferencesSection
 
                 // Collection Stats Section
                 statsSection
@@ -134,6 +140,18 @@ struct SettingsView: View {
                             .frame(width: 8, height: 8)
                     }
                 }
+            }
+        }
+    }
+
+    private var preferencesSection: some View {
+        Section("Preferences") {
+            Picker("Currency", selection: $preferredCurrency) {
+                Text("USD ($)").tag("USD")
+                Text("EUR (\u{20AC})").tag("EUR")
+            }
+            .onChange(of: preferredCurrency) { _, newValue in
+                UserDefaults.standard.set(newValue, forKey: "preferredCurrency")
             }
         }
     }
@@ -403,7 +421,7 @@ struct SettingsView: View {
 
     private var totalCollectionValue: String {
         let total = collectionManager.collectedCards.compactMap { $0.price }.reduce(0, +)
-        return String(format: "$%.2f", total)
+        return PricingService.formatPrice(total)
     }
 
     private func requestReview() {

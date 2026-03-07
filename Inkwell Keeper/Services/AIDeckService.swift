@@ -101,8 +101,22 @@ class AIDeckService: ObservableObject {
     - Do NOT paraphrase, shorten, reword, or invent card names. If a card is listed as "Elsa - Snow Queen" you must write exactly "Elsa - Snow Queen", not "Elsa - The Snow Queen" or "Elsa - Ice Queen".
     - Do NOT combine a character's first name with a subtitle from a different card. Each "Name - Subtitle" pair is a unique card.
     - If you are unsure whether a card exists, do NOT include it. Only use cards you can see in the provided list.
-    - The deck list must add up to exactly 60 cards.
     - When completing a partial deck, analyze what's already there and fill gaps in the strategy.
+
+    CRITICAL 60-CARD REQUIREMENT:
+    - The deck list MUST add up to EXACTLY 60 cards total. Not 59, not 61 — exactly 60.
+    - After writing your decklist, add up all the quantities (the numbers before the "x"). The sum MUST equal 60.
+    - A typical 60-card deck has about 15 unique cards at 4 copies each (15 × 4 = 60). Adjust quantities to hit exactly 60.
+    - Double-check your math before finishing. Count the total: if it's not 60, adjust quantities until it is.
+
+    THEME & DESCRIPTION PRIORITY:
+    - The player's description is the MOST IMPORTANT input. Honor the theme above competitiveness.
+    - If the card list has a "★★★ PRIORITY CHARACTERS" section, use those for ALL character slots in the deck.
+    - Pick the best priority characters that fit the chosen ink colors. You do NOT need to use every single priority character — only include ones that match your 2 ink colors and make strategic sense.
+    - Use 3-4 copies of low/mid cost priority characters (cost 1-5), and 2-3 copies of expensive ones (cost 6+).
+    - Aim for about 25-30 characters total from the priority list.
+    - Fill the remaining 30-35 slots with the BEST non-character cards (Items, Actions, Songs, Locations) from the OTHER AVAILABLE CARDS list. Choose cards that are competitively strong and synergize with your characters.
+    - Build a real, competitive deck — the theme applies to characters, but support cards should be the strongest available options.
     """
 
     // MARK: - Generate Full Deck
@@ -141,8 +155,9 @@ class AIDeckService: ObservableObject {
             prompt += "- IMPORTANT: Only use cards from legal sets (Sets 5+: Shimmering Skies, Azurite Sea, Fabled, Archazia's Island, Reign of Jafar, Whispers in the Well, Winterspell)\n"
         }
 
-        prompt += "\nPlayer's description: \(description)"
-        prompt += buildCardCatalog(format: format, inkColors: inkColors, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities)
+        prompt += "\nPlayer's description (THIS IS THE TOP PRIORITY — build the deck around this): \(description)"
+        prompt += "\nREMINDER: Maximize the use of cards that match the player's description. Include ALL available cards that fit the theme before adding any non-themed cards."
+        prompt += buildCardCatalog(format: format, inkColors: inkColors, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities, description: description)
 
         await streamCompletion(apiKey: apiKey, prompt: prompt, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities)
     }
@@ -281,7 +296,7 @@ class AIDeckService: ObservableObject {
     }
 
     // MARK: - Build Card Catalog for AI Prompt
-    private func buildCardCatalog(format: DeckFormat, inkColors: [InkColor], collectionOnly: Bool = false, ownedCardQuantities: [String: Int] = [:]) -> String {
+    private func buildCardCatalog(format: DeckFormat, inkColors: [InkColor], collectionOnly: Bool = false, ownedCardQuantities: [String: Int] = [:], description: String = "") -> String {
         let legalSetNames: Set<String>
         if format == .coreConstructed {
             legalSetNames = ["Shimmering Skies", "Azurite Sea", "Fabled", "Archazia's Island", "Reign of Jafar", "Whispers in the Well", "Winterspell"]
@@ -308,6 +323,9 @@ class AIDeckService: ObservableObject {
             filteredCards = filteredCards.filter { ownedCardQuantities[$0.name] != nil }
         }
 
+        // Extract theme keywords from description to highlight matching cards
+        let themeKeywords = extractThemeKeywords(from: description)
+
         if !inkColors.isEmpty {
             // Colors specified: filter to only those colors
             let colorNames = Set(inkColors.map { $0.rawValue })
@@ -321,14 +339,20 @@ class AIDeckService: ObservableObject {
             if collectionOnly && !ownedCardQuantities.isEmpty {
                 catalog += "IMPORTANT: The number before each card is how many copies the player OWNS. You MUST NOT suggest more copies than the player owns. For example, if a card shows \"1x\", you can only use 1 copy in the deck.\n"
             }
-            catalog += "AVAILABLE CARDS:\n"
-            for card in filteredCards.sorted(by: { $0.name < $1.name }) {
-                if collectionOnly, let qty = ownedCardQuantities[card.name] {
-                    catalog += "- \(qty)x \(card.name)\n"
-                } else {
-                    catalog += "- \(card.name)\n"
+
+            if !themeKeywords.isEmpty {
+                let (themed, other) = partitionByTheme(cards: filteredCards, keywords: themeKeywords)
+                if !themed.isEmpty {
+                    catalog += "\n★★★ PRIORITY CHARACTERS (Use these for ALL character slots — pick the ones matching your ink colors) ★★★\n"
+                    catalog += formatCardList(themed, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities)
+                    catalog += "\nOTHER AVAILABLE CARDS (use Items, Actions, Songs, and Locations from here to build a competitive support package):\n"
+                    catalog += formatCardList(other, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities)
+                    return catalog
                 }
             }
+
+            catalog += "AVAILABLE CARDS:\n"
+            catalog += formatCardList(filteredCards, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities)
             return catalog
         } else {
             // No colors specified: group by ink color so the AI clearly sees 2 choices to make
@@ -338,19 +362,26 @@ class AIDeckService: ObservableObject {
             if collectionOnly && !ownedCardQuantities.isEmpty {
                 catalog += "IMPORTANT: The number before each card is how many copies the player OWNS. You MUST NOT suggest more copies than the player owns. For example, if a card shows \"1x\", you can only use 1 copy in the deck.\n"
             }
-            catalog += "\nFirst, state which 2 colors you chose. Then provide the [DECKLIST] using ONLY cards from those 2 color sections.\n\nCHOOSE 2 COLORS AND USE ONLY THOSE:\n"
+
+            if !themeKeywords.isEmpty {
+                let (themed, _) = partitionByTheme(cards: filteredCards, keywords: themeKeywords)
+                if !themed.isEmpty {
+                    // Detect which colors the themed cards span to help the AI pick the right 2 colors
+                    let themedColors = Set(themed.compactMap { $0.inkColor })
+                    catalog += "\nThe player wants cards matching their theme. These themed cards are in: \(themedColors.sorted().joined(separator: ", ")). Choose 2 colors that include the MOST themed cards.\n"
+                    catalog += "\n★★★ PRIORITY CHARACTERS (Use these for ALL character slots — pick the ones matching your chosen 2 ink colors) ★★★\n"
+                    catalog += formatCardList(themed, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities)
+                    catalog += "\n"
+                }
+            }
+
+            catalog += "\nCHOOSE 2 COLORS AND USE ONLY THOSE:\n"
 
             let byColor = Dictionary(grouping: filteredCards) { $0.inkColor ?? "Unknown" }
             for colorName in byColor.keys.sorted() {
                 let cards = byColor[colorName]!.sorted { $0.name < $1.name }
                 catalog += "\n=== \(colorName.uppercased()) ===\n"
-                for card in cards {
-                    if collectionOnly, let qty = ownedCardQuantities[card.name] {
-                        catalog += "- \(qty)x \(card.name)\n"
-                    } else {
-                        catalog += "- \(card.name)\n"
-                    }
-                }
+                catalog += formatCardList(cards, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities)
             }
             return catalog
         }
@@ -387,6 +418,11 @@ class AIDeckService: ObservableObject {
                 parseSuggestions()
             }
         }
+
+        // Final enforcement after all parsing
+        normalizeTo60Cards()
+        enforceCostCurve()
+        normalizeTo60Cards()
 
         isLoading = false
     }
@@ -425,6 +461,9 @@ class AIDeckService: ObservableObject {
             enforceColorConstraint()
             autoFixUnmatched()
             enforceOwnedQuantities()
+            normalizeTo60Cards()
+            enforceCostCurve()
+            normalizeTo60Cards()
         }
     }
 
@@ -442,6 +481,8 @@ class AIDeckService: ObservableObject {
         enforceColorConstraint()
         autoFixUnmatched()
         enforceOwnedQuantities()
+        enforceCostCurve()
+        normalizeTo60Cards()
     }
 
     private func parseCardLine(_ line: String) -> AIDeckSuggestion? {
@@ -726,6 +767,335 @@ class AIDeckService: ObservableObject {
             guard let card = suggestion.matchedCard else { return true }
             return (currentOwnedCardQuantities[card.name] ?? 0) > 0
         }
+    }
+
+    // MARK: - Normalize to 60 Cards
+    /// Adjusts the suggestion list so the total card count is exactly 60.
+    /// If over 60, trims quantities starting from the highest-quantity suggestions.
+    /// If under 60, increases existing quantities (up to 4 max) or adds new cards.
+    // MARK: - Enforce Cost Curve
+    /// Clamps quantities for high-cost cards to prevent top-heavy decks.
+    /// Freed slots will be filled by normalizeTo60Cards().
+    private func enforceCostCurve() {
+        // Phase 1: Per-card copy limits based on cost
+        for idx in suggestions.indices {
+            guard let card = suggestions[idx].matchedCard else { continue }
+            let cost = card.cost
+            let current = suggestions[idx].quantity
+
+            let maxForCost: Int
+            if cost >= 8 {
+                maxForCost = 2
+            } else if cost >= 6 {
+                maxForCost = 3
+            } else {
+                continue
+            }
+
+            if current > maxForCost {
+                suggestions[idx] = AIDeckSuggestion(
+                    cardName: suggestions[idx].cardName,
+                    quantity: maxForCost,
+                    reasoning: suggestions[idx].reasoning,
+                    matchedCard: suggestions[idx].matchedCard
+                )
+            }
+        }
+
+        // Phase 2: Total bracket limits — cap how many cards can be at each cost tier
+        // Good Lorcana curve: bulk at 2-5, limited high end
+        let bracketLimits: [(range: ClosedRange<Int>, maxTotal: Int)] = [
+            (6...6, 6),    // max 6 total cards at cost 6
+            (7...7, 4),    // max 4 total cards at cost 7
+            (8...8, 3),    // max 3 total cards at cost 8
+            (9...99, 2),   // max 2 total cards at cost 9+
+        ]
+
+        for bracket in bracketLimits {
+            // Find suggestions in this cost bracket, sorted by quantity ascending (trim smallest first to preserve key cards)
+            let bracketIndices = suggestions.indices.filter { idx in
+                guard let card = suggestions[idx].matchedCard else { return false }
+                return bracket.range.contains(card.cost)
+            }.sorted { suggestions[$0].quantity > suggestions[$1].quantity }
+
+            var bracketTotal = bracketIndices.reduce(0) { $0 + suggestions[$1].quantity }
+
+            for idx in bracketIndices.reversed() {
+                guard bracketTotal > bracket.maxTotal else { break }
+                let current = suggestions[idx].quantity
+                let reduction = min(current - 1, bracketTotal - bracket.maxTotal)
+                if reduction > 0 {
+                    suggestions[idx] = AIDeckSuggestion(
+                        cardName: suggestions[idx].cardName,
+                        quantity: current - reduction,
+                        reasoning: suggestions[idx].reasoning,
+                        matchedCard: suggestions[idx].matchedCard
+                    )
+                    bracketTotal -= reduction
+                }
+            }
+        }
+    }
+
+    private func normalizeTo60Cards() {
+        let target = 60
+        var total = suggestions.reduce(0) { $0 + $1.quantity }
+
+        guard total != target else { return }
+
+        if total > target {
+            // Over 60: reduce quantities, starting from cards with highest quantity
+            var excess = total - target
+
+            // Sort indices by cost descending then quantity descending — trim expensive cards first
+            let sortedIndices = suggestions.indices.sorted {
+                let costA = suggestions[$0].matchedCard?.cost ?? 0
+                let costB = suggestions[$1].matchedCard?.cost ?? 0
+                if costA != costB { return costA > costB }
+                return suggestions[$0].quantity > suggestions[$1].quantity
+            }
+
+            for idx in sortedIndices {
+                guard excess > 0 else { break }
+                let current = suggestions[idx].quantity
+                let reduction = min(current - 1, excess) // keep at least 1 copy
+                if reduction > 0 {
+                    suggestions[idx] = AIDeckSuggestion(
+                        cardName: suggestions[idx].cardName,
+                        quantity: current - reduction,
+                        reasoning: suggestions[idx].reasoning,
+                        matchedCard: suggestions[idx].matchedCard
+                    )
+                    excess -= reduction
+                }
+            }
+
+            // If still over (shouldn't happen unless 60+ unique cards), remove extras from the end
+            if excess > 0 {
+                while excess > 0 && !suggestions.isEmpty {
+                    let last = suggestions.count - 1
+                    let qty = suggestions[last].quantity
+                    if qty <= excess {
+                        excess -= qty
+                        suggestions.removeLast()
+                    } else {
+                        suggestions[last] = AIDeckSuggestion(
+                            cardName: suggestions[last].cardName,
+                            quantity: qty - excess,
+                            reasoning: suggestions[last].reasoning,
+                            matchedCard: suggestions[last].matchedCard
+                        )
+                        excess = 0
+                    }
+                }
+            }
+        } else {
+            // Under 60: fill the gap
+            var deficit = target - total
+
+            // Phase 1: Increase existing matched suggestions up to max copies each
+            // Respects cost curve limits (3 max for 6-7 cost, 2 max for 8+ cost)
+            for idx in suggestions.indices {
+                guard deficit > 0 else { break }
+                guard let matched = suggestions[idx].matchedCard else { continue }
+                let current = suggestions[idx].quantity
+                let costMax: Int
+                if matched.cost >= 8 { costMax = 2 }
+                else if matched.cost >= 6 { costMax = 3 }
+                else { costMax = 4 }
+                var maxAllowed = costMax
+                if currentCollectionOnly && !currentOwnedCardQuantities.isEmpty {
+                    maxAllowed = min(maxAllowed, currentOwnedCardQuantities[matched.name] ?? maxAllowed)
+                }
+                let increase = min(maxAllowed - current, deficit)
+                if increase > 0 {
+                    suggestions[idx] = AIDeckSuggestion(
+                        cardName: suggestions[idx].cardName,
+                        quantity: current + increase,
+                        reasoning: suggestions[idx].reasoning,
+                        matchedCard: suggestions[idx].matchedCard
+                    )
+                    deficit -= increase
+                }
+            }
+
+            // Phase 2: If still short, add new cards from the pool
+            if deficit > 0 {
+                var deckColors = Set<String>()
+                for suggestion in suggestions {
+                    if let color = suggestion.matchedCard?.inkColor {
+                        deckColors.insert(color)
+                    }
+                }
+
+                var usedNames = Set<String>()
+                for suggestion in suggestions where suggestion.matchedCard != nil {
+                    usedNames.insert(suggestion.matchedCard!.name)
+                }
+
+                var pool = dataManager.getAllCards().filter { card in
+                    card.variant == .normal
+                    && deckColors.contains(card.inkColor ?? "")
+                    && !usedNames.contains(card.name)
+                }
+
+                if currentCollectionOnly && !currentOwnedCardQuantities.isEmpty {
+                    pool = pool.filter { currentOwnedCardQuantities[$0.name] != nil }
+                }
+
+                // Sort pool by cost for a reasonable distribution
+                pool.sort { $0.cost < $1.cost }
+
+                for card in pool {
+                    guard deficit > 0 else { break }
+                    let maxAllowed = currentCollectionOnly && !currentOwnedCardQuantities.isEmpty
+                        ? min(4, currentOwnedCardQuantities[card.name] ?? 4)
+                        : 4
+                    let qty = min(maxAllowed, deficit)
+                    if qty > 0 {
+                        suggestions.append(AIDeckSuggestion(
+                            cardName: card.name,
+                            quantity: qty,
+                            reasoning: "Added to reach 60 cards",
+                            matchedCard: card
+                        ))
+                        usedNames.insert(card.name)
+                        deficit -= qty
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Theme Keyword Extraction
+
+    /// Maps franchise/movie trigger words to all character names from that franchise.
+    /// Character names should match the first part of Lorcana card names (before " - ").
+    private let franchiseCharacters: [String: [String]] = [
+        "lilo": ["lilo", "stitch", "nani", "jumba", "pleakley", "gantu", "david", "cobra bubbles", "angel", "reuben", "hamsterviel"],
+        "stitch": ["lilo", "stitch", "nani", "jumba", "pleakley", "gantu", "david", "cobra bubbles", "angel", "reuben", "hamsterviel"],
+        "emperor": ["kuzco", "yzma", "kronk", "pacha", "kuzco's palace"],
+        "kuzco": ["kuzco", "yzma", "kronk", "pacha", "kuzco's palace"],
+        "frozen": ["elsa", "anna", "olaf", "kristoff", "sven", "hans", "marshmallow", "mattias"],
+        "moana": ["moana", "maui", "tamatoa", "te ka", "te fiti", "hei hei", "sina", "tui", "gramma tala"],
+        "tangled": ["rapunzel", "flynn rider", "pascal", "maximus", "mother gothel", "cassandra"],
+        "aladdin": ["aladdin", "jasmine", "genie", "jafar", "abu", "iago", "carpet", "rajah"],
+        "lion king": ["simba", "nala", "mufasa", "scar", "timon", "pumbaa", "rafiki", "zazu", "sarabi", "shenzi", "banzai"],
+        "little mermaid": ["ariel", "ursula", "flounder", "sebastian", "eric", "triton", "scuttle"],
+        "mermaid": ["ariel", "ursula", "flounder", "sebastian", "eric", "triton", "scuttle"],
+        "beauty": ["belle", "beast", "gaston", "lumiere", "cogsworth", "mrs. potts", "chip", "lefou", "maurice"],
+        "beast": ["belle", "beast", "gaston", "lumiere", "cogsworth", "mrs. potts", "chip", "lefou", "maurice"],
+        "hercules": ["hercules", "meg", "megara", "hades", "phil", "pegasus", "pain", "panic", "zeus"],
+        "mulan": ["mulan", "mushu", "shang", "shan yu", "li shang"],
+        "cinderella": ["cinderella", "prince charming", "fairy godmother", "lady tremaine", "anastasia", "drizella", "lucifer", "jaq", "gus"],
+        "snow white": ["snow white", "evil queen", "grumpy", "doc", "dopey", "bashful", "sleepy", "sneezy", "happy", "magic mirror"],
+        "sleeping beauty": ["aurora", "maleficent", "prince phillip", "flora", "fauna", "merryweather"],
+        "peter pan": ["peter pan", "tinker bell", "captain hook", "wendy", "john", "michael", "smee", "tick-tock", "tiger lily"],
+        "101 dalmatians": ["pongo", "perdita", "cruella", "cruella de vil", "horace", "jasper"],
+        "dalmatians": ["pongo", "perdita", "cruella", "cruella de vil", "horace", "jasper"],
+        "jungle book": ["mowgli", "baloo", "bagheera", "shere khan", "king louie", "kaa"],
+        "pocahontas": ["pocahontas", "john smith", "meeko", "flit", "percy", "ratcliffe"],
+        "treasure planet": ["jim hawkins", "john silver", "captain amelia", "b.e.n.", "morph", "doppler"],
+        "pirates": ["jack sparrow", "captain hook", "davy jones", "elizabeth swann", "will turner", "barbossa", "tia dalma"],
+        "robin hood": ["robin hood", "maid marian", "little john", "prince john", "friar tuck", "sir hiss"],
+        "incredibles": ["mr. incredible", "elastigirl", "violet", "dash", "jack-jack", "syndrome", "frozone", "edna"],
+        "encanto": ["mirabel", "luisa", "isabela", "bruno", "abuela"],
+        "zootopia": ["judy hopps", "nick wilde", "chief bogo", "flash", "bellwether", "gazelle"],
+        "wreck": ["wreck-it ralph", "ralph", "vanellope", "fix-it felix", "calhoun"],
+        "ralph": ["wreck-it ralph", "ralph", "vanellope", "fix-it felix", "calhoun"],
+        "ratatouille": ["remy", "linguini", "colette", "gusteau", "skinner"],
+        "monsters": ["sulley", "mike", "boo", "randall", "roz", "celia"],
+        "toy story": ["woody", "buzz lightyear", "jessie", "rex", "hamm", "slinky", "lotso", "bo peep"],
+        "cars": ["lightning mcqueen", "mater", "sally", "doc hudson"],
+        "finding nemo": ["nemo", "marlin", "dory", "gill", "crush", "bruce"],
+        "nemo": ["nemo", "marlin", "dory", "gill", "crush", "bruce"],
+        "princess": ["ariel", "belle", "cinderella", "aurora", "rapunzel", "moana", "jasmine", "mulan", "tiana", "snow white", "elsa", "anna", "pocahontas", "merida"],
+        "villain": ["maleficent", "ursula", "jafar", "scar", "hades", "cruella", "gaston", "evil queen", "captain hook", "yzma", "shan yu", "mother gothel", "hans", "dr. facilier", "lady tremaine"],
+        "gargoyles": ["goliath", "demona", "david xanatos", "elisa", "brooklyn", "broadway", "lexington", "hudson", "angela"],
+        "atlantis": ["milo", "kida", "rourke", "helga", "vinny", "audrey"],
+        "big hero": ["hiro", "baymax", "honey lemon", "gogo", "wasabi", "fred", "yokai"],
+        "baymax": ["hiro", "baymax", "honey lemon", "gogo", "wasabi", "fred", "yokai"],
+    ]
+
+    /// Extracts meaningful keywords from the user's description for card matching.
+    /// Expands franchise/movie names to include all related character names.
+    private func extractThemeKeywords(from description: String) -> [String] {
+        guard !description.isEmpty else { return [] }
+
+        let descLower = description.lowercased()
+
+        // Collect character names from any matching franchise triggers
+        var expandedKeywords: Set<String> = []
+        for (trigger, characters) in franchiseCharacters {
+            if descLower.contains(trigger) {
+                for character in characters {
+                    expandedKeywords.insert(character)
+                }
+            }
+        }
+
+        // Also extract raw words from the description as direct keywords
+        let stopWords: Set<String> = [
+            "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
+            "of", "with", "from", "by", "is", "it", "my", "me", "i", "we", "you",
+            "make", "build", "create", "use", "using", "only", "just", "want",
+            "deck", "card", "cards", "character", "characters", "movie", "film",
+            "all", "every", "each", "some", "any", "that", "this", "these", "those",
+            "new", "good", "best", "fun", "cool", "like", "based", "themed", "theme",
+            "around", "about", "please", "can", "could", "would", "should",
+            "disney", "lorcana", "groove", "tale", "tales", "story", "competitive",
+            "centered", "center"
+        ]
+
+        let words = description
+            .lowercased()
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { $0.count >= 3 && !stopWords.contains($0) }
+
+        for word in words {
+            expandedKeywords.insert(word)
+        }
+
+        return Array(expandedKeywords)
+    }
+
+    /// Partitions cards into themed (matching keywords) and non-themed.
+    /// Matches against the character name (before " - ") to avoid false positives on subtitles.
+    private func partitionByTheme(cards: [LorcanaCard], keywords: [String]) -> (themed: [LorcanaCard], other: [LorcanaCard]) {
+        guard !keywords.isEmpty else { return ([], cards) }
+
+        var themed: [LorcanaCard] = []
+        var other: [LorcanaCard] = []
+
+        for card in cards.sorted(by: { $0.name < $1.name }) {
+            let cardNameLower = card.name.lowercased()
+            // Use the character name (before " - ") for matching to reduce false positives
+            let characterName = cardNameLower.components(separatedBy: " - ").first ?? cardNameLower
+            let matches = keywords.contains { keyword in
+                characterName.contains(keyword)
+            }
+            if matches {
+                themed.append(card)
+            } else {
+                other.append(card)
+            }
+        }
+
+        return (themed, other)
+    }
+
+    /// Formats a list of cards for the catalog string, including type and cost for AI decision-making.
+    private func formatCardList(_ cards: [LorcanaCard], collectionOnly: Bool, ownedCardQuantities: [String: Int]) -> String {
+        var result = ""
+        for card in cards.sorted(by: { $0.name < $1.name }) {
+            let info = "[\(card.type), Cost \(card.cost)]"
+            if collectionOnly, let qty = ownedCardQuantities[card.name] {
+                result += "- \(qty)x \(card.name) \(info)\n"
+            } else {
+                result += "- \(card.name) \(info)\n"
+            }
+        }
+        return result
     }
 
     private func normalizeName(_ name: String) -> String {

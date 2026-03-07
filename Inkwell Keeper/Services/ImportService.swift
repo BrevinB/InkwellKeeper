@@ -86,9 +86,6 @@ class ImportService {
     // MARK: - Main Import Methods
 
     func importFromText(_ text: String, format: ImportFormat = .textList, progressCallback: ((Double) -> Void)? = nil) async -> ImportResult {
-        print("📥 [Import] Starting import - Format: \(format.description)")
-        print("📄 [Import] Text length: \(text.count) characters")
-
         var successful: [ImportedCard] = []
         var failed: [FailedImport] = []
         var duplicates: [ImportedCard] = []
@@ -96,8 +93,6 @@ class ImportService {
         let lines = text.components(separatedBy: .newlines)
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
-
-        print("📊 [Import] Processing \(lines.count) lines")
 
         for (index, line) in lines.enumerated() {
             // Update progress every 10 lines or on last line
@@ -113,12 +108,10 @@ class ImportService {
                 let lowerLine = line.lowercased()
                 // Dreamborn header: "Normal,Foil,Name,Set,Card Number,Color,Rarity,Price,Foil Price"
                 if lowerLine.contains("normal") && lowerLine.contains("foil") && lowerLine.contains("name") {
-                    print("⏭️  [Import] Skipping Dreamborn header")
                     continue
                 }
                 // Other headers
                 if lowerLine.contains("name") || lowerLine.contains("card") {
-                    print("⏭️  [Import] Skipping header: \(line)")
                     continue
                 }
             }
@@ -127,34 +120,27 @@ class ImportService {
             if format == .dreamborn {
                 // parseDreambornLineRaw returns nil for rows with 0,0 quantities
                 if let (normalQty, foilQty, cardName, setName) = parseDreambornLineRaw(line) {
-                    print("📦 [Import] Processing line \(index + 1): Normal=\(normalQty), Foil=\(foilQty), Name='\(cardName)'")
                     var lineHadSuccess = false
                     var lineHadFailure = false
                     var failureReasons: [String] = []
 
                     // Process normal quantity
                     if normalQty > 0 {
-                        print("🔍 [Import] Line \(index + 1): '\(cardName)' x\(normalQty) from \(setName ?? "any") [Normal]")
                         if let matchedCard = findCard(name: cardName, setName: setName, variant: .normal) {
                             successful.append(ImportedCard(card: matchedCard, quantity: normalQty, originalLine: line))
-                            print("✅ [Import] Matched: \(matchedCard.name) [Normal]")
                             lineHadSuccess = true
                         } else {
                             let setInfo = setName != nil ? " from set '\(setName!)'" : ""
                             failureReasons.append("Normal: Card not found '\(cardName)'\(setInfo)")
-                            print("❌ [Import] Failed: \(cardName)\(setInfo) [Normal]")
                             lineHadFailure = true
                         }
                     }
 
                     // Process foil quantity
                     if foilQty > 0 {
-                        print("🔍 [Import] Line \(index + 1): '\(cardName)' x\(foilQty) from \(setName ?? "any") [Foil]")
-
                         // Try to find foil variant first
                         if let matchedCard = findCard(name: cardName, setName: setName, variant: .foil) {
                             successful.append(ImportedCard(card: matchedCard, quantity: foilQty, originalLine: line))
-                            print("✅ [Import] Matched: \(matchedCard.name) [Foil]")
                             lineHadSuccess = true
                         }
                         // If foil not found, try to find normal variant and create foil version
@@ -162,13 +148,11 @@ class ImportService {
                             // Create a foil version of the normal card
                             let foilCard = createFoilVariant(from: normalCard)
                             successful.append(ImportedCard(card: foilCard, quantity: foilQty, originalLine: line))
-                            print("✅ [Import] Created foil variant from normal: \(foilCard.name) [Foil]")
                             lineHadSuccess = true
                         }
                         else {
                             let setInfo = setName != nil ? " from set '\(setName!)'" : ""
                             failureReasons.append("Foil: Card not found '\(cardName)'\(setInfo)")
-                            print("❌ [Import] Failed: \(cardName)\(setInfo) [Foil]")
                             lineHadFailure = true
                         }
                     }
@@ -183,8 +167,6 @@ class ImportService {
                 let parsed = parseLine(line, format: format)
 
                 if let (cardName, setName, variant, quantity) = parsed {
-                    print("🔍 [Import] Line \(index + 1): '\(cardName)' x\(quantity) from \(setName ?? "any") [\(variant.displayName)]")
-
                     if let matchedCard = findCard(name: cardName, setName: setName, variant: variant) {
                         let importedCard = ImportedCard(
                             card: matchedCard,
@@ -192,7 +174,6 @@ class ImportService {
                             originalLine: line
                         )
                         successful.append(importedCard)
-                        print("✅ [Import] Matched: \(matchedCard.name)")
                     } else {
                         let setInfo = setName != nil ? " from set '\(setName!)'" : ""
                         let failedImport = FailedImport(
@@ -200,13 +181,10 @@ class ImportService {
                             reason: "Card not found: '\(cardName)'\(setInfo) [\(variant.displayName)]"
                         )
                         failed.append(failedImport)
-                        print("❌ [Import] Failed: \(cardName)\(setInfo) [\(variant.displayName)]")
                     }
                 }
             }
         }
-
-        print("📊 [Import] Complete - Success: \(successful.count), Failed: \(failed.count)")
 
         return ImportResult(
             successful: successful,
@@ -367,7 +345,6 @@ class ImportService {
         // Dreamborn format: Normal,Foil,Name,Set,Card Number,Color,Rarity,Price,Foil Price
         // Index:            0      1    2    3    4           5      6       7      8
         guard components.count >= 4 else {
-            print("⚠️ [Parse] Dreamborn parse failed - only \(components.count) components in line")
             return nil
         }
 
@@ -496,18 +473,13 @@ class ImportService {
         if let set = setName {
             let normalizedSet = normalizeSetName(set)
 
-            print("🔎 [Match] Looking for '\(normalizedName)' in set '\(normalizedSet)' with variant \(variant.rawValue)")
-
             if let exactMatch = allCards.first(where: {
                 normalizeName($0.name) == normalizedName &&
                 normalizeSetName($0.setName) == normalizedSet &&
                 $0.variant == variant
             }) {
-                print("✅ [Match] Exact match found: \(exactMatch.name) from \(exactMatch.setName)")
                 return exactMatch
             }
-
-            print("⚠️ [Match] No exact match in set '\(normalizedSet)', trying other sets...")
 
             // If set was provided but no exact match, try without set constraint
             // but prefer matches with the correct variant
@@ -515,7 +487,6 @@ class ImportService {
                 normalizeName($0.name) == normalizedName &&
                 $0.variant == variant
             }) {
-                print("⚠️ [Match] Fallback match found: \(fallbackMatch.name) from \(fallbackMatch.setName) (wanted \(set))")
                 return fallbackMatch
             }
         }

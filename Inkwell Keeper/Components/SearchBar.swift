@@ -23,6 +23,7 @@ struct SearchBar: View {
                 .foregroundColor(.white)
                 .font(.system(size: 16))
                 .focused($isFocused)
+                .autocorrectionDisabled()
             
             if !text.isEmpty {
                 Button(action: {

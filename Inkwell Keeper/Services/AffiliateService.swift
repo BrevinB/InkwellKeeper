@@ -70,6 +70,18 @@ class AffiliateService {
         return URL(string: affiliateURL)
     }
 
+    // MARK: - Cardmarket Links
+
+    /// Generate Cardmarket search link for a card
+    func getCardmarketLink(for card: LorcanaCard) -> URL? {
+        let searchQuery = "\(card.name) Lorcana"
+            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+
+        let urlString = "https://www.cardmarket.com/en/Lorcana/Products/Search?searchString=\(searchQuery)"
+
+        return URL(string: urlString)
+    }
+
     // MARK: - Multi-Platform Options
 
     struct BuyOption {
@@ -90,6 +102,16 @@ class AffiliateService {
                 price: nil, // Can be populated if you have API access
                 url: tcgURL,
                 isAffiliate: true
+            ))
+        }
+
+        // Cardmarket option
+        if let cardmarketURL = getCardmarketLink(for: card) {
+            options.append(BuyOption(
+                platform: "Cardmarket",
+                price: nil,
+                url: cardmarketURL,
+                isAffiliate: false
             ))
         }
 

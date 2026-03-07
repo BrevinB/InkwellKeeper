@@ -672,7 +672,6 @@ struct ExportView: View {
                     showingShareSheet = true
                 }
             } catch {
-                print("❌ [Export] Failed to write file: \(error)")
                 await MainActor.run {
                     isExporting = false
                 }
@@ -837,7 +836,6 @@ struct ExportView: View {
 
             // Skip cards without a valid card number
             guard let validCardNumber = cardNumber else {
-                print("⚠️ [Dreamborn Export] Skipping card without card number: \(card.name)")
                 continue
             }
 

@@ -43,21 +43,17 @@ struct InkwellKeeperApp: App {
                 PriceHistory.self, Deck.self, DeckCard.self,
                 configurations: config
             )
-            print("✅ [ModelContainer] Opened successfully at \(config.url.path)")
             return c
         } catch {
-            print("❌ [ModelContainer] Failed to open: \(error)")
         }
 
         // Persistent store may be corrupt from a previous failed session — delete and retry.
         let storeURL = config.url
         let fm = FileManager.default
-        print("   Deleting store at: \(storeURL.path)")
         for suffix in ["", "-wal", "-shm"] {
             let url = URL(fileURLWithPath: storeURL.path + suffix)
             if fm.fileExists(atPath: url.path) {
                 try? fm.removeItem(at: url)
-                print("   🗑 Deleted: \(url.lastPathComponent)")
             }
         }
 
@@ -67,7 +63,6 @@ struct InkwellKeeperApp: App {
                 PriceHistory.self, Deck.self, DeckCard.self,
                 configurations: config
             )
-            print("✅ [ModelContainer] Recovery successful — fresh store created")
             return c
         } catch {
             fatalError("❌ [ModelContainer] Cannot create container even after store deletion: \(error)")

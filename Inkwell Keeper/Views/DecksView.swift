@@ -316,7 +316,7 @@ struct DeckRow: View {
                             Text("Cost")
                                 .font(.caption2)
                                 .foregroundColor(.gray)
-                            Text("$\(statistics.costToComplete, specifier: "%.2f")")
+                            Text(PricingService.formatPrice(statistics.costToComplete))
                                 .font(.headline)
                                 .foregroundColor(.lorcanaGold)
                         }
@@ -707,7 +707,7 @@ struct DeckStatisticsCard: View {
                 StatItem(label: "Avg Cost", value: String(format: "%.1f", statistics.averageCost), color: .white)
                 StatItem(label: "Inkable", value: "\(Int(statistics.inkableRatio * 100))%", color: statistics.inkableRatio >= 0.3 ? .white : .orange)
                 StatItem(label: "Complete", value: "\(Int(statistics.completionPercentage))%", color: statistics.completionPercentage == 100 ? .green : .lorcanaGold)
-                StatItem(label: "Value", value: "$\(Int(statistics.totalValue))", color: .lorcanaGold)
+                StatItem(label: "Value", value: PricingService.formatPrice(statistics.totalValue), color: .lorcanaGold)
             }
         }
         .padding()
@@ -800,7 +800,7 @@ struct MissingCardsCard: View {
 
                 Spacer()
 
-                Text("$\(costToComplete, specifier: "%.2f")")
+                Text(PricingService.formatPrice(costToComplete))
                     .font(.headline)
                     .foregroundColor(.lorcanaGold)
             }
@@ -814,7 +814,7 @@ struct MissingCardsCard: View {
                     Spacer()
 
                     if let price = item.card.price {
-                        Text("$\(price * Double(item.needed), specifier: "%.2f")")
+                        Text(PricingService.formatPrice(price * Double(item.needed)))
                             .font(.caption)
                             .foregroundColor(.gray)
                     }
@@ -952,7 +952,7 @@ struct DeckCardRow: View {
                     }
 
                     if let price = card.price {
-                        Text("$\(price, specifier: "%.2f")")
+                        Text(PricingService.formatPrice(price))
                             .font(.caption2)
                             .foregroundColor(.gray)
                     }
@@ -1214,6 +1214,7 @@ struct DeckBuilderView: View {
 
                     TextField("Search cards...", text: $searchText)
                         .foregroundColor(.white)
+                        .autocorrectionDisabled()
 
                     if !searchText.isEmpty {
                         Button(action: { searchText = "" }) {

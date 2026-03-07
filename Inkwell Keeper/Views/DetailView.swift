@@ -45,7 +45,17 @@ struct CardDetailView: View {
                                 .foregroundColor(.secondary)
                         }
                         
-                        // Price display removed - users can check prices via buy options
+                        if let price = card.price {
+                            HStack {
+                                Text("Market Price")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text(PricingService.formatPrice(price))
+                                    .font(.headline)
+                                    .foregroundColor(.lorcanaGold)
+                            }
+                        }
                     }
                     .padding()
 
@@ -76,12 +86,22 @@ struct CardDetailView: View {
 struct CollectionCardDetailView: View {
     let card: LorcanaCard
     @Binding var isPresented: Bool
+    var showAllVariants: Bool = false
     @EnvironmentObject var collectionManager: CollectionManager
     @State private var collectedCard: CollectedCard?
     @State private var tempQuantity: Int = 1
+    @State private var foilCollectedCard: CollectedCard?
+    @State private var foilQuantity: Int = 0
     @State private var showingDeleteConfirmation = false
     @State private var showingFullscreenViewer = false
     @State private var showingRulesAssistant = false
+
+    /// Whether to show the foil section — only when opened from Sets view and card supports foil
+    private var showFoilSection: Bool {
+        guard showAllVariants else { return false }
+        let v = card.variant
+        return v == .normal || v == .foil
+    }
 
     var body: some View {
         NavigationView {
@@ -117,9 +137,119 @@ struct CollectionCardDetailView: View {
                         }
                         
                         // Collection specific information - only show if card is owned
-                        if collectedCard != nil {
+                        if collectedCard != nil || foilCollectedCard != nil {
                             VStack(alignment: .leading, spacing: 12) {
-                                Group {
+                                if showFoilSection {
+                                    // Show Normal + Foil quantities side by side
+                                    Text("Quantity")
+                                        .font(.headline)
+                                        .foregroundColor(.lorcanaGold)
+
+                                    HStack(spacing: 16) {
+                                        // Normal quantity
+                                        VStack(spacing: 8) {
+                                            HStack(spacing: 4) {
+                                                Image(systemName: "rectangle.portrait")
+                                                    .font(.caption)
+                                                Text("Normal")
+                                                    .font(.subheadline)
+                                                    .fontWeight(.medium)
+                                            }
+                                            .foregroundColor(.white)
+
+                                            HStack(spacing: 12) {
+                                                Button("-") {
+                                                    if tempQuantity > 0 {
+                                                        tempQuantity -= 1
+                                                        updateQuantity()
+                                                    }
+                                                }
+                                                .frame(width: 28, height: 28)
+                                                .background(Color.red.opacity(0.8))
+                                                .foregroundColor(.white)
+                                                .clipShape(Circle())
+                                                .disabled(tempQuantity <= 0)
+
+                                                Text("\(tempQuantity)")
+                                                    .font(.title3)
+                                                    .fontWeight(.bold)
+                                                    .foregroundColor(.white)
+                                                    .frame(minWidth: 30)
+
+                                                Button("+") {
+                                                    tempQuantity += 1
+                                                    updateQuantity()
+                                                }
+                                                .frame(width: 28, height: 28)
+                                                .background(Color.green.opacity(0.8))
+                                                .foregroundColor(.white)
+                                                .clipShape(Circle())
+                                            }
+                                        }
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .fill(tempQuantity > 0 ? Color.white.opacity(0.1) : Color.clear)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 12)
+                                                        .stroke(tempQuantity > 0 ? Color.white.opacity(0.3) : Color.gray.opacity(0.3), lineWidth: 1)
+                                                )
+                                        )
+
+                                        // Foil quantity
+                                        VStack(spacing: 8) {
+                                            HStack(spacing: 4) {
+                                                Image(systemName: "sparkles")
+                                                    .font(.caption)
+                                                Text("Foil")
+                                                    .font(.subheadline)
+                                                    .fontWeight(.medium)
+                                            }
+                                            .foregroundColor(.lorcanaGold)
+
+                                            HStack(spacing: 12) {
+                                                Button("-") {
+                                                    if foilQuantity > 0 {
+                                                        foilQuantity -= 1
+                                                        updateFoilQuantity()
+                                                    }
+                                                }
+                                                .frame(width: 28, height: 28)
+                                                .background(Color.red.opacity(0.8))
+                                                .foregroundColor(.white)
+                                                .clipShape(Circle())
+                                                .disabled(foilQuantity <= 0)
+
+                                                Text("\(foilQuantity)")
+                                                    .font(.title3)
+                                                    .fontWeight(.bold)
+                                                    .foregroundColor(.white)
+                                                    .frame(minWidth: 30)
+
+                                                Button("+") {
+                                                    foilQuantity += 1
+                                                    updateFoilQuantity()
+                                                }
+                                                .frame(width: 28, height: 28)
+                                                .background(Color.lorcanaGold)
+                                                .foregroundColor(.lorcanaDark)
+                                                .clipShape(Circle())
+                                            }
+                                        }
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .fill(foilQuantity > 0 ? Color.lorcanaGold.opacity(0.15) : Color.clear)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 12)
+                                                        .stroke(foilQuantity > 0 ? Color.lorcanaGold.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 1)
+                                                )
+                                        )
+                                    }
+                                } else {
+                                    // Non-foilable cards (Enchanted, etc.) — single quantity
                                     HStack {
                                         Text("Quantity:")
                                             .font(.headline)
@@ -129,6 +259,7 @@ struct CollectionCardDetailView: View {
                                             Button("-") {
                                                 if tempQuantity > 1 {
                                                     tempQuantity -= 1
+                                                    updateQuantity()
                                                 }
                                             }
                                             .frame(width: 30, height: 30)
@@ -136,15 +267,16 @@ struct CollectionCardDetailView: View {
                                             .foregroundColor(.white)
                                             .clipShape(Circle())
                                             .disabled(tempQuantity <= 1)
-                                            
+
                                             Text("\(tempQuantity)")
                                                 .font(.title2)
                                                 .fontWeight(.bold)
                                                 .foregroundColor(.white)
                                                 .frame(minWidth: 40)
-                                            
+
                                             Button("+") {
                                                 tempQuantity += 1
+                                                updateQuantity()
                                             }
                                             .frame(width: 30, height: 30)
                                             .background(Color.green.opacity(0.8))
@@ -152,27 +284,27 @@ struct CollectionCardDetailView: View {
                                             .clipShape(Circle())
                                         }
                                     }
-                                    
-                                    if let collected = collectedCard {
-                                        HStack {
-                                            Text("Date Added:")
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
-                                            Spacer()
-                                            Text(collected.dateAdded, style: .date)
-                                                .font(.subheadline)
-                                                .foregroundColor(.white)
-                                        }
-                                        
-                                        HStack {
-                                            Text("Condition:")
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
-                                            Spacer()
-                                            Text(collected.condition)
-                                                .font(.subheadline)
-                                                .foregroundColor(.white)
-                                        }
+                                }
+
+                                if let collected = collectedCard {
+                                    HStack {
+                                        Text("Date Added:")
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
+                                        Spacer()
+                                        Text(collected.dateAdded, style: .date)
+                                            .font(.subheadline)
+                                            .foregroundColor(.white)
+                                    }
+
+                                    HStack {
+                                        Text("Condition:")
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
+                                        Spacer()
+                                        Text(collected.condition)
+                                            .font(.subheadline)
+                                            .foregroundColor(.white)
                                     }
                                 }
                             }
@@ -190,7 +322,17 @@ struct CollectionCardDetailView: View {
                             }
                         }
                         
-                        // Price display removed - users can check prices via buy options
+                        if let price = card.price {
+                            HStack {
+                                Text("Market Price")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text(PricingService.formatPrice(price))
+                                    .font(.headline)
+                                    .foregroundColor(.lorcanaGold)
+                            }
+                        }
                     }
                     .padding()
                     .background(
@@ -217,19 +359,12 @@ struct CollectionCardDetailView: View {
 
                     // Action buttons - show different buttons based on ownership
                     VStack(spacing: 12) {
-                        if collectedCard != nil {
+                        if collectedCard != nil || foilCollectedCard != nil {
                             // Card is owned - show collection management buttons
-                            Button(action: updateQuantity) {
-                                Text("Update Quantity")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(LorcanaButtonStyle())
-                            .disabled(tempQuantity == (collectedCard?.quantity ?? 1))
-                            
                             Button(action: {
                                 showingDeleteConfirmation = true
                             }) {
-                                Text("Remove from Collection")
+                                Text("Remove All from Collection")
                                     .frame(maxWidth: .infinity)
                             }
                             .buttonStyle(.bordered)
@@ -237,14 +372,14 @@ struct CollectionCardDetailView: View {
                         } else {
                             // Card is not owned - show add buttons
                             Button(action: {
-                                collectionManager.addCard(card, quantity: 1)
-                                isPresented = false
+                                collectionManager.addCard(card.withVariant(.normal), quantity: 1)
+                                loadCollectedCardData()
                             }) {
                                 Text("Add to Collection")
                                     .frame(maxWidth: .infinity)
                             }
                             .buttonStyle(LorcanaButtonStyle())
-                            
+
                             Button(action: {
                                 collectionManager.addToWishlist(card)
                                 isPresented = false
@@ -276,11 +411,20 @@ struct CollectionCardDetailView: View {
         .alert("Remove Card", isPresented: $showingDeleteConfirmation) {
             Button("Cancel", role: .cancel) { }
             Button("Remove", role: .destructive) {
-                collectionManager.removeCard(card)
+                if showFoilSection {
+                    collectionManager.removeCard(card.withVariant(.normal))
+                    collectionManager.removeCard(card.withVariant(.foil))
+                } else {
+                    collectionManager.removeCard(card)
+                }
                 isPresented = false
             }
         } message: {
-            Text("Are you sure you want to remove \(card.name) from your collection?")
+            if showFoilSection {
+                Text("Are you sure you want to remove all copies of \(card.name) (Normal and Foil) from your collection?")
+            } else {
+                Text("Are you sure you want to remove \(card.name) from your collection?")
+            }
         }
         .fullScreenCover(isPresented: $showingFullscreenViewer) {
             FullscreenCardViewer(card: card)
@@ -291,13 +435,58 @@ struct CollectionCardDetailView: View {
     }
 
     private func loadCollectedCardData() {
-        collectedCard = collectionManager.getCollectedCardData(for: card)
-        tempQuantity = collectedCard?.quantity ?? 1
+        if showFoilSection {
+            // From Sets view: load both normal and foil separately
+            let normalCard = card.withVariant(.normal)
+            collectedCard = collectionManager.getCollectedCardDataForVariant(normalCard)
+            tempQuantity = collectedCard?.quantity ?? 0
+
+            let foilCard = card.withVariant(.foil)
+            foilCollectedCard = collectionManager.getCollectedCardDataForVariant(foilCard)
+            foilQuantity = foilCollectedCard?.quantity ?? 0
+        } else {
+            // From Collection view: load the card's specific variant
+            // Use variant-aware lookup for Normal/Foil since they're stored separately
+            if card.variant == .normal || card.variant == .foil {
+                collectedCard = collectionManager.getCollectedCardDataForVariant(card)
+            } else {
+                collectedCard = collectionManager.getCollectedCardData(for: card)
+            }
+            tempQuantity = collectedCard?.quantity ?? 1
+        }
     }
-    
+
     private func updateQuantity() {
-        collectionManager.updateCardQuantity(card, newQuantity: tempQuantity)
-        collectedCard = collectionManager.getCollectedCardData(for: card)
+        let targetCard = showFoilSection ? card.withVariant(.normal) : card
+        if tempQuantity > 0 {
+            if collectedCard != nil {
+                collectionManager.updateCardQuantity(targetCard, newQuantity: tempQuantity)
+            } else {
+                collectionManager.addCard(targetCard, quantity: tempQuantity)
+            }
+        } else if collectedCard != nil {
+            collectionManager.removeCard(targetCard)
+        }
+        // Reload to get fresh state
+        if targetCard.variant == .normal || targetCard.variant == .foil {
+            collectedCard = collectionManager.getCollectedCardDataForVariant(targetCard)
+        } else {
+            collectedCard = collectionManager.getCollectedCardData(for: targetCard)
+        }
+    }
+
+    private func updateFoilQuantity() {
+        let foilCard = card.withVariant(.foil)
+        if foilQuantity > 0 {
+            if foilCollectedCard != nil {
+                collectionManager.updateCardQuantity(foilCard, newQuantity: foilQuantity)
+            } else {
+                collectionManager.addCard(foilCard, quantity: foilQuantity)
+            }
+        } else if foilCollectedCard != nil {
+            collectionManager.removeCard(foilCard)
+        }
+        foilCollectedCard = collectionManager.getCollectedCardDataForVariant(foilCard)
     }
 }
 
@@ -352,7 +541,17 @@ struct WishlistCardDetailView: View {
                             }
                         }
                         
-                        // Price display removed - users can check prices via buy options
+                        if let price = card.price {
+                            HStack {
+                                Text("Market Price")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text(PricingService.formatPrice(price))
+                                    .font(.headline)
+                                    .foregroundColor(.lorcanaGold)
+                            }
+                        }
                     }
                     .padding()
                     .background(

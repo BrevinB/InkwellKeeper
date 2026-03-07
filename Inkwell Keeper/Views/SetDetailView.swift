@@ -227,6 +227,8 @@ struct SetDetailView: View {
                                         card: card,
                                         isCollected: isCardCollectedInSet(card),
                                         quantity: getCardQuantityInSet(card),
+                                        normalQuantity: getNormalQuantityInSet(card),
+                                        foilQuantity: getFoilQuantityInSet(card),
                                         isBulkSelectMode: isBulkSelectMode,
                                         isSelected: selectedCardIds.contains(card.id),
                                         onTap: {
@@ -240,6 +242,9 @@ struct SetDetailView: View {
                                         },
                                         onQuickAdd: {
                                             quickAddCard(card)
+                                        },
+                                        onQuickAddFoil: {
+                                            quickAddCard(card, asFoil: true)
                                         }
                                     )
                                 }
@@ -424,18 +429,23 @@ struct SetDetailView: View {
     }
 
     private func createCardGroup(from card: LorcanaCard) -> CardGroup {
-        // For promo cards with uniqueId, don't find reprints - treat as standalone
-        if let uniqueId = card.uniqueId, !uniqueId.isEmpty {
+        let isSpecialVariant = card.variant == .enchanted || card.variant == .promo ||
+                               card.variant == .epic || card.variant == .iconic
+
+        // Special variants (Enchanted/Promo/Epic/Iconic) are unique cards - treat as standalone
+        if isSpecialVariant {
             return CardGroup(
-                id: uniqueId,
+                id: card.uniqueId ?? card.id,
                 name: card.name,
                 cards: [card]
             )
         }
 
-        // Find all reprints of this card across all sets
+        // For Normal/Foil cards, find reprints across sets (but exclude special variants)
         let allCards = dataManager.getAllCards()
-        let reprints = allCards.filter { $0.name == card.name }
+        let reprints = allCards.filter { $0.name == card.name &&
+            $0.variant != .enchanted && $0.variant != .promo &&
+            $0.variant != .epic && $0.variant != .iconic }
 
         return CardGroup(
             id: card.name,
@@ -455,10 +465,11 @@ struct SetDetailView: View {
         }
     }
 
-    private func quickAddCard(_ card: LorcanaCard) {
-        let normalCard = card.variant == .normal ? card : card.withVariant(.normal)
-        collectionManager.addCard(normalCard, quantity: 1)
-        quickAddCardName = card.name
+    private func quickAddCard(_ card: LorcanaCard, asFoil: Bool = false) {
+        let variant: CardVariant = asFoil ? .foil : .normal
+        let cardToAdd = card.variant == variant ? card : card.withVariant(variant)
+        collectionManager.addCard(cardToAdd, quantity: 1)
+        quickAddCardName = "\(card.name) (\(variant.displayName))"
         showQuickAddBanner = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             showQuickAddBanner = false
@@ -477,9 +488,6 @@ struct SetDetailView: View {
     // Helper function to check if a specific card is collected
     private func isCardCollectedInSet(_ card: LorcanaCard) -> Bool {
         let isCollected = collectionManager.collectedCards.contains { collected in
-            // Match by card name across ALL sets (reprints count as collected)
-            // For Enchanted/Epic/Iconic/Promo, they are separate cards so match variant too
-            // For Normal/Foil, they're the same card so ignore variant (but don't match special variants)
             let cardIsSpecialVariant = card.variant == .enchanted ||
                                        card.variant == .epic ||
                                        card.variant == .iconic ||
@@ -490,58 +498,59 @@ struct SetDetailView: View {
                                            collected.variant == .iconic ||
                                            collected.variant == .promo
 
-            let match: Bool
+            // For special variants (unique art), use uniqueId for precise matching
             if cardIsSpecialVariant {
-                // For special variants, match name + variant (regardless of set)
-                match = collected.name == card.name &&
-                       collected.variant == card.variant
+                if let cardUniqueId = card.uniqueId, let collectedUniqueId = collected.uniqueId,
+                   !cardUniqueId.isEmpty, !collectedUniqueId.isEmpty {
+                    return collectedUniqueId == cardUniqueId
+                }
+                return collected.name == card.name && collected.variant == card.variant
             } else {
-                // For Normal/Foil, match name only but EXCLUDE special variants
-                match = collected.name == card.name &&
-                       !collectedIsSpecialVariant
+                // Normal/Foil: match by name across sets (reprints), exclude special variants
+                return collected.name == card.name && !collectedIsSpecialVariant
             }
-
-            if match {
-                print("✅ [isCardCollectedInSet] Match for \(card.name) in \(set.name): found in collection from \(collected.setName ?? "unknown set") (variant: \(collected.variant.rawValue))")
-            }
-            return match
-        }
-
-        if !isCollected {
-            print("❌ [isCardCollectedInSet] No match for: \(card.name) (uniqueId: \(card.uniqueId ?? "nil"), set: \(set.name), variant: \(card.variant.rawValue))")
         }
 
         return isCollected
     }
 
-    // Helper function to get quantity for a specific card
-    private func getCardQuantityInSet(_ card: LorcanaCard) -> Int {
-        // Sum quantities across ALL sets where this card appears (reprints)
-        let cardIsSpecialVariant = card.variant == .enchanted ||
-                                   card.variant == .epic ||
-                                   card.variant == .iconic ||
-                                   card.variant == .promo
+    // Helper function to get normal quantity for a specific card
+    private func getNormalQuantityInSet(_ card: LorcanaCard) -> Int {
+        let normalCard = card.withVariant(.normal)
+        return collectionManager.getCollectedCardDataForVariant(normalCard)?.quantity ?? 0
+    }
 
+    // Helper function to get foil quantity for a specific card
+    private func getFoilQuantityInSet(_ card: LorcanaCard) -> Int {
+        let foilCard = card.withVariant(.foil)
+        return collectionManager.getCollectedCardDataForVariant(foilCard)?.quantity ?? 0
+    }
+
+    // Helper function to get total quantity for a specific card
+    private func getCardQuantityInSet(_ card: LorcanaCard) -> Int {
         let totalQuantity = collectionManager.collectedCards
             .filter { collected in
+                let cardIsSpecialVariant = card.variant == .enchanted ||
+                                           card.variant == .epic ||
+                                           card.variant == .iconic ||
+                                           card.variant == .promo
                 let collectedIsSpecialVariant = collected.variant == .enchanted ||
                                                collected.variant == .epic ||
                                                collected.variant == .iconic ||
                                                collected.variant == .promo
 
                 if cardIsSpecialVariant {
-                    // For special variants, match name + variant across all sets
+                    if let cardUniqueId = card.uniqueId, let collectedUniqueId = collected.uniqueId,
+                       !cardUniqueId.isEmpty, !collectedUniqueId.isEmpty {
+                        return collectedUniqueId == cardUniqueId
+                    }
                     return collected.name == card.name && collected.variant == card.variant
                 } else {
-                    // For Normal/Foil, match name only but EXCLUDE special variants
                     return collected.name == card.name && !collectedIsSpecialVariant
                 }
             }
             .count
 
-        if totalQuantity > 0 {
-            print("📊 [getCardQuantityInSet] Found \(totalQuantity) total for: \(card.name) (\(card.variant.rawValue)) across all sets")
-        }
         return totalQuantity
     }
 }
@@ -550,10 +559,13 @@ struct SetCardView: View {
     let card: LorcanaCard
     let isCollected: Bool
     let quantity: Int
+    var normalQuantity: Int = 0
+    var foilQuantity: Int = 0
     var isBulkSelectMode: Bool = false
     var isSelected: Bool = false
     let onTap: () -> Void
     var onQuickAdd: (() -> Void)? = nil
+    var onQuickAddFoil: (() -> Void)? = nil
 
     var body: some View {
         VStack(spacing: 8) {
@@ -577,7 +589,7 @@ struct SetCardView: View {
                         )
                 )
 
-                // Collection status overlay
+                // Collection status overlay (top-right)
                 VStack {
                     HStack {
                         Spacer()
@@ -601,21 +613,39 @@ struct SetCardView: View {
                                 }
                             }
                         } else if isCollected {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.green)
-                                    .frame(width: 24, height: 24)
+                            VStack(spacing: 3) {
+                                // Normal count badge
+                                if normalQuantity > 0 {
+                                    HStack(spacing: 2) {
+                                        Image(systemName: "rectangle.portrait.fill")
+                                            .font(.system(size: 7))
+                                        Text("\(normalQuantity)")
+                                            .font(.system(size: 10, weight: .bold))
+                                    }
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 5)
+                                    .padding(.vertical, 2)
+                                    .background(
+                                        Capsule()
+                                            .fill(Color.green)
+                                    )
+                                }
 
-                                if quantity > 1 {
-                                    Text("\(quantity)")
-                                        .font(.caption2)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.white)
-                                } else {
-                                    Image(systemName: "checkmark")
-                                        .font(.caption)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.white)
+                                // Foil count badge
+                                if foilQuantity > 0 {
+                                    HStack(spacing: 2) {
+                                        Image(systemName: "sparkles")
+                                            .font(.system(size: 7))
+                                        Text("\(foilQuantity)")
+                                            .font(.system(size: 10, weight: .bold))
+                                    }
+                                    .foregroundColor(.lorcanaDark)
+                                    .padding(.horizontal, 5)
+                                    .padding(.vertical, 2)
+                                    .background(
+                                        Capsule()
+                                            .fill(Color.lorcanaGold)
+                                    )
                                 }
                             }
                         } else {
@@ -634,26 +664,45 @@ struct SetCardView: View {
                 }
                 .padding(6)
 
-                // Quick add button (bottom-right, only for uncollected cards not in bulk mode)
-                if !isCollected && !isBulkSelectMode {
+                // Quick add buttons (bottom-right, only for uncollected cards not in bulk mode)
+                if !isBulkSelectMode {
                     VStack {
                         Spacer()
                         HStack {
                             Spacer()
-                            Button(action: {
-                                onQuickAdd?()
-                            }) {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.lorcanaGold)
-                                        .frame(width: 28, height: 28)
-                                    Image(systemName: "plus")
-                                        .font(.caption)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.lorcanaDark)
+                            VStack(spacing: 4) {
+                                // Foil quick add
+                                Button(action: {
+                                    onQuickAddFoil?()
+                                }) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color.lorcanaGold)
+                                            .frame(width: 28, height: 28)
+                                        Image(systemName: "sparkles")
+                                            .font(.system(size: 11))
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.lorcanaDark)
+                                    }
                                 }
+                                .buttonStyle(.plain)
+
+                                // Normal quick add
+                                Button(action: {
+                                    onQuickAdd?()
+                                }) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color.green)
+                                            .frame(width: 28, height: 28)
+                                        Image(systemName: "plus")
+                                            .font(.caption)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.white)
+                                    }
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
                     }
                     .padding(6)
@@ -697,7 +746,7 @@ struct CardDetailSheetView: View {
     @State private var isPresented = true
 
     var body: some View {
-        CollectionCardDetailView(card: card, isPresented: $isPresented)
+        CollectionCardDetailView(card: card, isPresented: $isPresented, showAllVariants: true)
             .onChange(of: isPresented) { newValue in
                 if !newValue {
                     dismiss()
