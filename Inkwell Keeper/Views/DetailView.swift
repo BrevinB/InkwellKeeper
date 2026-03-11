@@ -95,6 +95,7 @@ struct CollectionCardDetailView: View {
     @State private var showingDeleteConfirmation = false
     @State private var showingFullscreenViewer = false
     @State private var showingRulesAssistant = false
+    @State private var deckAllocations: [CollectionManager.DeckAllocation] = []
 
     /// Whether to show the foil section — only when opened from Sets view and card supports foil
     private var showFoilSection: Bool {
@@ -307,6 +308,42 @@ struct CollectionCardDetailView: View {
                                             .foregroundColor(.white)
                                     }
                                 }
+
+                                // Deck Usage section
+                                if !deckAllocations.isEmpty {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        let totalAllocated = deckAllocations.reduce(0) { $0 + $1.quantity }
+                                        let totalOwned = tempQuantity + foilQuantity
+                                        let available = max(0, totalOwned - totalAllocated)
+
+                                        HStack {
+                                            Text("Deck Usage")
+                                                .font(.headline)
+                                                .foregroundColor(.lorcanaGold)
+                                            Spacer()
+                                            Text("\(available) available")
+                                                .font(.subheadline)
+                                                .fontWeight(.semibold)
+                                                .foregroundColor(available > 0 ? .green : .red)
+                                        }
+
+                                        ForEach(deckAllocations, id: \.deckName) { allocation in
+                                            HStack {
+                                                Image(systemName: "rectangle.stack.fill")
+                                                    .font(.caption)
+                                                    .foregroundColor(.lorcanaGold.opacity(0.7))
+                                                Text(allocation.deckName)
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.white)
+                                                Spacer()
+                                                Text("\(allocation.quantity) used")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.gray)
+                                            }
+                                        }
+                                    }
+                                    .padding(.top, 4)
+                                }
                             }
                             .padding(.vertical, 8)
                         }
@@ -454,6 +491,9 @@ struct CollectionCardDetailView: View {
             }
             tempQuantity = collectedCard?.quantity ?? 1
         }
+
+        // Load deck allocations
+        deckAllocations = collectionManager.getDeckAllocations(for: card)
     }
 
     private func updateQuantity() {
@@ -687,6 +727,7 @@ struct ManualAddCardView: View {
                         }
                     }
                     .listStyle(PlainListStyle())
+                    .scrollContentBackground(.hidden)
                 }
             }
             .background(LorcanaBackground())
@@ -794,6 +835,7 @@ struct AddToWishlistView: View {
                         }
                     }
                     .listStyle(PlainListStyle())
+                    .scrollContentBackground(.hidden)
                 }
             }
             .background(LorcanaBackground())
@@ -1664,28 +1706,39 @@ struct CardGroupSearchRow: View {
 
     var body: some View {
         Button(action: onTap) {
-            HStack {
+            HStack(spacing: 12) {
                 AsyncImage(url: cardGroup.primaryCard.bestImageUrl()) { image in
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                 } placeholder: {
-                    RoundedRectangle(cornerRadius: 6)
+                    RoundedRectangle(cornerRadius: 8)
                         .fill(Color.gray.opacity(0.3))
                 }
-                .frame(width: 50, height: 70)
-                .clipShape(RoundedRectangle(cornerRadius: 6))
+                .frame(width: 60, height: 84)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(cardGroup.primaryCard.rarity.color, lineWidth: 1)
+                )
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text(cardGroup.name)
                         .font(.headline)
                         .foregroundColor(.white)
-                        .lineLimit(1)
+                        .lineLimit(2)
 
-                    HStack {
+                    HStack(spacing: 6) {
                         RarityBadge(rarity: cardGroup.primaryCard.rarity)
+                        CostBadge(cost: cardGroup.primaryCard.cost)
+                    }
 
-                        // Show reprint badge if multiple sets
+                    HStack(spacing: 6) {
+                        Text(cardGroup.primaryCard.setName)
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                            .lineLimit(1)
+
                         if cardGroup.isReprint {
                             HStack(spacing: 3) {
                                 Image(systemName: "square.on.square")
@@ -1694,27 +1747,24 @@ struct CardGroupSearchRow: View {
                                     .font(.caption2)
                             }
                             .foregroundColor(.white)
-                            .padding(.horizontal, 4)
+                            .padding(.horizontal, 5)
                             .padding(.vertical, 2)
                             .background(Capsule().fill(Color.blue.opacity(0.8)))
                         }
-
-                        Spacer()
-
-                        // Price display removed
                     }
                 }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .foregroundColor(.gray)
+                    .foregroundColor(.lorcanaGold.opacity(0.6))
                     .font(.caption)
             }
-            .padding(.vertical, 4)
+            .padding(.vertical, 6)
             .contentShape(Rectangle())
         }
         .buttonStyle(PlainButtonStyle())
+        .listRowBackground(Color.lorcanaDark.opacity(0.6))
     }
 }
 

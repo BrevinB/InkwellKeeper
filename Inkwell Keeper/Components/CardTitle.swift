@@ -31,6 +31,15 @@ struct CardTile: View {
         }
         return collectionManager.getCollectedCardData(for: card)
     }
+
+    private var deckAllocationTotal: Int {
+        collectionManager.getTotalDeckAllocation(for: card)
+    }
+
+    private var availableQuantity: Int {
+        guard let collected = collectedCard else { return 0 }
+        return max(0, collected.quantity - deckAllocationTotal)
+    }
     
     var body: some View {
         VStack(spacing: 8) {
@@ -127,17 +136,32 @@ struct CardTile: View {
 
                         // Quantity badge in top-right corner
                         if let collected = collectedCard, collected.quantity > 1 {
-                            Text("\(collected.quantity)")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(
-                                    Capsule()
-                                        .fill(Color.lorcanaGold.opacity(0.9))
-                                )
-                                .padding(6)
+                            VStack(spacing: 2) {
+                                Text("\(collected.quantity)")
+                                    .font(.caption)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(
+                                        Capsule()
+                                            .fill(Color.lorcanaGold.opacity(0.9))
+                                    )
+
+                                // Show available count when some are in decks
+                                if deckAllocationTotal > 0 {
+                                    Text("\(availableQuantity) free")
+                                        .font(.system(size: 9, weight: .bold))
+                                        .foregroundColor(availableQuantity > 0 ? .green : .red)
+                                        .padding(.horizontal, 5)
+                                        .padding(.vertical, 1)
+                                        .background(
+                                            Capsule()
+                                                .fill(Color.black.opacity(0.7))
+                                        )
+                                }
+                            }
+                            .padding(6)
                         }
                     }
                     Spacer()

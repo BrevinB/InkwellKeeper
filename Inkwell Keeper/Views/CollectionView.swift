@@ -19,6 +19,7 @@ struct CollectionView: View {
     @State private var showingBulkImport = false
     @State private var showingExport = false
     @State private var showingSettings = false
+    @State private var showingCardSearch = false
     @State private var showingSupportThanks = false
     @State private var supportThanksMessage = ""
     
@@ -117,6 +118,12 @@ struct CollectionView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showingCardSearch = true }) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.lorcanaGold)
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Button(action: { showingBulkImport = true }) {
                             Label("Bulk Import", systemImage: "square.and.arrow.down")
@@ -173,6 +180,10 @@ struct CollectionView: View {
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
+                .environmentObject(collectionManager)
+        }
+        .sheet(isPresented: $showingCardSearch) {
+            CardSearchView(isPresented: $showingCardSearch)
                 .environmentObject(collectionManager)
         }
     }

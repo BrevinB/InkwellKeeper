@@ -9,16 +9,17 @@ import SwiftUI
 
 struct SearchBar: View {
     @Binding var text: String
+    var placeholder: String = "Search your collection..."
     @FocusState private var isFocused: Bool
-    
+
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(isFocused ? .lorcanaGold : .gray)
                 .font(.system(size: 16, weight: .medium))
                 .animation(.easeInOut(duration: 0.2), value: isFocused)
-            
-            TextField("Search your collection...", text: $text)
+
+            TextField(placeholder, text: $text)
                 .textFieldStyle(PlainTextFieldStyle())
                 .foregroundColor(.white)
                 .font(.system(size: 16))

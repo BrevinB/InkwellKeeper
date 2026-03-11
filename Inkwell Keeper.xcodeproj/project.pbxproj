@@ -53,6 +53,7 @@
 		23B90B292E66335C00214C40 /* WishlistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90B282E66335A00214C40 /* WishlistView.swift */; };
 		23B90B2B2E66336100214C40 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90B2A2E66335E00214C40 /* StatsView.swift */; };
 		23B90B2D2E66336600214C40 /* ScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90B2C2E66336400214C40 /* ScannerView.swift */; };
+		F1CARD5EB6A63F /* CardSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1CARD5EA3181D /* CardSearchView.swift */; };
 		23B90B2F2E66337300214C40 /* LorcanaAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90B2E2E66336C00214C40 /* LorcanaAPIService.swift */; };
 		23B90B312E66337800214C40 /* FilterModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90B302E66337500214C40 /* FilterModels.swift */; };
 		23B90B332E66337D00214C40 /* SwiftDataModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90B322E66337A00214C40 /* SwiftDataModels.swift */; };
@@ -151,6 +152,7 @@
 		23B90B282E66335A00214C40 /* WishlistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WishlistView.swift; sourceTree = "<group>"; };
 		23B90B2A2E66335E00214C40 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		23B90B2C2E66336400214C40 /* ScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerView.swift; sourceTree = "<group>"; };
+		F1CARD5EA3181D /* CardSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSearchView.swift; sourceTree = "<group>"; };
 		23B90B2E2E66336C00214C40 /* LorcanaAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LorcanaAPIService.swift; sourceTree = "<group>"; };
 		23B90B302E66337500214C40 /* FilterModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterModels.swift; sourceTree = "<group>"; };
 		23B90B322E66337A00214C40 /* SwiftDataModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataModels.swift; sourceTree = "<group>"; };
@@ -356,6 +358,7 @@
 				2333654D2E77961C00BE5BD4 /* SetDetailView.swift */,
 				2333654E2E77961C00BE5BD4 /* SetsView.swift */,
 				23B90B242E66334F00214C40 /* CollectionView.swift */,
+				F1CARD5EA3181D /* CardSearchView.swift */,
 				23B90B2C2E66336400214C40 /* ScannerView.swift */,
 				E2F3A4B5C6D7E8F9A0B1C3D4 /* MultiScanReviewView.swift */,
 				23B90B2A2E66335E00214C40 /* StatsView.swift */,
@@ -540,6 +543,7 @@
 				23B90B1B2E66332100214C40 /* ScanOverlay.swift in Sources */,
 				23BC47A92F4ABE8100E7037B /* AIDeckBuilderView.swift in Sources */,
 				23B90AFC2E66323500214C40 /* ContentView.swift in Sources */,
+				F1CARD5EB6A63F /* CardSearchView.swift in Sources */,
 				23B90B2D2E66336600214C40 /* ScannerView.swift in Sources */,
 				E2F3A4B5C6D7E8F9A0B1C3D5 /* MultiScanReviewView.swift in Sources */,
 				23CB6DCD2EB6B02200630416 /* PriceWithConfidenceView.swift in Sources */,

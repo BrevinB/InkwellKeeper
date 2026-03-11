@@ -725,6 +725,53 @@ class CollectionManager: ObservableObject {
         }
     }
 
+    // MARK: - Deck Allocation Tracking
+
+    /// Represents how many copies of a card are used in a specific deck
+    struct DeckAllocation {
+        let deckName: String
+        let quantity: Int
+    }
+
+    /// Get all deck allocations for a card (which decks use it and how many copies)
+    func getDeckAllocations(for card: LorcanaCard) -> [DeckAllocation] {
+        guard let context = modelContext else { return [] }
+
+        do {
+            let cardName = card.name
+            let descriptor = FetchDescriptor<DeckCard>(
+                predicate: #Predicate<DeckCard> { $0.name == cardName }
+            )
+            let deckCards = try context.fetch(descriptor)
+
+            return deckCards.compactMap { deckCard in
+                guard let deck = deckCard.deck else { return nil }
+                return DeckAllocation(deckName: deck.name, quantity: deckCard.quantity)
+            }
+        } catch {
+            return []
+        }
+    }
+
+    /// Get total quantity of a card allocated across all decks
+    func getTotalDeckAllocation(for card: LorcanaCard) -> Int {
+        return getDeckAllocations(for: card).reduce(0) { $0 + $1.quantity }
+    }
+
+    /// Get the number of copies available (not in any deck)
+    func getAvailableQuantity(for card: LorcanaCard) -> Int {
+        let owned: Int
+        let isSpecialVariant = card.variant == .enchanted || card.variant == .epic ||
+                               card.variant == .iconic || card.variant == .promo
+        if isSpecialVariant {
+            owned = getCollectedQuantityByName(card.name, setName: card.setName, variant: card.variant)
+        } else {
+            owned = getTotalQuantityAcrossVariants(uniqueId: card.uniqueId, cardName: card.name, setName: card.setName)
+        }
+        let allocated = getTotalDeckAllocation(for: card)
+        return max(0, owned - allocated)
+    }
+
     /// Get total collected quantity across Normal and Foil variants only
     /// (Enchanted/Epic/Iconic are separate cards, not summed)
     func getTotalQuantityAcrossVariants(uniqueId: String?, cardName: String, setName: String) -> Int {

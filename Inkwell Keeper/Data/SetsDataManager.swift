@@ -212,6 +212,12 @@ class SetsDataManager: ObservableObject {
         return groupCards(cards)
     }
 
+    func getAllCardGroups() -> [CardGroup] {
+        guard isDataLoaded else { return [] }
+        let allCards = getAllCards()
+        return groupCards(allCards)
+    }
+
     /// Group cards by name, keeping special variants (Enchanted/Promo/Epic/Iconic) separate
     private func groupCards(_ cards: [LorcanaCard]) -> [CardGroup] {
         var grouped: [String: [LorcanaCard]] = [:]
