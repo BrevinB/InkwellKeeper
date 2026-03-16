@@ -135,18 +135,20 @@ struct CardTile: View {
                         Spacer()
 
                         // Quantity badge in top-right corner
-                        if let collected = collectedCard, collected.quantity > 1 {
+                        if let collected = collectedCard, (collected.quantity > 1 || deckAllocationTotal > 0) {
                             VStack(spacing: 2) {
-                                Text("\(collected.quantity)")
-                                    .font(.caption)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(
-                                        Capsule()
-                                            .fill(Color.lorcanaGold.opacity(0.9))
-                                    )
+                                if collected.quantity > 1 {
+                                    Text("\(collected.quantity)")
+                                        .font(.caption)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(
+                                            Capsule()
+                                                .fill(Color.lorcanaGold.opacity(0.9))
+                                        )
+                                }
 
                                 // Show available count when some are in decks
                                 if deckAllocationTotal > 0 {

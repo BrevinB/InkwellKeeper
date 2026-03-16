@@ -65,13 +65,7 @@ struct WishlistCardRow: View {
                     Spacer()
                 }
                 
-                if let price = card.price {
-                    PriceWithConfidenceView(
-                        price: price,
-                        confidence: .estimated,
-                        style: .inline
-                    )
-                }
+                AsyncPriceWithConfidenceView(card: card, style: .inline)
 
                 // Buy button for wishlist cards
                 CompactBuyButton(card: card)

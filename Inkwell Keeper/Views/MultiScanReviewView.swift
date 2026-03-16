@@ -182,6 +182,10 @@ struct ScannedCardRow: View {
                         .foregroundColor(.gray)
 
                     RarityBadge(rarity: entry.card.rarity)
+
+                    Spacer()
+
+                    AsyncPriceWithConfidenceView(card: entry.card, style: .inline)
                 }
 
                 // Variant picker

@@ -5,7 +5,8 @@
       "WebFetch(domain:www.revenuecat.com)",
       "Bash(cat:*)",
       "Bash(python3:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(wc -l /Users/brevin/Developer/lorcana-pricing-api/app/*.py /Users/brevin/Developer/lorcana-pricing-api/app/routers/*.py /Users/brevin/Developer/lorcana-pricing-api/app/services/*.py /Users/brevin/Developer/lorcana-pricing-api/cron/*.py 2>/dev/null)"
     ],
     "deny": [],
     "ask": []

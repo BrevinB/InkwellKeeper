@@ -117,9 +117,12 @@ struct ScannerView: View {
                                                     .font(.subheadline)
                                                     .lineLimit(1)
                                             }
-                                            Text("Tap to correct")
-                                                .font(.caption2)
-                                                .foregroundColor(.gray)
+                                            HStack(spacing: 6) {
+                                                Text("Tap to correct")
+                                                    .font(.caption2)
+                                                    .foregroundColor(.gray)
+                                                AsyncPriceWithConfidenceView(card: entry.card, style: .inline)
+                                            }
                                         }
                                         .onTapGesture {
                                             showingCorrectionSearch = true

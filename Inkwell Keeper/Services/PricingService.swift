@@ -124,17 +124,18 @@ class PricingService: ObservableObject {
 
                 return pricing
             } catch PricingError.rateLimitExceeded(let resetTime) {
+                print("[Pricing] \(provider) rate limited for \(card.name)")
                 rateLimitHit = true
                 continue
             } catch {
+                print("[Pricing] \(provider) failed for \(card.name): \(error)")
                 continue
             }
         }
 
         // If all providers fail, return estimated pricing
-        if rateLimitHit {
-        } else {
-        }
+        let uniqueId = buildUniqueId(for: card)
+        print("[Pricing] All providers failed for \(card.name) (uniqueId: \(uniqueId), cardNumber: \(card.cardNumber ?? -1), id: \(card.id)) — using estimation")
 
         let estimatedPricing = generateEstimatedPricing(for: card, condition: condition)
 
@@ -371,12 +372,19 @@ class PricingService: ObservableObject {
             }
             return existingId
         }
+        // Try to extract card number from generated ID format (e.g., "THE_001_N_CardName")
+        let idParts = card.id.split(separator: "_")
+        if idParts.count >= 2, let num = Int(idParts[1]) {
+            return "\(code)-\(num)"
+        }
         return "\(code)-\(card.id)"
     }
 
     private func fetchInkwellAPIPricing(for card: LorcanaCard, condition: CardCondition) async throws -> CardPricing {
         let uniqueId = buildUniqueId(for: card)
         let urlString = "\(inkwellAPIBaseURL)/prices/\(uniqueId)"
+
+        print("[InkwellAPI] Fetching: \(urlString)")
 
         guard let url = URL(string: urlString) else {
             throw PricingError.invalidResponse
@@ -390,6 +398,7 @@ class PricingService: ObservableObject {
 
         if let httpResponse = response as? HTTPURLResponse {
             guard httpResponse.statusCode == 200 else {
+                print("[InkwellAPI] HTTP \(httpResponse.statusCode) for \(uniqueId)")
                 throw PricingError.noDataFound
             }
         }

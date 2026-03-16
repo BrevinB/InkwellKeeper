@@ -15,6 +15,7 @@ struct DecksView: View {
     @State private var showingCreateDeck = false
     @State private var showingStarterDecks = false
     @State private var showingAIDeckBuilder = false
+    @State private var showingImportDeck = false
 
     var body: some View {
         navigationWrapper {
@@ -53,6 +54,11 @@ struct DecksView: View {
 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 16) {
+                        Button(action: { showingImportDeck = true }) {
+                            Image(systemName: "square.and.arrow.down")
+                                .foregroundColor(.lorcanaGold)
+                        }
+
                         Button(action: { showingAIDeckBuilder = true }) {
                             Image(systemName: "sparkles")
                                 .foregroundColor(.lorcanaGold)
@@ -80,6 +86,10 @@ struct DecksView: View {
         }
         .sheet(isPresented: $showingAIDeckBuilder) {
             AIDeckBuilderView()
+                .environmentObject(deckManager)
+        }
+        .sheet(isPresented: $showingImportDeck) {
+            ImportDeckView()
                 .environmentObject(deckManager)
         }
     }
@@ -473,7 +483,9 @@ struct DeckDetailView: View {
     @State private var showingEditDeck = false
     @State private var showingAICompleter = false
     @State private var showingAIStrategy = false
+    @State private var showingShareSheet = false
     @State private var exportedText = ""
+    @State private var shareCode = ""
 
     var statistics: DeckStatistics {
         deckManager.calculateStatistics(for: deck, collectionManager: collectionManager)
@@ -602,6 +614,15 @@ struct DeckDetailView: View {
                         }
 
                         Button(action: {
+                            if let code = deckManager.generateShareCode(for: deck) {
+                                shareCode = code
+                                showingShareSheet = true
+                            }
+                        }) {
+                            Label("Share Deck", systemImage: "paperplane")
+                        }
+
+                        Button(action: {
                             _ = deckManager.duplicateDeck(deck)
                         }) {
                             Label("Duplicate Deck", systemImage: "doc.on.doc")
@@ -634,6 +655,9 @@ struct DeckDetailView: View {
         }
         .sheet(isPresented: $showingExport) {
             ExportDeckView(deckText: exportedText, deckName: deck.name)
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            ShareDeckView(shareCode: shareCode, deckName: deck.name)
         }
         .alert("Delete Deck?", isPresented: $showingDeleteConfirm) {
             Button("Cancel", role: .cancel) { }
@@ -1640,6 +1664,192 @@ struct AddCardToDeckView: View {
                         dismiss()
                     }
                 }
+            }
+        }
+    }
+}
+
+// MARK: - Share Deck View
+struct ShareDeckView: View {
+    let shareCode: String
+    let deckName: String
+    @Environment(\.dismiss) private var dismiss
+    @State private var copied = false
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                VStack(spacing: 8) {
+                    Image(systemName: "paperplane.fill")
+                        .font(.system(size: 48))
+                        .foregroundColor(.lorcanaGold)
+
+                    Text("Share \"\(deckName)\"")
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+
+                    Text("Send this code to a friend so they can import your deck into Ink Well Keeper.")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top)
+
+                ScrollView {
+                    Text(shareCode)
+                        .font(.system(.caption2, design: .monospaced))
+                        .foregroundColor(.white.opacity(0.8))
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.lorcanaDark.opacity(0.8))
+                        )
+                }
+                .frame(maxHeight: 200)
+
+                VStack(spacing: 12) {
+                    Button(action: {
+                        UIPasteboard.general.string = shareCode
+                        copied = true
+                    }) {
+                        Label(copied ? "Copied!" : "Copy Code", systemImage: copied ? "checkmark" : "doc.on.clipboard")
+                            .foregroundColor(.lorcanaDark)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.lorcanaGold)
+                            .cornerRadius(10)
+                    }
+
+                    ShareLink(item: shareCode) {
+                        Label("Share via...", systemImage: "square.and.arrow.up")
+                            .foregroundColor(.lorcanaGold)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.lorcanaGold, lineWidth: 2)
+                            )
+                    }
+                }
+            }
+            .padding()
+            .background(LorcanaBackground())
+            .navigationTitle("Share Deck")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Import Deck View
+struct ImportDeckView: View {
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var deckManager: DeckManager
+    @State private var shareCode = ""
+    @State private var importError = false
+    @State private var importSuccess = false
+    @State private var importedDeckName = ""
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                VStack(spacing: 8) {
+                    Image(systemName: "square.and.arrow.down.fill")
+                        .font(.system(size: 48))
+                        .foregroundColor(.lorcanaGold)
+
+                    Text("Import a Deck")
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+
+                    Text("Paste a deck share code from another Ink Well Keeper user to import their deck.")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Deck Code")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+
+                    TextEditor(text: $shareCode)
+                        .font(.system(.caption2, design: .monospaced))
+                        .frame(minHeight: 120)
+                        .scrollContentBackground(.hidden)
+                        .padding(8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.lorcanaDark.opacity(0.8))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.lorcanaGold.opacity(0.3), lineWidth: 1)
+                                )
+                        )
+                }
+
+                if let clipboardString = UIPasteboard.general.string, clipboardString.hasPrefix("IWK:") && shareCode.isEmpty {
+                    Button(action: {
+                        shareCode = clipboardString
+                    }) {
+                        Label("Paste from Clipboard", systemImage: "doc.on.clipboard")
+                            .font(.subheadline)
+                            .foregroundColor(.lorcanaGold)
+                    }
+                }
+
+                Button(action: {
+                    if let deck = deckManager.importDeck(from: shareCode) {
+                        importedDeckName = deck.name
+                        importSuccess = true
+                    } else {
+                        importError = true
+                    }
+                }) {
+                    Text("Import Deck")
+                        .fontWeight(.semibold)
+                        .foregroundColor(.lorcanaDark)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(shareCode.isEmpty ? Color.gray : Color.lorcanaGold)
+                        .cornerRadius(10)
+                }
+                .disabled(shareCode.isEmpty)
+
+                Spacer()
+            }
+            .padding()
+            .background(LorcanaBackground())
+            .navigationTitle("Import Deck")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
+            .alert("Import Failed", isPresented: $importError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("The deck code is invalid. Make sure you copied the full code starting with \"IWK:\".")
+            }
+            .alert("Deck Imported!", isPresented: $importSuccess) {
+                Button("OK") {
+                    dismiss()
+                }
+            } message: {
+                Text("\"\(importedDeckName)\" has been added to your decks.")
             }
         }
     }

@@ -58,9 +58,11 @@ struct CardSearchView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     List(displayedCards, id: \.id) { cardGroup in
-                        CardGroupSearchRow(cardGroup: cardGroup) {
+                        CardGroupSearchRow(cardGroup: cardGroup, onTap: {
                             selectedCardGroupForAdd = cardGroup
-                        }
+                        }, onWishlist: {
+                            selectedCardGroupForWishlist = cardGroup
+                        })
                         .swipeActions(edge: .trailing) {
                             Button {
                                 selectedCardGroupForWishlist = cardGroup
@@ -104,7 +106,13 @@ struct CardSearchView: View {
                     }
                     selectedCardGroupForAdd = nil
                 },
-                isWishlist: false
+                isWishlist: false,
+                onAddToWishlist: { selectedCard, quantity in
+                    for _ in 0..<quantity {
+                        collectionManager.addToWishlist(selectedCard)
+                    }
+                    selectedCardGroupForAdd = nil
+                }
             )
             .environmentObject(collectionManager)
         }

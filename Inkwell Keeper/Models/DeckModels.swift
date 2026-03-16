@@ -189,6 +189,8 @@ class DeckCard {
     var quantity: Int
     var variant: String
     var price: Double?
+    var cardNumber: Int?
+    var uniqueId: String?
 
     @Relationship(deleteRule: .nullify)
     var deck: Deck?
@@ -224,6 +226,8 @@ class DeckCard {
         self.quantity = quantity
         self.variant = card.variant.rawValue
         self.price = card.price
+        self.cardNumber = card.cardNumber
+        self.uniqueId = card.uniqueId
         self.deck = nil
     }
 
@@ -238,6 +242,8 @@ class DeckCard {
             imageUrl: imageUrl,
             price: price,
             variant: cardVariant,
+            cardNumber: cardNumber,
+            uniqueId: uniqueId,
             inkwell: inkwell,
             inkColor: inkColor
         )

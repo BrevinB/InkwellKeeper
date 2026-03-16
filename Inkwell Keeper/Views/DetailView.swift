@@ -45,17 +45,7 @@ struct CardDetailView: View {
                                 .foregroundColor(.secondary)
                         }
                         
-                        if let price = card.price {
-                            HStack {
-                                Text("Market Price")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                Text(PricingService.formatPrice(price))
-                                    .font(.headline)
-                                    .foregroundColor(.lorcanaGold)
-                            }
-                        }
+                        AsyncPriceWithConfidenceView(card: card, style: .detailed)
                     }
                     .padding()
 
@@ -140,152 +130,7 @@ struct CollectionCardDetailView: View {
                         // Collection specific information - only show if card is owned
                         if collectedCard != nil || foilCollectedCard != nil {
                             VStack(alignment: .leading, spacing: 12) {
-                                if showFoilSection {
-                                    // Show Normal + Foil quantities side by side
-                                    Text("Quantity")
-                                        .font(.headline)
-                                        .foregroundColor(.lorcanaGold)
-
-                                    HStack(spacing: 16) {
-                                        // Normal quantity
-                                        VStack(spacing: 8) {
-                                            HStack(spacing: 4) {
-                                                Image(systemName: "rectangle.portrait")
-                                                    .font(.caption)
-                                                Text("Normal")
-                                                    .font(.subheadline)
-                                                    .fontWeight(.medium)
-                                            }
-                                            .foregroundColor(.white)
-
-                                            HStack(spacing: 12) {
-                                                Button("-") {
-                                                    if tempQuantity > 0 {
-                                                        tempQuantity -= 1
-                                                        updateQuantity()
-                                                    }
-                                                }
-                                                .frame(width: 28, height: 28)
-                                                .background(Color.red.opacity(0.8))
-                                                .foregroundColor(.white)
-                                                .clipShape(Circle())
-                                                .disabled(tempQuantity <= 0)
-
-                                                Text("\(tempQuantity)")
-                                                    .font(.title3)
-                                                    .fontWeight(.bold)
-                                                    .foregroundColor(.white)
-                                                    .frame(minWidth: 30)
-
-                                                Button("+") {
-                                                    tempQuantity += 1
-                                                    updateQuantity()
-                                                }
-                                                .frame(width: 28, height: 28)
-                                                .background(Color.green.opacity(0.8))
-                                                .foregroundColor(.white)
-                                                .clipShape(Circle())
-                                            }
-                                        }
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .fill(tempQuantity > 0 ? Color.white.opacity(0.1) : Color.clear)
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 12)
-                                                        .stroke(tempQuantity > 0 ? Color.white.opacity(0.3) : Color.gray.opacity(0.3), lineWidth: 1)
-                                                )
-                                        )
-
-                                        // Foil quantity
-                                        VStack(spacing: 8) {
-                                            HStack(spacing: 4) {
-                                                Image(systemName: "sparkles")
-                                                    .font(.caption)
-                                                Text("Foil")
-                                                    .font(.subheadline)
-                                                    .fontWeight(.medium)
-                                            }
-                                            .foregroundColor(.lorcanaGold)
-
-                                            HStack(spacing: 12) {
-                                                Button("-") {
-                                                    if foilQuantity > 0 {
-                                                        foilQuantity -= 1
-                                                        updateFoilQuantity()
-                                                    }
-                                                }
-                                                .frame(width: 28, height: 28)
-                                                .background(Color.red.opacity(0.8))
-                                                .foregroundColor(.white)
-                                                .clipShape(Circle())
-                                                .disabled(foilQuantity <= 0)
-
-                                                Text("\(foilQuantity)")
-                                                    .font(.title3)
-                                                    .fontWeight(.bold)
-                                                    .foregroundColor(.white)
-                                                    .frame(minWidth: 30)
-
-                                                Button("+") {
-                                                    foilQuantity += 1
-                                                    updateFoilQuantity()
-                                                }
-                                                .frame(width: 28, height: 28)
-                                                .background(Color.lorcanaGold)
-                                                .foregroundColor(.lorcanaDark)
-                                                .clipShape(Circle())
-                                            }
-                                        }
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .fill(foilQuantity > 0 ? Color.lorcanaGold.opacity(0.15) : Color.clear)
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 12)
-                                                        .stroke(foilQuantity > 0 ? Color.lorcanaGold.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 1)
-                                                )
-                                        )
-                                    }
-                                } else {
-                                    // Non-foilable cards (Enchanted, etc.) — single quantity
-                                    HStack {
-                                        Text("Quantity:")
-                                            .font(.headline)
-                                            .foregroundColor(.lorcanaGold)
-                                        Spacer()
-                                        HStack(spacing: 12) {
-                                            Button("-") {
-                                                if tempQuantity > 1 {
-                                                    tempQuantity -= 1
-                                                    updateQuantity()
-                                                }
-                                            }
-                                            .frame(width: 30, height: 30)
-                                            .background(Color.red.opacity(0.8))
-                                            .foregroundColor(.white)
-                                            .clipShape(Circle())
-                                            .disabled(tempQuantity <= 1)
-
-                                            Text("\(tempQuantity)")
-                                                .font(.title2)
-                                                .fontWeight(.bold)
-                                                .foregroundColor(.white)
-                                                .frame(minWidth: 40)
-
-                                            Button("+") {
-                                                tempQuantity += 1
-                                                updateQuantity()
-                                            }
-                                            .frame(width: 30, height: 30)
-                                            .background(Color.green.opacity(0.8))
-                                            .foregroundColor(.white)
-                                            .clipShape(Circle())
-                                        }
-                                    }
-                                }
+                                collectionQuantitySection
 
                                 if let collected = collectedCard {
                                     HStack {
@@ -359,17 +204,7 @@ struct CollectionCardDetailView: View {
                             }
                         }
                         
-                        if let price = card.price {
-                            HStack {
-                                Text("Market Price")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                Text(PricingService.formatPrice(price))
-                                    .font(.headline)
-                                    .foregroundColor(.lorcanaGold)
-                            }
-                        }
+                        AsyncPriceWithConfidenceView(card: card, style: .detailed)
                     }
                     .padding()
                     .background(
@@ -468,6 +303,164 @@ struct CollectionCardDetailView: View {
         }
         .sheet(isPresented: $showingRulesAssistant) {
             RulesAssistantView(initialCard: card)
+        }
+    }
+
+    @ViewBuilder
+    private var collectionQuantitySection: some View {
+        if showFoilSection {
+            Text("Quantity")
+                .font(.headline)
+                .foregroundColor(.lorcanaGold)
+
+            HStack(spacing: 16) {
+                // Normal quantity
+                VStack(spacing: 8) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "rectangle.portrait")
+                            .font(.caption)
+                        Text("Normal")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(.white)
+
+                    HStack(spacing: 12) {
+                        Button("-") {
+                            if tempQuantity > 0 {
+                                tempQuantity -= 1
+                                updateQuantity()
+                                if tempQuantity == 0 && foilQuantity == 0 {
+                                    isPresented = false
+                                }
+                            }
+                        }
+                        .frame(width: 28, height: 28)
+                        .background(Color.red.opacity(0.8))
+                        .foregroundColor(.white)
+                        .clipShape(Circle())
+                        .disabled(tempQuantity <= 0)
+
+                        Text("\(tempQuantity)")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .frame(minWidth: 30)
+
+                        Button("+") {
+                            tempQuantity += 1
+                            updateQuantity()
+                        }
+                        .frame(width: 28, height: 28)
+                        .background(Color.green.opacity(0.8))
+                        .foregroundColor(.white)
+                        .clipShape(Circle())
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(tempQuantity > 0 ? Color.white.opacity(0.1) : Color.clear)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(tempQuantity > 0 ? Color.white.opacity(0.3) : Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                )
+
+                // Foil quantity
+                VStack(spacing: 8) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "sparkles")
+                            .font(.caption)
+                        Text("Foil")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(.lorcanaGold)
+
+                    HStack(spacing: 12) {
+                        Button("-") {
+                            if foilQuantity > 0 {
+                                foilQuantity -= 1
+                                updateFoilQuantity()
+                                if tempQuantity == 0 && foilQuantity == 0 {
+                                    isPresented = false
+                                }
+                            }
+                        }
+                        .frame(width: 28, height: 28)
+                        .background(Color.red.opacity(0.8))
+                        .foregroundColor(.white)
+                        .clipShape(Circle())
+                        .disabled(foilQuantity <= 0)
+
+                        Text("\(foilQuantity)")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .frame(minWidth: 30)
+
+                        Button("+") {
+                            foilQuantity += 1
+                            updateFoilQuantity()
+                        }
+                        .frame(width: 28, height: 28)
+                        .background(Color.lorcanaGold)
+                        .foregroundColor(.lorcanaDark)
+                        .clipShape(Circle())
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(foilQuantity > 0 ? Color.lorcanaGold.opacity(0.15) : Color.clear)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(foilQuantity > 0 ? Color.lorcanaGold.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                )
+            }
+        } else {
+            // Non-foilable cards (Enchanted, etc.) — single quantity
+            HStack {
+                Text("Quantity:")
+                    .font(.headline)
+                    .foregroundColor(.lorcanaGold)
+                Spacer()
+                HStack(spacing: 12) {
+                    Button("-") {
+                        if tempQuantity > 0 {
+                            tempQuantity -= 1
+                            updateQuantity()
+                            if tempQuantity == 0 {
+                                isPresented = false
+                            }
+                        }
+                    }
+                    .frame(width: 30, height: 30)
+                    .background(Color.red.opacity(0.8))
+                    .foregroundColor(.white)
+                    .clipShape(Circle())
+                    .disabled(tempQuantity <= 0)
+
+                    Text("\(tempQuantity)")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .frame(minWidth: 40)
+
+                    Button("+") {
+                        tempQuantity += 1
+                        updateQuantity()
+                    }
+                    .frame(width: 30, height: 30)
+                    .background(Color.green.opacity(0.8))
+                    .foregroundColor(.white)
+                    .clipShape(Circle())
+                }
+            }
         }
     }
 
@@ -581,17 +574,7 @@ struct WishlistCardDetailView: View {
                             }
                         }
                         
-                        if let price = card.price {
-                            HStack {
-                                Text("Market Price")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                Text(PricingService.formatPrice(price))
-                                    .font(.headline)
-                                    .foregroundColor(.lorcanaGold)
-                            }
-                        }
+                        AsyncPriceWithConfidenceView(card: card, style: .detailed)
                     }
                     .padding()
                     .background(
@@ -1000,7 +983,7 @@ struct AddCardModal: View {
                     CostBadge(cost: currentCard.cost)
                 }
 
-                // Price display removed
+                AsyncPriceWithConfidenceView(card: selectedCard, style: .inline)
             }
 
             Spacer()
@@ -1111,6 +1094,7 @@ struct AddCardGroupModal: View {
     @Binding var isPresented: Bool
     let onAdd: (LorcanaCard, Int) -> Void
     let isWishlist: Bool
+    var onAddToWishlist: ((LorcanaCard, Int) -> Void)? = nil
 
     // For regular cards (Normal/Foil), use multi-quantity mode
     @State private var normalQuantity: Int = 1
@@ -1373,6 +1357,29 @@ struct AddCardGroupModal: View {
                 .buttonStyle(LorcanaButtonStyle())
                 .disabled(totalQuantity == 0)
                 .padding()
+
+                // Add to Wishlist button (shown when adding to collection)
+                if let onAddToWishlist = onAddToWishlist, !isWishlist {
+                    Button(action: {
+                        addCardsToWishlist(onAddToWishlist)
+                    }) {
+                        HStack {
+                            Image(systemName: "star.fill")
+                            Text("Add to Wishlist Instead")
+                        }
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .foregroundColor(.yellow)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.yellow.opacity(0.5), lineWidth: 1)
+                        )
+                    }
+                    .disabled(totalQuantity == 0)
+                    .padding(.horizontal)
+                    .padding(.bottom)
+                }
                 }
                 .padding()
             }
@@ -1575,6 +1582,36 @@ struct AddCardGroupModal: View {
             isPresented = false
         }
     }
+
+    private func addCardsToWishlist(_ wishlistAction: (LorcanaCard, Int) -> Void) {
+        if supportsMultiVariant {
+            var addedParts: [String] = []
+
+            if normalQuantity > 0 {
+                let normalCard = cardGroup.primaryCard.withVariant(.normal)
+                wishlistAction(normalCard, normalQuantity)
+                addedParts.append("\(normalQuantity) Normal")
+            }
+
+            if foilQuantity > 0 {
+                let foilCard = cardGroup.primaryCard.withVariant(.foil)
+                wishlistAction(foilCard, foilQuantity)
+                addedParts.append("\(foilQuantity) Foil")
+            }
+
+            successMessage = "Added \(addedParts.joined(separator: " + ")) to Wishlist"
+        } else {
+            let specialCard = cardGroup.primaryCard.withVariant(selectedSpecialVariant)
+            wishlistAction(specialCard, specialQuantity)
+            successMessage = "Added \(specialQuantity) \(selectedSpecialVariant.displayName) to Wishlist"
+        }
+
+        showingSuccessBanner = true
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            isPresented = false
+        }
+    }
 }
 
 struct CardSearchForCorrectionView: View {
@@ -1703,6 +1740,7 @@ struct SimpleCardSearchRow: View {
 struct CardGroupSearchRow: View {
     let cardGroup: CardGroup
     let onTap: () -> Void
+    var onWishlist: (() -> Void)? = nil
 
     var body: some View {
         Button(action: onTap) {
@@ -1755,6 +1793,18 @@ struct CardGroupSearchRow: View {
                 }
 
                 Spacer()
+
+                if let onWishlist = onWishlist {
+                    Button {
+                        onWishlist()
+                    } label: {
+                        Image(systemName: "star.fill")
+                            .font(.body)
+                            .foregroundColor(.yellow)
+                            .padding(8)
+                    }
+                    .buttonStyle(BorderlessButtonStyle())
+                }
 
                 Image(systemName: "chevron.right")
                     .foregroundColor(.lorcanaGold.opacity(0.6))

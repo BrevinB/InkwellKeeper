@@ -269,6 +269,118 @@ class DeckManager: ObservableObject {
         return missing.sorted { $0.card.name < $1.card.name }
     }
 
+    // MARK: - Share Deck Code
+    struct ShareableDeck: Codable {
+        let name: String
+        let description: String
+        let format: String
+        let inkColors: [String]
+        let archetype: String?
+        let cards: [ShareableCard]
+    }
+
+    struct ShareableCard: Codable {
+        let cardId: String
+        let name: String
+        let cost: Int
+        let type: String
+        let rarity: String
+        let setName: String
+        let imageUrl: String
+        let inkColor: String?
+        let inkwell: Bool
+        let quantity: Int
+        let variant: String
+    }
+
+    func generateShareCode(for deck: Deck) -> String? {
+        let shareable = ShareableDeck(
+            name: deck.name,
+            description: deck.deckDescription,
+            format: deck.format,
+            inkColors: deck.inkColors,
+            archetype: deck.archetype,
+            cards: deck.cards.map { card in
+                ShareableCard(
+                    cardId: card.cardId,
+                    name: card.name,
+                    cost: card.cost,
+                    type: card.type,
+                    rarity: card.rarity,
+                    setName: card.setName,
+                    imageUrl: card.imageUrl,
+                    inkColor: card.inkColor,
+                    inkwell: card.inkwell,
+                    quantity: card.quantity,
+                    variant: card.variant
+                )
+            }
+        )
+
+        guard let jsonData = try? JSONEncoder().encode(shareable),
+              let compressed = try? (jsonData as NSData).compressed(using: .lzfse) else {
+            return nil
+        }
+
+        return "IWK:" + (compressed as Data).base64EncodedString()
+    }
+
+    func importDeck(from shareCode: String) -> Deck? {
+        guard let context = modelContext else { return nil }
+
+        let code = shareCode.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard code.hasPrefix("IWK:") else { return nil }
+
+        let base64 = String(code.dropFirst(4))
+        guard let compressedData = Data(base64Encoded: base64),
+              let decompressed = try? (compressedData as NSData).decompressed(using: .lzfse),
+              let shareable = try? JSONDecoder().decode(ShareableDeck.self, from: decompressed as Data) else {
+            return nil
+        }
+
+        let format = DeckFormat(rawValue: shareable.format) ?? .infinityConstructed
+        let inkColors = shareable.inkColors.compactMap { InkColor.fromString($0) }
+        let archetype = shareable.archetype.flatMap { DeckArchetype(rawValue: $0) }
+
+        let deck = Deck(
+            name: shareable.name,
+            description: shareable.description,
+            format: format,
+            inkColors: inkColors,
+            archetype: archetype
+        )
+
+        context.insert(deck)
+
+        for cardData in shareable.cards {
+            let deckCard = DeckCard(
+                from: LorcanaCard(
+                    id: cardData.cardId,
+                    name: cardData.name,
+                    cost: cardData.cost,
+                    type: cardData.type,
+                    rarity: CardRarity(rawValue: cardData.rarity) ?? .common,
+                    setName: cardData.setName,
+                    imageUrl: cardData.imageUrl,
+                    variant: CardVariant(rawValue: cardData.variant) ?? .normal,
+                    inkwell: cardData.inkwell,
+                    inkColor: cardData.inkColor
+                ),
+                quantity: cardData.quantity
+            )
+            deck.cards.append(deckCard)
+            context.insert(deckCard)
+        }
+
+        do {
+            try context.save()
+            loadDecks(context: context)
+            return deck
+        } catch {
+            return nil
+        }
+    }
+
     // MARK: - Update Deck Colors from Cards
     func updateDeckColorsFromCards(_ deck: Deck) {
         // Automatically detect ink colors from added cards
