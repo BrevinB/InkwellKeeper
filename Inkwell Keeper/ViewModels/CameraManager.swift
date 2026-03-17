@@ -34,7 +34,9 @@ class CameraManager: NSObject, ObservableObject {
     @Published var lastScannedCardName: String? = nil
     @Published var lastScannedEntry: ScannedCardEntry? = nil
     @Published var isFoilMode = false
-    
+    // Set disambiguation — when scanner can't determine which set a reprint belongs to
+    @Published var pendingSetChoices: [LorcanaCard]? = nil
+
     private let captureSession = AVCaptureSession()
     private var currentDevice: AVCaptureDevice?
     private let captureOutput = AVCapturePhotoOutput()
@@ -428,10 +430,12 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
     private func processCardImage(_ image: UIImage) {
         isProcessingCard = true
 
-        // Run rectangle detection and text recognition in parallel for speed
+        // Run rectangle detection, text recognition, and rarity detection in parallel
         let dispatchGroup = DispatchGroup()
         var cardDetected = false
         var recognizedCard: LorcanaCard?
+        var ocrTexts: [String] = []
+        var symbolRarity: CardRarity?
 
         // Start rectangle detection (optional check)
         dispatchGroup.enter()
@@ -442,8 +446,16 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
 
         // Start text recognition simultaneously (primary check)
         dispatchGroup.enter()
-        recognizeCard(in: image) { card in
+        recognizeCard(in: image) { card, detectedTexts in
             recognizedCard = card
+            ocrTexts = detectedTexts
+            dispatchGroup.leave()
+        }
+
+        // Start rarity symbol detection in parallel
+        dispatchGroup.enter()
+        detectRaritySymbol(in: image) { rarity in
+            symbolRarity = rarity
             dispatchGroup.leave()
         }
 
@@ -457,10 +469,18 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
             if let card = recognizedCard {
                 self.lastSuccessfulScanTime = Date()
 
+                // Resolve which set this card belongs to
+                let resolved = self.resolveCardSet(card, detectedTexts: ocrTexts, detectedRarity: symbolRarity)
+
+                // If pendingSetChoices was set, the UI will handle it — don't add yet
+                if self.pendingSetChoices != nil {
+                    return
+                }
+
                 if self.isMultiScanMode {
-                    self.addToScannedCards(card)
+                    self.addToScannedCards(resolved)
                 } else {
-                    self.detectedCard = card
+                    self.detectedCard = resolved
                 }
             } else {
 
@@ -486,32 +506,33 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
         }
     }
     
-    private func recognizeCard(in image: UIImage, completion: @escaping (LorcanaCard?) -> Void) {
+    private func recognizeCard(in image: UIImage, completion: @escaping (LorcanaCard?, [String]) -> Void) {
         // Downscale image for faster processing (max 1200px on longest side)
         let scaledImage = image.scaledDown(to: 1200)
 
         guard let cgImage = scaledImage.cgImage else {
-            completion(nil)
+            completion(nil, [])
             return
         }
-        
+
         let request = VNRecognizeTextRequest { request, error in
             if let error = error {
-                completion(nil)
+                completion(nil, [])
                 return
             }
-            
+
             guard let observations = request.results as? [VNRecognizedTextObservation] else {
-                completion(nil)
+                completion(nil, [])
                 return
             }
-            
+
             let detectedTexts = observations.compactMap { observation in
                 observation.topCandidates(1).first?.string
             }
 
-
-            self.searchForCard(with: detectedTexts, completion: completion)
+            self.searchForCard(with: detectedTexts) { card in
+                completion(card, detectedTexts)
+            }
         }
         
         request.recognitionLevel = .accurate  // Use accurate mode for better text recognition
@@ -525,7 +546,7 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
             do {
                 try handler.perform([request])
             } catch {
-                completion(nil)
+                completion(nil, [])
             }
         }
     }
@@ -819,6 +840,461 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
 
         // Last resort: return first result
         return cards.first
+    }
+
+    // MARK: - Rarity Symbol Detection
+
+    /// Detect the rarity symbol from the bottom region of a card image.
+    /// Lorcana rarity symbols: ○ Common, ● Uncommon, ◆ Rare, ★ Super Rare, ⬠ Legendary
+    private func detectRaritySymbol(in image: UIImage, completion: @escaping (CardRarity?) -> Void) {
+        guard let cgImage = image.cgImage else {
+            completion(nil)
+            return
+        }
+
+        let imageWidth = CGFloat(cgImage.width)
+        let imageHeight = CGFloat(cgImage.height)
+
+        // Crop the bottom ~12% of the image, left-center area where the rarity symbol sits
+        // On Lorcana cards, the symbol is near the card number at the bottom
+        let cropRect = CGRect(
+            x: imageWidth * 0.05,
+            y: imageHeight * 0.88,
+            width: imageWidth * 0.5,
+            height: imageHeight * 0.10
+        )
+
+        guard let croppedCGImage = cgImage.cropping(to: cropRect) else {
+            completion(nil)
+            return
+        }
+
+        // Use contour detection to find the rarity symbol shape
+        let contourRequest = VNDetectContoursRequest()
+        contourRequest.contrastAdjustment = 2.0
+        contourRequest.detectsDarkOnLight = true
+
+        let handler = VNImageRequestHandler(cgImage: croppedCGImage, options: [:])
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                try handler.perform([contourRequest])
+
+                guard let contoursResult = contourRequest.results?.first else {
+                    completion(nil)
+                    return
+                }
+
+                // Find contours that could be the rarity symbol
+                // The symbol is typically the most prominent shape in this region
+                let topLevelCount = contoursResult.topLevelContourCount
+                guard topLevelCount > 0 else {
+                    completion(nil)
+                    return
+                }
+
+                // Analyze the largest contour(s)
+                var bestRarity: CardRarity?
+                var bestArea: Float = 0
+
+                for i in 0..<min(topLevelCount, 5) {
+                    guard let contour = try? contoursResult.contour(at: IndexPath(index: i)) else { continue }
+
+                    let points = contour.normalizedPoints
+                    guard points.count >= 4 else { continue }
+
+                    // Calculate bounding box area
+                    let xs = points.map { $0.x }
+                    let ys = points.map { $0.y }
+                    guard let minX = xs.min(), let maxX = xs.max(),
+                          let minY = ys.min(), let maxY = ys.max() else { continue }
+
+                    let width = maxX - minX
+                    let height = maxY - minY
+                    let area = width * height
+
+                    // Skip very small or very large contours
+                    guard area > 0.001 && area < 0.5 else { continue }
+
+                    // Skip very elongated shapes (not a symbol)
+                    let aspectRatio = width / max(height, 0.001)
+                    guard aspectRatio > 0.4 && aspectRatio < 2.5 else { continue }
+
+                    if area > bestArea {
+                        bestArea = area
+                        bestRarity = self.classifyRarityShape(points: points, width: width, height: height)
+                    }
+                }
+
+                completion(bestRarity)
+
+            } catch {
+                completion(nil)
+            }
+        }
+    }
+
+    /// Classify a contour shape as a rarity based on geometric properties.
+    private func classifyRarityShape(points: [simd_float2], width: Float, height: Float) -> CardRarity? {
+        let pointCount = points.count
+
+        // Calculate circularity: how close the shape is to a circle
+        // Circularity = 4π * area / perimeter²
+        let area = polygonArea(points: points)
+        let perimeter = polygonPerimeter(points: points)
+        let circularity = perimeter > 0 ? (4 * Float.pi * abs(area)) / (perimeter * perimeter) : 0
+
+        // Calculate convex hull and count dominant vertices/corners
+        let corners = countDominantCorners(points: points)
+
+        // Classification based on shape properties:
+        // Common (○): Hollow circle — high circularity, smooth
+        // Uncommon (●): Filled circle — high circularity
+        // Rare (◆): Diamond — 4 corners, medium circularity
+        // Super Rare (★): Star — many points/corners, low circularity
+        // Legendary (⬠): Hexagonal star — distinct star with more points
+
+        if circularity > 0.7 {
+            // Circular shape — Common or Uncommon
+            // Distinguish by whether it's hollow (common) or filled (uncommon)
+            // Hollow circles have more points in the contour (inner + outer edge)
+            if pointCount > 60 {
+                return .common  // Hollow circle has more contour points (two edges)
+            } else {
+                return .uncommon  // Filled circle is a simpler contour
+            }
+        } else if corners <= 5 && circularity > 0.5 {
+            // Diamond/rhombus shape — Rare
+            return .rare
+        } else if corners >= 8 && circularity < 0.5 {
+            // Star shape with many points
+            if corners >= 10 {
+                return .legendary  // More complex star
+            } else {
+                return .superRare  // 5-pointed star
+            }
+        } else if corners >= 5 && corners <= 7 {
+            // Pentagon/hexagon-like — could be Legendary
+            return .legendary
+        }
+
+        return nil
+    }
+
+    /// Calculate the area of a polygon using the shoelace formula
+    private func polygonArea(points: [simd_float2]) -> Float {
+        guard points.count >= 3 else { return 0 }
+        var area: Float = 0
+        let n = points.count
+        for i in 0..<n {
+            let j = (i + 1) % n
+            area += points[i].x * points[j].y
+            area -= points[j].x * points[i].y
+        }
+        return area / 2
+    }
+
+    /// Calculate the perimeter of a polygon
+    private func polygonPerimeter(points: [simd_float2]) -> Float {
+        guard points.count >= 2 else { return 0 }
+        var perimeter: Float = 0
+        for i in 0..<points.count {
+            let j = (i + 1) % points.count
+            let dx = points[j].x - points[i].x
+            let dy = points[j].y - points[i].y
+            perimeter += sqrt(dx * dx + dy * dy)
+        }
+        return perimeter
+    }
+
+    /// Count the dominant corners/vertices by detecting significant direction changes
+    private func countDominantCorners(points: [simd_float2]) -> Int {
+        guard points.count >= 6 else { return points.count }
+
+        // Sample points at regular intervals for stability
+        let sampleCount = min(points.count, 36)
+        let step = max(points.count / sampleCount, 1)
+        var sampled: [simd_float2] = []
+        for i in stride(from: 0, to: points.count, by: step) {
+            sampled.append(points[i])
+        }
+        guard sampled.count >= 3 else { return 0 }
+
+        var corners = 0
+        let threshold: Float = 0.5  // ~30 degrees in radians
+
+        for i in 0..<sampled.count {
+            let prev = sampled[(i - 1 + sampled.count) % sampled.count]
+            let curr = sampled[i]
+            let next = sampled[(i + 1) % sampled.count]
+
+            let v1 = simd_float2(curr.x - prev.x, curr.y - prev.y)
+            let v2 = simd_float2(next.x - curr.x, next.y - curr.y)
+
+            let len1 = simd_length(v1)
+            let len2 = simd_length(v2)
+            guard len1 > 0 && len2 > 0 else { continue }
+
+            let cosAngle = simd_dot(v1, v2) / (len1 * len2)
+            let angle = acos(min(max(cosAngle, -1), 1))
+
+            if angle > threshold {
+                corners += 1
+            }
+        }
+
+        return corners
+    }
+
+    // MARK: - Set Detection from OCR
+
+    /// Parsed card number info from OCR text (e.g., "207/204 · EN · 9")
+    struct CardNumberInfo {
+        let cardNumber: Int
+        let setTotal: Int
+        let setNumber: String?  // The set identifier printed on the card (e.g., "9", "P1", "D23")
+    }
+
+    /// Parse card info from OCR text. Looks for patterns like:
+    /// "207/204 · EN · 9", "42/204 EN 9", "23/204 · EN · P1"
+    private func parseCardNumber(from texts: [String]) -> CardNumberInfo? {
+        // First try the full pattern with set number: "X/Y · EN · Z" or "X/Y EN Z"
+        // The set number can be a number or alphanumeric (P1, P2, D23, CP, Q1, etc.)
+        let fullPattern = #"(\d{1,4})\s*/\s*(\d{2,4})\s*[·.\-\s]+\s*EN\s*[·.\-\s]+\s*([A-Z0-9]+)"#
+        if let regex = try? NSRegularExpression(pattern: fullPattern, options: .caseInsensitive) {
+            for text in texts {
+                let range = NSRange(text.startIndex..., in: text)
+                if let match = regex.firstMatch(in: text, range: range) {
+                    guard let numRange = Range(match.range(at: 1), in: text),
+                          let totalRange = Range(match.range(at: 2), in: text),
+                          let setNumRange = Range(match.range(at: 3), in: text),
+                          let cardNumber = Int(text[numRange]),
+                          let setTotal = Int(text[totalRange]),
+                          cardNumber > 0, setTotal > 0 else {
+                        continue
+                    }
+                    let setNumber = String(text[setNumRange])
+                    return CardNumberInfo(cardNumber: cardNumber, setTotal: setTotal, setNumber: setNumber)
+                }
+            }
+        }
+
+        // Fallback: just the card number pattern "X/Y" without set number
+        let simplePattern = #"(\d{1,4})\s*/\s*(\d{2,4})"#
+        guard let regex = try? NSRegularExpression(pattern: simplePattern) else { return nil }
+
+        for text in texts {
+            let range = NSRange(text.startIndex..., in: text)
+            if let match = regex.firstMatch(in: text, range: range) {
+                guard let numRange = Range(match.range(at: 1), in: text),
+                      let totalRange = Range(match.range(at: 2), in: text),
+                      let cardNumber = Int(text[numRange]),
+                      let setTotal = Int(text[totalRange]),
+                      cardNumber > 0, setTotal > 0 else {
+                    continue
+                }
+                return CardNumberInfo(cardNumber: cardNumber, setTotal: setTotal, setNumber: nil)
+            }
+        }
+        return nil
+    }
+
+    /// Find a set by its printed set number (e.g., "9" → Fabled, "P1" → Promo Set 1)
+    private func findSetBySetNumber(_ setNumber: String) -> LorcanaSet? {
+        return SetsDataManager.shared.sets.first { $0.setNumber == setNumber }
+    }
+
+    /// Find all sets that match a given total card count
+    private func findSetsByCardCount(_ total: Int) -> [LorcanaSet] {
+        let sets = SetsDataManager.shared.sets
+        // Exact matches first
+        let exact = sets.filter { $0.cardCount == total }
+        if !exact.isEmpty { return exact }
+        // Allow slight tolerance (±2) for OCR misreads like "204" vs "206"
+        return sets.filter { abs($0.cardCount - total) <= 2 }
+    }
+
+    /// Find a single set that matches a given total card count (only if unambiguous)
+    private func findSetByCardCount(_ total: Int) -> LorcanaSet? {
+        let matches = findSetsByCardCount(total)
+        return matches.count == 1 ? matches.first : nil
+    }
+
+    /// Narrow a list of matched cards to the correct set using OCR-detected card number info
+    private func narrowBySetInfo(cards: [LorcanaCard], detectedTexts: [String]) -> LorcanaCard? {
+        guard let info = parseCardNumber(from: detectedTexts) else { return nil }
+
+        // Priority 1: Use the set number printed on the card (most reliable)
+        if let setNumber = info.setNumber, let matchedSet = findSetBySetNumber(setNumber) {
+            if let card = cards.first(where: { $0.setName == matchedSet.name && $0.cardNumber == info.cardNumber }) {
+                return card
+            }
+            if let card = cards.first(where: { $0.setName == matchedSet.name }) {
+                return card
+            }
+        }
+
+        // Priority 2: Try to find the set by total card count (only works for unique counts)
+        if let matchedSet = findSetByCardCount(info.setTotal) {
+            if let card = cards.first(where: { $0.setName == matchedSet.name && $0.cardNumber == info.cardNumber }) {
+                return card
+            }
+            if let card = cards.first(where: { $0.setName == matchedSet.name }) {
+                return card
+            }
+        }
+
+        // Priority 3: Try matching by card number alone (if only one card has that number)
+        let byNumber = cards.filter { $0.cardNumber == info.cardNumber }
+        if byNumber.count == 1 {
+            return byNumber.first
+        }
+
+        return nil
+    }
+
+    /// Resolve a matched card to the correct set version and variant (enchanted vs normal).
+    /// Returns the card if determined, or sets pendingSetChoices if user needs to pick.
+    private func resolveCardSet(_ card: LorcanaCard, detectedTexts: [String], detectedRarity: CardRarity? = nil) -> LorcanaCard {
+        let dataManager = SetsDataManager.shared
+        let allCards = dataManager.getAllCards()
+
+        // First, check if this is an enchanted/special card via card number
+        if let resolved = resolveVariant(for: card, detectedTexts: detectedTexts, allCards: allCards) {
+            return resolved
+        }
+
+        // If rarity detection says enchanted but card number didn't catch it,
+        // look for an enchanted variant of this card
+        if detectedRarity == .enchanted {
+            if let enchantedCard = allCards.first(where: {
+                $0.name == card.name && $0.variant == .enchanted
+            }) {
+                return enchantedCard
+            }
+        }
+
+        // Get all normal versions of this card across sets
+        let allVersions = allCards.filter {
+            $0.name == card.name && $0.variant == .normal
+        }
+
+        // If only one set has this card, no disambiguation needed
+        guard allVersions.count > 1 else { return card }
+
+        // Try OCR-based set detection
+        if let resolved = narrowBySetInfo(cards: allVersions, detectedTexts: detectedTexts) {
+            return resolved
+        }
+
+        // Use detected rarity to narrow down if versions have different rarities
+        if let detectedRarity = detectedRarity {
+            let rarityMatches = allVersions.filter { $0.rarity == detectedRarity }
+            if rarityMatches.count == 1 {
+                return rarityMatches[0]
+            }
+        }
+
+        // Can't determine set — signal the UI to ask the user
+        pendingSetChoices = allVersions
+
+        // Return the card as-is (caller checks pendingSetChoices before using it)
+        return card
+    }
+
+    /// Detect if the scanned card is an enchanted/special variant based on card number.
+    /// Enchanted cards have numbers beyond the base set count (e.g., 205/204).
+    private func resolveVariant(for card: LorcanaCard, detectedTexts: [String], allCards: [LorcanaCard]) -> LorcanaCard? {
+        guard let info = parseCardNumber(from: detectedTexts) else { return nil }
+
+        // Card number > set total indicates enchanted/epic/iconic variant
+        guard info.cardNumber > info.setTotal else { return nil }
+
+        let specialVariants: [CardVariant] = [.enchanted, .epic, .iconic]
+        let cardMainName = card.name.components(separatedBy: " - ").first?.lowercased() ?? card.name.lowercased()
+
+        // Priority 1: Use set number from card (e.g., "207/204 · EN · 9" → set 9 = Fabled)
+        if let setNumber = info.setNumber, let matchedSet = findSetBySetNumber(setNumber) {
+            // Exact name + card number
+            for variant in specialVariants {
+                if let specialCard = allCards.first(where: {
+                    $0.name == card.name &&
+                    $0.setName == matchedSet.name &&
+                    $0.variant == variant &&
+                    $0.cardNumber == info.cardNumber
+                }) {
+                    return specialCard
+                }
+            }
+            // Main name + card number (OCR subtitle misread)
+            if let specialCard = allCards.first(where: {
+                $0.setName == matchedSet.name &&
+                $0.cardNumber == info.cardNumber &&
+                specialVariants.contains($0.variant) &&
+                ($0.name.lowercased().hasPrefix(cardMainName) ||
+                 ($0.name.components(separatedBy: " - ").first?.lowercased() ?? "") == cardMainName)
+            }) {
+                return specialCard
+            }
+            // Just name + set (card number OCR might be wrong)
+            for variant in specialVariants {
+                if let specialCard = allCards.first(where: {
+                    $0.name == card.name &&
+                    $0.setName == matchedSet.name &&
+                    $0.variant == variant
+                }) {
+                    return specialCard
+                }
+            }
+        }
+
+        // Priority 2: Fall back to card count matching (for cards where set number wasn't read)
+        let candidateSets = findSetsByCardCount(info.setTotal)
+        guard !candidateSets.isEmpty else { return nil }
+
+        // Exact name + card number across candidate sets
+        for set in candidateSets {
+            for variant in specialVariants {
+                if let specialCard = allCards.first(where: {
+                    $0.name == card.name &&
+                    $0.setName == set.name &&
+                    $0.variant == variant &&
+                    $0.cardNumber == info.cardNumber
+                }) {
+                    return specialCard
+                }
+            }
+        }
+
+        // Main name match + card number
+        for set in candidateSets {
+            if let specialCard = allCards.first(where: {
+                $0.setName == set.name &&
+                $0.cardNumber == info.cardNumber &&
+                specialVariants.contains($0.variant) &&
+                ($0.name.lowercased().hasPrefix(cardMainName) ||
+                 ($0.name.components(separatedBy: " - ").first?.lowercased() ?? "") == cardMainName)
+            }) {
+                return specialCard
+            }
+        }
+
+        return nil
+    }
+
+    /// Called by the UI when the user picks a set for a pending card
+    func resolveSetChoice(_ card: LorcanaCard) {
+        pendingSetChoices = nil
+
+        if isMultiScanMode {
+            addToScannedCards(card)
+        } else {
+            detectedCard = card
+        }
+    }
+
+    func dismissSetChoice() {
+        pendingSetChoices = nil
     }
 }
 

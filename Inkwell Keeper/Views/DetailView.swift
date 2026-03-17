@@ -32,19 +32,23 @@ struct CardDetailView: View {
                         Text(card.name)
                             .font(.title)
                             .fontWeight(.bold)
-                        
+
+                        Text(card.setName)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+
                         HStack {
                             RarityBadge(rarity: card.rarity)
                             Spacer()
                             CostBadge(cost: card.cost)
                         }
-                        
+
                         if !card.cardText.isEmpty {
                             Text(card.cardText)
                                 .font(.body)
                                 .foregroundColor(.secondary)
                         }
-                        
+
                         AsyncPriceWithConfidenceView(card: card, style: .detailed)
                     }
                     .padding()
@@ -142,10 +146,14 @@ struct CollectionCardDetailView: View {
                             .font(.title)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
-                        
+
+                        Text(card.setName)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+
                         HStack {
                             RarityBadge(rarity: card.rarity)
-                            
+
                             Text(card.variant.displayName)
                                 .font(.caption)
                                 .fontWeight(.semibold)
@@ -156,11 +164,11 @@ struct CollectionCardDetailView: View {
                                     RoundedRectangle(cornerRadius: 6)
                                         .fill(Color.purple.opacity(0.8))
                                 )
-                            
+
                             Spacer()
                             CostBadge(cost: card.cost)
                         }
-                        
+
                         // Collection specific information - only show if card is owned
                         if collectedCard != nil || foilCollectedCard != nil {
                             VStack(alignment: .leading, spacing: 12) {
@@ -578,10 +586,14 @@ struct WishlistCardDetailView: View {
                             .font(.title)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
-                        
+
+                        Text(card.setName)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+
                         HStack {
                             RarityBadge(rarity: card.rarity)
-                            
+
                             Text(card.variant.displayName)
                                 .font(.caption)
                                 .fontWeight(.semibold)
@@ -592,11 +604,11 @@ struct WishlistCardDetailView: View {
                                     RoundedRectangle(cornerRadius: 6)
                                         .fill(Color.purple.opacity(0.8))
                                 )
-                            
+
                             Spacer()
                             CostBadge(cost: card.cost)
                         }
-                        
+
                         if !card.cardText.isEmpty {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Card Text:")
@@ -607,7 +619,7 @@ struct WishlistCardDetailView: View {
                                     .foregroundColor(.white)
                             }
                         }
-                        
+
                         AsyncPriceWithConfidenceView(card: card, style: .detailed)
                     }
                     .padding()
@@ -913,6 +925,7 @@ struct AddCardModal: View {
     @State private var selectedVariant: CardVariant = .normal
     @State private var quantity: Int = 1
     @State private var showingCardSearch = false
+    @State private var showingFullscreenViewer = false
     @State private var currentCard: LorcanaCard
 
     init(card: LorcanaCard, isPresented: Binding<Bool>, onAdd: @escaping (LorcanaCard, Int) -> Void, isWishlist: Bool) {
@@ -1005,11 +1018,18 @@ struct AddCardModal: View {
             }
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .id(selectedVariant)
+            .onTapGesture {
+                showingFullscreenViewer = true
+            }
 
             VStack(alignment: .leading, spacing: 8) {
                 Text(currentCard.name)
                     .font(.headline)
                     .foregroundColor(.white)
+
+                Text(currentCard.setName)
+                    .font(.caption)
+                    .foregroundColor(.gray)
 
                 HStack {
                     RarityBadge(rarity: currentCard.rarity)
@@ -1027,6 +1047,9 @@ struct AddCardModal: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.lorcanaDark.opacity(0.8))
         )
+        .fullScreenCover(isPresented: $showingFullscreenViewer) {
+            FullscreenCardViewer(card: selectedCard)
+        }
     }
 
     private var variantSection: some View {
@@ -1191,6 +1214,10 @@ struct AddCardGroupModal: View {
                         Text(displayCard.name)
                             .font(.headline)
                             .foregroundColor(.white)
+
+                        Text(displayCard.setName)
+                            .font(.caption)
+                            .foregroundColor(.gray)
 
                         HStack {
                             RarityBadge(rarity: displayCard.rarity)
@@ -1751,10 +1778,14 @@ struct SimpleCardSearchRow: View {
                         .foregroundColor(.white)
                         .lineLimit(1)
 
+                    Text(card.setName)
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                        .lineLimit(1)
+
                     HStack {
                         RarityBadge(rarity: card.rarity)
                         Spacer()
-                        // Price display removed
                     }
                 }
 
@@ -1873,16 +1904,20 @@ struct CardSearchResultRow: View {
                 Text(card.name)
                     .font(.headline)
                     .lineLimit(1)
-                
+
+                Text(card.setName)
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                    .lineLimit(1)
+
                 HStack {
                     RarityBadge(rarity: card.rarity)
                     Spacer()
-                    // Price display removed
                 }
             }
-            
+
             Spacer()
-            
+
             Button("Add", action: onAdd)
                 .buttonStyle(LorcanaButtonStyle())
                 .controlSize(.small)

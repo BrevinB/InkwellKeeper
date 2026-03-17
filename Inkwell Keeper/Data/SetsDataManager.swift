@@ -13,6 +13,7 @@ struct LorcanaSet: Identifiable, Codable {
     let id: String
     let name: String
     let setCode: String
+    let setNumber: String?
     let releaseDate: String?
     let cardCount: Int
     let description: String

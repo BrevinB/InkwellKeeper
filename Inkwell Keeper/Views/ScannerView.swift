@@ -17,6 +17,7 @@ struct ScannerView: View {
     @State private var showingMultiScanReview = false
     @State private var isCapturePressed = false
     @State private var showingCorrectionSearch = false
+    @State private var showingSetPicker = false
     @Binding var isActive: Bool  // Track if this tab is active
 
     var body: some View {
@@ -190,6 +191,43 @@ struct ScannerView: View {
         }
         .sheet(isPresented: $showingCorrectionSearch) {
             ScanCorrectionSearchView(cameraManager: cameraManager, isPresented: $showingCorrectionSearch)
+        }
+        .sheet(isPresented: $showingSetPicker) {
+            if let choices = cameraManager.pendingSetChoices {
+                SetPickerSheet(cards: choices) { selected in
+                    cameraManager.resolveSetChoice(selected)
+                    showingSetPicker = false
+                } onCancel: {
+                    cameraManager.dismissSetChoice()
+                    showingSetPicker = false
+                }
+            }
+        }
+        .onChange(of: cameraManager.pendingSetChoices) { choices in
+            if choices != nil {
+                showingSetPicker = true
+                if cameraManager.isAutoScanEnabled {
+                    cameraManager.pauseAutoScan()
+                }
+            } else if !showingSetPicker {
+                // Resume auto-scan after set picker dismissed
+                if cameraManager.isAutoScanEnabled {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        if cameraManager.isAutoScanEnabled && !showingSetPicker {
+                            cameraManager.resumeAutoScan()
+                        }
+                    }
+                }
+            }
+        }
+        .onChange(of: showingSetPicker) { isShowing in
+            if !isShowing && cameraManager.isAutoScanEnabled {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    if cameraManager.isAutoScanEnabled && !showingSetPicker {
+                        cameraManager.resumeAutoScan()
+                    }
+                }
+            }
         }
         .onChange(of: cameraManager.detectedCard) { card in
             if let card = card {
@@ -560,6 +598,97 @@ struct ScanCorrectionSearchView: View {
             return
         }
         searchResults = dataManager.searchCards(query: query)
+    }
+}
+
+// MARK: - Set Picker for Reprints
+
+struct SetPickerSheet: View {
+    let cards: [LorcanaCard]
+    let onSelect: (LorcanaCard) -> Void
+    let onCancel: () -> Void
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 16) {
+                // Card preview (use first card's image)
+                if let first = cards.first {
+                    HStack(spacing: 12) {
+                        AsyncImage(url: first.bestImageUrl()) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                        } placeholder: {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.gray.opacity(0.3))
+                        }
+                        .frame(width: 70, height: 98)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(first.name)
+                                .font(.headline)
+                                .foregroundColor(.white)
+                            Text("This card appears in multiple sets.")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                            Text("Which set is this copy from?")
+                                .font(.subheadline)
+                                .foregroundColor(.lorcanaGold)
+                        }
+                        Spacer()
+                    }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.lorcanaDark.opacity(0.8))
+                    )
+                    .padding(.horizontal)
+                }
+
+                // Set options
+                List(cards, id: \.id) { card in
+                    Button(action: { onSelect(card) }) {
+                        HStack(spacing: 12) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(card.setName)
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+
+                                if let num = card.cardNumber {
+                                    Text("Card #\(num)")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                }
+                            }
+
+                            Spacer()
+
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.lorcanaGold.opacity(0.6))
+                                .font(.caption)
+                        }
+                        .padding(.vertical, 4)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .listRowBackground(Color.lorcanaDark.opacity(0.6))
+                }
+                .listStyle(PlainListStyle())
+                .scrollContentBackground(.hidden)
+            }
+            .background(LorcanaBackground())
+            .navigationTitle("Select Set")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Cancel") {
+                        onCancel()
+                    }
+                }
+            }
+        }
+        .presentationDetents([.medium])
     }
 }
 
