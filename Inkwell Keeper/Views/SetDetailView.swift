@@ -506,8 +506,8 @@ struct SetDetailView: View {
                 }
                 return collected.name == card.name && collected.variant == card.variant
             } else {
-                // Normal/Foil: match by name across sets (reprints), exclude special variants
-                return collected.name == card.name && !collectedIsSpecialVariant
+                // Normal/Foil: match by name and set to avoid false positives across sets
+                return collected.name == card.name && collected.setName == card.setName && !collectedIsSpecialVariant
             }
         }
 
@@ -546,7 +546,7 @@ struct SetDetailView: View {
                     }
                     return collected.name == card.name && collected.variant == card.variant
                 } else {
-                    return collected.name == card.name && !collectedIsSpecialVariant
+                    return collected.name == card.name && collected.setName == card.setName && !collectedIsSpecialVariant
                 }
             }
             .count

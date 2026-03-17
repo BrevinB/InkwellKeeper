@@ -86,6 +86,7 @@ struct CollectionCardDetailView: View {
     @State private var showingFullscreenViewer = false
     @State private var showingRulesAssistant = false
     @State private var deckAllocations: [CollectionManager.DeckAllocation] = []
+    @State private var showFoilArt = false
 
     /// Whether to show the foil section — only when opened from Sets view and card supports foil
     private var showFoilSection: Bool {
@@ -94,15 +95,48 @@ struct CollectionCardDetailView: View {
         return v == .normal || v == .foil
     }
 
+    /// The card to display — switches to foil variant when foil art toggle is on
+    private var displayCard: LorcanaCard {
+        showFoilArt ? card.withVariant(.foil) : card
+    }
+
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
-                    InteractiveCardView(card: card) {
+                    InteractiveCardView(card: displayCard) {
                         showingFullscreenViewer = true
                     }
                     .frame(width: 250, height: 350)
-                    
+
+                    // Foil art toggle — visible when user owns foil copies
+                    if showFoilSection && foilQuantity > 0 {
+                        Button(action: {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                showFoilArt.toggle()
+                            }
+                        }) {
+                            HStack(spacing: 6) {
+                                Image(systemName: showFoilArt ? "sparkles" : "rectangle.portrait")
+                                    .font(.caption)
+                                Text(showFoilArt ? "Viewing Foil" : "View Foil")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                            }
+                            .foregroundColor(showFoilArt ? .lorcanaDark : .lorcanaGold)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(
+                                Capsule()
+                                    .fill(showFoilArt ? Color.lorcanaGold : Color.lorcanaGold.opacity(0.15))
+                            )
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.lorcanaGold.opacity(0.5), lineWidth: 1)
+                            )
+                        }
+                    }
+
                     VStack(alignment: .leading, spacing: 16) {
                         Text(card.name)
                             .font(.title)
@@ -299,7 +333,7 @@ struct CollectionCardDetailView: View {
             }
         }
         .fullScreenCover(isPresented: $showingFullscreenViewer) {
-            FullscreenCardViewer(card: card)
+            FullscreenCardViewer(card: displayCard)
         }
         .sheet(isPresented: $showingRulesAssistant) {
             RulesAssistantView(initialCard: card)

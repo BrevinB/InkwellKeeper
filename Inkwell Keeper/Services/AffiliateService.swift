@@ -74,12 +74,24 @@ class AffiliateService {
 
     /// Generate Cardmarket search link for a card
     func getCardmarketLink(for card: LorcanaCard) -> URL? {
-        let searchQuery = "\(card.name) Lorcana"
-            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        // Build a direct card page URL using hyphenated card name
+        // Cardmarket format: /en/Lorcana/Cards/Card-Name-Subtitle
+        // e.g. "Stitch - Rock Star" -> "Stitch-Rock-Star"
+        let hyphenatedName = card.name
+            .replacingOccurrences(of: " - ", with: "-")
+            .replacingOccurrences(of: " ", with: "-")
+            .addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
 
-        let urlString = "https://www.cardmarket.com/en/Lorcana/Products/Search?searchString=\(searchQuery)"
+        let directURL = "https://www.cardmarket.com/en/Lorcana/Cards/\(hyphenatedName)"
 
-        return URL(string: urlString)
+        // Fall back to search if direct URL can't be formed
+        guard !hyphenatedName.isEmpty else {
+            let searchQuery = card.name
+                .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+            return URL(string: "https://www.cardmarket.com/en/Lorcana/Products/Search?searchString=\(searchQuery)")
+        }
+
+        return URL(string: directURL)
     }
 
     // MARK: - Multi-Platform Options

@@ -218,7 +218,7 @@ class SetsDataManager: ObservableObject {
         return groupCards(allCards)
     }
 
-    /// Group cards by name, keeping special variants (Enchanted/Promo/Epic/Iconic) separate
+    /// Group cards by name + set, keeping each set's version separate
     private func groupCards(_ cards: [LorcanaCard]) -> [CardGroup] {
         var grouped: [String: [LorcanaCard]] = [:]
 
@@ -226,7 +226,13 @@ class SetsDataManager: ObservableObject {
             // Special variants are distinct cards (different art/rarity), so group them separately
             let isSpecial = card.variant == .enchanted || card.variant == .promo ||
                             card.variant == .epic || card.variant == .iconic
-            let groupKey = isSpecial ? "\(card.name)_\(card.variant.rawValue)_\(card.uniqueId ?? card.setName)" : card.name
+            let groupKey: String
+            if isSpecial {
+                groupKey = "\(card.name)_\(card.variant.rawValue)_\(card.uniqueId ?? card.setName)"
+            } else {
+                // Group by name + set so reprints from different sets are separate entries
+                groupKey = "\(card.name)_\(card.setName)"
+            }
             grouped[groupKey, default: []].append(card)
         }
 

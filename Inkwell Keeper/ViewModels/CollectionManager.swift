@@ -16,8 +16,13 @@ class CollectionManager: ObservableObject {
 
     @Published var collectedCards: [LorcanaCard] = []
     @Published var wishlistCards: [LorcanaCard] = []
-    /// Card name → total owned quantity (normal + foil), for AI deck building
+    /// Card key ("name||setName") → total owned quantity (normal + foil), for AI deck building
     @Published var collectedCardQuantities: [String: Int] = [:]
+
+    /// Build a compound key for card quantity lookups
+    static func cardKey(name: String, setName: String) -> String {
+        "\(name)||\(setName)"
+    }
     
     init() {
         // Don't load mock data - start with empty collections
@@ -45,12 +50,13 @@ class CollectionManager: ObservableObject {
             let collectedData = try context.fetch(collectedDescriptor)
             let newCollectedCards = collectedData.map { $0.toLorcanaCard }
 
-            // Build card name → total owned quantity (normal + foil only)
+            // Build card key (name+set) → total owned quantity (normal + foil only)
             var quantities: [String: Int] = [:]
             for card in collectedData {
                 let variant = CardVariant(rawValue: card.variant ?? "Normal") ?? .normal
                 if variant == .normal || variant == .foil {
-                    quantities[card.name, default: 0] += card.quantity
+                    let key = CollectionManager.cardKey(name: card.name, setName: card.setName)
+                    quantities[key, default: 0] += card.quantity
                 }
             }
             let newQuantities = quantities
@@ -566,7 +572,7 @@ class CollectionManager: ObservableObject {
         var collectedCount = 0
 
         for card in cardsInSet {
-            // Check if we own this card (from ANY set, counting reprints)
+            // Check if we own this card in this specific set
             let isOwned = collectedCards.contains { collected in
                 let cardIsSpecialVariant = card.variant == .enchanted ||
                                           card.variant == .epic ||
@@ -584,10 +590,10 @@ class CollectionManager: ObservableObject {
                        !cardUniqueId.isEmpty, !collectedUniqueId.isEmpty {
                         return collectedUniqueId == cardUniqueId
                     }
-                    return collected.name == card.name && collected.variant == card.variant
+                    return collected.name == card.name && collected.setName == card.setName && collected.variant == card.variant
                 } else {
-                    // Normal/Foil: match by name across sets (reprints), exclude special variants
-                    return collected.name == card.name && !collectedIsSpecialVariant
+                    // Normal/Foil: match by name and set, exclude special variants
+                    return collected.name == card.name && collected.setName == card.setName && !collectedIsSpecialVariant
                 }
             }
 
@@ -634,24 +640,18 @@ class CollectionManager: ObservableObject {
         }
     }
 
-    /// Check if a card is collected, considering reprints from other sets
+    /// Check if a card is collected (matches by name + set)
     func isCardCollectedIncludingReprints(_ card: LorcanaCard) -> Bool {
-        // First check by exact card ID
+        // Check by exact card ID first
         if isCardCollected(card.id) {
             return true
         }
 
-        // If not found, check if this is a reprint and we own it from another set
-        let dataManager = SetsDataManager.shared
-        if dataManager.isReprint(cardName: card.name) {
-            // Check if we own this card from ANY set
-            return collectedCards.contains { $0.name == card.name }
-        }
-
-        return false
+        // Fall back to name + set match
+        return collectedCards.contains { $0.name == card.name && $0.setName == card.setName }
     }
 
-    /// Get collected quantity for a card, considering reprints
+    /// Get collected quantity for a card (matches by name + set)
     func getCollectedQuantityIncludingReprints(for card: LorcanaCard) -> Int {
         // First try by exact card ID
         let exactQuantity = getCollectedQuantity(for: card.id)
@@ -659,13 +659,9 @@ class CollectionManager: ObservableObject {
             return exactQuantity
         }
 
-        // If not found, check reprints from other sets
-        let dataManager = SetsDataManager.shared
-        if dataManager.isReprint(cardName: card.name) {
-            // Find any version of this card in our collection
-            if let collected = collectedCards.first(where: { $0.name == card.name }) {
-                return getCollectedQuantity(for: collected.id)
-            }
+        // Fall back to name + set match
+        if let collected = collectedCards.first(where: { $0.name == card.name && $0.setName == card.setName }) {
+            return getCollectedQuantity(for: collected.id)
         }
 
         return 0
@@ -739,8 +735,9 @@ class CollectionManager: ObservableObject {
 
         do {
             let cardName = card.name
+            let cardSetName = card.setName
             let descriptor = FetchDescriptor<DeckCard>(
-                predicate: #Predicate<DeckCard> { $0.name == cardName }
+                predicate: #Predicate<DeckCard> { $0.name == cardName && $0.setName == cardSetName }
             )
             let deckCards = try context.fetch(descriptor)
 

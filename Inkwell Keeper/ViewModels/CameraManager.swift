@@ -60,19 +60,23 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     deinit {
-        stopSession()
-        stopAutoScan()
+        // Stop synchronously during deallocation to avoid accessing self after dealloc
+        captureSession.stopRunning()
+        autoScanTimer?.invalidate()
+        autoScanTimer = nil
     }
-    
+
     func startSession() {
         guard permissionStatus == .authorized else { return }
-        
-        DispatchQueue.global(qos: .background).async {
+
+        DispatchQueue.global(qos: .background).async { [weak self] in
+            guard let self = self else { return }
             if !self.captureSession.isRunning {
                 self.captureSession.startRunning()
             }
-            
-            DispatchQueue.main.async {
+
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
                 self.isSessionRunning = self.captureSession.isRunning
 
                 // Start auto scan if it was enabled
@@ -82,16 +86,17 @@ class CameraManager: NSObject, ObservableObject {
             }
         }
     }
-    
+
     func stopSession() {
-        DispatchQueue.global(qos: .background).async {
+        DispatchQueue.global(qos: .background).async { [weak self] in
+            guard let self = self else { return }
             if self.captureSession.isRunning {
                 self.captureSession.stopRunning()
             }
-            
-            DispatchQueue.main.async {
-                self.isSessionRunning = false
-                self.stopAutoScan()
+
+            DispatchQueue.main.async { [weak self] in
+                self?.isSessionRunning = false
+                self?.stopAutoScan()
             }
         }
     }

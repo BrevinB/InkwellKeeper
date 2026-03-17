@@ -320,7 +320,7 @@ class AIDeckService: ObservableObject {
 
         // Filter to only owned cards when collection-only mode is active
         if collectionOnly && !ownedCardQuantities.isEmpty {
-            filteredCards = filteredCards.filter { ownedCardQuantities[$0.name] != nil }
+            filteredCards = filteredCards.filter { ownedCardQuantities[CollectionManager.cardKey(name: $0.name, setName: $0.setName)] != nil }
         }
 
         // Extract theme keywords from description to highlight matching cards
@@ -715,7 +715,7 @@ class AIDeckService: ObservableObject {
 
         // Filter to only owned cards when collection-only mode is active
         if currentCollectionOnly && !currentOwnedCardQuantities.isEmpty {
-            pool = pool.filter { currentOwnedCardQuantities[$0.name] != nil }
+            pool = pool.filter { currentOwnedCardQuantities[CollectionManager.cardKey(name: $0.name, setName: $0.setName)] != nil }
         }
         guard !pool.isEmpty else { return }
 
@@ -751,7 +751,8 @@ class AIDeckService: ObservableObject {
 
         for i in suggestions.indices {
             guard let card = suggestions[i].matchedCard else { continue }
-            let owned = currentOwnedCardQuantities[card.name] ?? 0
+            let key = CollectionManager.cardKey(name: card.name, setName: card.setName)
+            let owned = currentOwnedCardQuantities[key] ?? 0
             if suggestions[i].quantity > owned {
                 suggestions[i] = AIDeckSuggestion(
                     cardName: suggestions[i].cardName,
@@ -765,7 +766,8 @@ class AIDeckService: ObservableObject {
         // Remove any suggestions where the player owns 0
         suggestions = suggestions.filter { suggestion in
             guard let card = suggestion.matchedCard else { return true }
-            return (currentOwnedCardQuantities[card.name] ?? 0) > 0
+            let key = CollectionManager.cardKey(name: card.name, setName: card.setName)
+            return (currentOwnedCardQuantities[key] ?? 0) > 0
         }
     }
 
@@ -905,7 +907,8 @@ class AIDeckService: ObservableObject {
                 else { costMax = 4 }
                 var maxAllowed = costMax
                 if currentCollectionOnly && !currentOwnedCardQuantities.isEmpty {
-                    maxAllowed = min(maxAllowed, currentOwnedCardQuantities[matched.name] ?? maxAllowed)
+                    let key = CollectionManager.cardKey(name: matched.name, setName: matched.setName)
+                    maxAllowed = min(maxAllowed, currentOwnedCardQuantities[key] ?? maxAllowed)
                 }
                 let increase = min(maxAllowed - current, deficit)
                 if increase > 0 {
@@ -940,7 +943,7 @@ class AIDeckService: ObservableObject {
                 }
 
                 if currentCollectionOnly && !currentOwnedCardQuantities.isEmpty {
-                    pool = pool.filter { currentOwnedCardQuantities[$0.name] != nil }
+                    pool = pool.filter { currentOwnedCardQuantities[CollectionManager.cardKey(name: $0.name, setName: $0.setName)] != nil }
                 }
 
                 // Sort pool by cost for a reasonable distribution
@@ -948,8 +951,9 @@ class AIDeckService: ObservableObject {
 
                 for card in pool {
                     guard deficit > 0 else { break }
+                    let cardKey = CollectionManager.cardKey(name: card.name, setName: card.setName)
                     let maxAllowed = currentCollectionOnly && !currentOwnedCardQuantities.isEmpty
-                        ? min(4, currentOwnedCardQuantities[card.name] ?? 4)
+                        ? min(4, currentOwnedCardQuantities[cardKey] ?? 4)
                         : 4
                     let qty = min(maxAllowed, deficit)
                     if qty > 0 {
@@ -1089,7 +1093,7 @@ class AIDeckService: ObservableObject {
         var result = ""
         for card in cards.sorted(by: { $0.name < $1.name }) {
             let info = "[\(card.type), Cost \(card.cost)]"
-            if collectionOnly, let qty = ownedCardQuantities[card.name] {
+            if collectionOnly, let qty = ownedCardQuantities[CollectionManager.cardKey(name: card.name, setName: card.setName)] {
                 result += "- \(qty)x \(card.name) \(info)\n"
             } else {
                 result += "- \(card.name) \(info)\n"
