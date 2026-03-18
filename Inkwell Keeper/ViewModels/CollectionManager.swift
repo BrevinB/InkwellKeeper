@@ -121,6 +121,7 @@ class CollectionManager: ObservableObject {
 
             if let existingCard = existing {
                 existingCard.quantity += quantity
+                existingCard.dateAdded = Date()
             } else {
                 let newCard = CollectedCard(
                     cardId: card.id,

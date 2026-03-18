@@ -53,7 +53,6 @@
 		23B90B292E66335C00214C40 /* WishlistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90B282E66335A00214C40 /* WishlistView.swift */; };
 		23B90B2B2E66336100214C40 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90B2A2E66335E00214C40 /* StatsView.swift */; };
 		23B90B2D2E66336600214C40 /* ScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90B2C2E66336400214C40 /* ScannerView.swift */; };
-		F1CARD5EB6A63F /* CardSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1CARD5EA3181D /* CardSearchView.swift */; };
 		23B90B2F2E66337300214C40 /* LorcanaAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90B2E2E66336C00214C40 /* LorcanaAPIService.swift */; };
 		23B90B312E66337800214C40 /* FilterModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90B302E66337500214C40 /* FilterModels.swift */; };
 		23B90B332E66337D00214C40 /* SwiftDataModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90B322E66337A00214C40 /* SwiftDataModels.swift */; };
@@ -101,6 +100,7 @@
 		D1E2F3A4B5C6D7E8F9A0B1C2 /* CloudKitKeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C1 /* CloudKitKeyService.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C4 /* OpenAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C3 /* OpenAIService.swift */; };
 		E2F3A4B5C6D7E8F9A0B1C3D5 /* MultiScanReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F3A4B5C6D7E8F9A0B1C3D4 /* MultiScanReviewView.swift */; };
+		F1CARD5EB6A63F /* CardSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1CARD5EA3181D /* CardSearchView.swift */; };
 		F9FA8CEF18B640868AFA0847 /* whispers_in_the_well.json in Resources */ = {isa = PBXBuildFile; fileRef = B281D76F664D42E898C5AFFB /* whispers_in_the_well.json */; };
 /* End PBXBuildFile section */
 
@@ -129,6 +129,7 @@
 		233365602E77B05400BE5BD4 /* ursulas_return.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ursulas_return.json; sourceTree = "<group>"; };
 		234EDF462F41766B0016D086 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		234EDF482F4176860016D086 /* RulesPaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesPaywallView.swift; sourceTree = "<group>"; };
+		238530A62F6A3D8000DEA52D /* Inkwell-Keeper-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Inkwell-Keeper-Info.plist"; sourceTree = SOURCE_ROOT; };
 		23B90AF72E66323500214C40 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		23B90AF82E66323500214C40 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		23B90AF92E66323500214C40 /* InkwellKeeperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkwellKeeperApp.swift; sourceTree = "<group>"; };
@@ -152,7 +153,6 @@
 		23B90B282E66335A00214C40 /* WishlistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WishlistView.swift; sourceTree = "<group>"; };
 		23B90B2A2E66335E00214C40 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		23B90B2C2E66336400214C40 /* ScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerView.swift; sourceTree = "<group>"; };
-		F1CARD5EA3181D /* CardSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSearchView.swift; sourceTree = "<group>"; };
 		23B90B2E2E66336C00214C40 /* LorcanaAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LorcanaAPIService.swift; sourceTree = "<group>"; };
 		23B90B302E66337500214C40 /* FilterModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterModels.swift; sourceTree = "<group>"; };
 		23B90B322E66337A00214C40 /* SwiftDataModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataModels.swift; sourceTree = "<group>"; };
@@ -201,6 +201,7 @@
 		D1E2F3A4B5C6D7E8F9A0B1C3 /* OpenAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIService.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C6D7E8F9A0B1C5 /* Inkwell Keeper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Inkwell Keeper.entitlements"; sourceTree = "<group>"; };
 		E2F3A4B5C6D7E8F9A0B1C3D4 /* MultiScanReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiScanReviewView.swift; sourceTree = "<group>"; };
+		F1CARD5EA3181D /* CardSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSearchView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -276,6 +277,7 @@
 		23B90AFA2E66323500214C40 /* Inkwell Keeper */ = {
 			isa = PBXGroup;
 			children = (
+				238530A62F6A3D8000DEA52D /* Inkwell-Keeper-Info.plist */,
 				D1E2F3A4B5C6D7E8F9A0B1C5 /* Inkwell Keeper.entitlements */,
 				230CAD1F2EB0602800978724 /* Resources */,
 				23D9D44D2EA45ACE0089D552 /* ink.icon */,
@@ -724,6 +726,7 @@
 				DEVELOPMENT_TEAM = YFXZ6WNN53;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Inkwell-Keeper-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Ink Well Keeper";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.reference";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Ink Well Keeper uses the camera to scan and identify your Lorcana cards for easy collection tracking.";
@@ -738,7 +741,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4.1;
+				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -761,6 +764,7 @@
 				DEVELOPMENT_TEAM = YFXZ6WNN53;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Inkwell-Keeper-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Ink Well Keeper";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.reference";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Ink Well Keeper uses the camera to scan and identify your Lorcana cards for easy collection tracking.";
@@ -775,7 +779,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4.1;
+				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

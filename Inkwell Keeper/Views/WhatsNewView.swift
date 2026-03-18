@@ -23,10 +23,8 @@ struct WhatsNewView: View {
                         changelogSection(for: entry)
                     }
                 }
-                .padding()
             }
             .background(LorcanaBackground())
-            .navigationTitle("What's New")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -63,10 +61,7 @@ struct WhatsNewView: View {
         }
         .padding()
         .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.lorcanaDark.opacity(0.6))
-        )
+
     }
 
     private func changelogSection(for entry: ChangelogEntry) -> some View {
@@ -119,10 +114,6 @@ struct WhatsNewView: View {
             }
         }
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.lorcanaDark.opacity(0.4))
-        )
     }
 
     private func featureGroup(title: String, items: [String], color: Color) -> some View {
@@ -161,6 +152,14 @@ struct ChangelogEntry {
 
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
+    ChangelogEntry(
+        version: "2.0.0",
+        date: "March 2026",
+        features: ["More accurate pricing coming from TCGTrader", "Added CardMarket", "AI Deck Building (Pro Feature)", "Improved Set Tracking", "Improved Scanning: New mode as Multi Scan", "Added Search for all cards without going to scanning tab"],
+        improvements: ["Your collection now shows which cards belong to which deck and how many 'available' cards you have", "You can now add cards to wishlist easier", ],
+        bugFixes: ["Previously cards that are reprinted appeard as the same card with a tag showing which set they belonged to, now they act as separate cards", "Scanning didn't grab cards with different rarity, now it should"],
+        inProgress: ["Pricing isn't perfect, thats being improved", "AI Deck Building and AI Rules is a constant effort to improve quality of responses ", "Continuing to improve app performance"]
+    ),
     ChangelogEntry(
         version: "1.4.0",
         date: "February 2026",

@@ -34,6 +34,7 @@ class CameraManager: NSObject, ObservableObject {
     @Published var lastScannedCardName: String? = nil
     @Published var lastScannedEntry: ScannedCardEntry? = nil
     @Published var isFoilMode = false
+    @Published var isCorrectionActive = false
     // Set disambiguation — when scanner can't determine which set a reprint belongs to
     @Published var pendingSetChoices: [LorcanaCard]? = nil
 
@@ -312,11 +313,38 @@ class CameraManager: NSObject, ObservableObject {
 
         // Clear the last scanned info after a moment (longer to allow undo/correction)
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) { [weak self] in
-            if self?.lastScannedCardName == card.name {
-                self?.lastScannedCardName = nil
-                self?.lastScannedEntry = nil
+            guard let self = self, !self.isCorrectionActive else { return }
+            if self.lastScannedCardName == card.name {
+                self.lastScannedCardName = nil
+                self.lastScannedEntry = nil
             }
         }
+    }
+
+    func incrementLastScannedQuantity() {
+        guard let entry = lastScannedEntry else { return }
+
+        if let index = scannedCards.firstIndex(where: { $0.card.name == entry.card.name && $0.card.setName == entry.card.setName && $0.variant == entry.variant }) {
+            scannedCards[index].quantity += 1
+            lastScannedEntry = scannedCards[index]
+        }
+
+        let feedback = UIImpactFeedbackGenerator(style: .light)
+        feedback.impactOccurred()
+    }
+
+    func decrementLastScannedQuantity() {
+        guard let entry = lastScannedEntry else { return }
+
+        if let index = scannedCards.firstIndex(where: { $0.card.name == entry.card.name && $0.card.setName == entry.card.setName && $0.variant == entry.variant }) {
+            if scannedCards[index].quantity > 1 {
+                scannedCards[index].quantity -= 1
+                lastScannedEntry = scannedCards[index]
+            }
+        }
+
+        let feedback = UIImpactFeedbackGenerator(style: .light)
+        feedback.impactOccurred()
     }
 
     func undoLastScan() {
@@ -369,9 +397,10 @@ class CameraManager: NSObject, ObservableObject {
 
         // Clear after delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) { [weak self] in
-            if self?.lastScannedCardName == newCard.name {
-                self?.lastScannedCardName = nil
-                self?.lastScannedEntry = nil
+            guard let self = self, !self.isCorrectionActive else { return }
+            if self.lastScannedCardName == newCard.name {
+                self.lastScannedCardName = nil
+                self.lastScannedEntry = nil
             }
         }
     }
@@ -566,7 +595,13 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
                 }
             }
 
-            // First, try to find card names in the detected text
+            // First, try to find the card by its printed card number (most reliable)
+            if let cardByNumber = findCardByNumber(from: detectedTexts) {
+                completion(cardByNumber)
+                return
+            }
+
+            // Fall back to name-based search
             let potentialNames = extractCardNames(from: detectedTexts)
 
             for name in potentialNames {
@@ -1047,6 +1082,41 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
     }
 
     // MARK: - Set Detection from OCR
+
+    /// Look up a card directly by its printed card number and set info.
+    /// This is the most reliable identification method since card numbers are structured text.
+    private func findCardByNumber(from detectedTexts: [String]) -> LorcanaCard? {
+        guard let info = parseCardNumber(from: detectedTexts) else { return nil }
+
+        let allCards = SetsDataManager.shared.getAllCards()
+
+        // Priority 1: Match by set number (e.g., "9" → set "Fabled") + card number
+        if let setNumber = info.setNumber, let matchedSet = findSetBySetNumber(setNumber) {
+            if let card = allCards.first(where: { $0.setName == matchedSet.name && $0.cardNumber == info.cardNumber }) {
+                return card
+            }
+        }
+
+        // Priority 2: Match by card count (unique set total) + card number
+        if let matchedSet = findSetByCardCount(info.setTotal) {
+            if let card = allCards.first(where: { $0.setName == matchedSet.name && $0.cardNumber == info.cardNumber }) {
+                return card
+            }
+        }
+
+        // Priority 3: Match by card count (multiple sets share the total) + card number
+        let possibleSets = findSetsByCardCount(info.setTotal)
+        if possibleSets.count > 1 {
+            let candidates = allCards.filter { card in
+                card.cardNumber == info.cardNumber && possibleSets.contains(where: { $0.name == card.setName })
+            }
+            if candidates.count == 1 {
+                return candidates.first
+            }
+        }
+
+        return nil
+    }
 
     /// Parsed card number info from OCR text (e.g., "207/204 · EN · 9")
     struct CardNumberInfo {

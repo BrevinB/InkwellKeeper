@@ -131,6 +131,42 @@ struct ScannerView: View {
 
                                         Spacer()
 
+                                        // Quantity stepper
+                                        HStack(spacing: 6) {
+                                            Button(action: {
+                                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                                    cameraManager.decrementLastScannedQuantity()
+                                                }
+                                            }) {
+                                                Image(systemName: "minus")
+                                                    .font(.caption2.weight(.bold))
+                                                    .foregroundColor(entry.quantity > 1 ? .white : .gray.opacity(0.4))
+                                                    .frame(width: 24, height: 24)
+                                                    .background(Color.white.opacity(entry.quantity > 1 ? 0.2 : 0.05))
+                                                    .clipShape(Circle())
+                                            }
+                                            .disabled(entry.quantity <= 1)
+
+                                            Text("\(entry.quantity)")
+                                                .font(.subheadline)
+                                                .fontWeight(.bold)
+                                                .foregroundColor(.white)
+                                                .frame(minWidth: 20)
+
+                                            Button(action: {
+                                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                                    cameraManager.incrementLastScannedQuantity()
+                                                }
+                                            }) {
+                                                Image(systemName: "plus")
+                                                    .font(.caption2.weight(.bold))
+                                                    .foregroundColor(.white)
+                                                    .frame(width: 24, height: 24)
+                                                    .background(Color.white.opacity(0.2))
+                                                    .clipShape(Circle())
+                                            }
+                                        }
+
                                         // Undo button
                                         Button(action: {
                                             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
@@ -253,12 +289,22 @@ struct ScannerView: View {
             }
         }
         .onChange(of: showingCorrectionSearch) { isShowing in
+            cameraManager.isCorrectionActive = isShowing
             if isShowing {
                 cameraManager.pauseAutoScan()
-            } else if cameraManager.isAutoScanEnabled {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                    if cameraManager.isAutoScanEnabled && !showingCorrectionSearch {
-                        cameraManager.resumeAutoScan()
+            } else {
+                // Clear the toast after correction sheet closes
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+                    if !cameraManager.isCorrectionActive {
+                        cameraManager.lastScannedCardName = nil
+                        cameraManager.lastScannedEntry = nil
+                    }
+                }
+                if cameraManager.isAutoScanEnabled {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        if cameraManager.isAutoScanEnabled && !showingCorrectionSearch {
+                            cameraManager.resumeAutoScan()
+                        }
                     }
                 }
             }
