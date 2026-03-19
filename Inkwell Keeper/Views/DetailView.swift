@@ -91,6 +91,7 @@ struct CollectionCardDetailView: View {
     @State private var showingRulesAssistant = false
     @State private var deckAllocations: [CollectionManager.DeckAllocation] = []
     @State private var showFoilArt = false
+    @State private var imageAttachments: [Data] = []
 
     /// Whether to show the foil section — only when opened from Sets view and card supports foil
     private var showFoilSection: Bool {
@@ -253,6 +254,15 @@ struct CollectionCardDetailView: View {
                         RoundedRectangle(cornerRadius: 16)
                             .fill(Color.lorcanaDark.opacity(0.8))
                     )
+
+                    // My Card Photos section - only show for owned cards
+                    if collectedCard != nil || foilCollectedCard != nil {
+                        CardImageAttachmentView(
+                            imageAttachments: $imageAttachments,
+                            onSave: saveImageAttachments
+                        )
+                        .padding(.horizontal)
+                    }
 
                     // Check Prices section
                     BuyCardOptionsView(card: card)
@@ -527,8 +537,23 @@ struct CollectionCardDetailView: View {
             tempQuantity = collectedCard?.quantity ?? 1
         }
 
+        // Load image attachments from the primary collected card
+        let primaryCard = collectedCard ?? foilCollectedCard
+        imageAttachments = primaryCard?.imageAttachments ?? []
+
         // Load deck allocations
         deckAllocations = collectionManager.getDeckAllocations(for: card)
+    }
+
+    private func saveImageAttachments() {
+        // Save to the primary collected card (prefer normal over foil)
+        if let collected = collectedCard {
+            collected.imageAttachments = imageAttachments
+            collectionManager.saveContext()
+        } else if let foilCollected = foilCollectedCard {
+            foilCollected.imageAttachments = imageAttachments
+            collectionManager.saveContext()
+        }
     }
 
     private func updateQuantity() {

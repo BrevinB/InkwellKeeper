@@ -32,6 +32,16 @@ class CollectionManager: ObservableObject {
         self.modelContext = context
         loadCollection()
     }
+
+    /// Save any pending changes to the model context
+    func saveContext() {
+        guard let context = modelContext else { return }
+        do {
+            try context.save()
+        } catch {
+            // Handle error silently
+        }
+    }
     
     func loadCollection() {
         guard let context = modelContext else {

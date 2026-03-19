@@ -29,6 +29,7 @@ class CollectedCard {
     var inkColor: String?
     var uniqueId: String?
     var cardNumber: Int?
+    @Attribute(.externalStorage) var imageAttachments: [Data]?
 
     var cardRarity: CardRarity {
         get { CardRarity(rawValue: rarity) ?? .common }
