@@ -128,9 +128,8 @@ struct MultiScanReviewView: View {
     private func addAllToCollection() {
         for entry in cameraManager.scannedCards {
             let card = entry.card.withVariant(entry.variant)
-            for _ in 0..<entry.quantity {
-                collectionManager.addCard(card)
-            }
+            let imageAttachments: [Data]? = entry.capturedImage.map { [$0] }
+            collectionManager.addCard(card, quantity: entry.quantity, imageAttachments: imageAttachments)
         }
 
         withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
@@ -157,16 +156,27 @@ struct ScannedCardRow: View {
     var body: some View {
         HStack(spacing: 12) {
             // Card image thumbnail
-            AsyncImage(url: entry.card.bestImageUrl()) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-            } placeholder: {
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(Color.gray.opacity(0.3))
+            ZStack(alignment: .bottomTrailing) {
+                AsyncImage(url: entry.card.bestImageUrl()) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                } placeholder: {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.gray.opacity(0.3))
+                }
+                .frame(width: 50, height: 70)
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+
+                if entry.capturedImage != nil {
+                    Image(systemName: "camera.fill")
+                        .font(.system(size: 8))
+                        .foregroundColor(.white)
+                        .padding(3)
+                        .background(Circle().fill(Color.lorcanaGold))
+                        .offset(x: 2, y: 2)
+                }
             }
-            .frame(width: 50, height: 70)
-            .clipShape(RoundedRectangle(cornerRadius: 6))
 
             // Card info
             VStack(alignment: .leading, spacing: 4) {

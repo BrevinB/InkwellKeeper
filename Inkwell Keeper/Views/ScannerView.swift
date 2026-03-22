@@ -217,7 +217,7 @@ struct ScannerView: View {
                         collectionManager.addCard(selectedCard)
                     }
                     showingCardDetail = false
-                }, isWishlist: false)
+                }, isWishlist: false, initialImage: cameraManager.lastCapturedImage)
                 .environmentObject(collectionManager)
             }
         }
@@ -278,6 +278,9 @@ struct ScannerView: View {
             }
         }
         .onChange(of: showingCardDetail) { isShowing in
+            if !isShowing {
+                cameraManager.lastCapturedImage = nil
+            }
             // Resume auto-scan with buffer when modal closes
             if !isShowing && cameraManager.isAutoScanEnabled {
                 // Add 2-second buffer to allow user to reposition phone

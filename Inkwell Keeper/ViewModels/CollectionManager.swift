@@ -96,7 +96,7 @@ class CollectionManager: ObservableObject {
         }
     }
     
-    func addCard(_ card: LorcanaCard, quantity: Int = 1) {
+    func addCard(_ card: LorcanaCard, quantity: Int = 1, imageAttachments: [Data]? = nil) {
         guard let context = modelContext else {
             return
         }
@@ -132,6 +132,12 @@ class CollectionManager: ObservableObject {
             if let existingCard = existing {
                 existingCard.quantity += quantity
                 existingCard.dateAdded = Date()
+                // Append new image attachments to existing ones
+                if let newImages = imageAttachments, !newImages.isEmpty {
+                    var currentImages = existingCard.imageAttachments ?? []
+                    currentImages.append(contentsOf: newImages)
+                    existingCard.imageAttachments = currentImages
+                }
             } else {
                 let newCard = CollectedCard(
                     cardId: card.id,
@@ -149,6 +155,9 @@ class CollectionManager: ObservableObject {
                     uniqueId: card.uniqueId,
                     cardNumber: card.cardNumber
                 )
+                if let newImages = imageAttachments, !newImages.isEmpty {
+                    newCard.imageAttachments = newImages
+                }
                 context.insert(newCard)
             }
 
@@ -167,6 +176,16 @@ class CollectionManager: ObservableObject {
         }
     }
     
+    /// Attach images to an existing collected card
+    func attachImages(_ images: [Data], to card: LorcanaCard) {
+        guard !images.isEmpty,
+              let collected = getCollectedCardDataForVariant(card) else { return }
+        var current = collected.imageAttachments ?? []
+        current.append(contentsOf: images)
+        collected.imageAttachments = current
+        saveContext()
+    }
+
     func removeCard(_ card: LorcanaCard) {
         guard let context = modelContext else { return }
 

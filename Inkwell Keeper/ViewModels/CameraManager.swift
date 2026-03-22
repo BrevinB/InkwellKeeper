@@ -16,6 +16,7 @@ struct ScannedCardEntry: Identifiable {
     var quantity: Int
     let scannedAt: Date
     var variant: CardVariant = .normal
+    var capturedImage: Data?
 }
 
 class CameraManager: NSObject, ObservableObject {
@@ -37,6 +38,9 @@ class CameraManager: NSObject, ObservableObject {
     @Published var isCorrectionActive = false
     // Set disambiguation — when scanner can't determine which set a reprint belongs to
     @Published var pendingSetChoices: [LorcanaCard]? = nil
+    // Captured image data for attaching to cards
+    @Published var lastCapturedImage: Data? = nil
+    var pendingCapturedImage: Data? = nil
 
     private let captureSession = AVCaptureSession()
     private var currentDevice: AVCaptureDevice?
@@ -293,15 +297,19 @@ class CameraManager: NSObject, ObservableObject {
         isMultiScanMode.toggle()
     }
 
-    private func addToScannedCards(_ card: LorcanaCard) {
+    private func addToScannedCards(_ card: LorcanaCard, capturedImage: Data? = nil) {
         let variant: CardVariant = isFoilMode ? .foil : .normal
         let cardWithVariant = card.withVariant(variant)
 
         // Check if this card+variant was already scanned
         if let index = scannedCards.firstIndex(where: { $0.card.name == card.name && $0.card.setName == card.setName && $0.variant == variant }) {
             scannedCards[index].quantity += 1
+            // Keep the first captured image if one already exists
+            if scannedCards[index].capturedImage == nil {
+                scannedCards[index].capturedImage = capturedImage
+            }
         } else {
-            scannedCards.append(ScannedCardEntry(card: cardWithVariant, quantity: 1, scannedAt: Date(), variant: variant))
+            scannedCards.append(ScannedCardEntry(card: cardWithVariant, quantity: 1, scannedAt: Date(), variant: variant, capturedImage: capturedImage))
         }
 
         lastScannedCardName = card.name
@@ -459,6 +467,9 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
     private func processCardImage(_ image: UIImage) {
         isProcessingCard = true
 
+        // Compress the captured image for storage
+        let capturedImageData = image.jpegData(compressionQuality: 0.8)
+
         // Run rectangle detection, text recognition, and rarity detection in parallel
         let dispatchGroup = DispatchGroup()
         var cardDetected = false
@@ -503,12 +514,14 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
 
                 // If pendingSetChoices was set, the UI will handle it — don't add yet
                 if self.pendingSetChoices != nil {
+                    self.pendingCapturedImage = capturedImageData
                     return
                 }
 
                 if self.isMultiScanMode {
-                    self.addToScannedCards(resolved)
+                    self.addToScannedCards(resolved, capturedImage: capturedImageData)
                 } else {
+                    self.lastCapturedImage = capturedImageData
                     self.detectedCard = resolved
                 }
             } else {
@@ -1354,17 +1367,21 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
 
     /// Called by the UI when the user picks a set for a pending card
     func resolveSetChoice(_ card: LorcanaCard) {
+        let capturedImage = pendingCapturedImage
         pendingSetChoices = nil
+        pendingCapturedImage = nil
 
         if isMultiScanMode {
-            addToScannedCards(card)
+            addToScannedCards(card, capturedImage: capturedImage)
         } else {
+            lastCapturedImage = capturedImage
             detectedCard = card
         }
     }
 
     func dismissSetChoice() {
         pendingSetChoices = nil
+        pendingCapturedImage = nil
     }
 }
 
