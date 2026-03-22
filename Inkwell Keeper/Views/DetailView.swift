@@ -91,6 +91,7 @@ struct CollectionCardDetailView: View {
     @State private var showingRulesAssistant = false
     @State private var deckAllocations: [CollectionManager.DeckAllocation] = []
     @State private var showFoilArt = false
+    @State private var imageAttachments: [Data] = []
 
     /// Whether to show the foil section — only when opened from Sets view and card supports foil
     private var showFoilSection: Bool {
@@ -253,6 +254,15 @@ struct CollectionCardDetailView: View {
                         RoundedRectangle(cornerRadius: 16)
                             .fill(Color.lorcanaDark.opacity(0.8))
                     )
+
+                    // My Card Photos section - only show for owned cards
+                    if collectedCard != nil || foilCollectedCard != nil {
+                        CardImageAttachmentView(
+                            imageAttachments: $imageAttachments,
+                            onSave: saveImageAttachments
+                        )
+                        .padding(.horizontal)
+                    }
 
                     // Check Prices section
                     BuyCardOptionsView(card: card)
@@ -527,8 +537,23 @@ struct CollectionCardDetailView: View {
             tempQuantity = collectedCard?.quantity ?? 1
         }
 
+        // Load image attachments from the primary collected card
+        let primaryCard = collectedCard ?? foilCollectedCard
+        imageAttachments = primaryCard?.imageAttachments ?? []
+
         // Load deck allocations
         deckAllocations = collectionManager.getDeckAllocations(for: card)
+    }
+
+    private func saveImageAttachments() {
+        // Save to the primary collected card (prefer normal over foil)
+        if let collected = collectedCard {
+            collected.imageAttachments = imageAttachments
+            collectionManager.saveContext()
+        } else if let foilCollected = foilCollectedCard {
+            foilCollected.imageAttachments = imageAttachments
+            collectionManager.saveContext()
+        }
     }
 
     private func updateQuantity() {
@@ -921,19 +946,26 @@ struct AddCardModal: View {
     @Binding var isPresented: Bool
     let onAdd: (LorcanaCard, Int) -> Void
     let isWishlist: Bool
+    let initialImage: Data?
 
+    @EnvironmentObject var collectionManager: CollectionManager
     @State private var selectedVariant: CardVariant = .normal
     @State private var quantity: Int = 1
     @State private var showingCardSearch = false
     @State private var showingFullscreenViewer = false
     @State private var currentCard: LorcanaCard
+    @State private var photoAttachments: [Data] = []
 
-    init(card: LorcanaCard, isPresented: Binding<Bool>, onAdd: @escaping (LorcanaCard, Int) -> Void, isWishlist: Bool) {
+    init(card: LorcanaCard, isPresented: Binding<Bool>, onAdd: @escaping (LorcanaCard, Int) -> Void, isWishlist: Bool, initialImage: Data? = nil) {
         self.card = card
         self._isPresented = isPresented
         self.onAdd = onAdd
         self.isWishlist = isWishlist
+        self.initialImage = initialImage
         self._currentCard = State(initialValue: card)
+        if let imageData = initialImage {
+            self._photoAttachments = State(initialValue: [imageData])
+        }
     }
 
     var selectedCard: LorcanaCard {
@@ -948,6 +980,9 @@ struct AddCardModal: View {
                     headerSection
                     variantSection
                     quantitySection
+                    if !isWishlist {
+                        CompactPhotoAttachmentView(imageAttachments: $photoAttachments)
+                    }
                     buySection
                     addButton
                 }
@@ -982,7 +1017,7 @@ struct AddCardModal: View {
             .onChange(of: currentCard.id) { _ in }
         }
     }
-    
+
     private var headerSection: some View {
         HStack(spacing: 16) {
             ZStack(alignment: .topTrailing) {
@@ -1134,6 +1169,9 @@ struct AddCardModal: View {
     private var addButton: some View {
         Button(action: {
             onAdd(selectedCard, quantity)
+            if !photoAttachments.isEmpty {
+                collectionManager.attachImages(photoAttachments, to: selectedCard)
+            }
             isPresented = false
         }) {
             Text("Add \(quantity) \(selectedVariant.displayName) card\(quantity > 1 ? "s" : "") to \(isWishlist ? "Wishlist" : "Collection")")
@@ -1153,6 +1191,8 @@ struct AddCardGroupModal: View {
     let isWishlist: Bool
     var onAddToWishlist: ((LorcanaCard, Int) -> Void)? = nil
 
+    @EnvironmentObject var collectionManager: CollectionManager
+
     // For regular cards (Normal/Foil), use multi-quantity mode
     @State private var normalQuantity: Int = 1
     @State private var foilQuantity: Int = 0
@@ -1164,6 +1204,7 @@ struct AddCardGroupModal: View {
     @State private var showingSuccessBanner = false
     @State private var isImageExpanded = false
     @State private var successMessage = ""
+    @State private var photoAttachments: [Data] = []
 
     /// Whether this card supports multi-variant adding (Normal + Foil)
     private var supportsMultiVariant: Bool {
@@ -1397,6 +1438,11 @@ struct AddCardGroupModal: View {
                     )
                 }
 
+                // Photo attachment (only for collection, not wishlist)
+                if !isWishlist {
+                    CompactPhotoAttachmentView(imageAttachments: $photoAttachments)
+                }
+
                 // Buy options (for cards you don't own yet)
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Or Buy This Card")
@@ -1618,6 +1664,9 @@ struct AddCardGroupModal: View {
             if normalQuantity > 0 {
                 let normalCard = cardGroup.primaryCard.withVariant(.normal)
                 onAdd(normalCard, normalQuantity)
+                if !photoAttachments.isEmpty {
+                    collectionManager.attachImages(photoAttachments, to: normalCard)
+                }
                 addedParts.append("\(normalQuantity) Normal")
             }
 
@@ -1625,6 +1674,10 @@ struct AddCardGroupModal: View {
             if foilQuantity > 0 {
                 let foilCard = cardGroup.primaryCard.withVariant(.foil)
                 onAdd(foilCard, foilQuantity)
+                // Attach photos to foil variant too if no normal cards were added
+                if !photoAttachments.isEmpty && normalQuantity == 0 {
+                    collectionManager.attachImages(photoAttachments, to: foilCard)
+                }
                 addedParts.append("\(foilQuantity) Foil")
             }
 
@@ -1633,6 +1686,9 @@ struct AddCardGroupModal: View {
             // Special variant - single add
             let specialCard = cardGroup.primaryCard.withVariant(selectedSpecialVariant)
             onAdd(specialCard, specialQuantity)
+            if !photoAttachments.isEmpty {
+                collectionManager.attachImages(photoAttachments, to: specialCard)
+            }
             successMessage = "Added \(specialQuantity) \(selectedSpecialVariant.displayName) card\(specialQuantity > 1 ? "s" : "")"
         }
 
