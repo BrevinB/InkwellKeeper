@@ -426,6 +426,9 @@ class ImportService {
         case "005", "5": return "Shimmering Skies"
         case "006", "6": return "Azurite Sea"
         case "007", "7": return "Archazia's Island"
+        case "008", "8": return "Reign of Jafar"
+        case "009", "9": return "Whispers in the Well"
+        case "010", "10": return "Fabled"
         case "P1": return "Promo" // Promo cards
         case "C1": return "Promo" // Convention promos
         case "D23": return "Promo" // D23 promos
@@ -499,7 +502,7 @@ class ImportService {
             return match
         }
 
-        // Priority 3: Fuzzy match on name (any variant, any set)
+        // Priority 3: Fuzzy match on name with correct variant
         let fuzzyMatches = allCards.filter { card in
             let cardName = normalizeName(card.name)
             return cardName.contains(normalizedName) || normalizedName.contains(cardName)
@@ -509,8 +512,14 @@ class ImportService {
             return bestMatch
         }
 
-        // Priority 4: Return any fuzzy match
-        return fuzzyMatches.first
+        // Priority 4: Return any fuzzy match, but only for normal variant requests
+        // For non-normal variants (foil, enchanted, etc.), returning a wrong-variant
+        // card would prevent the caller from creating the correct variant
+        if variant == .normal {
+            return fuzzyMatches.first
+        }
+
+        return nil
     }
 
     // MARK: - Helper Methods
