@@ -855,7 +855,7 @@ struct ExportView: View {
             let setNum2 = getSetNumber(for: second.card.setName)
 
             if setNum1 != setNum2 {
-                return setNum1 < setNum2  // String comparison works fine with 3-digit format
+                return (Int(setNum1) ?? 999) < (Int(setNum2) ?? 999)
             }
             return first.cardNumber < second.cardNumber
         }
@@ -891,18 +891,18 @@ struct ExportView: View {
     }
 
     private func getSetNumber(for setName: String) -> String {
-        // Map set names to Dreamborn set numbers (3-digit format)
+        // Map set names to Dreamborn set numbers (unpadded, matching Dreamborn's format)
         switch setName {
-        case "The First Chapter": return "001"
-        case "Rise of the Floodborn": return "002"
-        case "Into the Inklands": return "003"
-        case "Ursula's Return": return "004"
-        case "Shimmering Skies": return "005"
-        case "Azurite Sea": return "006"
-        case "Archazia's Island": return "007"
-        case "Reign of Jafar": return "008"
-        case "Whispers in the Well": return "009"
-        case "Fabled": return "010"
+        case "The First Chapter": return "1"
+        case "Rise of the Floodborn": return "2"
+        case "Into the Inklands": return "3"
+        case "Ursula's Return": return "4"
+        case "Shimmering Skies": return "5"
+        case "Azurite Sea": return "6"
+        case "Archazia's Island": return "7"
+        case "Reign of Jafar": return "8"
+        case "Whispers in the Well": return "9"
+        case "Fabled": return "10"
         default: return "999"  // Unknown sets
         }
     }
@@ -944,7 +944,7 @@ struct ExportView: View {
             let setNum2 = getSetNumber(for: second.card.setName)
 
             if setNum1 != setNum2 {
-                return setNum1 < setNum2
+                return (Int(setNum1) ?? 999) < (Int(setNum2) ?? 999)
             }
             if let num1 = first.card.cardNumber, let num2 = second.card.cardNumber {
                 return num1 < num2

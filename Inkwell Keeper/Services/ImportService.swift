@@ -70,7 +70,8 @@ class ImportService {
     enum ImportFormat {
         case csv              // CSV with headers
         case textList         // Simple text list (one per line)
-        case dreamborn        // Dreamborn.ink format
+        case dreamborn        // Dreamborn.ink collection format (Normal,Foil,Name,Set,...)
+        case dreambornBulk    // Dreamborn.ink bulk/backup format (Set Number,Card Number,Variant,Count)
         case lorcanaHQ        // Lorcana HQ format
 
         var description: String {
@@ -78,6 +79,7 @@ class ImportService {
             case .csv: return "CSV File"
             case .textList: return "Text List"
             case .dreamborn: return "Dreamborn.ink"
+            case .dreambornBulk: return "Dreamborn.ink (Backup)"
             case .lorcanaHQ: return "Lorcana HQ"
             }
         }
@@ -116,8 +118,27 @@ class ImportService {
                 }
             }
 
-            // Special handling for Dreamborn format to process both normal and foil quantities
-            if format == .dreamborn {
+            // Special handling for Dreamborn Bulk format (Set Number,Card Number,Variant,Count)
+            if format == .dreambornBulk {
+                if let (setName, cardNumber, variant, quantity) = parseDreambornBulkLine(line) {
+                    // Find card by set name + card number
+                    if let matchedCard = findCardByNumber(cardNumber: cardNumber, setName: setName, variant: variant) {
+                        successful.append(ImportedCard(card: matchedCard, quantity: quantity, originalLine: line))
+                    }
+                    // If non-normal variant not found, try to create it from normal
+                    else if variant != .normal,
+                            let normalCard = findCardByNumber(cardNumber: cardNumber, setName: setName, variant: .normal) {
+                        let variantCard = createVariant(from: normalCard, variant: variant)
+                        successful.append(ImportedCard(card: variantCard, quantity: quantity, originalLine: line))
+                    }
+                    else {
+                        let setInfo = " from set '\(setName)'"
+                        failed.append(FailedImport(originalLine: line, reason: "Card not found: #\(cardNumber)\(setInfo) [\(variant.displayName)]"))
+                    }
+                }
+            }
+            // Special handling for Dreamborn Collection format to process both normal and foil quantities
+            else if format == .dreamborn {
                 // parseDreambornLineRaw returns nil for rows with 0,0 quantities
                 if let (normalQty, foilQty, cardName, setName) = parseDreambornLineRaw(line) {
                     var lineHadSuccess = false
@@ -203,6 +224,8 @@ class ImportService {
             return parseTextListLine(line)
         case .dreamborn:
             return parseDreambornLine(line)
+        case .dreambornBulk:
+            return nil // Handled separately in importFromText
         case .lorcanaHQ:
             return parseLorcanaHQLine(line)
         }
@@ -441,7 +464,70 @@ class ImportService {
         return parseTextListLine(line)
     }
 
+    // Dreamborn Bulk format: Set Number,Card Number,Variant,Count
+    // Example: 4,188,normal,2  or  1,13,foil,1
+    private func parseDreambornBulkLine(_ line: String) -> (setName: String, cardNumber: Int, variant: CardVariant, quantity: Int)? {
+        let components = line.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+
+        guard components.count >= 4 else { return nil }
+
+        let setNum = components[0]
+        guard let cardNumber = Int(components[1]) else { return nil }
+        let variant = parseVariant(components[2])
+        let quantity = Int(components[3]) ?? 1
+
+        guard quantity > 0 else { return nil }
+
+        guard let setName = mapDreambornSetNumber(setNum) else { return nil }
+
+        return (setName, cardNumber, variant, quantity)
+    }
+
     // MARK: - Card Matching
+
+    private func findCardByNumber(cardNumber: Int, setName: String, variant: CardVariant) -> LorcanaCard? {
+        let setCards = dataManager.getCardsForSet(setName)
+
+        // Find card with matching card number and variant
+        if let match = setCards.first(where: { $0.cardNumber == cardNumber && $0.variant == variant }) {
+            return match
+        }
+
+        return nil
+    }
+
+    private func createVariant(from card: LorcanaCard, variant: CardVariant) -> LorcanaCard {
+        let variantCode: String
+        switch variant {
+        case .normal: variantCode = "_N_"
+        case .foil: variantCode = "_F_"
+        case .enchanted: variantCode = "_E_"
+        case .promo: variantCode = "_P_"
+        case .borderless: variantCode = "_B_"
+        case .epic: variantCode = "_EP_"
+        case .iconic: variantCode = "_I_"
+        }
+        return LorcanaCard(
+            id: card.id.replacingOccurrences(of: "_N_", with: variantCode),
+            name: card.name,
+            cost: card.cost,
+            type: card.type,
+            rarity: card.rarity,
+            setName: card.setName,
+            cardText: card.cardText,
+            imageUrl: card.imageUrl,
+            price: card.price,
+            variant: variant,
+            cardNumber: card.cardNumber,
+            uniqueId: card.uniqueId,
+            inkwell: card.inkwell,
+            strength: card.strength,
+            willpower: card.willpower,
+            lore: card.lore,
+            franchise: card.franchise,
+            inkColor: card.inkColor
+        )
+    }
 
     private func createFoilVariant(from normalCard: LorcanaCard) -> LorcanaCard {
         // Create a new card with foil variant but same other properties
