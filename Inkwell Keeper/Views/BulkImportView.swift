@@ -424,18 +424,31 @@ struct BulkImportView: View {
 
     private func detectFormat(from text: String) -> ImportService.ImportFormat {
         let firstLine = text.components(separatedBy: .newlines).first ?? ""
+        let lowerFirstLine = firstLine.lowercased()
 
-        // Check if it's a Dreamborn CSV (has the specific header or comma-separated with numbers at start)
-        if firstLine.lowercased().contains("normal") &&
-           firstLine.lowercased().contains("foil") &&
-           firstLine.lowercased().contains("name") {
+        // Check for Dreamborn Bulk/Backup format: "Set Number,Card Number,Variant,Count"
+        if lowerFirstLine.contains("set number") &&
+           lowerFirstLine.contains("card number") &&
+           lowerFirstLine.contains("variant") &&
+           lowerFirstLine.contains("count") {
+            return .dreambornBulk
+        }
+
+        // Check if it's a Dreamborn Collection CSV (has the specific header)
+        if lowerFirstLine.contains("normal") &&
+           lowerFirstLine.contains("foil") &&
+           lowerFirstLine.contains("name") {
             return .dreamborn
         }
 
-        // Check if any early line looks like Dreamborn format (starts with numbers, has quoted card name)
+        // Check if any early line looks like Dreamborn Bulk format (number,number,variant,number)
         let earlyLines = text.components(separatedBy: .newlines).prefix(5)
         for line in earlyLines where !line.isEmpty {
-            // Pattern: number,number,"Card Name",
+            // Pattern: number,number,variant_word,number (e.g. "4,188,normal,2")
+            if line.range(of: #"^\d+,\d+,(normal|foil|enchanted|promo|borderless),\d+$"#, options: .regularExpression) != nil {
+                return .dreambornBulk
+            }
+            // Pattern: number,number,"Card Name", (Dreamborn Collection without header)
             if line.range(of: #"^\d+,\d+,"[^"]+","#, options: .regularExpression) != nil {
                 return .dreamborn
             }
