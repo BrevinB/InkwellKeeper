@@ -470,6 +470,127 @@ struct CreateDeckView: View {
     }
 }
 
+// MARK: - Edit Deck View
+struct EditDeckView: View {
+    let deck: Deck
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var deckManager: DeckManager
+
+    @State private var deckName: String
+    @State private var deckDescription: String
+    @State private var selectedFormat: DeckFormat
+    @State private var selectedColors: Set<InkColor>
+    @State private var selectedArchetype: DeckArchetype?
+
+    init(deck: Deck) {
+        self.deck = deck
+        _deckName = State(initialValue: deck.name)
+        _deckDescription = State(initialValue: deck.deckDescription)
+        _selectedFormat = State(initialValue: deck.deckFormat)
+        _selectedColors = State(initialValue: Set(deck.deckInkColors))
+        _selectedArchetype = State(initialValue: deck.deckArchetype)
+    }
+
+    var canSave: Bool {
+        !deckName.isEmpty && selectedColors.count <= selectedFormat.maxInkColors
+    }
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Basic Info")) {
+                    TextField("Deck Name", text: $deckName)
+                    TextField("Description (optional)", text: $deckDescription)
+                }
+
+                Section(header: Text("Format")) {
+                    Picker("Format", selection: $selectedFormat) {
+                        ForEach(DeckFormat.allCases, id: \.self) { format in
+                            VStack(alignment: .leading) {
+                                Text(format.rawValue)
+                                Text(format.description)
+                                    .font(.caption)
+                                    .foregroundStyle(.gray)
+                            }
+                            .tag(format)
+                        }
+                    }
+                    .pickerStyle(.menu)
+
+                    Text("Min \(selectedFormat.minimumCards) cards, max \(selectedFormat.maxInkColors) ink colors")
+                        .font(.caption)
+                        .foregroundStyle(.gray)
+                }
+
+                Section(header: Text("Ink Colors (max \(selectedFormat.maxInkColors))")) {
+                    ForEach(InkColor.allCases, id: \.self) { color in
+                        Button {
+                            if selectedColors.contains(color) {
+                                selectedColors.remove(color)
+                            } else if selectedColors.count < selectedFormat.maxInkColors {
+                                selectedColors.insert(color)
+                            }
+                        } label: {
+                            HStack {
+                                Circle()
+                                    .fill(color.color)
+                                    .frame(width: 20, height: 20)
+
+                                Text(color.rawValue)
+                                    .foregroundStyle(.white)
+
+                                Spacer()
+
+                                if selectedColors.contains(color) {
+                                    Image(systemName: "checkmark")
+                                        .foregroundStyle(Color.lorcanaGold)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Section(header: Text("Archetype (optional)")) {
+                    Picker("Archetype", selection: $selectedArchetype) {
+                        Text("None").tag(nil as DeckArchetype?)
+                        ForEach(DeckArchetype.allCases, id: \.self) { archetype in
+                            HStack {
+                                Image(systemName: archetype.systemImage)
+                                Text(archetype.rawValue)
+                            }
+                            .tag(archetype as DeckArchetype?)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                }
+            }
+            .navigationTitle("Edit Deck")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") { dismiss() }
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Save") { saveDeck() }
+                        .disabled(!canSave)
+                        .foregroundStyle(canSave ? Color.lorcanaGold : .gray)
+                }
+            }
+        }
+    }
+
+    private func saveDeck() {
+        deck.name = deckName
+        deck.deckDescription = deckDescription
+        deck.deckFormat = selectedFormat
+        deck.deckInkColors = Array(selectedColors)
+        deck.deckArchetype = selectedArchetype
+        deck.lastModified = Date()
+        dismiss()
+    }
+}
+
 // MARK: - Deck Detail View
 struct DeckDetailView: View {
     let deck: Deck
@@ -658,6 +779,10 @@ struct DeckDetailView: View {
         }
         .sheet(isPresented: $showingShareSheet) {
             ShareDeckView(shareCode: shareCode, deckName: deck.name)
+        }
+        .sheet(isPresented: $showingEditDeck) {
+            EditDeckView(deck: deck)
+                .environmentObject(deckManager)
         }
         .alert("Delete Deck?", isPresented: $showingDeleteConfirm) {
             Button("Cancel", role: .cancel) { }

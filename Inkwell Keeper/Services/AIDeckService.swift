@@ -43,6 +43,8 @@ class AIDeckService: ObservableObject {
     private let dataManager = SetsDataManager.shared
     private var currentCollectionOnly = false
     private var currentOwnedCardQuantities: [String: Int] = [:]
+    /// How many cards the suggestions should total — 60 for a new deck, fewer for completion
+    private var targetSuggestionCount = 60
 
     private init() {
         checkAvailability()
@@ -190,6 +192,8 @@ class AIDeckService: ObservableObject {
             isLoading = false
             return
         }
+
+        targetSuggestionCount = remaining
 
         // Detect actual ink colors from existing cards if deck metadata colors are empty
         var effectiveColors = inkColors
@@ -840,7 +844,7 @@ class AIDeckService: ObservableObject {
     }
 
     private func normalizeTo60Cards() {
-        let target = 60
+        let target = targetSuggestionCount
         var total = suggestions.reduce(0) { $0 + $1.quantity }
 
         guard total != target else { return }
@@ -1186,5 +1190,6 @@ class AIDeckService: ObservableObject {
         isLoading = false
         currentCollectionOnly = false
         currentOwnedCardQuantities = [:]
+        targetSuggestionCount = 60
     }
 }
