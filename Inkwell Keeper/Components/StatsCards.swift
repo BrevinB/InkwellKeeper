@@ -147,9 +147,10 @@ struct SetCompletionCard: View {
         "Shimmering Skies",
         "Azurite Sea",
         "Archazia's Island",
-        "Fabled",
         "Reign of Jafar",
-        "Whispers in the Well"
+        "Fabled",
+        "Whispers in the Well",
+        "Winterspell"
     ]
 
     var body: some View {

@@ -151,6 +151,26 @@
       "cardCount": 6,
       "description": "Exclusive cards from the D23 Disney fan event",
       "isReleased": true
+    },
+    {
+      "id": "promo_set_3",
+      "name": "Promo Set 3",
+      "setCode": "P3",
+      "setNumber": "P3",
+      "releaseDate": "2025-06-01",
+      "cardCount": 48,
+      "description": "Third wave of promotional cards from various events",
+      "isReleased": true
+    },
+    {
+      "id": "epcot_festival_of_the_arts",
+      "name": "EPCOT Festival of the Arts",
+      "setCode": "EFA",
+      "setNumber": "EFA",
+      "releaseDate": "2025-01-17",
+      "cardCount": 3,
+      "description": "Exclusive cards from the EPCOT International Festival of the Arts",
+      "isReleased": true
     }
   ]
 }

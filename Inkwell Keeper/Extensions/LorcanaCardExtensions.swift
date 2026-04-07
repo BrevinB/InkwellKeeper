@@ -47,15 +47,17 @@ extension LorcanaCard {
             "Ursula's Return": "ursulas_return",
             "Shimmering Skies": "shimmering_skies",
             "Azurite Sea": "azurite_sea",
-            "Fabled": "fabled",
             "Archazia's Island": "archazias_island",
             "Reign of Jafar": "reign_of_jafar",
+            "Fabled": "fabled",
             "Whispers in the Well": "whispers_in_the_well",
             "Winterspell": "winterspell",
             "Promo Set 1": "promo_set_1",
             "Promo Set 2": "promo_set_2",
+            "Promo Set 3": "promo_set_3",
             "Challenge Promo": "challenge_promo",
-            "D23 Collection": "d23_collection"
+            "D23 Collection": "d23_collection",
+            "EPCOT Festival of the Arts": "epcot_festival_of_the_arts"
         ]
 
         guard let folderName = setFolderMap[setName] else {

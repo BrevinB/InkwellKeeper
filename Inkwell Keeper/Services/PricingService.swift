@@ -349,9 +349,16 @@ class PricingService: ObservableObject {
         "Shimmering Skies": "SSK",
         "Azurite Sea": "AZS",
         "Archazia's Island": "ARI",
-        "Fabled": "FAB",
         "Reign of Jafar": "ROJ",
+        "Fabled": "FAB",
         "Whispers in the Well": "WIW",
+        "Winterspell": "WIN",
+        "Promo Set 1": "P1",
+        "Promo Set 2": "P2",
+        "Promo Set 3": "P3",
+        "Challenge Promo": "CP",
+        "D23 Collection": "D23",
+        "EPCOT Festival of the Arts": "EFA",
     ]
 
     private static func setCode(for setName: String) -> String {

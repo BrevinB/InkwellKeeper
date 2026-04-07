@@ -113,15 +113,17 @@ class SetsDataManager: ObservableObject {
             "ursulas_return": "ursulas_return.json",
             "shimmering_skies": "shimmering_skies.json",
             "azurite_sea": "azurite_sea.json",
-            "fabled": "fabled.json",
             "archazias_island": "archazias_island.json",
             "reign_of_jafar": "reign_of_jafar.json",
+            "fabled": "fabled.json",
             "whispers_in_the_well": "whispers_in_the_well.json",
             "winterspell": "winterspell.json",
             "promo_set_1": "promo_set_1.json",
             "promo_set_2": "promo_set_2.json",
+            "promo_set_3": "promo_set_3.json",
             "d23_collection": "d23_collection.json",
-            "challenge_promo": "challenge_promo.json"
+            "challenge_promo": "challenge_promo.json",
+            "epcot_festival_of_the_arts": "epcot_festival_of_the_arts.json"
         ]
 
         for (setId, filename) in setFilenames {

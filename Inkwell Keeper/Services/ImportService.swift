@@ -465,12 +465,15 @@ class ImportService {
         case "006", "6": return "Azurite Sea"
         case "007", "7": return "Archazia's Island"
         case "008", "8": return "Reign of Jafar"
-        case "009", "9": return "Whispers in the Well"
-        case "010", "10": return "Fabled"
+        case "009", "9": return "Fabled"
+        case "010", "10": return "Whispers in the Well"
         case "011", "11": return "Winterspell"
-        case "P1": return "Promo"
-        case "C1": return "Promo"
-        case "D23": return "Promo"
+        case "P1": return "Promo Set 1"
+        case "P2": return "Promo Set 2"
+        case "P3": return "Promo Set 3"
+        case "C1", "CP": return "Challenge Promo"
+        case "D23": return "D23 Collection"
+        case "EFA": return "EPCOT Festival of the Arts"
         default: return nil
         }
     }
@@ -610,7 +613,12 @@ class ImportService {
             "iti": "into the inklands",
             "urs": "ursula's return",
             "ssk": "shimmering skies",
-            "as": "azurite sea"
+            "as": "azurite sea",
+            "ari": "archazia's island",
+            "roj": "reign of jafar",
+            "fab": "fabled",
+            "wiw": "whispers in the well",
+            "win": "winterspell"
         ]
 
         return abbreviations[normalized] ?? normalized

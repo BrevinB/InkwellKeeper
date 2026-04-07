@@ -1085,8 +1085,9 @@ struct ExportView: View {
         case "Azurite Sea": return 6
         case "Archazia's Island": return 7
         case "Reign of Jafar": return 8
-        case "Whispers in the Well": return 9
-        case "Fabled": return 10
+        case "Fabled": return 9
+        case "Whispers in the Well": return 10
+        case "Winterspell": return 11
         default: return 999
         }
     }

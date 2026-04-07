@@ -1,7 +1,7 @@
 {
   "setName": "D23 Collection",
   "setCode": "D23",
-  "cardCount": 6,
+  "cardCount": 9,
   "cards": [
     {
       "id": "D23_Collection_1_Mickey_Mouse___Brave_Little_Tailor_Promo",
@@ -116,6 +116,63 @@
       "lore": 2,
       "franchise": "",
       "inkColor": "Sapphire"
+    },
+    {
+      "id": "D23_Collection_7_Mickey_Mouse___Playful_Sorcerer_Promo",
+      "name": "Mickey Mouse - Playful Sorcerer",
+      "cost": 5,
+      "type": "Character",
+      "rarity": "Promo",
+      "setName": "D23 Collection",
+      "cardText": "Shift 3 (You may pay 3 {I} to play this on top of one of your characters named Mickey Mouse.)\nResist +1 (Damage dealt to this character is reduced by 1.)\nSWEEP AWAY When you play this character, deal damage to chosen character equal to the number of Broom characters you have in play.",
+      "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_db6db54405ff449ba819ed521fae7df0.avif?1774402593",
+      "variant": "Promo",
+      "cardNumber": 7,
+      "uniqueId": "D23-007",
+      "inkwell": true,
+      "strength": 3,
+      "willpower": 4,
+      "lore": 2,
+      "franchise": "",
+      "inkColor": "Steel"
+    },
+    {
+      "id": "D23_Collection_8_Iago___Out_of_Reach_Promo",
+      "name": "Iago - Out of Reach",
+      "cost": 4,
+      "type": "Character",
+      "rarity": "Promo",
+      "setName": "D23 Collection",
+      "cardText": "SELF-PRESERVATION While you have another exerted character in play, this character can't be challenged.\n\n\"Nice try, chumps! Too bad I'm all the way up here!\"",
+      "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_a2a3f642e4704e159e4e65233aacc2fb.avif?1774402627",
+      "variant": "Promo",
+      "cardNumber": 8,
+      "uniqueId": "D23-008",
+      "inkwell": true,
+      "strength": 3,
+      "willpower": 3,
+      "lore": 2,
+      "franchise": "",
+      "inkColor": "Steel"
+    },
+    {
+      "id": "D23_Collection_16_Mad_Hatter___Unruly_Eccentric_Promo",
+      "name": "Mad Hatter - Unruly Eccentric",
+      "cost": 6,
+      "type": "Character",
+      "rarity": "Promo",
+      "setName": "D23 Collection",
+      "cardText": "UNBIRTHDAY PRESENT Whenever a damaged character challenges another character, you may draw a card.\n\n\"Don't you care for tea?\"",
+      "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_b01c656daf06443fb63d76d9df3ff108.avif?1774402653",
+      "variant": "Promo",
+      "cardNumber": 16,
+      "uniqueId": "D23-016",
+      "inkwell": true,
+      "strength": 3,
+      "willpower": 5,
+      "lore": 2,
+      "franchise": "",
+      "inkColor": "Emerald"
     }
   ]
 }

@@ -14,7 +14,6 @@
 		232D42912ECE317500FF9283 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 232D42902ECE317500FF9283 /* RevenueCat */; };
 		232D42932ECE320A00FF9283 /* TipJarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D42922ECE320A00FF9283 /* TipJarView.swift */; };
 		232D42952ECE321D00FF9283 /* TipJarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D42942ECE321D00FF9283 /* TipJarManager.swift */; };
-		53F307B176D5D34B253D3526 /* ReviewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B0A43E08D93192BD18673C /* ReviewManager.swift */; };
 		232D42972ECE322400FF9283 /* TipProduct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D42962ECE322400FF9283 /* TipProduct.swift */; };
 		2333654F2E77961C00BE5BD4 /* SetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2333654E2E77961C00BE5BD4 /* SetsView.swift */; };
 		233365502E77961C00BE5BD4 /* SetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2333654D2E77961C00BE5BD4 /* SetDetailView.swift */; };
@@ -64,6 +63,8 @@
 		23B90D1F2E6CCB7900214C40 /* PricingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90D1E2E6CCB7900214C40 /* PricingService.swift */; };
 		23BC47A72F4ABE7A00E7037B /* AIDeckService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23BC47A62F4ABE7A00E7037B /* AIDeckService.swift */; };
 		23BC47A92F4ABE8100E7037B /* AIDeckBuilderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23BC47A82F4ABE8100E7037B /* AIDeckBuilderView.swift */; };
+		23C7E66C2F84BB5300FCD493 /* promo_set_3.json in Resources */ = {isa = PBXBuildFile; fileRef = 23C7E66B2F84BB5300FCD493 /* promo_set_3.json */; };
+		23C7E66D2F84BB5300FCD493 /* epcot_festival_of_the_arts.json in Resources */ = {isa = PBXBuildFile; fileRef = 23C7E66A2F84BB5300FCD493 /* epcot_festival_of_the_arts.json */; };
 		23CA3B392ED3CB48006786F7 /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23CA3B382ED3CB48006786F7 /* WhatsNewView.swift */; };
 		23CA3B3B2ED3EA1F006786F7 /* SupportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23CA3B3A2ED3EA1F006786F7 /* SupportView.swift */; };
 		23CAFB0D2ECF3E6D006786F7 /* FoilEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23CAFB0C2ECF3E6D006786F7 /* FoilEffect.swift */; };
@@ -90,7 +91,9 @@
 		23D9D44E2EA45ACE0089D552 /* ink.icon in Resources */ = {isa = PBXBuildFile; fileRef = 23D9D44D2EA45ACE0089D552 /* ink.icon */; };
 		23E099212F6CF6DC0063C758 /* CardImageAttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23E099202F6CF6DC0063C758 /* CardImageAttachmentView.swift */; };
 		23E099232F6CF6DC0063C758 /* CompactPhotoAttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23E099222F6CF6DC0063C758 /* CompactPhotoAttachmentView.swift */; };
+		53F307B176D5D34B253D3526 /* ReviewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B0A43E08D93192BD18673C /* ReviewManager.swift */; };
 		A1B2C3D4E5F6789012345679 /* winterspell.json in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345678 /* winterspell.json */; };
+		A1B2C3D4E5F6A7B8C9D0E1F3 /* HolographicCardImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* HolographicCardImage.swift */; };
 		AA1B2C3D4E5F678901234561 /* LoreCounterModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1B2C3D4E5F678901234560 /* LoreCounterModels.swift */; };
 		AA1B2C3D4E5F678901234563 /* PlayerLoreCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1B2C3D4E5F678901234562 /* PlayerLoreCard.swift */; };
 		AA1B2C3D4E5F678901234565 /* LoreCounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1B2C3D4E5F678901234564 /* LoreCounterView.swift */; };
@@ -98,7 +101,6 @@
 		BF694AC2893B440FAD2DF586 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AA815C9650049DB84CB04F7 /* OnboardingView.swift */; };
 		C1D2E3F4A5B6C7D8E9F0A1B2 /* MotionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6C7D8E9F0A1B1 /* MotionManager.swift */; };
 		C1D2E3F4A5B6C7D8E9F0A1B4 /* InteractiveHolographicEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6C7D8E9F0A1B3 /* InteractiveHolographicEffect.swift */; };
-		A1B2C3D4E5F6A7B8C9D0E1F3 /* HolographicCardImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* HolographicCardImage.swift */; };
 		C1D2E3F4A5B6C7D8E9F0A1B6 /* InteractiveCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6C7D8E9F0A1B5 /* InteractiveCardView.swift */; };
 		C1D2E3F4A5B6C7D8E9F0A1B8 /* FullscreenCardViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6C7D8E9F0A1B7 /* FullscreenCardViewer.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C2 /* CloudKitKeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C1 /* CloudKitKeyService.swift */; };
@@ -117,7 +119,6 @@
 		230F91DA2EA89EF7006E5A70 /* starter_decks.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = starter_decks.json; sourceTree = "<group>"; };
 		232D42922ECE320A00FF9283 /* TipJarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipJarView.swift; sourceTree = "<group>"; };
 		232D42942ECE321D00FF9283 /* TipJarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipJarManager.swift; sourceTree = "<group>"; };
-		B8B0A43E08D93192BD18673C /* ReviewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewManager.swift; sourceTree = "<group>"; };
 		232D42962ECE322400FF9283 /* TipProduct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipProduct.swift; sourceTree = "<group>"; };
 		2333654D2E77961C00BE5BD4 /* SetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDetailView.swift; sourceTree = "<group>"; };
 		2333654E2E77961C00BE5BD4 /* SetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetsView.swift; sourceTree = "<group>"; };
@@ -168,6 +169,8 @@
 		23B90D1E2E6CCB7900214C40 /* PricingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PricingService.swift; sourceTree = "<group>"; };
 		23BC47A62F4ABE7A00E7037B /* AIDeckService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIDeckService.swift; sourceTree = "<group>"; };
 		23BC47A82F4ABE8100E7037B /* AIDeckBuilderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIDeckBuilderView.swift; sourceTree = "<group>"; };
+		23C7E66A2F84BB5300FCD493 /* epcot_festival_of_the_arts.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = epcot_festival_of_the_arts.json; sourceTree = "<group>"; };
+		23C7E66B2F84BB5300FCD493 /* promo_set_3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = promo_set_3.json; sourceTree = "<group>"; };
 		23CA3B382ED3CB48006786F7 /* WhatsNewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
 		23CA3B3A2ED3EA1F006786F7 /* SupportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportView.swift; sourceTree = "<group>"; };
 		23CAFB0C2ECF3E6D006786F7 /* FoilEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoilEffect.swift; sourceTree = "<group>"; };
@@ -196,14 +199,15 @@
 		23E099222F6CF6DC0063C758 /* CompactPhotoAttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompactPhotoAttachmentView.swift; sourceTree = "<group>"; };
 		6AA815C9650049DB84CB04F7 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6789012345678 /* winterspell.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = winterspell.json; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* HolographicCardImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolographicCardImage.swift; sourceTree = "<group>"; };
 		AA1B2C3D4E5F678901234560 /* LoreCounterModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoreCounterModels.swift; sourceTree = "<group>"; };
 		AA1B2C3D4E5F678901234562 /* PlayerLoreCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerLoreCard.swift; sourceTree = "<group>"; };
 		AA1B2C3D4E5F678901234564 /* LoreCounterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoreCounterView.swift; sourceTree = "<group>"; };
 		B281D76F664D42E898C5AFFB /* whispers_in_the_well.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = whispers_in_the_well.json; sourceTree = "<group>"; };
+		B8B0A43E08D93192BD18673C /* ReviewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewManager.swift; sourceTree = "<group>"; };
 		C1D2E3F4A5B6C7D8E9F0A1B1 /* MotionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionManager.swift; sourceTree = "<group>"; };
 		C1D2E3F4A5B6C7D8E9F0A1B3 /* InteractiveHolographicEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractiveHolographicEffect.swift; sourceTree = "<group>"; };
 		C1D2E3F4A5B6C7D8E9F0A1B5 /* InteractiveCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractiveCardView.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6A7B8C9D0E1F2 /* HolographicCardImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolographicCardImage.swift; sourceTree = "<group>"; };
 		C1D2E3F4A5B6C7D8E9F0A1B7 /* FullscreenCardViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullscreenCardViewer.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C6D7E8F9A0B1C1 /* CloudKitKeyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitKeyService.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C6D7E8F9A0B1C3 /* OpenAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIService.swift; sourceTree = "<group>"; };
@@ -259,6 +263,8 @@
 		233365542E779F3F00BE5BD4 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				23C7E66A2F84BB5300FCD493 /* epcot_festival_of_the_arts.json */,
+				23C7E66B2F84BB5300FCD493 /* promo_set_3.json */,
 				23CAFBCC2ED2A3B7006786F7 /* migration_map.json */,
 				23CAFBC42ED02884006786F7 /* challenge_promo.json */,
 				23CAFBC52ED02884006786F7 /* d23_collection.json */,
@@ -508,6 +514,8 @@
 				233365662E77B05400BE5BD4 /* archazias_island.json in Resources */,
 				233365672E77B05400BE5BD4 /* azurite_sea.json in Resources */,
 				23CAFBCD2ED2A3B7006786F7 /* migration_map.json in Resources */,
+				23C7E66C2F84BB5300FCD493 /* promo_set_3.json in Resources */,
+				23C7E66D2F84BB5300FCD493 /* epcot_festival_of_the_arts.json in Resources */,
 				23CAFBC82ED02884006786F7 /* promo_set_1.json in Resources */,
 				23CAFBC92ED02884006786F7 /* challenge_promo.json in Resources */,
 				23CAFBCA2ED02884006786F7 /* d23_collection.json in Resources */,
