@@ -14,6 +14,7 @@
 		232D42912ECE317500FF9283 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 232D42902ECE317500FF9283 /* RevenueCat */; };
 		232D42932ECE320A00FF9283 /* TipJarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D42922ECE320A00FF9283 /* TipJarView.swift */; };
 		232D42952ECE321D00FF9283 /* TipJarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D42942ECE321D00FF9283 /* TipJarManager.swift */; };
+		53F307B176D5D34B253D3526 /* ReviewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B0A43E08D93192BD18673C /* ReviewManager.swift */; };
 		232D42972ECE322400FF9283 /* TipProduct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D42962ECE322400FF9283 /* TipProduct.swift */; };
 		2333654F2E77961C00BE5BD4 /* SetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2333654E2E77961C00BE5BD4 /* SetsView.swift */; };
 		233365502E77961C00BE5BD4 /* SetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2333654D2E77961C00BE5BD4 /* SetDetailView.swift */; };
@@ -115,6 +116,7 @@
 		230F91DA2EA89EF7006E5A70 /* starter_decks.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = starter_decks.json; sourceTree = "<group>"; };
 		232D42922ECE320A00FF9283 /* TipJarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipJarView.swift; sourceTree = "<group>"; };
 		232D42942ECE321D00FF9283 /* TipJarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipJarManager.swift; sourceTree = "<group>"; };
+		B8B0A43E08D93192BD18673C /* ReviewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewManager.swift; sourceTree = "<group>"; };
 		232D42962ECE322400FF9283 /* TipProduct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipProduct.swift; sourceTree = "<group>"; };
 		2333654D2E77961C00BE5BD4 /* SetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDetailView.swift; sourceTree = "<group>"; };
 		2333654E2E77961C00BE5BD4 /* SetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetsView.swift; sourceTree = "<group>"; };
@@ -337,6 +339,7 @@
 				D1E2F3A4B5C6D7E8F9A0B1C3 /* OpenAIService.swift */,
 				1E3D652CBA4843E9BA303B2E /* DataMigrationService.swift */,
 				232D42942ECE321D00FF9283 /* TipJarManager.swift */,
+				B8B0A43E08D93192BD18673C /* ReviewManager.swift */,
 				23CB6DD02EB8546600630416 /* ImportService.swift */,
 				23D9D4452EA3F1C80089D552 /* AffiliateService.swift */,
 				23D9D43D2EA3120F0089D552 /* ImageCache.swift */,
@@ -548,6 +551,7 @@
 				23D9D4462EA3F1C80089D552 /* AffiliateService.swift in Sources */,
 				23D9D4482EA3FEFE0089D552 /* DecksView.swift in Sources */,
 				232D42952ECE321D00FF9283 /* TipJarManager.swift in Sources */,
+				53F307B176D5D34B253D3526 /* ReviewManager.swift in Sources */,
 				23B90B1B2E66332100214C40 /* ScanOverlay.swift in Sources */,
 				23BC47A92F4ABE8100E7037B /* AIDeckBuilderView.swift in Sources */,
 				23B90AFC2E66323500214C40 /* ContentView.swift in Sources */,

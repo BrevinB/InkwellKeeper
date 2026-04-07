@@ -121,6 +121,8 @@ struct ExportView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var collectionManager: CollectionManager
 
+    var initialDateFilter: DateRangePreset?
+
     @State private var exportOption: ExportOption = .collection
     @State private var selectedSets: Set<String> = []
     @State private var exportFormat: ExportFormat = .standard
@@ -129,8 +131,52 @@ struct ExportView: View {
     @State private var showingShareSheet = false
     @State private var exportedFileURL: URL?
     @State private var showingFieldSelection = false
+    @State private var filterByDate = false
+    @State private var dateRangePreset: DateRangePreset = .today
+    @State private var customStartDate = Calendar.current.startOfDay(for: Date())
+    @State private var customEndDate = Date()
 
     @StateObject private var dataManager = SetsDataManager.shared
+
+    enum DateRangePreset: String, CaseIterable {
+        case today = "Today"
+        case yesterdayAndToday = "Yesterday & Today"
+        case lastSevenDays = "Last 7 Days"
+        case lastThirtyDays = "Last 30 Days"
+        case custom = "Custom Range"
+
+        var icon: String {
+            switch self {
+            case .today: return "sun.max"
+            case .yesterdayAndToday: return "clock.arrow.circlepath"
+            case .lastSevenDays: return "calendar.badge.clock"
+            case .lastThirtyDays: return "calendar"
+            case .custom: return "calendar.badge.plus"
+            }
+        }
+
+        func dateRange() -> (start: Date, end: Date) {
+            let calendar = Calendar.current
+            let now = Date()
+            let endOfToday = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now))!
+
+            switch self {
+            case .today:
+                return (calendar.startOfDay(for: now), endOfToday)
+            case .yesterdayAndToday:
+                let yesterday = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: now))!
+                return (yesterday, endOfToday)
+            case .lastSevenDays:
+                let sevenDaysAgo = calendar.date(byAdding: .day, value: -7, to: calendar.startOfDay(for: now))!
+                return (sevenDaysAgo, endOfToday)
+            case .lastThirtyDays:
+                let thirtyDaysAgo = calendar.date(byAdding: .day, value: -30, to: calendar.startOfDay(for: now))!
+                return (thirtyDaysAgo, endOfToday)
+            case .custom:
+                return (calendar.startOfDay(for: now), endOfToday)
+            }
+        }
+    }
 
     enum ExportFormat: String, CaseIterable {
         case standard = "Custom CSV"
@@ -221,6 +267,9 @@ struct ExportView: View {
                         setSelectionSection
                     }
 
+                    // Date Range Filter
+                    dateFilterSection
+
                     // Export Format Selection
                     formatSelectionSection
 
@@ -255,6 +304,12 @@ struct ExportView: View {
             .sheet(isPresented: $showingShareSheet) {
                 if let url = exportedFileURL {
                     ShareSheet(items: [url])
+                }
+            }
+            .onAppear {
+                if let preset = initialDateFilter {
+                    filterByDate = true
+                    dateRangePreset = preset
                 }
             }
         }
@@ -385,6 +440,89 @@ struct ExportView: View {
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.lorcanaDark.opacity(0.4))
+                    )
+                }
+            }
+        }
+    }
+
+    private var dateFilterSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Toggle(isOn: $filterByDate) {
+                HStack(spacing: 8) {
+                    Image(systemName: "calendar.badge.clock")
+                        .foregroundColor(.lorcanaGold)
+                    Text("Filter by Date Added")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                }
+            }
+            .tint(Color.lorcanaGold)
+
+            if filterByDate {
+                ForEach(DateRangePreset.allCases, id: \.self) { preset in
+                    Button {
+                        dateRangePreset = preset
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: dateRangePreset == preset ? "checkmark.circle.fill" : "circle")
+                                .foregroundColor(.lorcanaGold)
+                                .font(.title3)
+
+                            Image(systemName: preset.icon)
+                                .foregroundColor(.lorcanaGold)
+                                .frame(width: 24)
+
+                            Text(preset.rawValue)
+                                .font(.body)
+                                .foregroundColor(.white)
+
+                            Spacer()
+
+                            Text("\(getFilteredCardCount(for: preset)) cards")
+                                .font(.caption)
+                                .foregroundColor(.lorcanaGold)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(
+                                    Capsule()
+                                        .fill(Color.lorcanaGold.opacity(0.2))
+                                )
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(dateRangePreset == preset ? Color.lorcanaGold.opacity(0.2) : Color.lorcanaDark.opacity(0.4))
+                        )
+                    }
+                }
+
+                if dateRangePreset == .custom {
+                    VStack(spacing: 12) {
+                        DatePicker(
+                            "From",
+                            selection: $customStartDate,
+                            in: ...Date(),
+                            displayedComponents: .date
+                        )
+                        .datePickerStyle(.compact)
+                        .foregroundColor(.white)
+                        .tint(Color.lorcanaGold)
+
+                        DatePicker(
+                            "To",
+                            selection: $customEndDate,
+                            in: ...Date(),
+                            displayedComponents: .date
+                        )
+                        .datePickerStyle(.compact)
+                        .foregroundColor(.white)
+                        .tint(Color.lorcanaGold)
+                    }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
                             .fill(Color.lorcanaDark.opacity(0.4))
                     )
                 }
@@ -637,16 +775,67 @@ struct ExportView: View {
     }
 
     private func getCardsToExport() -> [LorcanaCard] {
+        var cards: [LorcanaCard]
+
         switch exportOption {
         case .collection:
-            return collectionManager.collectedCards
+            cards = collectionManager.collectedCards
         case .wishlist:
-            return collectionManager.wishlistCards
+            cards = collectionManager.wishlistCards
         case .specificSets:
-            return collectionManager.collectedCards.filter { selectedSets.contains($0.setName) }
+            cards = collectionManager.collectedCards.filter { selectedSets.contains($0.setName) }
         case .everything:
-            return collectionManager.collectedCards + collectionManager.wishlistCards
+            cards = collectionManager.collectedCards + collectionManager.wishlistCards
         }
+
+        if filterByDate {
+            let range = activeDateRange()
+            cards = cards.filter { card in
+                guard let dateAdded = card.dateAdded else { return false }
+                return dateAdded >= range.start && dateAdded < range.end
+            }
+        }
+
+        return cards
+    }
+
+    private func activeDateRange() -> (start: Date, end: Date) {
+        if dateRangePreset == .custom {
+            let calendar = Calendar.current
+            let start = calendar.startOfDay(for: customStartDate)
+            let end = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: customEndDate))!
+            return (start, end)
+        }
+        return dateRangePreset.dateRange()
+    }
+
+    private func getFilteredCardCount(for preset: DateRangePreset) -> Int {
+        let range: (start: Date, end: Date)
+        if preset == .custom {
+            let calendar = Calendar.current
+            let start = calendar.startOfDay(for: customStartDate)
+            let end = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: customEndDate))!
+            range = (start, end)
+        } else {
+            range = preset.dateRange()
+        }
+
+        let baseCards: [LorcanaCard]
+        switch exportOption {
+        case .collection:
+            baseCards = collectionManager.collectedCards
+        case .wishlist:
+            baseCards = collectionManager.wishlistCards
+        case .specificSets:
+            baseCards = collectionManager.collectedCards.filter { selectedSets.contains($0.setName) }
+        case .everything:
+            baseCards = collectionManager.collectedCards + collectionManager.wishlistCards
+        }
+
+        return baseCards.filter { card in
+            guard let dateAdded = card.dateAdded else { return false }
+            return dateAdded >= range.start && dateAdded < range.end
+        }.count
     }
 
     private func performExport() {
@@ -855,7 +1044,7 @@ struct ExportView: View {
             let setNum2 = getSetNumber(for: second.card.setName)
 
             if setNum1 != setNum2 {
-                return setNum1 < setNum2  // String comparison works fine with 3-digit format
+                return setNum1 < setNum2
             }
             return first.cardNumber < second.cardNumber
         }
@@ -890,20 +1079,19 @@ struct ExportView: View {
         return csv
     }
 
-    private func getSetNumber(for setName: String) -> String {
-        // Map set names to Dreamborn set numbers (3-digit format)
+    private func getSetNumber(for setName: String) -> Int {
         switch setName {
-        case "The First Chapter": return "001"
-        case "Rise of the Floodborn": return "002"
-        case "Into the Inklands": return "003"
-        case "Ursula's Return": return "004"
-        case "Shimmering Skies": return "005"
-        case "Azurite Sea": return "006"
-        case "Archazia's Island": return "007"
-        case "Reign of Jafar": return "008"
-        case "Whispers in the Well": return "009"
-        case "Fabled": return "010"
-        default: return "999"  // Unknown sets
+        case "The First Chapter": return 1
+        case "Rise of the Floodborn": return 2
+        case "Into the Inklands": return 3
+        case "Ursula's Return": return 4
+        case "Shimmering Skies": return 5
+        case "Azurite Sea": return 6
+        case "Archazia's Island": return 7
+        case "Reign of Jafar": return 8
+        case "Whispers in the Well": return 9
+        case "Fabled": return 10
+        default: return 999
         }
     }
 

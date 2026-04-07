@@ -125,6 +125,7 @@ struct TipJarView: View {
             let success = try await tipManager.purchase(package)
             if success {
                 showThankYou = true
+                ReviewManager.shared.recordTipCompleted()
             }
             // If not success, user cancelled - no message needed
         } catch {

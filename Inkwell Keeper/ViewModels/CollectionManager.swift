@@ -170,6 +170,9 @@ class CollectionManager: ObservableObject {
         // Always reload collection regardless of save success/failure
         loadCollection()
 
+        // Track milestone for review prompt
+        ReviewManager.shared.recordCardAdded(totalCardCount: collectedCards.count)
+
         // Update price on main actor to safely access ModelContext
         Task { @MainActor in
             await updateCardPrice(card)

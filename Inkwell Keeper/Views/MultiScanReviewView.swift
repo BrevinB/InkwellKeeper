@@ -13,6 +13,8 @@ struct MultiScanReviewView: View {
     @Binding var isPresented: Bool
 
     @State private var addedAll = false
+    @State private var showExportPrompt = false
+    @State private var showingExportView = false
 
     var body: some View {
         NavigationView {
@@ -21,7 +23,11 @@ struct MultiScanReviewView: View {
                     emptyState
                 } else {
                     cardList
-                    bottomBar
+                    if showExportPrompt {
+                        exportPromptBar
+                    } else {
+                        bottomBar
+                    }
                 }
             }
             .background(LorcanaBackground())
@@ -35,7 +41,7 @@ struct MultiScanReviewView: View {
                     .foregroundColor(.lorcanaGold)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    if !cameraManager.scannedCards.isEmpty {
+                    if !cameraManager.scannedCards.isEmpty && !showExportPrompt {
                         Button("Clear All") {
                             cameraManager.clearScannedCards()
                         }
@@ -43,7 +49,16 @@ struct MultiScanReviewView: View {
                     }
                 }
             }
+            .sheet(isPresented: $showingExportView, onDismiss: dismissAfterExport) {
+                ExportView(initialDateFilter: .today)
+                    .environmentObject(collectionManager)
+            }
         }
+    }
+
+    private func dismissAfterExport() {
+        cameraManager.clearScannedCards()
+        isPresented = false
     }
 
     private var emptyState: some View {
@@ -116,7 +131,7 @@ struct MultiScanReviewView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .background(addedAll ? Color.green : Color.lorcanaGold)
-                .cornerRadius(14)
+                .clipShape(.rect(cornerRadius: 14))
             }
             .disabled(addedAll || cameraManager.scannedCards.isEmpty)
         }
@@ -125,7 +140,53 @@ struct MultiScanReviewView: View {
         .background(.ultraThinMaterial)
     }
 
+    private var exportPromptBar: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+                Text("\(scannedCount) cards added to your collection!")
+                    .font(.subheadline)
+                    .foregroundColor(.white)
+            }
+
+            Text("Would you like to export these cards?")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+
+            HStack(spacing: 12) {
+                Button("Done") {
+                    cameraManager.clearScannedCards()
+                    isPresented = false
+                }
+                .font(.headline)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(Color.white.opacity(0.15))
+                .clipShape(.rect(cornerRadius: 14))
+
+                Button("Export", systemImage: "arrow.up.doc.fill") {
+                    showingExportView = true
+                }
+                .font(.headline)
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(Color.lorcanaGold)
+                .clipShape(.rect(cornerRadius: 14))
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(.ultraThinMaterial)
+    }
+
+    @State private var scannedCount = 0
+
     private func addAllToCollection() {
+        scannedCount = cameraManager.totalScannedCount
+
         for entry in cameraManager.scannedCards {
             let card = entry.card.withVariant(entry.variant)
             let imageAttachments: [Data]? = entry.capturedImage.map { [$0] }
@@ -140,10 +201,15 @@ struct MultiScanReviewView: View {
         let feedback = UINotificationFeedbackGenerator()
         feedback.notificationOccurred(.success)
 
-        // Dismiss after a brief delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            cameraManager.clearScannedCards()
-            isPresented = false
+        // Track multi-scan completion for review prompt
+        ReviewManager.shared.recordMultiScanCompleted(cardsScanned: cameraManager.scannedCards.count)
+
+        // Show export prompt after a brief delay
+        Task {
+            try? await Task.sleep(for: .seconds(1.5))
+            withAnimation {
+                showExportPrompt = true
+            }
         }
     }
 }

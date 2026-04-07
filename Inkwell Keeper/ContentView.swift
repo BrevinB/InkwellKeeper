@@ -89,6 +89,7 @@ struct ContentView: View {
         .onAppear {
             collectionManager.setModelContext(modelContext)
             checkOnboardingStatus()
+            ReviewManager.shared.recordAppLaunch()
         }
         .sheet(isPresented: $showOnboarding) {
             OnboardingView(onImportTap: {
