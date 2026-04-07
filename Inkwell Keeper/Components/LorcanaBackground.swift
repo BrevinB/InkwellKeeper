@@ -9,6 +9,8 @@
 import SwiftUI
 
 struct LorcanaBackground: View {
+    @State private var animate = false
+
     var body: some View {
         ZStack {
             LinearGradient(
@@ -20,22 +22,37 @@ struct LorcanaBackground: View {
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
-            
-            ForEach(0..<20, id: \.self) { _ in
+
+            ForEach(0..<20, id: \.self) { index in
+                let opacity = seededDouble(index: index, min: 0.1, max: 0.3)
+                let size = seededDouble(index: index + 100, min: 2, max: 6)
+                let xPos = seededDouble(index: index + 200, min: 0, max: 400)
+                let yPos = seededDouble(index: index + 300, min: 0, max: 800)
+                let duration = seededDouble(index: index + 400, min: 2, max: 5)
+
                 Circle()
-                    .fill(Color.lorcanaGold.opacity(Double.random(in: 0.1...0.3)))
-                    .frame(width: CGFloat.random(in: 2...6))
-                    .position(
-                        x: CGFloat.random(in: 0...400),
-                        y: CGFloat.random(in: 0...800)
-                    )
+                    .fill(Color.lorcanaGold.opacity(opacity))
+                    .frame(width: size)
+                    .position(x: xPos, y: yPos)
                     .animation(
-                        .easeInOut(duration: Double.random(in: 2...5))
+                        .easeInOut(duration: duration)
                         .repeatForever(autoreverses: true),
-                        value: UUID()
+                        value: animate
                     )
             }
         }
         .ignoresSafeArea()
+        .onAppear { animate = true }
+    }
+
+    /// Deterministic pseudo-random value based on index, stable across renders
+    private func seededDouble(index: Int, min: Double, max: Double) -> Double {
+        // Simple hash-based seeded random
+        var hasher = Hasher()
+        hasher.combine(index)
+        hasher.combine(42) // fixed seed
+        let hash = abs(hasher.finalize())
+        let normalized = Double(hash % 10000) / 10000.0
+        return min + normalized * (max - min)
     }
 }

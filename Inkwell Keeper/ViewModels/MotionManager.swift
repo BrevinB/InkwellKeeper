@@ -18,12 +18,14 @@ class MotionManager: ObservableObject {
     @Published var isAvailable: Bool = false
 
     private var motionManager: CMMotionManager?
-    private let updateInterval: TimeInterval = 1.0 / 60.0  // 60fps
+    private let updateInterval: TimeInterval = 1.0 / 20.0  // 20fps — sufficient for smooth holographic effects
 
     // Low-pass filter coefficients for smoothing (higher = more responsive)
     private let filterFactor: Double = 0.25
     // Sensitivity multiplier (higher = less tilt needed for full effect)
     private let sensitivity: Double = 3.5
+    // Minimum change threshold to avoid publishing when device is stationary
+    private let deadZone: Double = 0.01
     private var filteredPitch: Double = 0.0
     private var filteredRoll: Double = 0.0
 
@@ -105,8 +107,12 @@ class MotionManager: ObservableObject {
                     new: rawRoll
                 )
 
-                self.pitch = self.filteredPitch
-                self.roll = self.filteredRoll
+                // Only publish if values changed enough to matter
+                if abs(self.filteredPitch - self.pitch) > self.deadZone ||
+                   abs(self.filteredRoll - self.roll) > self.deadZone {
+                    self.pitch = self.filteredPitch
+                    self.roll = self.filteredRoll
+                }
             }
         }
     }

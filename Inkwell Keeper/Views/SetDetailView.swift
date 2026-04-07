@@ -51,29 +51,7 @@ struct SetDetailView: View {
         }
     }
     
-    private var filteredCards: [LorcanaCard] {
-        var filtered: [LorcanaCard]
-
-        // Apply ownership filter
-        switch filterOption {
-        case .all:
-            filtered = cards
-        case .owned:
-            filtered = cards.filter { isCardCollectedInSet($0) }
-        case .missing:
-            filtered = cards.filter { !isCardCollectedInSet($0) }
-        }
-
-        // Apply search filter
-        if !searchText.isEmpty {
-            filtered = filtered.filter { card in
-                card.name.localizedCaseInsensitiveContains(searchText) ||
-                card.cardText.localizedCaseInsensitiveContains(searchText)
-            }
-        }
-
-        return filtered
-    }
+    @State private var filteredCards: [LorcanaCard] = []
     
     private var progress: (collected: Int, total: Int, percentage: Double) {
         let totalCards = dataManager.hasLocalCards(for: set.name) ? 
@@ -351,7 +329,12 @@ struct SetDetailView: View {
         }
         .onAppear {
             loadCards()
+            recomputeFilteredCards()
         }
+        .onChange(of: filterOption) { recomputeFilteredCards() }
+        .onChange(of: searchText) { recomputeFilteredCards() }
+        .onChange(of: cards.count) { recomputeFilteredCards() }
+        .onChange(of: collectionManager.collectedCards.count) { recomputeFilteredCards() }
         .sheet(item: $selectedCard) { card in
             CardDetailSheetView(card: card)
                 .environmentObject(collectionManager)
@@ -486,6 +469,28 @@ struct SetDetailView: View {
     }
 
     // Helper function to check if a specific card is collected
+    private func recomputeFilteredCards() {
+        var filtered: [LorcanaCard]
+
+        switch filterOption {
+        case .all:
+            filtered = cards
+        case .owned:
+            filtered = cards.filter { isCardCollectedInSet($0) }
+        case .missing:
+            filtered = cards.filter { !isCardCollectedInSet($0) }
+        }
+
+        if !searchText.isEmpty {
+            filtered = filtered.filter { card in
+                card.name.localizedStandardContains(searchText) ||
+                card.cardText.localizedStandardContains(searchText)
+            }
+        }
+
+        filteredCards = filtered
+    }
+
     private func isCardCollectedInSet(_ card: LorcanaCard) -> Bool {
         let isCollected = collectionManager.collectedCards.contains { collected in
             let cardIsSpecialVariant = card.variant == .enchanted ||

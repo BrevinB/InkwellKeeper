@@ -33,6 +33,47 @@ class CollectionManager: ObservableObject {
         loadCollection()
     }
 
+    /// Lightweight refresh of collected cards only (avoids full 3-fetch reload)
+    private func updateCollectedCardsInPlace() {
+        guard let context = modelContext else { return }
+        do {
+            let descriptor = FetchDescriptor<CollectedCard>(
+                predicate: #Predicate { $0.isWishlisted == false },
+                sortBy: [SortDescriptor(\.dateAdded, order: .reverse)]
+            )
+            let collectedData = try context.fetch(descriptor)
+            self.collectedCards = collectedData.map { $0.toLorcanaCard }
+
+            var quantities: [String: Int] = [:]
+            for card in collectedData {
+                let variant = CardVariant(rawValue: card.variant ?? "Normal") ?? .normal
+                if variant == .normal || variant == .foil {
+                    let key = CollectionManager.cardKey(name: card.name, setName: card.setName)
+                    quantities[key, default: 0] += card.quantity
+                }
+            }
+            self.collectedCardQuantities = quantities
+        } catch {
+            // Fall back to full reload on error
+            loadCollection()
+        }
+    }
+
+    /// Lightweight refresh of wishlist cards only
+    private func updateWishlistCardsInPlace() {
+        guard let context = modelContext else { return }
+        do {
+            let descriptor = FetchDescriptor<CollectedCard>(
+                predicate: #Predicate { $0.isWishlisted == true },
+                sortBy: [SortDescriptor(\.dateAdded, order: .reverse)]
+            )
+            let wishlistData = try context.fetch(descriptor)
+            self.wishlistCards = wishlistData.map { $0.toLorcanaCard }
+        } catch {
+            loadCollection()
+        }
+    }
+
     /// Save any pending changes to the model context
     func saveContext() {
         guard let context = modelContext else { return }
@@ -78,18 +119,9 @@ class CollectionManager: ObservableObject {
             let wishlistData = try context.fetch(wishlistDescriptor)
             let newWishlistCards = wishlistData.map { $0.toLorcanaCard }
 
-            // Update on main thread synchronously if already on main thread, otherwise async
-            if Thread.isMainThread {
-                self.collectedCards = newCollectedCards
-                self.wishlistCards = newWishlistCards
-                self.collectedCardQuantities = newQuantities
-            } else {
-                DispatchQueue.main.async {
-                    self.collectedCards = newCollectedCards
-                    self.wishlistCards = newWishlistCards
-                    self.collectedCardQuantities = newQuantities
-                }
-            }
+            self.collectedCards = newCollectedCards
+            self.wishlistCards = newWishlistCards
+            self.collectedCardQuantities = newQuantities
 
         } catch {
             // Handle error silently
@@ -167,8 +199,8 @@ class CollectionManager: ObservableObject {
             // Handle error silently
         }
 
-        // Always reload collection regardless of save success/failure
-        loadCollection()
+        // Targeted in-memory update instead of full reload
+        updateCollectedCardsInPlace()
 
         // Track milestone for review prompt
         ReviewManager.shared.recordCardAdded(totalCardCount: collectedCards.count)
@@ -215,12 +247,12 @@ class CollectionManager: ObservableObject {
                 context.delete(cardData)
             }
             try context.save()
-            loadCollection()
+            updateCollectedCardsInPlace()
         } catch {
             // Handle error silently
         }
     }
-    
+
     func addToWishlist(_ card: LorcanaCard) {
         guard let context = modelContext else { return }
         
@@ -246,12 +278,12 @@ class CollectionManager: ObservableObject {
         
         do {
             try context.save()
-            loadCollection()
+            updateWishlistCardsInPlace()
         } catch {
             // Handle error silently
         }
     }
-    
+
     func removeFromWishlist(_ card: LorcanaCard) {
         guard let context = modelContext else {
             return
@@ -269,12 +301,12 @@ class CollectionManager: ObservableObject {
             }
             
             try context.save()
-            loadCollection()
+            updateWishlistCardsInPlace()
         } catch {
             // Handle error silently
         }
     }
-    
+
     func getCollectionStats() -> (totalValue: Double, cardCount: Int, rarityBreakdown: [CardRarity: Int]) {
         guard let context = modelContext else { return (0, 0, [:]) }
         
@@ -314,10 +346,8 @@ class CollectionManager: ObservableObject {
 
             try context.save()
 
-            DispatchQueue.main.async {
-                self.collectedCards = []
-                self.wishlistCards = []
-            }
+            self.collectedCards = []
+            self.wishlistCards = []
 
         } catch {
             // Handle error silently
@@ -366,10 +396,8 @@ class CollectionManager: ObservableObject {
 
             try context.save()
 
-            DispatchQueue.main.async {
-                self.collectedCards = []
-                self.wishlistCards = []
-            }
+            self.collectedCards = []
+            self.wishlistCards = []
         } catch {
             // Handle error silently
         }
@@ -520,13 +548,13 @@ class CollectionManager: ObservableObject {
                     existingCard.quantity = newQuantity
                 }
                 try context.save()
-                loadCollection()
+                updateCollectedCardsInPlace()
             }
         } catch {
             // Handle error silently
         }
     }
-    
+
     @MainActor
     private func updateCardPrice(_ card: LorcanaCard) async {
         guard let context = modelContext else { return }
@@ -556,7 +584,7 @@ class CollectionManager: ObservableObject {
                 }
 
                 try context.save()
-                loadCollection()
+                updateCollectedCardsInPlace()
             }
         } catch {
             // Handle error silently
@@ -579,7 +607,7 @@ class CollectionManager: ObservableObject {
 
                 // Small delay to avoid rate limiting (every 10 cards)
                 if index > 0 && index % 10 == 0 {
-                    try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+                    try? await Task.sleep(for: .seconds(1))
                 }
 
                 let price = await pricingService.getMarketPrice(for: card)
@@ -597,37 +625,45 @@ class CollectionManager: ObservableObject {
     
     func getSetProgress(_ setName: String, totalCardsInSet: Int) -> (collected: Int, total: Int, percentage: Double) {
         let dataManager = SetsDataManager.shared
-
-        // Get all cards in this set from the data manager
         let cardsInSet = dataManager.getCardsForSet(setName)
 
-        // Count how many we have collected FROM THIS SPECIFIC SET
-        var collectedCount = 0
+        // Pre-build O(1) lookup sets from collected cards
+        var ownedSpecialKeys = Set<String>()
+        var ownedNormalKeys = Set<String>()
 
-        for card in cardsInSet {
-            // Check if we own this card in this specific set
-            let isOwned = collectedCards.contains { collected in
-                let cardIsSpecialVariant = card.variant == .enchanted ||
-                                          card.variant == .epic ||
-                                          card.variant == .iconic ||
-                                          card.variant == .promo
+        for collected in collectedCards {
+            let isSpecial = collected.variant == .enchanted ||
+                            collected.variant == .epic ||
+                            collected.variant == .iconic ||
+                            collected.variant == .promo
 
-                let collectedIsSpecialVariant = collected.variant == .enchanted ||
-                                               collected.variant == .epic ||
-                                               collected.variant == .iconic ||
-                                               collected.variant == .promo
-
-                // For special variants, use uniqueId for precise matching (they have unique art)
-                if cardIsSpecialVariant {
-                    if let cardUniqueId = card.uniqueId, let collectedUniqueId = collected.uniqueId,
-                       !cardUniqueId.isEmpty, !collectedUniqueId.isEmpty {
-                        return collectedUniqueId == cardUniqueId
-                    }
-                    return collected.name == card.name && collected.setName == card.setName && collected.variant == card.variant
+            if isSpecial {
+                if let uniqueId = collected.uniqueId, !uniqueId.isEmpty {
+                    ownedSpecialKeys.insert(uniqueId)
                 } else {
-                    // Normal/Foil: match by name and set, exclude special variants
-                    return collected.name == card.name && collected.setName == card.setName && !collectedIsSpecialVariant
+                    ownedSpecialKeys.insert("\(collected.name)||\(collected.setName)||\(collected.variant.rawValue)")
                 }
+            } else {
+                ownedNormalKeys.insert("\(collected.name)||\(collected.setName)")
+            }
+        }
+
+        var collectedCount = 0
+        for card in cardsInSet {
+            let isSpecial = card.variant == .enchanted ||
+                            card.variant == .epic ||
+                            card.variant == .iconic ||
+                            card.variant == .promo
+
+            let isOwned: Bool
+            if isSpecial {
+                if let uniqueId = card.uniqueId, !uniqueId.isEmpty {
+                    isOwned = ownedSpecialKeys.contains(uniqueId)
+                } else {
+                    isOwned = ownedSpecialKeys.contains("\(card.name)||\(card.setName)||\(card.variant.rawValue)")
+                }
+            } else {
+                isOwned = ownedNormalKeys.contains("\(card.name)||\(card.setName)")
             }
 
             if isOwned {

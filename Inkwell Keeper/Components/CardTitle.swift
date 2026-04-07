@@ -18,157 +18,30 @@ struct CardTile: View {
     @State private var loadingPrice = false
     @State private var priceChange: Double?
     @State private var priceConfidence: PricingService.PriceConfidence?
-    @State private var imageLoadTrigger = UUID() // Force image reload
+    @State private var cachedCollectedCard: CollectedCard?
+    @State private var cachedDeckAllocation: Int = 0
     @EnvironmentObject var collectionManager: CollectionManager
-    @ObservedObject private var motionManager = MotionManager.shared
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let pricingService = PricingService.shared
-    
-    private var collectedCard: CollectedCard? {
-        if card.variant == .normal || card.variant == .foil {
-            return collectionManager.getCollectedCardDataForVariant(card)
-        }
-        return collectionManager.getCollectedCardData(for: card)
-    }
-
-    private var deckAllocationTotal: Int {
-        collectionManager.getTotalDeckAllocation(for: card)
-    }
 
     private var availableQuantity: Int {
-        guard let collected = collectedCard else { return 0 }
-        return max(0, collected.quantity - deckAllocationTotal)
+        guard let collected = cachedCollectedCard else { return 0 }
+        return max(0, collected.quantity - cachedDeckAllocation)
     }
     
     var body: some View {
         VStack(spacing: 8) {
-            AsyncImage(url: card.bestImageUrl()) { phase in
-                switch phase {
-                case .success(let image):
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .interactiveHolographicEffect(
-                            pitch: reduceMotion ? 0 : motionManager.pitch,
-                            roll: reduceMotion ? 0 : motionManager.roll,
-                            variant: card.variant
-                        )
-                case .failure(let error):
+            HolographicCardImage(card: card, reduceMotion: reduceMotion)
+                .frame(height: 200)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(
-                            LinearGradient(
-                                colors: [card.rarity.color.opacity(0.3), card.rarity.color.opacity(0.1)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .overlay {
-                            VStack(spacing: 8) {
-                                Image(systemName: "photo.artframe")
-                                    .font(.largeTitle)
-                                    .foregroundColor(card.rarity.color)
-                                Text(card.name)
-                                    .font(.caption)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.white)
-                                    .multilineTextAlignment(.center)
-                                    .lineLimit(2)
-                            }
-                            .padding()
-                        }
-                        .onAppear {
-                        }
-                case .empty:
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.gray.opacity(0.3))
-                        .overlay {
-                            VStack(spacing: 4) {
-                                Image(systemName: "photo")
-                                    .font(.title2)
-                                    .foregroundColor(.gray)
-                                Text("Loading...")
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                            }
-                        }
-                @unknown default:
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.gray.opacity(0.3))
-                        .overlay {
-                            Image(systemName: "questionmark")
-                                .font(.title2)
-                                .foregroundColor(.gray)
-                        }
+                        .stroke(card.rarity.color, lineWidth: 2)
+                )
+                .overlay(alignment: .top) {
+                    cardBadgeOverlay
                 }
-            }
-            .id("\(imageLoadTrigger)")  // Force reload when trigger changes
-            .frame(height: 200)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(card.rarity.color, lineWidth: 2)
-            )
-            .overlay(
-                // Badges in top corners
-                VStack {
-                    HStack {
-                        // Reprint badge in top-left
-                        if let reprintCount = reprintCount, reprintCount > 1 {
-                            HStack(spacing: 3) {
-                                Image(systemName: "square.on.square")
-                                    .font(.caption2)
-                                Text("\(reprintCount)")
-                                    .font(.caption2)
-                                    .fontWeight(.bold)
-                            }
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 2)
-                            .background(
-                                Capsule()
-                                    .fill(Color.blue.opacity(0.9))
-                            )
-                            .padding(6)
-                        }
-
-                        Spacer()
-
-                        // Quantity badge in top-right corner
-                        if let collected = collectedCard, (collected.quantity > 1 || deckAllocationTotal > 0) {
-                            VStack(spacing: 2) {
-                                if collected.quantity > 1 {
-                                    Text("\(collected.quantity)")
-                                        .font(.caption)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
-                                        .background(
-                                            Capsule()
-                                                .fill(Color.lorcanaGold.opacity(0.9))
-                                        )
-                                }
-
-                                // Show available count when some are in decks
-                                if deckAllocationTotal > 0 {
-                                    Text("\(availableQuantity) free")
-                                        .font(.system(size: 9, weight: .bold))
-                                        .foregroundColor(availableQuantity > 0 ? .green : .red)
-                                        .padding(.horizontal, 5)
-                                        .padding(.vertical, 1)
-                                        .background(
-                                            Capsule()
-                                                .fill(Color.black.opacity(0.7))
-                                        )
-                                }
-                            }
-                            .padding(6)
-                        }
-                    }
-                    Spacer()
-                }
-            )
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(card.name)
@@ -201,20 +74,13 @@ struct CardTile: View {
             }
         }
         .onAppear {
-            // Price is already loaded when card is added to collection
-            // Just use the cached price from the card object
             if let price = card.price {
                 self.marketPrice = price
             }
-            // Force image reload by generating new trigger
-            imageLoadTrigger = UUID()
-            // Start motion updates for holographic effect
-            if !reduceMotion {
-                motionManager.start()
-            }
+            refreshCardData()
         }
-        .onDisappear {
-            motionManager.stop()
+        .onChange(of: collectionManager.collectedCards.count) {
+            refreshCardData()
         }
         .padding()
         .background(
@@ -231,8 +97,9 @@ struct CardTile: View {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                 showingDetail = true
             }
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(100))
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                     showingDetail = false
                 }
@@ -253,6 +120,61 @@ struct CardTile: View {
         }
     }
     
+    @ViewBuilder
+    private var cardBadgeOverlay: some View {
+        HStack {
+            if let reprintCount = reprintCount, reprintCount > 1 {
+                HStack(spacing: 3) {
+                    Image(systemName: "square.on.square")
+                        .font(.caption2)
+                    Text("\(reprintCount)")
+                        .font(.caption2)
+                        .bold()
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 5)
+                .padding(.vertical, 2)
+                .background(Capsule().fill(Color.blue.opacity(0.9)))
+                .padding(6)
+            }
+
+            Spacer()
+
+            if let collected = cachedCollectedCard, (collected.quantity > 1 || cachedDeckAllocation > 0) {
+                VStack(spacing: 2) {
+                    if collected.quantity > 1 {
+                        Text("\(collected.quantity)")
+                            .font(.caption)
+                            .bold()
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Capsule().fill(Color.lorcanaGold.opacity(0.9)))
+                    }
+
+                    if cachedDeckAllocation > 0 {
+                        Text("\(availableQuantity) free")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundStyle(availableQuantity > 0 ? .green : .red)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 1)
+                            .background(Capsule().fill(Color.black.opacity(0.7)))
+                    }
+                }
+                .padding(6)
+            }
+        }
+    }
+
+    private func refreshCardData() {
+        if card.variant == .normal || card.variant == .foil {
+            cachedCollectedCard = collectionManager.getCollectedCardDataForVariant(card)
+        } else {
+            cachedCollectedCard = collectionManager.getCollectedCardData(for: card)
+        }
+        cachedDeckAllocation = collectionManager.getTotalDeckAllocation(for: card)
+    }
+
     private func loadMarketPrice() async {
         loadingPrice = true
 

@@ -137,44 +137,29 @@ struct SetCompletionCard: View {
     let cards: [LorcanaCard]
     @EnvironmentObject var collectionManager: CollectionManager
     @StateObject private var dataManager = SetsDataManager.shared
+    @State private var cachedProgress: [(name: String, collected: Int, total: Int)] = []
 
-    private var setProgress: [(name: String, collected: Int, total: Int)] {
-        // Get all sets
-        let allSets = [
-            "The First Chapter",
-            "Rise of the Floodborn",
-            "Into the Inklands",
-            "Ursula's Return",
-            "Shimmering Skies",
-            "Azurite Sea",
-            "Archazia's Island",
-            "Fabled",
-            "Reign of Jafar",
-            "Whispers in the Well"
-        ]
-
-        return allSets.compactMap { setName in
-            let totalCards = dataManager.hasLocalCards(for: setName) ?
-                dataManager.getLocalCardCount(for: setName) : 204
-            let progress = collectionManager.getSetProgress(setName, totalCardsInSet: totalCards)
-
-            // Only include sets with some progress or first 3 sets
-            guard progress.collected > 0 || allSets.firstIndex(of: setName)! < 3 else {
-                return nil
-            }
-
-            return (name: setName, collected: progress.collected, total: progress.total)
-        }
-    }
+    private static let allSets = [
+        "The First Chapter",
+        "Rise of the Floodborn",
+        "Into the Inklands",
+        "Ursula's Return",
+        "Shimmering Skies",
+        "Azurite Sea",
+        "Archazia's Island",
+        "Fabled",
+        "Reign of Jafar",
+        "Whispers in the Well"
+    ]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Set Completion")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
 
             VStack(spacing: 8) {
-                ForEach(setProgress, id: \.name) { progress in
+                ForEach(cachedProgress, id: \.name) { progress in
                     SetProgressRow(
                         setName: progress.name,
                         current: progress.collected,
@@ -192,6 +177,22 @@ struct SetCompletionCard: View {
                         .stroke(Color.lorcanaGold.opacity(0.3), lineWidth: 1)
                 )
         )
+        .onAppear { recomputeProgress() }
+        .onChange(of: collectionManager.collectedCards.count) { recomputeProgress() }
+    }
+
+    private func recomputeProgress() {
+        cachedProgress = Self.allSets.enumerated().compactMap { index, setName in
+            let totalCards = dataManager.hasLocalCards(for: setName) ?
+                dataManager.getLocalCardCount(for: setName) : 204
+            let progress = collectionManager.getSetProgress(setName, totalCardsInSet: totalCards)
+
+            guard progress.collected > 0 || index < 3 else {
+                return nil
+            }
+
+            return (name: setName, collected: progress.collected, total: progress.total)
+        }
     }
 }
 

@@ -54,6 +54,11 @@ class SetsDataManager: ObservableObject {
 
     private var setCards: [String: [LorcanaCard]] = [:]
     private let priceCache = PriceCache.shared
+
+    /// Pre-built flat array of all cards for search (built once when data loads)
+    private var cachedAllCards: [LorcanaCard] = []
+    /// Pre-normalized search text keyed by card ID for O(1) lookup
+    private var normalizedSearchIndex: [String: String] = [:]
     
     private init() {
         loadLocalData()
@@ -71,6 +76,7 @@ class SetsDataManager: ObservableObject {
                 try await loadAllSetCards()
                 
                 await MainActor.run {
+                    self.buildSearchIndex()
                     self.isLoading = false
                     self.isDataLoaded = true
                 }
@@ -250,61 +256,59 @@ class SetsDataManager: ObservableObject {
         }.sorted { $0.name < $1.name }
     }
 
+    /// Build pre-normalized search index for fast lookups
+    private func buildSearchIndex() {
+        cachedAllCards = []
+        normalizedSearchIndex = [:]
+        for cards in setCards.values {
+            for card in cards {
+                let pricedCard = getCardWithCachedPrice(card)
+                cachedAllCards.append(pricedCard)
+                // Combine all searchable fields into one normalized string
+                let combined = [card.name, card.cardText, card.type, card.setName]
+                    .map { normalizeSearchText($0) }
+                    .joined(separator: " ")
+                normalizedSearchIndex[card.id] = combined
+            }
+        }
+    }
+
     func searchCards(query: String) -> [LorcanaCard] {
         guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return []
         }
 
-        // Wait for data to load if not ready
-        if !isDataLoaded {
-            return []
-        }
+        guard isDataLoaded else { return [] }
 
         let normalizedQuery = normalizeSearchText(query)
-        var allCards: [LorcanaCard] = []
 
-        // Collect all cards from all sets
-        for cards in setCards.values {
-            allCards.append(contentsOf: cards)
-        }
-        
-        // Apply cached prices to all cards
-        allCards = allCards.map { getCardWithCachedPrice($0) }
-
-        // Filter cards based on search query
-        let filteredCards = allCards.filter { card in
-            let normalizedName = normalizeSearchText(card.name)
-            let normalizedText = normalizeSearchText(card.cardText)
-            let normalizedType = normalizeSearchText(card.type)
-            let normalizedSet = normalizeSearchText(card.setName)
-
-            return normalizedName.contains(normalizedQuery) ||
-                   normalizedText.contains(normalizedQuery) ||
-                   normalizedType.contains(normalizedQuery) ||
-                   normalizedSet.contains(normalizedQuery) ||
-                   isExactMatch(query: normalizedQuery, cardName: normalizedName)
+        // Use pre-built index instead of normalizing per card per search
+        let filteredCards = cachedAllCards.filter { card in
+            guard let indexed = normalizedSearchIndex[card.id] else { return false }
+            return indexed.contains(normalizedQuery) ||
+                   isExactMatch(query: normalizedQuery, cardName: normalizeSearchText(card.name))
         }
 
         // Sort results: exact matches first, then by name
         return filteredCards.sorted { card1, card2 in
             let name1 = normalizeSearchText(card1.name)
             let name2 = normalizeSearchText(card2.name)
-            
+
             let exact1 = isExactMatch(query: normalizedQuery, cardName: name1)
             let exact2 = isExactMatch(query: normalizedQuery, cardName: name2)
-            
+
             if exact1 && !exact2 { return true }
             if !exact1 && exact2 { return false }
-            
+
             return name1 < name2
         }
     }
     
     private func normalizeSearchText(_ text: String) -> String {
-        return text.lowercased()
-            .replacingOccurrences(of: "'", with: "")
-            .replacingOccurrences(of: "-", with: " ")
-            .replacingOccurrences(of: "  ", with: " ")
+        text.lowercased()
+            .replacing("'", with: "")
+            .replacing("-", with: " ")
+            .replacing("  ", with: " ")
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
     

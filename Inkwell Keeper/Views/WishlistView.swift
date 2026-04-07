@@ -15,66 +15,7 @@ struct WishlistView: View {
     @State private var selectedInkColor: InkColorFilter = .all
     @State private var selectedVariant: VariantFilter = .all
     @State private var sortOption: SortOption = .recentlyAdded
-
-    private var filteredCards: [LorcanaCard] {
-        var cards = collectionManager.wishlistCards
-
-        if !searchText.isEmpty {
-            cards = cards.filter { card in
-                card.name.localizedCaseInsensitiveContains(searchText) ||
-                card.cardText.localizedCaseInsensitiveContains(searchText)
-            }
-        }
-
-        switch selectedFilter {
-        case .all:
-            break
-        case .character:
-            cards = cards.filter { $0.type == "Character" }
-        case .action:
-            cards = cards.filter { $0.type == "Action" }
-        case .item:
-            cards = cards.filter { $0.type == "Item" }
-        case .song:
-            cards = cards.filter { $0.type == "Song" }
-        }
-
-        // Filter by ink color
-        if selectedInkColor != .all {
-            cards = cards.filter { card in
-                guard let inkColor = card.inkColor else { return false }
-                let colors = inkColor.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-                return colors.contains(selectedInkColor.rawValue)
-            }
-        }
-
-        // Filter by variant
-        if selectedVariant != .all {
-            cards = cards.filter { selectedVariant.matches($0.variant) }
-        }
-
-        switch sortOption {
-        case .recentlyAdded:
-            cards = cards.sorted { card1, card2 in
-                // Sort by dateAdded descending (most recent first)
-                guard let date1 = card1.dateAdded, let date2 = card2.dateAdded else {
-                    // Cards without dates go to the end
-                    return card1.dateAdded != nil
-                }
-                return date1 > date2
-            }
-        case .name:
-            cards = cards.sorted { $0.name < $1.name }
-        case .cost:
-            cards = cards.sorted { $0.cost < $1.cost }
-        case .rarity:
-            cards = cards.sorted { $0.rarity.sortOrder < $1.rarity.sortOrder }
-        case .set:
-            cards = cards.sorted { $0.setName < $1.setName }
-        }
-
-        return cards
-    }
+    @State private var filteredCards: [LorcanaCard] = []
 
     var body: some View {
         navigationWrapper {
@@ -117,10 +58,73 @@ struct WishlistView: View {
                 }
             }
         }
+        .onAppear { recomputeFilteredCards() }
+        .onChange(of: searchText) { recomputeFilteredCards() }
+        .onChange(of: selectedFilter) { recomputeFilteredCards() }
+        .onChange(of: selectedInkColor) { recomputeFilteredCards() }
+        .onChange(of: selectedVariant) { recomputeFilteredCards() }
+        .onChange(of: sortOption) { recomputeFilteredCards() }
+        .onChange(of: collectionManager.wishlistCards.count) { recomputeFilteredCards() }
         .sheet(isPresented: $showingAddToWishlist) {
             AddToWishlistView(isPresented: $showingAddToWishlist)
                 .environmentObject(collectionManager)
         }
+    }
+
+    private func recomputeFilteredCards() {
+        var cards = collectionManager.wishlistCards
+
+        if !searchText.isEmpty {
+            cards = cards.filter { card in
+                card.name.localizedStandardContains(searchText) ||
+                card.cardText.localizedStandardContains(searchText)
+            }
+        }
+
+        switch selectedFilter {
+        case .all:
+            break
+        case .character:
+            cards = cards.filter { $0.type == "Character" }
+        case .action:
+            cards = cards.filter { $0.type == "Action" }
+        case .item:
+            cards = cards.filter { $0.type == "Item" }
+        case .song:
+            cards = cards.filter { $0.type == "Song" }
+        }
+
+        if selectedInkColor != .all {
+            cards = cards.filter { card in
+                guard let inkColor = card.inkColor else { return false }
+                let colors = inkColor.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                return colors.contains(selectedInkColor.rawValue)
+            }
+        }
+
+        if selectedVariant != .all {
+            cards = cards.filter { selectedVariant.matches($0.variant) }
+        }
+
+        switch sortOption {
+        case .recentlyAdded:
+            cards.sort { card1, card2 in
+                guard let date1 = card1.dateAdded, let date2 = card2.dateAdded else {
+                    return card1.dateAdded != nil
+                }
+                return date1 > date2
+            }
+        case .name:
+            cards.sort { $0.name < $1.name }
+        case .cost:
+            cards.sort { $0.cost < $1.cost }
+        case .rarity:
+            cards.sort { $0.rarity.sortOrder < $1.rarity.sortOrder }
+        case .set:
+            cards.sort { $0.setName < $1.setName }
+        }
+
+        filteredCards = cards
     }
 
     @ViewBuilder

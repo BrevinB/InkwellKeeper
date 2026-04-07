@@ -85,6 +85,111 @@ class ImportService {
 
     // MARK: - Main Import Methods
 
+    /// Live stats reported during import
+    struct ImportProgress {
+        var progress: Double = 0
+        var totalCards: Int = 0
+        var uniqueCards: Int = 0
+        var normalCards: Int = 0
+        var foilCards: Int = 0
+        var failedCards: Int = 0
+    }
+
+    /// Process and import in a single pass — calls `onCardMatched` for each successfully matched card
+    /// so the caller can add it to the collection immediately without a second pass.
+    func importAndAdd(
+        _ text: String,
+        format: ImportFormat = .textList,
+        onCardMatched: @MainActor (LorcanaCard, Int) -> Void,
+        progressCallback: ((ImportProgress) -> Void)? = nil
+    ) async -> ImportResult {
+        var successful: [ImportedCard] = []
+        var failed: [FailedImport] = []
+        var stats = ImportProgress()
+
+        let lines = text.components(separatedBy: .newlines)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+
+        for (index, line) in lines.enumerated() {
+            // Skip header
+            if index == 0 {
+                let lowerLine = line.lowercased()
+                if lowerLine.contains("set number") && lowerLine.contains("variant") { continue }
+                if lowerLine.contains("name") && (lowerLine.contains("card") || lowerLine.contains("normal") || lowerLine.contains("rarity")) { continue }
+            }
+
+            let matched = matchLine(line, format: format)
+
+            for card in matched.cards {
+                successful.append(card)
+                stats.totalCards += card.quantity
+                stats.uniqueCards += 1
+                if card.card.variant == .foil {
+                    stats.foilCards += card.quantity
+                } else {
+                    stats.normalCards += card.quantity
+                }
+                await MainActor.run {
+                    onCardMatched(card.card, card.quantity)
+                }
+            }
+            for fail in matched.failures {
+                failed.append(fail)
+                stats.failedCards += 1
+            }
+
+            // Update progress
+            if index % 10 == 0 || index == lines.count - 1 {
+                stats.progress = Double(index + 1) / Double(lines.count)
+                await MainActor.run {
+                    progressCallback?(stats)
+                }
+            }
+        }
+
+        return ImportResult(successful: successful, failed: failed, duplicates: [])
+    }
+
+    /// Match a single line, returning matched cards and any failures
+    private func matchLine(_ line: String, format: ImportFormat) -> (cards: [ImportedCard], failures: [FailedImport]) {
+        var cards: [ImportedCard] = []
+        var failures: [FailedImport] = []
+
+        if format == .dreamborn {
+            if let (cardName, setName, variant, quantity) = parseDreambornLine(line) {
+                if variant == .foil {
+                    if let matchedCard = findCard(name: cardName, setName: setName, variant: .foil),
+                       matchedCard.variant == .foil {
+                        cards.append(ImportedCard(card: matchedCard, quantity: quantity, originalLine: line))
+                    } else if let baseCard = findCard(name: cardName, setName: setName, variant: .normal) {
+                        let foilCard = createFoilVariant(from: baseCard)
+                        cards.append(ImportedCard(card: foilCard, quantity: quantity, originalLine: line))
+                    } else {
+                        let setInfo = setName != nil ? " from set '\(setName!)'" : ""
+                        failures.append(FailedImport(originalLine: line, reason: "Foil card not found: '\(cardName)'\(setInfo)"))
+                    }
+                } else {
+                    if let matchedCard = findCard(name: cardName, setName: setName, variant: variant) {
+                        cards.append(ImportedCard(card: matchedCard, quantity: quantity, originalLine: line))
+                    } else {
+                        let setInfo = setName != nil ? " from set '\(setName!)'" : ""
+                        failures.append(FailedImport(originalLine: line, reason: "Card not found: '\(cardName)'\(setInfo)"))
+                    }
+                }
+            }
+        } else if let (cardName, setName, variant, quantity) = parseLine(line, format: format) {
+            if let matchedCard = findCard(name: cardName, setName: setName, variant: variant) {
+                cards.append(ImportedCard(card: matchedCard, quantity: quantity, originalLine: line))
+            } else {
+                let setInfo = setName != nil ? " from set '\(setName!)'" : ""
+                failures.append(FailedImport(originalLine: line, reason: "Card not found: '\(cardName)'\(setInfo) [\(variant.displayName)]"))
+            }
+        }
+
+        return (cards, failures)
+    }
+
     func importFromText(_ text: String, format: ImportFormat = .textList, progressCallback: ((Double) -> Void)? = nil) async -> ImportResult {
         var successful: [ImportedCard] = []
         var failed: [FailedImport] = []
@@ -103,63 +208,45 @@ class ImportService {
                 }
             }
 
-            // Skip header lines - check for common CSV headers
+            // Skip header lines
             if index == 0 {
                 let lowerLine = line.lowercased()
-                // Dreamborn header: "Normal,Foil,Name,Set,Card Number,Color,Rarity,Price,Foil Price"
-                if lowerLine.contains("normal") && lowerLine.contains("foil") && lowerLine.contains("name") {
+                // Dreamborn header: "Set Number,Card Number,Variant,Count,Name,Color,Rarity"
+                if lowerLine.contains("set number") && lowerLine.contains("variant") {
                     continue
                 }
-                // Other headers
-                if lowerLine.contains("name") || lowerLine.contains("card") {
+                // Other CSV headers
+                if lowerLine.contains("name") && (lowerLine.contains("card") || lowerLine.contains("normal") || lowerLine.contains("rarity")) {
                     continue
                 }
             }
 
-            // Special handling for Dreamborn format to process both normal and foil quantities
             if format == .dreamborn {
-                // parseDreambornLineRaw returns nil for rows with 0,0 quantities
-                if let (normalQty, foilQty, cardName, setName) = parseDreambornLineRaw(line) {
-                    var lineHadSuccess = false
-                    var lineHadFailure = false
-                    var failureReasons: [String] = []
+                if let parsed = parseDreambornLine(line) {
+                    let (cardName, setName, variant, quantity) = parsed
 
-                    // Process normal quantity
-                    if normalQty > 0 {
-                        if let matchedCard = findCard(name: cardName, setName: setName, variant: .normal) {
-                            successful.append(ImportedCard(card: matchedCard, quantity: normalQty, originalLine: line))
-                            lineHadSuccess = true
-                        } else {
-                            let setInfo = setName != nil ? " from set '\(setName!)'" : ""
-                            failureReasons.append("Normal: Card not found '\(cardName)'\(setInfo)")
-                            lineHadFailure = true
+                    if variant == .foil {
+                        // Try to find an explicit foil variant in the database
+                        if let matchedCard = findCard(name: cardName, setName: setName, variant: .foil),
+                           matchedCard.variant == .foil {
+                            successful.append(ImportedCard(card: matchedCard, quantity: quantity, originalLine: line))
                         }
-                    }
-
-                    // Process foil quantity
-                    if foilQty > 0 {
-                        // Try to find foil variant first
-                        if let matchedCard = findCard(name: cardName, setName: setName, variant: .foil) {
-                            successful.append(ImportedCard(card: matchedCard, quantity: foilQty, originalLine: line))
-                            lineHadSuccess = true
-                        }
-                        // If foil not found, try to find normal variant and create foil version
-                        else if let normalCard = findCard(name: cardName, setName: setName, variant: .normal) {
-                            // Create a foil version of the normal card
-                            let foilCard = createFoilVariant(from: normalCard)
-                            successful.append(ImportedCard(card: foilCard, quantity: foilQty, originalLine: line))
-                            lineHadSuccess = true
+                        // Otherwise find the base card and create a foil version
+                        else if let baseCard = findCard(name: cardName, setName: setName, variant: .normal) {
+                            let foilCard = createFoilVariant(from: baseCard)
+                            successful.append(ImportedCard(card: foilCard, quantity: quantity, originalLine: line))
                         }
                         else {
                             let setInfo = setName != nil ? " from set '\(setName!)'" : ""
-                            failureReasons.append("Foil: Card not found '\(cardName)'\(setInfo)")
-                            lineHadFailure = true
+                            failed.append(FailedImport(originalLine: line, reason: "Foil card not found: '\(cardName)'\(setInfo)"))
                         }
-                    }
-
-                    // Only add to failed if the ENTIRE line failed (no successes)
-                    if lineHadFailure && !lineHadSuccess {
-                        failed.append(FailedImport(originalLine: line, reason: failureReasons.joined(separator: "; ")))
+                    } else {
+                        if let matchedCard = findCard(name: cardName, setName: setName, variant: variant) {
+                            successful.append(ImportedCard(card: matchedCard, quantity: quantity, originalLine: line))
+                        } else {
+                            let setInfo = setName != nil ? " from set '\(setName!)'" : ""
+                            failed.append(FailedImport(originalLine: line, reason: "Card not found: '\(cardName)'\(setInfo)"))
+                        }
                     }
                 }
             } else {
@@ -321,103 +408,54 @@ class ImportService {
         return (cardName, nil, variant, quantity)
     }
 
-    // Dreamborn format parser that returns both normal and foil quantities
-    private func parseDreambornLineRaw(_ line: String) -> (normalQty: Int, foilQty: Int, name: String, set: String?)? {
-        // Parse CSV properly, handling quoted fields and preserving empty fields
-        var components: [String] = []
-
-        var currentField = ""
-        var inQuotes = false
-
-        for char in line {
-            if char == "\"" {
-                inQuotes.toggle()
-            } else if char == "," && !inQuotes {
-                components.append(currentField.trimmingCharacters(in: .whitespaces))
-                currentField = ""
-            } else {
-                currentField.append(char)
-            }
-        }
-        // Add the last field
-        components.append(currentField.trimmingCharacters(in: .whitespaces))
-
-        // Dreamborn format: Normal,Foil,Name,Set,Card Number,Color,Rarity,Price,Foil Price
-        // Index:            0      1    2    3    4           5      6       7      8
-        guard components.count >= 4 else {
-            return nil
-        }
-
-        let normalQty = Int(components[0]) ?? 0
-        let foilQty = Int(components[1]) ?? 0
-        let cardName = components[2]
-
-        // Skip cards with 0 quantity in both columns
-        guard normalQty > 0 || foilQty > 0 else { return nil }
-
-        // Get set name from index 3 if available
-        var setName: String? = nil
-        if components.count > 3 && !components[3].isEmpty {
-            let setNumber = components[3]
-            setName = mapDreambornSetNumber(setNumber)
-        }
-
-        return (normalQty, foilQty, cardName, setName)
-    }
-
-    // Dreamborn format: CSV with columns: Normal,Foil,Name,Set,Card Number,Color,Rarity,Price,Foil Price
-    // NOTE: This is kept for compatibility but shouldn't be used for Dreamborn imports
+    // Dreamborn CSV format:
+    // Set Number,Card Number,Variant,Count,Name,Color,Rarity
+    // 001,1,normal,2,"Ariel - On Human Legs",Amber,Uncommon
+    // 001,4,foil,1,"Goofy - Musketeer",Amber,Uncommon
+    //
+    // Each row is a single variant (normal or foil) with its own count.
+    // Card Number can include letter suffixes for reprints (e.g., "4a", "4b").
     private func parseDreambornLine(_ line: String) -> (name: String, set: String?, variant: CardVariant, quantity: Int)? {
-        // Parse quoted CSV
-        var components: [String] = []
+        let components = parseCSVFields(line)
 
-        // Parse CSV properly, handling quoted fields and preserving empty fields
-        var currentField = ""
-        var inQuotes = false
+        // Current format: Set Number(0), Card Number(1), Variant(2), Count(3), Name(4), Color(5), Rarity(6)
+        guard components.count >= 5 else { return nil }
 
-        for char in line {
-            if char == "\"" {
-                inQuotes.toggle()
-            } else if char == "," && !inQuotes {
-                components.append(currentField.trimmingCharacters(in: .whitespaces))
-                currentField = ""
-            } else {
-                currentField.append(char)
-            }
-        }
-        // Add the last field
-        components.append(currentField.trimmingCharacters(in: .whitespaces))
+        let setNumber = components[0]
+        let variantString = components[2].lowercased()
+        let quantity = Int(components[3]) ?? 0
+        let cardName = components[4]
 
-        // Dreamborn format: Normal,Foil,Name,Set,Card Number,Color,Rarity,Price,Foil Price
-        // Index:            0      1    2    3    4           5      6       7      8
-        guard components.count >= 4 else { return nil }
+        guard quantity > 0, !cardName.isEmpty else { return nil }
 
-        let normalQty = Int(components[0]) ?? 0
-        let foilQty = Int(components[1]) ?? 0
-        let cardName = components[2]
-
-        // Skip cards with 0 quantity in both columns
-        guard normalQty > 0 || foilQty > 0 else { return nil }
-
-        // Get set name from index 3 if available
-        var setName: String? = nil
-        if components.count > 3 && !components[3].isEmpty {
-            let setNumber = components[3]
-            setName = mapDreambornSetNumber(setNumber)
-        }
-
-        // Return normal variant with normal quantity (foils will be handled separately)
-        // For now, we only import the normal quantity. If user has foils, they'll need to manually adjust
-        let variant: CardVariant = foilQty > 0 && normalQty == 0 ? .foil : .normal
-        let quantity = variant == .foil ? foilQty : normalQty
+        let variant: CardVariant = variantString == "foil" ? .foil : .normal
+        let setName = mapDreambornSetNumber(setNumber)
 
         return (cardName, setName, variant, quantity)
     }
 
+    /// Parse a CSV line into fields, handling quoted values
+    private func parseCSVFields(_ line: String) -> [String] {
+        var fields: [String] = []
+        var current = ""
+        var inQuotes = false
+
+        for char in line {
+            if char == "\"" {
+                inQuotes.toggle()
+            } else if char == "," && !inQuotes {
+                fields.append(current.trimmingCharacters(in: .whitespaces))
+                current = ""
+            } else {
+                current.append(char)
+            }
+        }
+        fields.append(current.trimmingCharacters(in: .whitespaces))
+        return fields
+    }
+
     // Map Dreamborn set numbers to full set names
     private func mapDreambornSetNumber(_ setNum: String) -> String? {
-        // Dreamborn uses numbers like "001", "002", "003", "004", "005", "006"
-        // Map to set names
         switch setNum {
         case "001", "1": return "The First Chapter"
         case "002", "2": return "Rise of the Floodborn"
@@ -426,9 +464,13 @@ class ImportService {
         case "005", "5": return "Shimmering Skies"
         case "006", "6": return "Azurite Sea"
         case "007", "7": return "Archazia's Island"
-        case "P1": return "Promo" // Promo cards
-        case "C1": return "Promo" // Convention promos
-        case "D23": return "Promo" // D23 promos
+        case "008", "8": return "Reign of Jafar"
+        case "009", "9": return "Whispers in the Well"
+        case "010", "10": return "Fabled"
+        case "011", "11": return "Winterspell"
+        case "P1": return "Promo"
+        case "C1": return "Promo"
+        case "D23": return "Promo"
         default: return nil
         }
     }
@@ -440,27 +482,29 @@ class ImportService {
 
     // MARK: - Card Matching
 
-    private func createFoilVariant(from normalCard: LorcanaCard) -> LorcanaCard {
-        // Create a new card with foil variant but same other properties
+    private func createFoilVariant(from card: LorcanaCard) -> LorcanaCard {
+        // Generate a foil-specific ID from the base card
+        let foilId = card.id.replacing("_N_", with: "_F_")
+
         return LorcanaCard(
-            id: normalCard.id.replacingOccurrences(of: "_N_", with: "_F_"),
-            name: normalCard.name,
-            cost: normalCard.cost,
-            type: normalCard.type,
-            rarity: normalCard.rarity,
-            setName: normalCard.setName,
-            cardText: normalCard.cardText,
-            imageUrl: normalCard.imageUrl,
-            price: normalCard.price,
-            variant: .foil,  // Change to foil
-            cardNumber: normalCard.cardNumber,
-            uniqueId: normalCard.uniqueId,
-            inkwell: normalCard.inkwell,
-            strength: normalCard.strength,
-            willpower: normalCard.willpower,
-            lore: normalCard.lore,
-            franchise: normalCard.franchise,
-            inkColor: normalCard.inkColor
+            id: foilId,
+            name: card.name,
+            cost: card.cost,
+            type: card.type,
+            rarity: card.rarity,
+            setName: card.setName,
+            cardText: card.cardText,
+            imageUrl: card.imageUrl,
+            price: card.price,
+            variant: .foil,
+            cardNumber: card.cardNumber,
+            uniqueId: card.uniqueId,
+            inkwell: card.inkwell,
+            strength: card.strength,
+            willpower: card.willpower,
+            lore: card.lore,
+            franchise: card.franchise,
+            inkColor: card.inkColor
         )
     }
 
@@ -469,7 +513,7 @@ class ImportService {
 
         let normalizedName = normalizeName(name)
 
-        // Priority 1: Exact match (name + set + variant)
+        // Priority 1: Exact name + set + variant
         if let set = setName {
             let normalizedSet = normalizeSetName(set)
 
@@ -480,18 +524,9 @@ class ImportService {
             }) {
                 return exactMatch
             }
-
-            // If set was provided but no exact match, try without set constraint
-            // but prefer matches with the correct variant
-            if let fallbackMatch = allCards.first(where: {
-                normalizeName($0.name) == normalizedName &&
-                $0.variant == variant
-            }) {
-                return fallbackMatch
-            }
         }
 
-        // Priority 2: Exact name + variant (any set) - only if no set was specified
+        // Priority 2: Exact name + variant (any set)
         if let match = allCards.first(where: {
             normalizeName($0.name) == normalizedName &&
             $0.variant == variant
@@ -499,7 +534,27 @@ class ImportService {
             return match
         }
 
-        // Priority 3: Fuzzy match on name (any variant, any set)
+        // Priority 3: Exact name + set (any variant) — for cards where variant
+        // isn't in the database (e.g., foils stored as normal)
+        if let set = setName {
+            let normalizedSet = normalizeSetName(set)
+
+            if let match = allCards.first(where: {
+                normalizeName($0.name) == normalizedName &&
+                normalizeSetName($0.setName) == normalizedSet
+            }) {
+                return match
+            }
+        }
+
+        // Priority 4: Exact name only (any set, any variant)
+        if let match = allCards.first(where: {
+            normalizeName($0.name) == normalizedName
+        }) {
+            return match
+        }
+
+        // Priority 5: Fuzzy match — card name contains search or vice versa
         let fuzzyMatches = allCards.filter { card in
             let cardName = normalizeName(card.name)
             return cardName.contains(normalizedName) || normalizedName.contains(cardName)
@@ -509,7 +564,6 @@ class ImportService {
             return bestMatch
         }
 
-        // Priority 4: Return any fuzzy match
         return fuzzyMatches.first
     }
 

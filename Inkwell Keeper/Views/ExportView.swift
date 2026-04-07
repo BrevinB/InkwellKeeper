@@ -180,8 +180,7 @@ struct ExportView: View {
 
     enum ExportFormat: String, CaseIterable {
         case standard = "Custom CSV"
-        case dreambornBulk = "Dreamborn Bulk Add"
-        case dreambornCollection = "Dreamborn Collection"
+        case dreamborn = "Dreamborn"
         case lorcanaHQ = "Lorcana HQ"
         case jsonBackup = "JSON Backup"
 
@@ -189,10 +188,8 @@ struct ExportView: View {
             switch self {
             case .standard:
                 return "Choose exactly which fields to export"
-            case .dreambornBulk:
+            case .dreamborn:
                 return "Set Number, Card Number, Variant, Count"
-            case .dreambornCollection:
-                return "Normal, Foil, Name, Set, Card Number, Color, Rarity"
             case .lorcanaHQ:
                 return "Quantity x Card Name - Subtitle (Set)"
             case .jsonBackup:
@@ -203,8 +200,7 @@ struct ExportView: View {
         var icon: String {
             switch self {
             case .standard: return "slider.horizontal.3"
-            case .dreambornBulk: return "arrow.up.square"
-            case .dreambornCollection: return "tablecells"
+            case .dreamborn: return "arrow.up.square"
             case .lorcanaHQ: return "list.bullet"
             case .jsonBackup: return "externaldrive"
             }
@@ -301,7 +297,9 @@ struct ExportView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showingShareSheet) {
+            .sheet(isPresented: $showingShareSheet, onDismiss: {
+                dismiss()
+            }) {
                 if let url = exportedFileURL {
                     ShareSheet(items: [url])
                 }
@@ -872,10 +870,8 @@ struct ExportView: View {
         switch exportFormat {
         case .standard:
             return generateStandardCSV(from: cards)
-        case .dreambornBulk:
+        case .dreamborn:
             return generateDreambornBulkCSV(from: cards)
-        case .dreambornCollection:
-            return generateDreambornCollectionCSV(from: cards)
         case .lorcanaHQ:
             return generateLorcanaHQExport(from: cards)
         case .jsonBackup:
@@ -1093,66 +1089,6 @@ struct ExportView: View {
         case "Fabled": return 10
         default: return 999
         }
-    }
-
-    // MARK: - Dreamborn Collection Export
-    // Format: Normal,Foil,Name,Set,Card Number,Color,Rarity,Price,Foil Price
-
-    private func generateDreambornCollectionCSV(from cards: [LorcanaCard]) -> String {
-        var csv = "Normal,Foil,Name,Set,Card Number,Color,Rarity,Price,Foil Price\n"
-
-        // Group cards by name+set to combine normal and foil quantities
-        var cardGroups: [String: (card: LorcanaCard, normalQty: Int, foilQty: Int)] = [:]
-
-        for card in cards {
-            let key = "\(card.name)|\(card.setName)"
-
-            let qty = collectionManager.getCollectedQuantityByName(card.name, setName: card.setName, variant: card.variant)
-            let actualQty = qty > 0 ? qty : 1
-
-            if var existing = cardGroups[key] {
-                if card.variant == .foil {
-                    existing.foilQty += actualQty
-                } else {
-                    existing.normalQty += actualQty
-                }
-                cardGroups[key] = existing
-            } else {
-                if card.variant == .foil {
-                    cardGroups[key] = (card, 0, actualQty)
-                } else {
-                    cardGroups[key] = (card, actualQty, 0)
-                }
-            }
-        }
-
-        // Sort by set number then card number
-        let sortedGroups = cardGroups.values.sorted { first, second in
-            let setNum1 = getSetNumber(for: first.card.setName)
-            let setNum2 = getSetNumber(for: second.card.setName)
-
-            if setNum1 != setNum2 {
-                return setNum1 < setNum2
-            }
-            if let num1 = first.card.cardNumber, let num2 = second.card.cardNumber {
-                return num1 < num2
-            }
-            return first.card.name < second.card.name
-        }
-
-        // Generate rows
-        for group in sortedGroups {
-            let name = group.card.name.replacingOccurrences(of: "\"", with: "\"\"")
-            let setNumber = getSetNumber(for: group.card.setName)
-            let cardNumber = group.card.cardNumber ?? 0
-            let color = group.card.inkColor ?? ""
-            let rarity = group.card.rarity.rawValue
-            let price = group.card.price ?? 0.0
-
-            csv += "\(group.normalQty),\(group.foilQty),\"\(name)\",\(setNumber),\(cardNumber),\(color),\(rarity),\(String(format: "%.2f", price)),\(String(format: "%.2f", price * 2))\n"
-        }
-
-        return csv
     }
 
     // MARK: - Lorcana HQ Export
