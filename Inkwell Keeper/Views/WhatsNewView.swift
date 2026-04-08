@@ -153,6 +153,30 @@ struct ChangelogEntry {
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
     ChangelogEntry(
+        version: "2.1.0",
+        date: "April 2026",
+        features: [
+            "New Sets - Added Promo Set 3 and EPCOT Festival of the Arts cards",
+            "Edit Deck Info - You can now edit deck name, format, ink colors, and archetype after creation",
+            "Streamlined Import - Importing from Dreamborn now processes and adds cards in a single step with live stats",
+            "Card Photos - Attach photos of your physical cards to any card in your collection"
+        ],
+        improvements: [
+            "Major performance improvements - Scrolling, filtering, and searching are significantly faster with large collections",
+            "Dreamborn CSV import completely rewritten to match current export format with proper foil detection",
+            "Updated all card data to latest from LorCast API",
+            "AI deck completion now correctly fills to 60 cards instead of going over",
+            "Corrected set ordering across the app (Fabled is now Set 9)"
+        ],
+        bugFixes: [
+            "Fixed foil cards from Dreamborn imports being added as normal variants",
+            "Fixed set progress calculations being slow with large collections",
+            "Fixed background animation causing unnecessary CPU usage",
+            "Fixed card images reloading every time you scrolled"
+        ],
+        inProgress: []
+    ),
+    ChangelogEntry(
         version: "2.0.0",
         date: "March 2026",
         features: ["More accurate pricing coming from TCGTrader", "Added CardMarket", "AI Deck Building (Pro Feature)", "Improved Set Tracking", "Improved Scanning: New mode as Multi Scan", "Added Search for all cards without going to scanning tab"],

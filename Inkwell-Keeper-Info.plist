@@ -3,6 +3,15 @@
 <plist version="1.0">
 <dict>
 	<key>INAlternativeAppNames</key>
-	<string>Lorcana</string>
+	<array>
+		<dict>
+			<key>INAlternativeAppName</key>
+			<string>Lorcana</string>
+		</dict>
+		<dict>
+			<key>INAlternativeAppName</key>
+			<string>Dreamborn</string>
+		</dict>
+	</array>
 </dict>
 </plist>

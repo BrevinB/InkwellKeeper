@@ -291,7 +291,6 @@
 		23B90AFA2E66323500214C40 /* Inkwell Keeper */ = {
 			isa = PBXGroup;
 			children = (
-				238530A62F6A3D8000DEA52D /* Inkwell-Keeper-Info.plist */,
 				D1E2F3A4B5C6D7E8F9A0B1C5 /* Inkwell Keeper.entitlements */,
 				230CAD1F2EB0602800978724 /* Resources */,
 				23D9D44D2EA45ACE0089D552 /* ink.icon */,
@@ -765,7 +764,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -803,7 +802,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
