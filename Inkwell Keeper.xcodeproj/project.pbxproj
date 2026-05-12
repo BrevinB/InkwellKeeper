@@ -65,6 +65,8 @@
 		23BC47A92F4ABE8100E7037B /* AIDeckBuilderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23BC47A82F4ABE8100E7037B /* AIDeckBuilderView.swift */; };
 		23C7E66C2F84BB5300FCD493 /* promo_set_3.json in Resources */ = {isa = PBXBuildFile; fileRef = 23C7E66B2F84BB5300FCD493 /* promo_set_3.json */; };
 		23C7E66D2F84BB5300FCD493 /* epcot_festival_of_the_arts.json in Resources */ = {isa = PBXBuildFile; fileRef = 23C7E66A2F84BB5300FCD493 /* epcot_festival_of_the_arts.json */; };
+		23C7E66F2F84BB5300FCD493 /* lorcana_challenge_year_3.json in Resources */ = {isa = PBXBuildFile; fileRef = 23C7E66E2F84BB5300FCD493 /* lorcana_challenge_year_3.json */; };
+		23C7E6712F84BB5300FCD493 /* wilds_unknown.json in Resources */ = {isa = PBXBuildFile; fileRef = 23C7E6702F84BB5300FCD493 /* wilds_unknown.json */; };
 		23CA3B392ED3CB48006786F7 /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23CA3B382ED3CB48006786F7 /* WhatsNewView.swift */; };
 		23CA3B3B2ED3EA1F006786F7 /* SupportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23CA3B3A2ED3EA1F006786F7 /* SupportView.swift */; };
 		23CAFB0D2ECF3E6D006786F7 /* FoilEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23CAFB0C2ECF3E6D006786F7 /* FoilEffect.swift */; };
@@ -135,7 +137,6 @@
 		233365602E77B05400BE5BD4 /* ursulas_return.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ursulas_return.json; sourceTree = "<group>"; };
 		234EDF462F41766B0016D086 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		234EDF482F4176860016D086 /* RulesPaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesPaywallView.swift; sourceTree = "<group>"; };
-		238530A62F6A3D8000DEA52D /* Inkwell-Keeper-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Inkwell-Keeper-Info.plist"; sourceTree = SOURCE_ROOT; };
 		23B90AF72E66323500214C40 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		23B90AF82E66323500214C40 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		23B90AF92E66323500214C40 /* InkwellKeeperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkwellKeeperApp.swift; sourceTree = "<group>"; };
@@ -171,6 +172,8 @@
 		23BC47A82F4ABE8100E7037B /* AIDeckBuilderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIDeckBuilderView.swift; sourceTree = "<group>"; };
 		23C7E66A2F84BB5300FCD493 /* epcot_festival_of_the_arts.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = epcot_festival_of_the_arts.json; sourceTree = "<group>"; };
 		23C7E66B2F84BB5300FCD493 /* promo_set_3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = promo_set_3.json; sourceTree = "<group>"; };
+		23C7E66E2F84BB5300FCD493 /* lorcana_challenge_year_3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = lorcana_challenge_year_3.json; sourceTree = "<group>"; };
+		23C7E6702F84BB5300FCD493 /* wilds_unknown.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = wilds_unknown.json; sourceTree = "<group>"; };
 		23CA3B382ED3CB48006786F7 /* WhatsNewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
 		23CA3B3A2ED3EA1F006786F7 /* SupportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportView.swift; sourceTree = "<group>"; };
 		23CAFB0C2ECF3E6D006786F7 /* FoilEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoilEffect.swift; sourceTree = "<group>"; };
@@ -265,6 +268,8 @@
 			children = (
 				23C7E66A2F84BB5300FCD493 /* epcot_festival_of_the_arts.json */,
 				23C7E66B2F84BB5300FCD493 /* promo_set_3.json */,
+				23C7E66E2F84BB5300FCD493 /* lorcana_challenge_year_3.json */,
+				23C7E6702F84BB5300FCD493 /* wilds_unknown.json */,
 				23CAFBCC2ED2A3B7006786F7 /* migration_map.json */,
 				23CAFBC42ED02884006786F7 /* challenge_promo.json */,
 				23CAFBC52ED02884006786F7 /* d23_collection.json */,
@@ -515,6 +520,8 @@
 				23CAFBCD2ED2A3B7006786F7 /* migration_map.json in Resources */,
 				23C7E66C2F84BB5300FCD493 /* promo_set_3.json in Resources */,
 				23C7E66D2F84BB5300FCD493 /* epcot_festival_of_the_arts.json in Resources */,
+				23C7E66F2F84BB5300FCD493 /* lorcana_challenge_year_3.json in Resources */,
+				23C7E6712F84BB5300FCD493 /* wilds_unknown.json in Resources */,
 				23CAFBC82ED02884006786F7 /* promo_set_1.json in Resources */,
 				23CAFBC92ED02884006786F7 /* challenge_promo.json in Resources */,
 				23CAFBCA2ED02884006786F7 /* d23_collection.json in Resources */,
@@ -764,7 +771,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1.0;
+				MARKETING_VERSION = 2.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -802,7 +809,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1.0;
+				MARKETING_VERSION = 2.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

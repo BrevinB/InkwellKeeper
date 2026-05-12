@@ -6,7 +6,17 @@
       "Bash(cat:*)",
       "Bash(python3:*)",
       "Bash(cd:*)",
-      "Bash(wc -l /Users/brevin/Developer/lorcana-pricing-api/app/*.py /Users/brevin/Developer/lorcana-pricing-api/app/routers/*.py /Users/brevin/Developer/lorcana-pricing-api/app/services/*.py /Users/brevin/Developer/lorcana-pricing-api/cron/*.py 2>/dev/null)"
+      "Bash(wc -l /Users/brevin/Developer/lorcana-pricing-api/app/*.py /Users/brevin/Developer/lorcana-pricing-api/app/routers/*.py /Users/brevin/Developer/lorcana-pricing-api/app/services/*.py /Users/brevin/Developer/lorcana-pricing-api/cron/*.py 2>/dev/null)",
+      "Bash(curl -s -i --max-time 30 \"https://29kwvipys3.execute-api.us-east-2.amazonaws.com/health\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} | total=%{time_total}s\\\\n\" --max-time 30 \"https://29kwvipys3.execute-api.us-east-2.amazonaws.com/prices/TFC-1\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} | total=%{time_total}s\\\\n\" --max-time 30 \"https://29kwvipys3.execute-api.us-east-2.amazonaws.com/health\")",
+      "Bash(aws --version)",
+      "Bash(aws sts *)",
+      "Bash(aws lambda *)",
+      "Bash(aws logs *)",
+      "Bash(aws rds describe-db-instances *)",
+      "Bash(aws secretsmanager describe-secret *)",
+      "Bash(curl -sS \"https://api.lorcast.com/v0/cards/search?q=set:12&unique=prints\")"
     ],
     "deny": [],
     "ask": []

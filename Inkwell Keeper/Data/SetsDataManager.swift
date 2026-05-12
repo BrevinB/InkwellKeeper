@@ -98,8 +98,11 @@ class SetsDataManager: ObservableObject {
         let setsData = try JSONDecoder().decode(SetsData.self, from: data)
         
         await MainActor.run {
-            self.sets = setsData.sets.sorted { 
-                ($0.releaseDate ?? "") < ($1.releaseDate ?? "") 
+            self.sets = setsData.sets.sorted { lhs, rhs in
+                let lNum = Int(lhs.setNumber ?? "") ?? Int.max
+                let rNum = Int(rhs.setNumber ?? "") ?? Int.max
+                if lNum != rNum { return lNum < rNum }
+                return (lhs.releaseDate ?? "") < (rhs.releaseDate ?? "")
             }
         }
     }
@@ -123,7 +126,9 @@ class SetsDataManager: ObservableObject {
             "promo_set_3": "promo_set_3.json",
             "d23_collection": "d23_collection.json",
             "challenge_promo": "challenge_promo.json",
-            "epcot_festival_of_the_arts": "epcot_festival_of_the_arts.json"
+            "epcot_festival_of_the_arts": "epcot_festival_of_the_arts.json",
+            "lorcana_challenge_year_3": "lorcana_challenge_year_3.json",
+            "wilds_unknown": "wilds_unknown.json"
         ]
 
         for (setId, filename) in setFilenames {

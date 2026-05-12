@@ -1,0 +1,799 @@
+{
+  "" : {
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/Inkwell Keeper-primary.dia",
+    "emit-module-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/Inkwell Keeper-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/Inkwell Keeper-primary-emit-module.dia",
+    "pch" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/Inkwell Keeper-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/Inkwell Keeper-primary.swiftdeps"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/BuyCardButton.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/BuyCardButton.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/BuyCardButton.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/BuyCardButton.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/BuyCardButton.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/BuyCardButton.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/BuyCardButton.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/BuyCardButton.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/BuyCardButton~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/CameraPreview.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CameraPreview.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CameraPreview.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CameraPreview.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CameraPreview.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CameraPreview.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CameraPreview.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CameraPreview.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CameraPreview~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/CardGridView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardGridView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardGridView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardGridView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardGridView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardGridView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardGridView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardGridView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardGridView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/CardImageAttachmentView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardImageAttachmentView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardImageAttachmentView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardImageAttachmentView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardImageAttachmentView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardImageAttachmentView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardImageAttachmentView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardImageAttachmentView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardImageAttachmentView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/CardTitle.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardTitle.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardTitle.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardTitle.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardTitle.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardTitle.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardTitle.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardTitle.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardTitle~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/CompactPhotoAttachmentView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CompactPhotoAttachmentView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CompactPhotoAttachmentView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CompactPhotoAttachmentView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CompactPhotoAttachmentView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CompactPhotoAttachmentView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CompactPhotoAttachmentView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CompactPhotoAttachmentView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CompactPhotoAttachmentView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/CostBadge.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CostBadge.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CostBadge.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CostBadge.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CostBadge.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CostBadge.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CostBadge.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CostBadge.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CostBadge~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/EmptyStates.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/EmptyStates.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/EmptyStates.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/EmptyStates.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/EmptyStates.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/EmptyStates.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/EmptyStates.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/EmptyStates.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/EmptyStates~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/FilterBar.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterBar.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterBar.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterBar.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterBar.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterBar.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterBar.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterBar.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterBar~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/FilterChip.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterChip.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterChip.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterChip.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterChip.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterChip.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterChip.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterChip.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterChip~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/FoilEffect.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FoilEffect.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FoilEffect.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FoilEffect.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FoilEffect.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FoilEffect.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FoilEffect.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FoilEffect.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FoilEffect~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/HolographicCardImage.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/HolographicCardImage.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/HolographicCardImage.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/HolographicCardImage.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/HolographicCardImage.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/HolographicCardImage.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/HolographicCardImage.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/HolographicCardImage.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/HolographicCardImage~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/InteractiveCardView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InteractiveCardView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InteractiveCardView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InteractiveCardView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InteractiveCardView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InteractiveCardView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InteractiveCardView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InteractiveCardView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InteractiveCardView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/InteractiveHolographicEffect.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InteractiveHolographicEffect.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InteractiveHolographicEffect.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InteractiveHolographicEffect.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InteractiveHolographicEffect.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InteractiveHolographicEffect.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InteractiveHolographicEffect.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InteractiveHolographicEffect.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InteractiveHolographicEffect~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/LorcanaBackground.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaBackground.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaBackground.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaBackground.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaBackground.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaBackground.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaBackground.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaBackground.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaBackground~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/PlayerLoreCard.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PlayerLoreCard.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PlayerLoreCard.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PlayerLoreCard.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PlayerLoreCard.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PlayerLoreCard.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PlayerLoreCard.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PlayerLoreCard.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PlayerLoreCard~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/PriceWithConfidenceView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PriceWithConfidenceView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PriceWithConfidenceView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PriceWithConfidenceView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PriceWithConfidenceView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PriceWithConfidenceView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PriceWithConfidenceView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PriceWithConfidenceView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PriceWithConfidenceView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/RarityBadge.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RarityBadge.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RarityBadge.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RarityBadge.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RarityBadge.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RarityBadge.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RarityBadge.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RarityBadge.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RarityBadge~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/ScanOverlay.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ScanOverlay.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ScanOverlay.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ScanOverlay.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ScanOverlay.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ScanOverlay.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ScanOverlay.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ScanOverlay.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ScanOverlay~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/SearchBar.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SearchBar.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SearchBar.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SearchBar.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SearchBar.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SearchBar.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SearchBar.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SearchBar.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SearchBar~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/StatsCards.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StatsCards.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StatsCards.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StatsCards.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StatsCards.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StatsCards.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StatsCards.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StatsCards.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StatsCards~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Components/WishlistComponents.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WishlistComponents.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WishlistComponents.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WishlistComponents.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WishlistComponents.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WishlistComponents.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WishlistComponents.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WishlistComponents.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WishlistComponents~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/ContentView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ContentView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ContentView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ContentView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ContentView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ContentView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ContentView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ContentView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Data/SetsDataManager.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetsDataManager.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetsDataManager.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetsDataManager.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetsDataManager.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetsDataManager.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetsDataManager.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetsDataManager.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetsDataManager~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Extensions/AsyncImageExtensions.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AsyncImageExtensions.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AsyncImageExtensions.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AsyncImageExtensions.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AsyncImageExtensions.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AsyncImageExtensions.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AsyncImageExtensions.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AsyncImageExtensions.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AsyncImageExtensions~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Extensions/Color+Extensions.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/Color+Extensions.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/Color+Extensions.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/Color+Extensions.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/Color+Extensions.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/Color+Extensions.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/Color+Extensions.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/Color+Extensions.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/Color+Extensions~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Extensions/LorcanaCardExtensions.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaCardExtensions.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaCardExtensions.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaCardExtensions.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaCardExtensions.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaCardExtensions.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaCardExtensions.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaCardExtensions.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaCardExtensions~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/InkwellKeeperApp.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InkwellKeeperApp.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InkwellKeeperApp.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InkwellKeeperApp.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InkwellKeeperApp.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InkwellKeeperApp.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InkwellKeeperApp.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InkwellKeeperApp.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/InkwellKeeperApp~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Models/CardRarity.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardRarity.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardRarity.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardRarity.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardRarity.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardRarity.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardRarity.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardRarity.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardRarity~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Models/DeckModels.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DeckModels.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DeckModels.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DeckModels.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DeckModels.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DeckModels.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DeckModels.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DeckModels.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DeckModels~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Models/FilterModels.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterModels.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterModels.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterModels.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterModels.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterModels.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterModels.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterModels.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FilterModels~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Models/LorcanaCard.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaCard.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaCard.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaCard.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaCard.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaCard.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaCard.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaCard.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaCard~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Models/LoreCounterModels.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LoreCounterModels.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LoreCounterModels.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LoreCounterModels.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LoreCounterModels.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LoreCounterModels.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LoreCounterModels.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LoreCounterModels.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LoreCounterModels~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Models/StarterDeckModels.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDeckModels.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDeckModels.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDeckModels.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDeckModels.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDeckModels.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDeckModels.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDeckModels.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDeckModels~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Models/SwiftDataModels.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SwiftDataModels.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SwiftDataModels.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SwiftDataModels.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SwiftDataModels.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SwiftDataModels.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SwiftDataModels.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SwiftDataModels.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SwiftDataModels~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Models/TipProduct.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipProduct.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipProduct.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipProduct.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipProduct.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipProduct.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipProduct.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipProduct.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipProduct~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Services/AIDeckService.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AIDeckService.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AIDeckService.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AIDeckService.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AIDeckService.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AIDeckService.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AIDeckService.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AIDeckService.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AIDeckService~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Services/AffiliateService.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AffiliateService.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AffiliateService.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AffiliateService.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AffiliateService.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AffiliateService.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AffiliateService.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AffiliateService.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AffiliateService~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Services/CloudKitKeyService.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CloudKitKeyService.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CloudKitKeyService.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CloudKitKeyService.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CloudKitKeyService.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CloudKitKeyService.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CloudKitKeyService.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CloudKitKeyService.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CloudKitKeyService~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Services/DataMigrationService.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DataMigrationService.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DataMigrationService.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DataMigrationService.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DataMigrationService.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DataMigrationService.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DataMigrationService.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DataMigrationService.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DataMigrationService~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Services/ImageCache.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ImageCache.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ImageCache.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ImageCache.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ImageCache.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ImageCache.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ImageCache.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ImageCache.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ImageCache~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Services/ImportService.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ImportService.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ImportService.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ImportService.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ImportService.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ImportService.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ImportService.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ImportService.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ImportService~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Services/LorcanaAPIService.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaAPIService.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaAPIService.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaAPIService.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaAPIService.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaAPIService.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaAPIService.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaAPIService.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaAPIService~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Services/OpenAIService.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/OpenAIService.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/OpenAIService.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/OpenAIService.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/OpenAIService.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/OpenAIService.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/OpenAIService.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/OpenAIService.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/OpenAIService~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Services/PricingService.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PricingService.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PricingService.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PricingService.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PricingService.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PricingService.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PricingService.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PricingService.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/PricingService~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Services/ReviewManager.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ReviewManager.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ReviewManager.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ReviewManager.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ReviewManager.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ReviewManager.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ReviewManager.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ReviewManager.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ReviewManager~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Services/RulesAssistantService.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesAssistantService.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesAssistantService.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesAssistantService.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesAssistantService.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesAssistantService.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesAssistantService.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesAssistantService.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesAssistantService~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Services/SubscriptionManager.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SubscriptionManager.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SubscriptionManager.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SubscriptionManager.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SubscriptionManager.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SubscriptionManager.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SubscriptionManager.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SubscriptionManager.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SubscriptionManager~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Services/TipJarManager.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipJarManager.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipJarManager.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipJarManager.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipJarManager.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipJarManager.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipJarManager.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipJarManager.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipJarManager~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Styles/LorcanaButtonStyle.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaButtonStyle.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaButtonStyle.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaButtonStyle.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaButtonStyle.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaButtonStyle.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaButtonStyle.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaButtonStyle.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LorcanaButtonStyle~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/ViewModels/CameraManager.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CameraManager.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CameraManager.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CameraManager.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CameraManager.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CameraManager.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CameraManager.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CameraManager.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CameraManager~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/ViewModels/CollectionManager.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CollectionManager.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CollectionManager.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CollectionManager.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CollectionManager.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CollectionManager.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CollectionManager.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CollectionManager.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CollectionManager~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/ViewModels/DeckManager.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DeckManager.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DeckManager.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DeckManager.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DeckManager.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DeckManager.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DeckManager.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DeckManager.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DeckManager~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/ViewModels/MotionManager.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/MotionManager.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/MotionManager.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/MotionManager.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/MotionManager.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/MotionManager.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/MotionManager.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/MotionManager.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/MotionManager~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/ViewModels/StarterDeckManager.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDeckManager.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDeckManager.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDeckManager.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDeckManager.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDeckManager.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDeckManager.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDeckManager.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDeckManager~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/AIDeckBuilderView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AIDeckBuilderView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AIDeckBuilderView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AIDeckBuilderView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AIDeckBuilderView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AIDeckBuilderView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AIDeckBuilderView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AIDeckBuilderView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/AIDeckBuilderView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/BulkImportView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/BulkImportView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/BulkImportView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/BulkImportView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/BulkImportView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/BulkImportView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/BulkImportView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/BulkImportView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/BulkImportView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/CardSearchView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardSearchView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardSearchView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardSearchView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardSearchView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardSearchView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardSearchView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardSearchView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CardSearchView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/CollectionView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CollectionView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CollectionView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CollectionView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CollectionView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CollectionView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CollectionView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CollectionView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/CollectionView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/DecksView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DecksView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DecksView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DecksView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DecksView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DecksView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DecksView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DecksView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DecksView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/DetailView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DetailView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DetailView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DetailView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DetailView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DetailView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DetailView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DetailView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/DetailView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/ExportView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ExportView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ExportView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ExportView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ExportView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ExportView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ExportView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ExportView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ExportView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/FullscreenCardViewer.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FullscreenCardViewer.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FullscreenCardViewer.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FullscreenCardViewer.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FullscreenCardViewer.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FullscreenCardViewer.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FullscreenCardViewer.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FullscreenCardViewer.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/FullscreenCardViewer~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/LoreCounterView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LoreCounterView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LoreCounterView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LoreCounterView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LoreCounterView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LoreCounterView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LoreCounterView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LoreCounterView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/LoreCounterView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/MultiScanReviewView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/MultiScanReviewView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/MultiScanReviewView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/MultiScanReviewView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/MultiScanReviewView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/MultiScanReviewView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/MultiScanReviewView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/MultiScanReviewView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/MultiScanReviewView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/OnboardingView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/OnboardingView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/OnboardingView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/OnboardingView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/OnboardingView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/OnboardingView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/OnboardingView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/OnboardingView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/OnboardingView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/RulesAssistantView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesAssistantView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesAssistantView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesAssistantView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesAssistantView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesAssistantView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesAssistantView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesAssistantView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesAssistantView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/RulesPaywallView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesPaywallView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesPaywallView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesPaywallView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesPaywallView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesPaywallView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesPaywallView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesPaywallView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/RulesPaywallView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/ScannerView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ScannerView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ScannerView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ScannerView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ScannerView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ScannerView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ScannerView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ScannerView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/ScannerView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/SetDetailView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetDetailView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetDetailView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetDetailView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetDetailView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetDetailView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetDetailView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetDetailView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetDetailView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/SetsView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetsView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetsView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetsView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetsView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetsView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetsView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetsView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SetsView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/SettingsView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SettingsView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SettingsView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SettingsView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SettingsView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SettingsView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SettingsView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SettingsView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SettingsView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/StarterDecksView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDecksView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDecksView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDecksView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDecksView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDecksView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDecksView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDecksView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StarterDecksView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/StatsView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StatsView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StatsView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StatsView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StatsView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StatsView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StatsView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StatsView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/StatsView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/SupportView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SupportView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SupportView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SupportView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SupportView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SupportView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SupportView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SupportView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/SupportView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/TipJarView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipJarView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipJarView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipJarView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipJarView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipJarView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipJarView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipJarView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/TipJarView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/WhatsNewView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WhatsNewView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WhatsNewView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WhatsNewView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WhatsNewView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WhatsNewView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WhatsNewView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WhatsNewView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WhatsNewView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Views/WishlistView.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WishlistView.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WishlistView.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WishlistView.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WishlistView.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WishlistView.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WishlistView.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WishlistView.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/WishlistView~partial.swiftmodule"
+  },
+  "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/brevin/Developer/Inkwell Keeper/build/Inkwell Keeper.build/Debug-iphonesimulator/Inkwell Keeper.build/Objects-normal/arm64/GeneratedAssetSymbols~partial.swiftmodule"
+  }
+}

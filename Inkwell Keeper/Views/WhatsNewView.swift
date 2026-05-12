@@ -29,8 +29,6 @@ struct WhatsNewView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
-                        // Mark this version as seen
-                        WhatsNewManager.shared.markVersionAsSeen()
                         dismiss()
                     }
                 }
@@ -38,6 +36,7 @@ struct WhatsNewView: View {
         }
         .onAppear {
             currentVersion = WhatsNewManager.shared.currentVersion
+            WhatsNewManager.shared.markVersionAsSeen()
         }
     }
 
@@ -152,6 +151,33 @@ struct ChangelogEntry {
 
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
+    ChangelogEntry(
+        version: "2.2.1",
+        date: "May 2026",
+        features: [],
+        improvements: [],
+        bugFixes: [
+            "Fixed scanned card photos being automatically saved to the collection — photos are now only attached when you explicitly add one",
+            "Fixed What's New popup reappearing on every launch when dismissed by swipe"
+        ],
+        inProgress: []
+    ),
+    ChangelogEntry(
+        version: "2.2.0",
+        date: "May 2026",
+        features: [
+            "Wilds Unknown - Added support for the new Wilds Unknown set with all 242 cards",
+            "Lorcana Challenge Year 3 - Added the 14-card Lorcana Challenge Year 3 promo set"
+        ],
+        improvements: [
+            "Updated Promo Set 1 with the Mickey Mouse - True Friend international variant",
+            "Added the four new Dalmatian Puppy alternate-art variants to Into the Inklands",
+            "Sets are now consistently ordered by set number across the app, with promos and special sets grouped at the end",
+            "Cards within a set now always display in collector-number order"
+        ],
+        bugFixes: [],
+        inProgress: []
+    ),
     ChangelogEntry(
         version: "2.1.0",
         date: "April 2026",

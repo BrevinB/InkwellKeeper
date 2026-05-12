@@ -186,7 +186,17 @@ struct CollectionView: View {
         case .rarity:
             cards.sort { $0.rarity.sortOrder < $1.rarity.sortOrder }
         case .set:
-            cards.sort { $0.setName < $1.setName }
+            let setOrder: [String: (Int, String)] = SetsDataManager.shared.sets.reduce(into: [:]) { dict, set in
+                let numeric = Int(set.setNumber ?? "") ?? Int.max
+                dict[set.name] = (numeric, set.releaseDate ?? "")
+            }
+            cards.sort { lhs, rhs in
+                let l = setOrder[lhs.setName] ?? (Int.max, "")
+                let r = setOrder[rhs.setName] ?? (Int.max, "")
+                if l.0 != r.0 { return l.0 < r.0 }
+                if l.1 != r.1 { return l.1 < r.1 }
+                return lhs.setName < rhs.setName
+            }
         }
 
         filteredCards = cards

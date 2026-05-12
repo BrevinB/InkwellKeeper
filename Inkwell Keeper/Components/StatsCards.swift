@@ -150,7 +150,8 @@ struct SetCompletionCard: View {
         "Reign of Jafar",
         "Fabled",
         "Whispers in the Well",
-        "Winterspell"
+        "Winterspell",
+        "Wilds Unknown"
     ]
 
     var body: some View {

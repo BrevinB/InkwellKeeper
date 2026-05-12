@@ -57,7 +57,9 @@ extension LorcanaCard {
             "Promo Set 3": "promo_set_3",
             "Challenge Promo": "challenge_promo",
             "D23 Collection": "d23_collection",
-            "EPCOT Festival of the Arts": "epcot_festival_of_the_arts"
+            "EPCOT Festival of the Arts": "epcot_festival_of_the_arts",
+            "Lorcana Challenge Year 3": "lorcana_challenge_year_3",
+            "Wilds Unknown": "wilds_unknown"
         ]
 
         guard let folderName = setFolderMap[setName] else {

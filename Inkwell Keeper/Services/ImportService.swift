@@ -468,12 +468,14 @@ class ImportService {
         case "009", "9": return "Fabled"
         case "010", "10": return "Whispers in the Well"
         case "011", "11": return "Winterspell"
+        case "012", "12": return "Wilds Unknown"
         case "P1": return "Promo Set 1"
         case "P2": return "Promo Set 2"
         case "P3": return "Promo Set 3"
         case "C1", "CP": return "Challenge Promo"
+        case "C2": return "Lorcana Challenge Year 3"
         case "D23": return "D23 Collection"
-        case "EFA": return "EPCOT Festival of the Arts"
+        case "DIS", "EFA": return "EPCOT Festival of the Arts"
         default: return nil
         }
     }

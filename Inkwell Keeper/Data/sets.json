@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-03-17",
+  "lastUpdated": "2026-05-02",
   "sets": [
     {
       "id": "the_first_chapter",
@@ -170,6 +170,26 @@
       "releaseDate": "2025-01-17",
       "cardCount": 3,
       "description": "Exclusive cards from the EPCOT International Festival of the Arts",
+      "isReleased": true
+    },
+    {
+      "id": "lorcana_challenge_year_3",
+      "name": "Lorcana Challenge Year 3",
+      "setCode": "C2",
+      "setNumber": "C2",
+      "releaseDate": "2026-01-16",
+      "cardCount": 14,
+      "description": "Promotional cards from the third year of Lorcana Challenge events.",
+      "isReleased": true
+    },
+    {
+      "id": "wilds_unknown",
+      "name": "Wilds Unknown",
+      "setCode": "WU",
+      "setNumber": "12",
+      "releaseDate": "2026-05-08",
+      "cardCount": 204,
+      "description": "Venture into uncharted lands as the realm's wild frontiers reveal new heroes and untamed magic.",
       "isReleased": true
     }
   ]

@@ -946,7 +946,6 @@ struct AddCardModal: View {
     @Binding var isPresented: Bool
     let onAdd: (LorcanaCard, Int) -> Void
     let isWishlist: Bool
-    let initialImage: Data?
 
     @EnvironmentObject var collectionManager: CollectionManager
     @State private var selectedVariant: CardVariant = .normal
@@ -956,16 +955,12 @@ struct AddCardModal: View {
     @State private var currentCard: LorcanaCard
     @State private var photoAttachments: [Data] = []
 
-    init(card: LorcanaCard, isPresented: Binding<Bool>, onAdd: @escaping (LorcanaCard, Int) -> Void, isWishlist: Bool, initialImage: Data? = nil) {
+    init(card: LorcanaCard, isPresented: Binding<Bool>, onAdd: @escaping (LorcanaCard, Int) -> Void, isWishlist: Bool) {
         self.card = card
         self._isPresented = isPresented
         self.onAdd = onAdd
         self.isWishlist = isWishlist
-        self.initialImage = initialImage
         self._currentCard = State(initialValue: card)
-        if let imageData = initialImage {
-            self._photoAttachments = State(initialValue: [imageData])
-        }
     }
 
     var selectedCard: LorcanaCard {

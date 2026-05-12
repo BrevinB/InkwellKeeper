@@ -730,7 +730,17 @@ struct ExportView: View {
 
     private var availableSets: [String] {
         let allSets = Set(collectionManager.collectedCards.map { $0.setName })
-        return Array(allSets).sorted()
+        let setOrder: [String: (Int, String)] = SetsDataManager.shared.sets.reduce(into: [:]) { dict, set in
+            let numeric = Int(set.setNumber ?? "") ?? Int.max
+            dict[set.name] = (numeric, set.releaseDate ?? "")
+        }
+        return Array(allSets).sorted { lhs, rhs in
+            let l = setOrder[lhs] ?? (Int.max, "")
+            let r = setOrder[rhs] ?? (Int.max, "")
+            if l.0 != r.0 { return l.0 < r.0 }
+            if l.1 != r.1 { return l.1 < r.1 }
+            return lhs < rhs
+        }
     }
 
     private func getCardCount(for option: ExportOption) -> Int {
@@ -1088,6 +1098,7 @@ struct ExportView: View {
         case "Fabled": return 9
         case "Whispers in the Well": return 10
         case "Winterspell": return 11
+        case "Wilds Unknown": return 12
         default: return 999
         }
     }
