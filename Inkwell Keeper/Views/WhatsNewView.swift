@@ -152,6 +152,28 @@ struct ChangelogEntry {
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
     ChangelogEntry(
+        version: "2.3.0",
+        date: "May 2026",
+        features: [
+            "Reworked Stats tab — rarity donut, ink-color and cost-curve charts, card type breakdown, inkable ratio, top 10 most valuable cards, value by set, plus set completion and recent additions",
+            "About Pricing sheet (Stats tab and Settings → Legal) explains where prices come from and why some cards may not have data"
+        ],
+        improvements: [
+            "Pricing is now exclusively live Cardmarket data — no more estimated values when market data isn't available",
+            "Cards without market data display \"—\" instead of a fabricated price",
+            "Refresh Prices button added to the Stats tab",
+            "Top valuable cards now show a variant badge so Normal, Foil, and Enchanted versions are easy to tell apart"
+        ],
+        bugFixes: [
+            "Fixed Bulk Add corrupting Enchanted/Epic/Iconic/Promo cards — each card now keeps its actual variant instead of being forced to Normal",
+            "Fixed Missing filter and set-completion percentage disagreeing after Bulk Add",
+            "One-time repair migrates any collections affected by the previous Bulk Add bug, merging duplicate rows automatically"
+        ],
+        inProgress: [
+            "Cardmarket pricing coverage continues to improve — report missing cards from Settings → Report an Issue"
+        ]
+    ),
+    ChangelogEntry(
         version: "2.2.1",
         date: "May 2026",
         features: [],

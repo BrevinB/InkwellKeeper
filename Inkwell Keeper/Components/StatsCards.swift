@@ -7,81 +7,6 @@
 
 import SwiftUI
 
-struct CollectionOverviewCard: View {
-    let totalCards: Int
-    let totalValue: Double
-    
-    var body: some View {
-        VStack(spacing: 16) {
-            Text("Collection Overview")
-                .font(.headline)
-                .foregroundColor(.white)
-            
-            HStack(spacing: 40) {
-                VStack {
-                    Text("\(totalCards)")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(.lorcanaGold)
-                    Text("Cards")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-                
-                VStack {
-                    Text(PricingService.formatPrice(totalValue))
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(.lorcanaGold)
-                    Text("Total Value")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-            }
-        }
-        .padding(24)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.lorcanaDark.opacity(0.8))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.lorcanaGold.opacity(0.3), lineWidth: 1)
-                )
-        )
-    }
-}
-
-struct RarityBreakdownCard: View {
-    let cardsByRarity: [(CardRarity, Int)]
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Rarity Breakdown")
-                .font(.headline)
-                .foregroundColor(.white)
-            
-            ForEach(cardsByRarity, id: \.0) { rarity, count in
-                HStack {
-                    RarityBadge(rarity: rarity)
-                    Spacer()
-                    Text("\(count)")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                }
-            }
-        }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.lorcanaDark.opacity(0.8))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.lorcanaGold.opacity(0.3), lineWidth: 1)
-                )
-        )
-    }
-}
-
 struct RecentAdditionsCard: View {
     let recentCards: [LorcanaCard]
     
@@ -228,19 +153,25 @@ struct SetProgressRow: View {
 
 struct CollectionStatsButton: View {
     @EnvironmentObject var collectionManager: CollectionManager
-    
+
     private var stats: (totalValue: Double, cardCount: Int, rarityBreakdown: [CardRarity: Int]) {
         collectionManager.getCollectionStats()
     }
-    
+
     var body: some View {
         VStack(alignment: .trailing, spacing: 2) {
-            Text(PricingService.formatPrice(stats.totalValue))
-                .font(.headline)
-                .foregroundColor(.lorcanaGold)
+            if stats.totalValue > 0 {
+                Text(PricingService.formatPrice(stats.totalValue))
+                    .font(.headline)
+                    .foregroundStyle(Color.lorcanaGold)
+            } else {
+                Text("—")
+                    .font(.headline)
+                    .foregroundStyle(.gray)
+            }
             Text("\(stats.cardCount) cards")
                 .font(.caption2)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
         }
     }
 }

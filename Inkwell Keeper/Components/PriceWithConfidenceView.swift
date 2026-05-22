@@ -2,12 +2,14 @@
 //  PriceWithConfidenceView.swift
 //  Inkwell Keeper
 //
-//  Displays card price with confidence indicator
+//  Displays card price with a confidence indicator.
+//  Cards without real market data render an "unavailable" placeholder
+//  rather than an estimated value.
 //
 
 import SwiftUI
 
-/// Displays a price with a confidence indicator badge
+/// Displays a price with a confidence indicator badge.
 struct PriceWithConfidenceView: View {
     let price: Double
     let confidence: PricingService.PriceConfidence
@@ -28,25 +30,10 @@ struct PriceWithConfidenceView: View {
     }
 
     private var inlineView: some View {
-        HStack(spacing: 4) {
-            Text(PricingService.formatPrice(price))
-                .font(.caption)
-                .foregroundColor(.lorcanaGold)
-                .fontWeight(.semibold)
-
-            if confidence == .estimated {
-                Text("EST")
-                    .font(.caption2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 4)
-                    .padding(.vertical, 2)
-                    .background(
-                        RoundedRectangle(cornerRadius: 3)
-                            .fill(confidenceColor)
-                    )
-            }
-        }
+        Text(PricingService.formatPrice(price))
+            .font(.caption)
+            .foregroundStyle(Color.lorcanaGold)
+            .bold()
     }
 
     private var detailedView: some View {
@@ -54,21 +41,14 @@ struct PriceWithConfidenceView: View {
             HStack(spacing: 8) {
                 Text(PricingService.formatPrice(price))
                     .font(.headline)
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(Color.lorcanaGold)
 
                 confidenceBadge
             }
 
-            if confidence == .estimated {
-                Text("Based on algorithmic estimation")
-                    .font(.caption2)
-                    .foregroundColor(.gray)
-                    .italic()
-            } else {
-                Text(confidence.description)
-                    .font(.caption2)
-                    .foregroundColor(.gray)
-            }
+            Text(confidence.description)
+                .font(.caption2)
+                .foregroundStyle(.gray)
         }
     }
 
@@ -78,114 +58,96 @@ struct PriceWithConfidenceView: View {
                 .font(.caption2)
             Text(confidence.rawValue.uppercased())
                 .font(.caption2)
-                .fontWeight(.bold)
+                .bold()
         }
-        .foregroundColor(.white)
+        .foregroundStyle(.white)
         .padding(.horizontal, 6)
         .padding(.vertical, 3)
-        .background(
-            Capsule()
-                .fill(confidenceColor)
-        )
+        .background(Capsule().fill(confidenceColor))
     }
 
     private var confidenceIcon: String {
         switch confidence {
-        case .high:
-            return "checkmark.circle.fill"
-        case .medium:
-            return "chart.bar.fill"
-        case .low:
-            return "exclamationmark.triangle.fill"
-        case .estimated:
-            return "function"
+        case .high: return "checkmark.circle.fill"
+        case .medium: return "chart.bar.fill"
+        case .low: return "exclamationmark.triangle.fill"
         }
     }
 
     private var confidenceColor: Color {
         switch confidence {
-        case .high:
-            return .green
-        case .medium:
-            return .orange
-        case .low:
-            return .red
-        case .estimated:
-            return .gray
+        case .high: return .green
+        case .medium: return .orange
+        case .low: return .red
         }
     }
 }
 
-/// Simple price display that fetches confidence data and displays it
+/// Compact "price unavailable" placeholder for when no provider returned market data.
+struct PriceUnavailableView: View {
+    let style: PriceWithConfidenceView.DisplayStyle
+
+    var body: some View {
+        switch style {
+        case .inline:
+            Text("—")
+                .font(.caption)
+                .foregroundStyle(.gray)
+        case .detailed:
+            VStack(alignment: .leading, spacing: 4) {
+                Text("No price available")
+                    .font(.subheadline)
+                    .foregroundStyle(.gray)
+                Text("Market data couldn't be retrieved for this card.")
+                    .font(.caption2)
+                    .foregroundStyle(.gray.opacity(0.8))
+            }
+        }
+    }
+}
+
+/// Async wrapper that fetches the price with confidence and renders the appropriate state.
 struct AsyncPriceWithConfidenceView: View {
     let card: LorcanaCard
     let style: PriceWithConfidenceView.DisplayStyle
 
-    private let pricingService = PricingService.shared
-    @State private var price: Double?
-    @State private var confidence: PricingService.PriceConfidence = .estimated
+    @State private var result: (price: Double, confidence: PricingService.PriceConfidence)?
     @State private var isLoading = true
+
+    private let pricingService = PricingService.shared
 
     var body: some View {
         Group {
-            if let price = price {
-                PriceWithConfidenceView(price: price, confidence: confidence, style: style)
+            if let result {
+                PriceWithConfidenceView(price: result.price, confidence: result.confidence, style: style)
             } else if isLoading {
                 HStack(spacing: 4) {
                     ProgressView()
                         .scaleEffect(0.7)
-                    Text("Loading...")
+                    Text("Loading…")
                         .font(.caption2)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 }
             } else {
-                Text("Price unavailable")
-                    .font(.caption2)
-                    .foregroundColor(.gray)
+                PriceUnavailableView(style: style)
             }
         }
         .task {
-            await loadPrice()
-        }
-    }
-
-    private func loadPrice() async {
-        let result = await pricingService.getPriceWithConfidence(for: card)
-        await MainActor.run {
-            self.price = result.price
-            self.confidence = result.confidence
-            self.isLoading = false
+            let fetched = await pricingService.getPriceWithConfidence(for: card)
+            await MainActor.run {
+                self.result = fetched
+                self.isLoading = false
+            }
         }
     }
 }
 
 #Preview {
     VStack(spacing: 20) {
-        // High confidence
-        PriceWithConfidenceView(
-            price: 24.99,
-            confidence: .high,
-            style: .inline
-        )
-
-        PriceWithConfidenceView(
-            price: 24.99,
-            confidence: .high,
-            style: .detailed
-        )
-
-        // Estimated
-        PriceWithConfidenceView(
-            price: 3.50,
-            confidence: .estimated,
-            style: .inline
-        )
-
-        PriceWithConfidenceView(
-            price: 3.50,
-            confidence: .estimated,
-            style: .detailed
-        )
+        PriceWithConfidenceView(price: 24.99, confidence: .high, style: .inline)
+        PriceWithConfidenceView(price: 24.99, confidence: .high, style: .detailed)
+        PriceUnavailableView(style: .inline)
+        PriceUnavailableView(style: .detailed)
     }
     .padding()
     .background(Color.black)

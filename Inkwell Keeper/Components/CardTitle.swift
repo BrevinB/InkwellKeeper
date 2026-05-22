@@ -182,8 +182,8 @@ struct CardTile: View {
         let priceChangeInfo = pricingService.getRecentPriceChange(for: card)
 
         await MainActor.run {
-            self.marketPrice = priceData.price
-            self.priceConfidence = priceData.confidence
+            self.marketPrice = priceData?.price
+            self.priceConfidence = priceData?.confidence
             self.priceChange = priceChangeInfo.changePercent
             self.loadingPrice = false
         }

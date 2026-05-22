@@ -2,7 +2,7 @@
 //  DebugPricingView.swift
 //  Inkwell Keeper
 //
-//  Debug view to test eBay API pricing
+//  Debug view to test the Cardmarket pricing pipeline
 //
 
 import SwiftUI
@@ -10,7 +10,7 @@ import SwiftUI
 struct DebugPricingView: View {
     private let pricingService = PricingService.shared
     @State private var testCard: LorcanaCard?
-    @State private var priceResult: String = "Tap 'Test eBay API' to start"
+    @State private var priceResult: String = "Tap 'Test Pricing API' to start"
     @State private var isLoading = false
 
     var body: some View {
@@ -24,7 +24,7 @@ struct DebugPricingView: View {
                             .fontWeight(.bold)
                             .foregroundColor(.lorcanaGold)
 
-                        Text("This tool tests the pricing API integration (Lorcana Prices, eBay, TCGPlayer). Check the Xcode console for detailed logs.")
+                        Text("This tool tests the Cardmarket pricing integration (Inkwell Backend → Lorcana Prices API fallback). Check the Xcode console for detailed logs.")
                             .font(.body)
                             .foregroundColor(.gray)
                     }
@@ -132,22 +132,17 @@ struct DebugPricingView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             issueRow(
                                 icon: "1.circle.fill",
-                                text: "Lorcana Prices API: Real-time Cardmarket data via RapidAPI. Requires 'rapidapi' key in CloudKit."
+                                text: "Inkwell Backend: Pre-aggregated Cardmarket prices served from our cache."
                             )
 
                             issueRow(
                                 icon: "2.circle.fill",
-                                text: "eBay Finding API: Searches sold listings for price averages. Falls back if Lorcana API unavailable."
+                                text: "Lorcana Prices API: Live Cardmarket fallback via RapidAPI. Requires 'rapidapi' key in CloudKit."
                             )
 
                             issueRow(
-                                icon: "3.circle.fill",
-                                text: "TCGPlayer: API or web scraping fallback. Requires API credentials for best results."
-                            )
-
-                            issueRow(
-                                icon: "function",
-                                text: "Estimation: Algorithmic fallback based on rarity, variant, and card attributes."
+                                icon: "info.circle.fill",
+                                text: "No estimates: when neither source has data, the card is reported as price-unavailable."
                             )
                         }
                     }
@@ -181,7 +176,7 @@ struct DebugPricingView: View {
     }
 
     private func loadTestCard() {
-        // Load a test card (Mickey Mouse is popular and should have eBay data)
+        // Load a test card (Mickey Mouse is popular and should have Cardmarket data)
         let dataManager = SetsDataManager.shared
         let results = dataManager.searchCards(query: "Mickey Mouse")
         testCard = results.first
@@ -194,7 +189,7 @@ struct DebugPricingView: View {
         }
 
         isLoading = true
-        priceResult = "🔄 Testing eBay API...\nCheck Xcode console for detailed logs.\n\n"
+        priceResult = "🔄 Testing Pricing API...\nCheck Xcode console for detailed logs.\n\n"
 
         do {
             let pricing = try await pricingService.getPricing(for: card, condition: .nearMint)

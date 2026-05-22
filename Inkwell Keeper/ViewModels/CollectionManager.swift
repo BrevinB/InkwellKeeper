@@ -30,7 +30,120 @@ class CollectionManager: ObservableObject {
     
     func setModelContext(_ context: ModelContext) {
         self.modelContext = context
+        wipeStaleEstimatedPricesIfNeeded(context: context)
+        repairBulkAddVariantCorruptionIfNeeded(context: context)
         loadCollection()
+    }
+
+    /// One-time repair for a pre-fix bulk-add bug. Prior versions of "Bulk Add" in
+    /// SetDetailView forced every selected card to .normal while preserving its
+    /// original uniqueId. That left rows like { variant: "Normal", uniqueId: <Enchanted's> }
+    /// which made the Missing filter and set-progress totals disagree, and — once the
+    /// filter was fixed — let users bulk-add the special variants a second time,
+    /// producing pairs of rows pointing to the same Cardmarket entry.
+    ///
+    /// We have to wait for SetsDataManager to finish its async load before running,
+    /// otherwise the master-card lookup is empty and the repair no-ops. The v2 flag
+    /// retries even for users who hit the v1 flag while master data was still loading.
+    private func repairBulkAddVariantCorruptionIfNeeded(context: ModelContext) {
+        let defaultsKey = "didRepairBulkAddVariants_v2"
+        guard !UserDefaults.standard.bool(forKey: defaultsKey) else { return }
+
+        Task { @MainActor in
+            // Poll until SetsDataManager has loaded its bundled JSON, up to ~30s.
+            var attempts = 0
+            while SetsDataManager.shared.getAllCards().isEmpty && attempts < 60 {
+                try? await Task.sleep(for: .milliseconds(500))
+                attempts += 1
+            }
+            guard !SetsDataManager.shared.getAllCards().isEmpty else { return }
+
+            performBulkAddRepair(context: context)
+            UserDefaults.standard.set(true, forKey: defaultsKey)
+        }
+    }
+
+    @MainActor
+    private func performBulkAddRepair(context: ModelContext) {
+        let masterSpecialVariants: [String: CardVariant] = {
+            var map: [String: CardVariant] = [:]
+            for card in SetsDataManager.shared.getAllCards() {
+                guard let uid = card.uniqueId, !uid.isEmpty else { continue }
+                switch card.variant {
+                case .enchanted, .epic, .iconic, .promo, .borderless:
+                    map[uid] = card.variant
+                case .normal, .foil:
+                    break
+                }
+            }
+            return map
+        }()
+        guard !masterSpecialVariants.isEmpty else { return }
+
+        do {
+            let allCards = try context.fetch(FetchDescriptor<CollectedCard>())
+
+            // Index existing rows by (uniqueId, variant) so we can detect collisions
+            // when promoting a corrupted Normal row to its real variant.
+            var existingByKey: [String: CollectedCard] = [:]
+            for card in allCards {
+                guard let uid = card.uniqueId, !uid.isEmpty else { continue }
+                existingByKey["\(uid)|\(card.cardVariant.rawValue)"] = card
+            }
+
+            var changed = 0
+            for record in allCards {
+                guard record.cardVariant == .normal,
+                      let uid = record.uniqueId, !uid.isEmpty,
+                      let correctVariant = masterSpecialVariants[uid] else { continue }
+
+                let targetKey = "\(uid)|\(correctVariant.rawValue)"
+                if let collision = existingByKey[targetKey], collision !== record {
+                    // A legit row at the correct variant already exists — the corrupted
+                    // row is a duplicate of the same physical card. Keep the larger
+                    // quantity (the user almost certainly only owns 1) and delete the
+                    // corrupted row.
+                    collision.quantity = max(collision.quantity, record.quantity)
+                    if collision.price == nil, let recordPrice = record.price {
+                        collision.price = recordPrice
+                    }
+                    context.delete(record)
+                } else {
+                    record.cardVariant = correctVariant
+                    existingByKey[targetKey] = record
+                }
+                changed += 1
+            }
+
+            if changed > 0 {
+                try context.save()
+                updateCollectedCardsInPlace()
+            }
+        } catch {
+            // Non-fatal — the underlying bug is already fixed in code, so new bulk-adds
+            // won't reintroduce the corruption.
+        }
+    }
+
+    /// One-time wipe of stored CollectedCard.price values that may have been written
+    /// as algorithmic estimates by prior versions of the app. Future refreshes will
+    /// repopulate prices only with real market data.
+    private func wipeStaleEstimatedPricesIfNeeded(context: ModelContext) {
+        let defaultsKey = "didWipeEstimatedPrices_v3"
+        guard !UserDefaults.standard.bool(forKey: defaultsKey) else { return }
+
+        do {
+            let descriptor = FetchDescriptor<CollectedCard>()
+            let cards = try context.fetch(descriptor)
+            for card in cards where card.price != nil {
+                card.price = nil
+            }
+            try context.save()
+            UserDefaults.standard.set(true, forKey: defaultsKey)
+        } catch {
+            // Migration failure is non-fatal — prices will continue to be replaced
+            // organically as users refresh.
+        }
     }
 
     /// Lightweight refresh of collected cards only (avoids full 3-fetch reload)
@@ -611,9 +724,7 @@ class CollectionManager: ObservableObject {
                 }
 
                 let price = await pricingService.getMarketPrice(for: card)
-                if let updatedPrice = price {
-                    cardData.price = updatedPrice
-                }
+                cardData.price = price
             }
 
             try context.save()

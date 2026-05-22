@@ -20,6 +20,7 @@ struct SettingsView: View {
     @State private var showingDeleteConfirmation = false
     @State private var showingTipJar = false
     @State private var showingWhatsNew = false
+    @State private var showingPricingInfo = false
 
     // Debug options
     @State private var showingAddSomeConfirmation = false
@@ -77,6 +78,9 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showingTipJar) {
                 TipJarView()
+            }
+            .sheet(isPresented: $showingPricingInfo) {
+                PricingInfoView()
             }
             .sheet(isPresented: $showingWhatsNew) {
                 WhatsNewView()
@@ -186,6 +190,11 @@ struct SettingsView: View {
 
     private var legalSection: some View {
         Section("Legal") {
+            Button(action: { showingPricingInfo = true }) {
+                Label("About Pricing", systemImage: "tag.fill")
+                    .foregroundColor(.primary)
+            }
+
             Button(action: { showingDisclaimer = true }) {
                 Label("Disclaimer", systemImage: "exclamationmark.triangle.fill")
                     .foregroundColor(.primary)
@@ -606,7 +615,7 @@ Ink Well Keeper is provided "as is" without warranties of any kind. The develope
 • Loss of data
 • Any damages arising from use of this app
 
-Pricing information is estimated and may not reflect actual market values.
+Pricing information is sourced from third-party marketplaces and may not reflect actual market values. Cards without available market data will not display a price.
 """)
             .font(.body)
         }
@@ -727,7 +736,7 @@ All your collection data is stored locally on your device using Apple's SwiftDat
             Text("""
 This app may access third-party websites for:
 
-• Card price estimates (TCGPlayer, eBay)
+• Card market pricing (Cardmarket)
 • Purchase links (affiliate links)
 
 When you click external links, you leave our app and are subject to those websites' privacy policies. We do not control or monitor these external sites.

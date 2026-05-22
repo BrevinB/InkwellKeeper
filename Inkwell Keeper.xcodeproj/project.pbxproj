@@ -110,6 +110,17 @@
 		E2F3A4B5C6D7E8F9A0B1C3D5 /* MultiScanReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F3A4B5C6D7E8F9A0B1C3D4 /* MultiScanReviewView.swift */; };
 		F1CARD5EB6A63F /* CardSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1CARD5EA3181D /* CardSearchView.swift */; };
 		F9FA8CEF18B640868AFA0847 /* whispers_in_the_well.json in Resources */ = {isa = PBXBuildFile; fileRef = B281D76F664D42E898C5AFFB /* whispers_in_the_well.json */; };
+		2E8C230A7C7346CDB8139B7D /* StatsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF2A26313064CEB985D1463 /* StatsViewModel.swift */; };
+		F752CD3BCA5B479CBEF391EB /* StatsCardContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4443B3280ED4450783544968 /* StatsCardContainer.swift */; };
+		3FDC3C18E5754BB18B3D3CA6 /* StatsOverviewCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3E270541E24B3288B8E542 /* StatsOverviewCard.swift */; };
+		07A14C930B524568A97F915A /* RarityDonutCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 201FD86CB7074B36B57EA57E /* RarityDonutCard.swift */; };
+		F8BB73DA16F14CECBF8505C1 /* InkColorChartCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F1B8FB605BA4901A05BB709 /* InkColorChartCard.swift */; };
+		DBC03F974A434FEAA071F27B /* CostCurveCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3744E1396FD647F29C30135B /* CostCurveCard.swift */; };
+		33BC6BA59BCB415FB26BED1B /* TypeBreakdownCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFF6B0A02D74D5DBDDBD4B1 /* TypeBreakdownCard.swift */; };
+		B3FA2E0710E5469DB952C448 /* InkableRatioCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A0DC199D804E5399BF0EE9 /* InkableRatioCard.swift */; };
+		D713553E04644B5A986AC5C2 /* TopValuableCardsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C326BEDCB4F436483894B4D /* TopValuableCardsCard.swift */; };
+		1E34BEC4FE724210B4368238 /* ValueBySetCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6502D77B1F14DFEA73094B1 /* ValueBySetCard.swift */; };
+		24F006AF660D446BAA2A4898 /* PricingInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F6FB2C58AC4849856F7DB2 /* PricingInfoView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -217,6 +228,17 @@
 		D1E2F3A4B5C6D7E8F9A0B1C5 /* Inkwell Keeper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Inkwell Keeper.entitlements"; sourceTree = "<group>"; };
 		E2F3A4B5C6D7E8F9A0B1C3D4 /* MultiScanReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiScanReviewView.swift; sourceTree = "<group>"; };
 		F1CARD5EA3181D /* CardSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSearchView.swift; sourceTree = "<group>"; };
+		7CF2A26313064CEB985D1463 /* StatsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsViewModel.swift; sourceTree = "<group>"; };
+		4443B3280ED4450783544968 /* StatsCardContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsCardContainer.swift; sourceTree = "<group>"; };
+		3C3E270541E24B3288B8E542 /* StatsOverviewCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsOverviewCard.swift; sourceTree = "<group>"; };
+		201FD86CB7074B36B57EA57E /* RarityDonutCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RarityDonutCard.swift; sourceTree = "<group>"; };
+		2F1B8FB605BA4901A05BB709 /* InkColorChartCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkColorChartCard.swift; sourceTree = "<group>"; };
+		3744E1396FD647F29C30135B /* CostCurveCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CostCurveCard.swift; sourceTree = "<group>"; };
+		DBFF6B0A02D74D5DBDDBD4B1 /* TypeBreakdownCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeBreakdownCard.swift; sourceTree = "<group>"; };
+		00A0DC199D804E5399BF0EE9 /* InkableRatioCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkableRatioCard.swift; sourceTree = "<group>"; };
+		7C326BEDCB4F436483894B4D /* TopValuableCardsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopValuableCardsCard.swift; sourceTree = "<group>"; };
+		F6502D77B1F14DFEA73094B1 /* ValueBySetCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValueBySetCard.swift; sourceTree = "<group>"; };
+		51F6FB2C58AC4849856F7DB2 /* PricingInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PricingInfoView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -337,6 +359,7 @@
 				23B90B382E66338B00214C40 /* CollectionManager.swift */,
 				23B90B3A2E6633A600214C40 /* CameraManager.swift */,
 				C1D2E3F4A5B6C7D8E9F0A1B1 /* MotionManager.swift */,
+				7CF2A26313064CEB985D1463 /* StatsViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -387,6 +410,7 @@
 				23B90B262E66335500214C40 /* DetailView.swift */,
 				6AA815C9650049DB84CB04F7 /* OnboardingView.swift */,
 				C1D2E3F4A5B6C7D8E9F0A1B7 /* FullscreenCardViewer.swift */,
+				51F6FB2C58AC4849856F7DB2 /* PricingInfoView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -416,6 +440,15 @@
 				C1D2E3F4A5B6C7D8E9F0A1B3 /* InteractiveHolographicEffect.swift */,
 				C1D2E3F4A5B6C7D8E9F0A1B5 /* InteractiveCardView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E1F2 /* HolographicCardImage.swift */,
+				4443B3280ED4450783544968 /* StatsCardContainer.swift */,
+				3C3E270541E24B3288B8E542 /* StatsOverviewCard.swift */,
+				201FD86CB7074B36B57EA57E /* RarityDonutCard.swift */,
+				2F1B8FB605BA4901A05BB709 /* InkColorChartCard.swift */,
+				3744E1396FD647F29C30135B /* CostCurveCard.swift */,
+				DBFF6B0A02D74D5DBDDBD4B1 /* TypeBreakdownCard.swift */,
+				00A0DC199D804E5399BF0EE9 /* InkableRatioCard.swift */,
+				7C326BEDCB4F436483894B4D /* TopValuableCardsCard.swift */,
+				F6502D77B1F14DFEA73094B1 /* ValueBySetCard.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -605,6 +638,17 @@
 				23B90B352E66338300214C40 /* CardRarity.swift in Sources */,
 				23B90B272E66335700214C40 /* DetailView.swift in Sources */,
 				23B90B392E66339400214C40 /* CollectionManager.swift in Sources */,
+				2E8C230A7C7346CDB8139B7D /* StatsViewModel.swift in Sources */,
+				F752CD3BCA5B479CBEF391EB /* StatsCardContainer.swift in Sources */,
+				3FDC3C18E5754BB18B3D3CA6 /* StatsOverviewCard.swift in Sources */,
+				07A14C930B524568A97F915A /* RarityDonutCard.swift in Sources */,
+				F8BB73DA16F14CECBF8505C1 /* InkColorChartCard.swift in Sources */,
+				DBC03F974A434FEAA071F27B /* CostCurveCard.swift in Sources */,
+				33BC6BA59BCB415FB26BED1B /* TypeBreakdownCard.swift in Sources */,
+				B3FA2E0710E5469DB952C448 /* InkableRatioCard.swift in Sources */,
+				D713553E04644B5A986AC5C2 /* TopValuableCardsCard.swift in Sources */,
+				1E34BEC4FE724210B4368238 /* ValueBySetCard.swift in Sources */,
+				24F006AF660D446BAA2A4898 /* PricingInfoView.swift in Sources */,
 				23B90B132E66330000214C40 /* WishlistComponents.swift in Sources */,
 				23D2466B2F2D9DCE00CF4128 /* RulesAssistantView.swift in Sources */,
 				23B90D1F2E6CCB7900214C40 /* PricingService.swift in Sources */,
@@ -771,7 +815,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.2.1;
+				MARKETING_VERSION = 2.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -809,7 +853,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.2.1;
+				MARKETING_VERSION = 2.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

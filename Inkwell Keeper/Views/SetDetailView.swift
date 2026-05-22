@@ -361,14 +361,14 @@ struct SetDetailView: View {
             isPresented: $showBulkAddConfirmation,
             titleVisibility: .visible
         ) {
-            Button("Add as Normal") {
+            Button("Add to Collection") {
                 bulkAddSelectedCards()
             }
             Button("Cancel", role: .cancel) {
                 showBulkAddConfirmation = false
             }
         } message: {
-            Text("All selected cards will be added as Normal variant with quantity 1.")
+            Text("Each card is added with its actual variant (Normal, Enchanted, Epic, Iconic, or Promo) at quantity 1.")
         }
         .overlay(
             // Quick add success banner
@@ -460,9 +460,12 @@ struct SetDetailView: View {
     }
 
     private func bulkAddSelectedCards() {
+        // Preserve each card's actual variant. Forcing .normal here used to corrupt
+        // special-variant entries (Enchanted/Epic/Iconic/Promo) by storing them as
+        // Normal CollectedCards that still carried the special variant's uniqueId,
+        // which made the Missing filter and set-progress counter disagree.
         for card in selectedCards {
-            let normalCard = card.variant == .normal ? card : card.withVariant(.normal)
-            collectionManager.addCard(normalCard, quantity: 1)
+            collectionManager.addCard(card, quantity: 1)
         }
         selectedCardIds.removeAll()
         isBulkSelectMode = false
@@ -503,13 +506,17 @@ struct SetDetailView: View {
                                            collected.variant == .iconic ||
                                            collected.variant == .promo
 
-            // For special variants (unique art), use uniqueId for precise matching
             if cardIsSpecialVariant {
+                // Special variants (unique art) must match BOTH variant and identity.
+                // Without the variant check, a corrupted Normal entry that happens to
+                // carry a special variant's uniqueId would falsely satisfy the match
+                // and the Missing filter would disagree with set-progress totals.
+                guard collected.variant == card.variant else { return false }
                 if let cardUniqueId = card.uniqueId, let collectedUniqueId = collected.uniqueId,
                    !cardUniqueId.isEmpty, !collectedUniqueId.isEmpty {
                     return collectedUniqueId == cardUniqueId
                 }
-                return collected.name == card.name && collected.variant == card.variant
+                return collected.name == card.name
             } else {
                 // Normal/Foil: match by name and set to avoid false positives across sets
                 return collected.name == card.name && collected.setName == card.setName && !collectedIsSpecialVariant
