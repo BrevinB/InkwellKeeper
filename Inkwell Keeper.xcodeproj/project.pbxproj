@@ -7,6 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3279F65A71AF4B52BDDE2E56 /* CelebrationBurst.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9AAC7C20950445D86D56146 /* CelebrationBurst.swift */; };
+		BC083B5DBEA8457485C7021F /* PackResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC0F504356B4BBCAEBAD3BA /* PackResult.swift */; };
+		D9C6E44858C044649ED3D5CE /* PackSimulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57C848FF5033436A8E704FAE /* PackSimulator.swift */; };
+		F5FA824ADAFB46DD89AFB4C0 /* GenericPackWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA050DD7CC649E097256CE3 /* GenericPackWrapper.swift */; };
+		188032E2A0644E13A465EBB6 /* CardBackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8532CA864164694ADA01C03 /* CardBackView.swift */; };
+		67B9634773664A59B9D92E42 /* PackCardImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CC62B37FC0F4623B2E02281 /* PackCardImageView.swift */; };
+		3B722972381D46D88FB19D0F /* PackSetPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B556ED2D806A43868B3AC308 /* PackSetPickerView.swift */; };
+		A958354BD37C46D1983C0554 /* SealedPackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 837A0A6A7DFF45A5A45C8F46 /* SealedPackView.swift */; };
+		808B129945AA4752AE54A853 /* PackRevealView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D1EBD9192F492FB1E518A9 /* PackRevealView.swift */; };
+		2E308FC120AF4A8C86EAB9DD /* PackSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71B550DF03C459B8AC79099 /* PackSummaryView.swift */; };
+		E84037B3FFFE4EA9B6F2F6EC /* PackOpeningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A6BB468A7B4EC99321A57C /* PackOpeningView.swift */; };
 		230F91D32EA89E65006E5A70 /* StarterDecksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230F91D22EA89E65006E5A70 /* StarterDecksView.swift */; };
 		230F91D52EA89E86006E5A70 /* StarterDeckManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230F91D42EA89E86006E5A70 /* StarterDeckManager.swift */; };
 		230F91D92EA89EA1006E5A70 /* StarterDeckModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230F91D82EA89EA1006E5A70 /* StarterDeckModels.swift */; };
@@ -124,6 +135,17 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D9AAC7C20950445D86D56146 /* CelebrationBurst.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelebrationBurst.swift; sourceTree = "<group>"; };
+		8AC0F504356B4BBCAEBAD3BA /* PackResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackResult.swift; sourceTree = "<group>"; };
+		57C848FF5033436A8E704FAE /* PackSimulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackSimulator.swift; sourceTree = "<group>"; };
+		AAA050DD7CC649E097256CE3 /* GenericPackWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericPackWrapper.swift; sourceTree = "<group>"; };
+		A8532CA864164694ADA01C03 /* CardBackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardBackView.swift; sourceTree = "<group>"; };
+		1CC62B37FC0F4623B2E02281 /* PackCardImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackCardImageView.swift; sourceTree = "<group>"; };
+		B556ED2D806A43868B3AC308 /* PackSetPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackSetPickerView.swift; sourceTree = "<group>"; };
+		837A0A6A7DFF45A5A45C8F46 /* SealedPackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SealedPackView.swift; sourceTree = "<group>"; };
+		47D1EBD9192F492FB1E518A9 /* PackRevealView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackRevealView.swift; sourceTree = "<group>"; };
+		F71B550DF03C459B8AC79099 /* PackSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackSummaryView.swift; sourceTree = "<group>"; };
+		16A6BB468A7B4EC99321A57C /* PackOpeningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackOpeningView.swift; sourceTree = "<group>"; };
 		1E3D652CBA4843E9BA303B2E /* DataMigrationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataMigrationService.swift; sourceTree = "<group>"; };
 		230352EE2E66220700CA8AA3 /* Inkwell Keeper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Inkwell Keeper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		230F91D22EA89E65006E5A70 /* StarterDecksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarterDecksView.swift; sourceTree = "<group>"; };
@@ -339,6 +361,7 @@
 		23B90AFF2E66323E00214C40 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				8AC0F504356B4BBCAEBAD3BA /* PackResult.swift */,
 				AA1B2C3D4E5F678901234560 /* LoreCounterModels.swift */,
 				232D42962ECE322400FF9283 /* TipProduct.swift */,
 				230F91D82EA89EA1006E5A70 /* StarterDeckModels.swift */,
@@ -354,6 +377,7 @@
 		23B90B002E66324300214C40 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				57C848FF5033436A8E704FAE /* PackSimulator.swift */,
 				230F91D42EA89E86006E5A70 /* StarterDeckManager.swift */,
 				23D9D44B2EA3FF210089D552 /* DeckManager.swift */,
 				23B90B382E66338B00214C40 /* CollectionManager.swift */,
@@ -387,6 +411,11 @@
 		23B90B022E66324F00214C40 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				B556ED2D806A43868B3AC308 /* PackSetPickerView.swift */,
+				837A0A6A7DFF45A5A45C8F46 /* SealedPackView.swift */,
+				47D1EBD9192F492FB1E518A9 /* PackRevealView.swift */,
+				F71B550DF03C459B8AC79099 /* PackSummaryView.swift */,
+				16A6BB468A7B4EC99321A57C /* PackOpeningView.swift */,
 				23BC47A82F4ABE8100E7037B /* AIDeckBuilderView.swift */,
 				234EDF482F4176860016D086 /* RulesPaywallView.swift */,
 				23D2466A2F2D9DCE00CF4128 /* RulesAssistantView.swift */,
@@ -418,6 +447,10 @@
 		23B90B032E66325800214C40 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				D9AAC7C20950445D86D56146 /* CelebrationBurst.swift */,
+				AAA050DD7CC649E097256CE3 /* GenericPackWrapper.swift */,
+				A8532CA864164694ADA01C03 /* CardBackView.swift */,
+				1CC62B37FC0F4623B2E02281 /* PackCardImageView.swift */,
 				23E099202F6CF6DC0063C758 /* CardImageAttachmentView.swift */,
 				23E099222F6CF6DC0063C758 /* CompactPhotoAttachmentView.swift */,
 				AA1B2C3D4E5F678901234562 /* PlayerLoreCard.swift */,
@@ -573,6 +606,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3279F65A71AF4B52BDDE2E56 /* CelebrationBurst.swift in Sources */,
+				BC083B5DBEA8457485C7021F /* PackResult.swift in Sources */,
+				D9C6E44858C044649ED3D5CE /* PackSimulator.swift in Sources */,
+				F5FA824ADAFB46DD89AFB4C0 /* GenericPackWrapper.swift in Sources */,
+				188032E2A0644E13A465EBB6 /* CardBackView.swift in Sources */,
+				67B9634773664A59B9D92E42 /* PackCardImageView.swift in Sources */,
+				3B722972381D46D88FB19D0F /* PackSetPickerView.swift in Sources */,
+				A958354BD37C46D1983C0554 /* SealedPackView.swift in Sources */,
+				808B129945AA4752AE54A853 /* PackRevealView.swift in Sources */,
+				2E308FC120AF4A8C86EAB9DD /* PackSummaryView.swift in Sources */,
+				E84037B3FFFE4EA9B6F2F6EC /* PackOpeningView.swift in Sources */,
 				AA1B2C3D4E5F678901234561 /* LoreCounterModels.swift in Sources */,
 				AA1B2C3D4E5F678901234563 /* PlayerLoreCard.swift in Sources */,
 				AA1B2C3D4E5F678901234565 /* LoreCounterView.swift in Sources */,

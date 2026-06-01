@@ -48,6 +48,12 @@ struct ContentView: View {
                 }
                 .tag(9)
 
+            PackOpeningView()
+                .tabItem {
+                    Label("Packs", systemImage: "gift.fill")
+                }
+                .tag(10)
+
             StatsView()
                 .environmentObject(collectionManager)
                 .tabItem {
