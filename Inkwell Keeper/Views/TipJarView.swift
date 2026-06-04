@@ -12,19 +12,19 @@ import Combine
 struct TipJarView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var tipManager = TipJarManager.shared
-
+    
     @State private var selectedPackage: Package?
     @State private var purchasingPackageId: String?
     @State private var showThankYou = false
     @State private var purchaseError: String?
-
+    
     var body: some View {
-        navigationWrapper {
+        NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
                     // Header
                     headerSection
-
+                    
                     // Tip Options
                     if tipManager.isLoading {
                         ProgressView()
@@ -32,7 +32,7 @@ struct TipJarView: View {
                     } else {
                         tipOptionsSection
                     }
-
+                    
                     // Footer Message
                     footerSection
                 }
@@ -59,19 +59,26 @@ struct TipJarView: View {
                     Text(error)
                 }
             }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
         }
     }
-
+    
     private var headerSection: some View {
         VStack(spacing: 12) {
             Image(systemName: "heart.fill")
                 .font(.system(size: 60))
                 .foregroundColor(.lorcanaGold)
-
+            
             Text("Support Ink Well Keeper")
                 .font(.title2)
                 .fontWeight(.bold)
-
+            
             Text("Ink Well Keeper is free with no ads. If you find it useful, consider leaving a tip to support development!")
                 .font(.body)
                 .foregroundColor(.gray)
@@ -79,7 +86,7 @@ struct TipJarView: View {
         }
         .padding(.vertical)
     }
-
+    
     private var tipOptionsSection: some View {
         VStack(spacing: 16) {
             ForEach(TipProduct.tiers) { product in
@@ -101,14 +108,14 @@ struct TipJarView: View {
             }
         }
     }
-
+    
     private var footerSection: some View {
         VStack(spacing: 8) {
             Text("Tips are optional and do not unlock any features.")
                 .font(.caption)
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
-
+            
             Text("All Lorcana content remains free per Ravensburger's Community Code Policy.")
                 .font(.caption)
                 .foregroundColor(.gray)
@@ -116,11 +123,11 @@ struct TipJarView: View {
         }
         .padding(.top)
     }
-
+    
     private func purchasePackage(_ package: Package) async {
         purchasingPackageId = package.storeProduct.productIdentifier
         defer { purchasingPackageId = nil }
-
+        
         do {
             let success = try await tipManager.purchase(package)
             if success {
@@ -131,31 +138,6 @@ struct TipJarView: View {
         } catch {
             // Show error for purchase failures
             purchaseError = error.localizedDescription
-        }
-    }
-
-    @ViewBuilder
-    private func navigationWrapper<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        if #available(iOS 18.0, *), UIDevice.current.userInterfaceIdiom == .pad {
-            content()
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Done") {
-                            dismiss()
-                        }
-                    }
-                }
-        } else {
-            NavigationView {
-                content()
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            Button("Done") {
-                                dismiss()
-                            }
-                        }
-                    }
-            }
         }
     }
 }

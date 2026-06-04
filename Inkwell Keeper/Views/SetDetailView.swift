@@ -487,7 +487,8 @@ struct SetDetailView: View {
         if !searchText.isEmpty {
             filtered = filtered.filter { card in
                 card.name.localizedStandardContains(searchText) ||
-                card.cardText.localizedStandardContains(searchText)
+                card.cardText.localizedStandardContains(searchText) ||
+                card.cardNumber.map { String($0).localizedStandardContains(searchText) } ?? false
             }
         }
 

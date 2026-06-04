@@ -18,7 +18,7 @@ struct WishlistView: View {
     @State private var filteredCards: [LorcanaCard] = []
 
     var body: some View {
-        navigationWrapper {
+        NavigationStack {
             VStack(spacing: 0) {
                 VStack(spacing: 12) {
                     SearchBar(text: $searchText)
@@ -125,16 +125,5 @@ struct WishlistView: View {
         }
 
         filteredCards = cards
-    }
-
-    @ViewBuilder
-    private func navigationWrapper<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        if #available(iOS 18.0, *), UIDevice.current.userInterfaceIdiom == .pad {
-            content()
-        } else {
-            NavigationView {
-                content()
-            }
-        }
     }
 }

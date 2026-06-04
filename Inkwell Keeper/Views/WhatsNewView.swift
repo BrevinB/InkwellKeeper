@@ -152,6 +152,15 @@ struct ChangelogEntry {
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
     ChangelogEntry(
+        version: "2.3.1",
+        date: "June 2026",
+        features: [],
+        improvements: [
+            "Sets View now allows you to search by card number, ex: Set 11 type 105 and it pulls up Donald Duck - Nephew Fred"
+        ],
+        bugFixes: ["Toolbar buttons were not showing up on iPad"],
+        inProgress: ["Coming Soon: iCloud sync between devices"]),
+    ChangelogEntry(
         version: "2.3.0",
         date: "May 2026",
         features: [

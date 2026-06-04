@@ -25,9 +25,9 @@ struct CollectionView: View {
     @State private var filteredCards: [LorcanaCard] = []
     
     var body: some View {
-        navigationWrapper {
+        NavigationStack {
             VStack(spacing: 0) {
-
+                
                 VStack(spacing: 12) {
                     SearchBar(text: $searchText)
                     FilterBar(
@@ -39,7 +39,7 @@ struct CollectionView: View {
                 }
                 .padding(.horizontal)
                 .background(Color.lorcanaDark.opacity(0.3))
-
+                
                 if filteredCards.isEmpty {
                     EmptyCollectionView(
                         showingManualAdd: $showingManualAdd,
@@ -68,18 +68,18 @@ struct CollectionView: View {
                         Button(action: { showingBulkImport = true }) {
                             Label("Bulk Import", systemImage: "square.and.arrow.down")
                         }
-
+                        
                         Button(action: { showingExport = true }) {
                             Label("Export Collection", systemImage: "square.and.arrow.up")
                         }
-
+                        
                         Divider()
-
+                        
                         CollectionStatsButton()
                             .environmentObject(collectionManager)
-
+                        
                         Divider()
-
+                        
                         Button(action: { showingSettings = true }) {
                             Label("Settings", systemImage: "gear")
                         }
@@ -104,7 +104,7 @@ struct CollectionView: View {
             if let cardsCount = notification.userInfo?["cardsCount"] as? Int {
                 supportThanksMessage = "Successfully imported \(cardsCount) cards!"
                 showingSupportThanks = true
-
+                
                 // Auto-dismiss after 5 seconds
                 Task { @MainActor in
                     try? await Task.sleep(for: .seconds(5))
@@ -135,17 +135,17 @@ struct CollectionView: View {
                 .environmentObject(collectionManager)
         }
     }
-
+    
     private func recomputeFilteredCards() {
         var cards = collectionManager.collectedCards
-
+        
         if !searchText.isEmpty {
             cards = cards.filter { card in
                 card.name.localizedStandardContains(searchText) ||
                 card.cardText.localizedStandardContains(searchText)
             }
         }
-
+        
         switch selectedFilter {
         case .all:
             break
@@ -158,7 +158,7 @@ struct CollectionView: View {
         case .song:
             cards = cards.filter { $0.type == "Song" }
         }
-
+        
         if selectedInkColor != .all {
             cards = cards.filter { card in
                 guard let inkColor = card.inkColor else { return false }
@@ -166,11 +166,11 @@ struct CollectionView: View {
                 return colors.contains(selectedInkColor.rawValue)
             }
         }
-
+        
         if selectedVariant != .all {
             cards = cards.filter { selectedVariant.matches($0.variant) }
         }
-
+        
         switch sortOption {
         case .recentlyAdded:
             cards.sort { card1, card2 in
@@ -198,20 +198,7 @@ struct CollectionView: View {
                 return lhs.setName < rhs.setName
             }
         }
-
+        
         filteredCards = cards
-    }
-
-    @ViewBuilder
-    private func navigationWrapper<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        if #available(iOS 18.0, *), UIDevice.current.userInterfaceIdiom == .pad {
-            // On iPad with iOS 18+, TabView handles navigation with sidebar
-            content()
-        } else {
-            // On iPhone or older iOS, use NavigationView
-            NavigationView {
-                content()
-            }
-        }
     }
 }

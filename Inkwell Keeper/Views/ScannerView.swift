@@ -21,7 +21,7 @@ struct ScannerView: View {
     @Binding var isActive: Bool  // Track if this tab is active
 
     var body: some View {
-        navigationWrapper {
+        NavigationStack {
             ZStack {
                 if cameraManager.permissionStatus == .authorized && cameraManager.errorMessage == nil {
                     CameraPreview(cameraManager: cameraManager)
@@ -549,17 +549,6 @@ struct ScannerView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .background(.ultraThinMaterial)
-        }
-    }
-
-    @ViewBuilder
-    private func navigationWrapper<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        if #available(iOS 18.0, *), UIDevice.current.userInterfaceIdiom == .pad {
-            content()
-        } else {
-            NavigationView {
-                content()
-            }
         }
     }
 }

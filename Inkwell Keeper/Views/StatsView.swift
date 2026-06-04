@@ -15,7 +15,7 @@ struct StatsView: View {
     @State private var isRefreshingPrices = false
 
     var body: some View {
-        navigationWrapper {
+        NavigationStack {
             ScrollView {
                 LazyVStack(spacing: 20) {
                     let snapshot = viewModel.snapshot
@@ -70,16 +70,6 @@ struct StatsView: View {
         }
     }
 
-    @ViewBuilder
-    private func navigationWrapper<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            content()
-        } else {
-            NavigationStack {
-                content()
-            }
-        }
-    }
 }
 
 private struct StatsEmptyCollectionCard: View {

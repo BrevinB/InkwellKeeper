@@ -18,7 +18,7 @@ struct DecksView: View {
     @State private var showingImportDeck = false
 
     var body: some View {
-        navigationWrapper {
+        NavigationStack {
             ZStack {
                 LorcanaBackground()
 
@@ -91,17 +91,6 @@ struct DecksView: View {
         .sheet(isPresented: $showingImportDeck) {
             ImportDeckView()
                 .environmentObject(deckManager)
-        }
-    }
-
-    @ViewBuilder
-    private func navigationWrapper<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        if #available(iOS 18.0, *), UIDevice.current.userInterfaceIdiom == .pad {
-            content()
-        } else {
-            NavigationView {
-                content()
-            }
         }
     }
 }

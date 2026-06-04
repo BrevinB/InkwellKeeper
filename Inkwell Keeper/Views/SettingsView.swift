@@ -33,7 +33,7 @@ struct SettingsView: View {
     @State private var preferredCurrency: String = UserDefaults.standard.string(forKey: "preferredCurrency") ?? "USD"
 
     var body: some View {
-        navigationWrapper {
+        NavigationStack {
             List {
                 // App Info Section
                 appInfoSection
@@ -508,17 +508,6 @@ struct SettingsView: View {
         }
     }
     #endif
-
-    @ViewBuilder
-    private func navigationWrapper<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        if #available(iOS 18.0, *), UIDevice.current.userInterfaceIdiom == .pad {
-            content()
-        } else {
-            NavigationView {
-                content()
-            }
-        }
-    }
 }
 
 // MARK: - Disclaimer View

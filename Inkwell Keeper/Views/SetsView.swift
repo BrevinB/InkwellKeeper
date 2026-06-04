@@ -13,7 +13,7 @@ struct SetsView: View {
     @State private var selectedSet: LorcanaSet?
     
     var body: some View {
-        navigationWrapper {
+        NavigationStack {
             VStack {
                 if dataManager.isLoading {
                     VStack(spacing: 16) {
@@ -87,17 +87,6 @@ struct SetsView: View {
         .sheet(item: $selectedSet) { set in
             SetDetailView(set: set)
                 .environmentObject(collectionManager)
-        }
-    }
-
-    @ViewBuilder
-    private func navigationWrapper<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        if #available(iOS 18.0, *), UIDevice.current.userInterfaceIdiom == .pad {
-            content()
-        } else {
-            NavigationView {
-                content()
-            }
         }
     }
 }
