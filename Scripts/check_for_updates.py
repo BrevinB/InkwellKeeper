@@ -37,11 +37,20 @@ SET_MAPPING = {
     "fabled": "9",
     "whispers_in_the_well": "10",
     "winterspell": "11",
+    "wilds_unknown": "12",
     "promo_set_1": "P1",
     "promo_set_2": "P2",
+    "promo_set_3": "P3",
     "challenge_promo": "cp",
     "d23_collection": "D23",
+    "epcot_festival_of_the_arts": "DIS",
+    "lorcana_challenge_year_3": "C2",
 }
+
+
+def _normalize_name(name: str) -> str:
+    """Normalize a set name for matching (lowercase, alphanumeric only)."""
+    return "".join(c for c in name.lower() if c.isalnum())
 
 
 def fetch_json(url: str) -> Optional[Dict]:
@@ -148,6 +157,13 @@ def check_for_updates(github_action: bool = False) -> Tuple[bool, str]:
     # Create reverse mapping: API code -> local file ID
     api_code_to_local = {v: k for k, v in SET_MAPPING.items()}
 
+    # Fallback: match by normalized set name so newly released sets are caught
+    # even before they're added to SET_MAPPING (avoids false "Missing" reports).
+    name_to_local = {
+        _normalize_name(meta["name"]): local_id
+        for local_id, meta in local_sets.items()
+    }
+
     report_lines.append("# Lorcana Card Data Update Check")
     report_lines.append("")
     report_lines.append(f"**API Source:** LorCast API ({LORCAST_API_BASE})")
@@ -172,8 +188,10 @@ def check_for_updates(github_action: bool = False) -> Tuple[bool, str]:
         api_card_count = get_lorcast_set_cards(api_code)
         total_api_cards += api_card_count
 
-        # Find matching local set using the mapping
+        # Find matching local set using the mapping, falling back to name match
         local_file_id = api_code_to_local.get(api_code)
+        if not local_file_id:
+            local_file_id = name_to_local.get(_normalize_name(set_name))
         local_set = local_sets.get(local_file_id) if local_file_id else None
 
         if local_set:
