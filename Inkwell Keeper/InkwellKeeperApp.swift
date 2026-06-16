@@ -26,15 +26,14 @@ struct InkwellKeeperApp: App {
         container = Self.makeContainer()
     }
 
-    /// Creates the SwiftData ModelContainer without CloudKit sync.
-    /// The app has CloudKit capability enabled in its entitlements, which causes SwiftData
-    /// to attempt CloudKit integration by default. CloudKit requires all attributes to be
-    /// optional and forbids unique constraints — neither of which matches our schema.
-    /// Passing cloudKitDatabase: .none opts out entirely.
+    /// Creates the SwiftData ModelContainer with iCloud (CloudKit) sync enabled.
+    /// All @Model types are CloudKit-compliant: no unique constraints, every non-optional
+    /// attribute has a default value, and all relationships are optional. With no iCloud
+    /// account signed in, SwiftData automatically falls back to local-only storage.
     private static func makeContainer() -> ModelContainer {
         let config = ModelConfiguration(
             isStoredInMemoryOnly: false,
-            cloudKitDatabase: .none
+            cloudKitDatabase: .private("iCloud.co.brevinb.Inkwell-Keeper")
         )
 
         do {

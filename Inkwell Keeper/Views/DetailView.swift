@@ -1362,27 +1362,11 @@ struct AddCardGroupModal: View {
 
                         LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
                             ForEach(availableVariants, id: \.self) { variant in
-                                Button(action: {
+                                SpecialVariantButton(
+                                    variant: variant,
+                                    isSelected: selectedSpecialVariant == variant
+                                ) {
                                     selectedSpecialVariant = variant
-                                }) {
-                                    VStack(spacing: 4) {
-                                        Text(variant.shortName)
-                                            .font(.caption)
-                                            .fontWeight(.bold)
-                                        Text(variant.displayName)
-                                            .font(.caption2)
-                                    }
-                                    .foregroundColor(selectedSpecialVariant == variant ? .white : .gray)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(8)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .fill(selectedSpecialVariant == variant ? Color.lorcanaGold.opacity(0.3) : Color.clear)
-                                    )
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(selectedSpecialVariant == variant ? Color.lorcanaGold : Color.gray.opacity(0.3), lineWidth: 1)
-                                    )
                                 }
                             }
                         }
@@ -1974,5 +1958,38 @@ struct CardSearchResultRow: View {
                 .controlSize(.small)
         }
         .padding(.vertical, 4)
+    }
+}
+
+// MARK: - Special Variant Button
+
+/// One selectable tile in the special-variant picker. Extracted into its own view so the
+/// grid expression stays light for the type-checker.
+struct SpecialVariantButton: View {
+    let variant: CardVariant
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Text(variant.shortName)
+                    .font(.caption)
+                    .bold()
+                Text(variant.displayName)
+                    .font(.caption2)
+            }
+            .foregroundStyle(isSelected ? .white : .gray)
+            .frame(maxWidth: .infinity)
+            .padding(8)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(isSelected ? Color.lorcanaGold.opacity(0.3) : Color.clear)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isSelected ? Color.lorcanaGold : Color.gray.opacity(0.3), lineWidth: 1)
+            )
+        }
     }
 }

@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftUI
-import Combine
 
 // MARK: - Message Model
 struct RulesMessage: Identifiable, Equatable, Codable {
@@ -15,12 +14,17 @@ struct RulesMessage: Identifiable, Equatable, Codable {
     let content: String
     let isUser: Bool
     let timestamp: Date
+    /// Formatted card details attached to (or auto-detected for) this message. Persisted so
+    /// follow-up questions retain the card context across turns. Optional for backward
+    /// compatibility with chats saved before this field existed.
+    let cardContext: String?
 
-    init(content: String, isUser: Bool) {
+    init(content: String, isUser: Bool, cardContext: String? = nil) {
         self.id = UUID()
         self.content = content
         self.isUser = isUser
         self.timestamp = Date()
+        self.cardContext = cardContext
     }
 }
 
@@ -96,18 +100,34 @@ enum RulesAssistantAvailability: Equatable {
 
 // MARK: - Rules Assistant Service
 @MainActor
-class RulesAssistantService: ObservableObject {
+@Observable
+class RulesAssistantService {
     static let shared = RulesAssistantService()
 
-    @Published var messages: [RulesMessage] = []
-    @Published var isLoading = false
-    @Published var availability: RulesAssistantAvailability = .checking
-    @Published var currentStreamingContent: String = ""
-    @Published var savedChats: [SavedChat] = []
-    @Published var currentChatId: UUID?
+    var messages: [RulesMessage] = []
+    var isLoading = false
+    var availability: RulesAssistantAvailability = .checking
+    var currentStreamingContent: String = ""
+    var savedChats: [SavedChat] = []
+    var currentChatId: UUID?
+    /// True when the most recent generation failed, so the UI can offer a retry.
+    var lastSendFailed = false
 
     private var apiKey: String?
     private let savedChatsKey = "RulesAssistantSavedChats"
+
+    // Rules answers are reasoning-heavy, so use a stronger model than the deck builder and a
+    // low temperature for deterministic, factual rulings.
+    private let rulesModel = "gpt-4o"
+    private let rulesTemperature = 0.3
+
+    // Lightweight client-side abuse guard for the shared API key.
+    let dailyMessageLimit = 50
+    private let dailyCountKey = "RulesAssistantDailyCount"
+    private let dailyDateKey = "RulesAssistantDailyDate"
+
+    /// The current generation task, retained so the user can stop it mid-stream.
+    @ObservationIgnored private var generationTask: Task<Void, Never>?
 
     private init() {
         loadSavedChats()
@@ -456,6 +476,8 @@ class RulesAssistantService: ObservableObject {
     - Distinguish between exert abilities ({E} cost) and non-exert activated abilities — this is a very common source of confusion
     - If you need more information about a card's text to answer accurately, ask the user to attach the card or type its text
     - For true edge cases with no clear ruling, acknowledge uncertainty and suggest checking disneylorcana.com/resources or asking a judge
+    - Stay on topic: only answer questions about Disney Lorcana. If asked about something unrelated, politely steer back to Lorcana rules
+    - Section numbers are general references to help players find the relevant rule. If you're not certain of the exact number, describe the rule plainly instead of inventing a precise citation
     """
 
     // MARK: - Public Methods
@@ -513,100 +535,193 @@ class RulesAssistantService: ObservableObject {
         return cardDetails.joined(separator: "\n")
     }
 
-    func sendMessage(_ text: String, cardContexts: [LorcanaCard] = []) async {
-        let userMessage = RulesMessage(content: text, isUser: true)
-        messages.append(userMessage)
+    /// Entry point from the UI. Appends the user's message and kicks off a streamed reply.
+    /// Returns immediately; observe `isLoading` / `currentStreamingContent` for progress.
+    func send(_ text: String, cardContexts: [LorcanaCard] = []) {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, !isLoading else { return }
 
-        isLoading = true
-        currentStreamingContent = ""
-
-        guard let apiKey = apiKey else {
-            appendErrorResponse("Service not available. Please try again later.")
-            isLoading = false
+        guard consumeDailyAllowance() else {
+            messages.append(RulesMessage(content: trimmed, isUser: true))
+            appendErrorResponse("You've reached today's limit of \(dailyMessageLimit) questions. Please try again tomorrow.")
             return
         }
 
-        var prompt = text
+        // Explicit attachments win; otherwise auto-detect card names mentioned in the question.
+        let cards = cardContexts.isEmpty ? detectCards(in: trimmed) : cardContexts
+        let context = cards.isEmpty ? nil : buildCardContext(for: cards)
 
-        if !cardContexts.isEmpty {
-            if cardContexts.count == 1 {
-                let card = cardContexts[0]
-                prompt = """
-                [Card Context - The user is asking about this specific card]
-                \(buildCardDetails(for: card))
+        messages.append(RulesMessage(content: trimmed, isUser: true, cardContext: context))
+        startGeneration()
+    }
 
-                [User's Question]
-                \(text)
+    /// Re-runs the assistant for the most recent user message. Used to recover from a failure.
+    func retryLast() {
+        guard !isLoading, let lastUserIndex = messages.lastIndex(where: { $0.isUser }) else { return }
+        // Drop any assistant turns after the last user message so we regenerate cleanly.
+        if lastUserIndex < messages.count - 1 {
+            messages.removeSubrange((lastUserIndex + 1)...)
+        }
+        startGeneration()
+    }
 
-                Please analyze this card's abilities and answer the question using the exact card text provided above. Cite relevant rules sections.
-                """
-            } else {
-                var cardSections: [String] = []
-                for (index, card) in cardContexts.enumerated() {
-                    cardSections.append("""
-                    [Card \(index + 1)]
-                    \(buildCardDetails(for: card))
-                    """)
-                }
+    /// Stops an in-flight generation, keeping whatever text has streamed so far.
+    func stopGenerating() {
+        generationTask?.cancel()
+    }
 
-                prompt = """
-                [Card Context - The user is asking about the following \(cardContexts.count) cards and how they interact]
-                \(cardSections.joined(separator: "\n\n"))
+    private func startGeneration() {
+        lastSendFailed = false
+        isLoading = true
+        currentStreamingContent = ""
+        generationTask = Task { await streamAssistantReply() }
+    }
 
-                [User's Question]
-                \(text)
-
-                Please analyze these cards' abilities using the exact card text provided above. Consider how they interact with each other and cite relevant rules sections.
-                """
-            }
+    private func streamAssistantReply() async {
+        defer {
+            isLoading = false
+            generationTask = nil
         }
 
-        // Build messages array for OpenAI
+        guard let apiKey else {
+            appendErrorResponse("Service not available. Please try again later.")
+            lastSendFailed = true
+            return
+        }
+
         var openAIMessages: [OpenAIChatMessage] = [
             OpenAIChatMessage(role: "system", content: systemInstructions)
         ]
-
-        // Add conversation history (excluding the message we just appended)
-        for message in messages.dropLast() {
+        for message in messages {
             openAIMessages.append(OpenAIChatMessage(
                 role: message.isUser ? "user" : "assistant",
-                content: message.content
+                content: apiContent(for: message)
             ))
         }
-
-        // Add the current user message
-        openAIMessages.append(OpenAIChatMessage(role: "user", content: prompt))
 
         do {
             let stream = OpenAIService.shared.streamChatCompletion(
                 apiKey: apiKey,
-                messages: openAIMessages
+                messages: openAIMessages,
+                model: rulesModel,
+                temperature: rulesTemperature
             )
 
             for try await chunk in stream {
+                if Task.isCancelled { break }
                 currentStreamingContent += chunk
             }
 
-            let assistantMessage = RulesMessage(content: currentStreamingContent, isUser: false)
-            messages.append(assistantMessage)
-            currentStreamingContent = ""
+            if currentStreamingContent.isEmpty {
+                // Empty with no cancellation means the request produced nothing useful.
+                if !Task.isCancelled {
+                    appendErrorResponse("Sorry, I encountered an error. Please try again.")
+                    lastSendFailed = true
+                }
+            } else {
+                commitStreamedReply()
+            }
         } catch {
             if currentStreamingContent.isEmpty {
                 appendErrorResponse("Sorry, I encountered an error. Please try again.")
+                lastSendFailed = true
             } else {
-                // We got partial content, save what we have
-                let assistantMessage = RulesMessage(content: currentStreamingContent, isUser: false)
-                messages.append(assistantMessage)
-                currentStreamingContent = ""
+                // Keep the partial answer we did receive.
+                commitStreamedReply()
             }
         }
+    }
 
-        isLoading = false
+    private func commitStreamedReply() {
+        messages.append(RulesMessage(content: currentStreamingContent, isUser: false))
+        currentStreamingContent = ""
+        lastSendFailed = false
+        // Auto-persist so an app termination doesn't lose the conversation.
+        saveCurrentChat()
+    }
+
+    /// The content sent to the API for a message — user turns carry their stored card context,
+    /// which keeps attached-card text available across follow-up questions.
+    private func apiContent(for message: RulesMessage) -> String {
+        guard message.isUser, let context = message.cardContext else {
+            return message.content
+        }
+        return """
+        \(context)
+
+        [User's Question]
+        \(message.content)
+
+        Please answer using the exact card text provided above. Cite relevant rules sections.
+        """
+    }
+
+    /// Builds the `[Card Context]` block for one or more cards.
+    private func buildCardContext(for cards: [LorcanaCard]) -> String {
+        if cards.count == 1 {
+            return """
+            [Card Context - The user is asking about this specific card]
+            \(buildCardDetails(for: cards[0]))
+            """
+        }
+        let sections = cards.enumerated().map { index, card in
+            """
+            [Card \(index + 1)]
+            \(buildCardDetails(for: card))
+            """
+        }
+        return """
+        [Card Context - The user is asking about the following \(cards.count) cards and how they interact]
+        \(sections.joined(separator: "\n\n"))
+        """
+    }
+
+    /// Scans the question for full card names that appear verbatim so their text can be
+    /// auto-attached. Deliberately conservative — only matches full "Name - Subtitle" names to
+    /// avoid false positives on common first names like "Belle" or "Stitch".
+    private func detectCards(in text: String) -> [LorcanaCard] {
+        let haystack = text.lowercased()
+        var matches: [LorcanaCard] = []
+        var seenNames = Set<String>()
+        for card in SetsDataManager.shared.getAllCards() where card.variant == .normal {
+            guard card.name.contains(" - ") else { continue }
+            if haystack.contains(card.name.lowercased()), seenNames.insert(card.name).inserted {
+                matches.append(card)
+                if matches.count >= 4 { break }
+            }
+        }
+        return matches
+    }
+
+    // MARK: - Daily Allowance
+
+    /// Returns true and records a use if the user is under today's limit.
+    private func consumeDailyAllowance() -> Bool {
+        let defaults = UserDefaults.standard
+        let today = Calendar.current.startOfDay(for: Date())
+        let storedDay = (defaults.object(forKey: dailyDateKey) as? Date).map { Calendar.current.startOfDay(for: $0) }
+
+        var count = defaults.integer(forKey: dailyCountKey)
+        if storedDay != today {
+            count = 0
+            defaults.set(today, forKey: dailyDateKey)
+        }
+        guard count < dailyMessageLimit else { return false }
+        defaults.set(count + 1, forKey: dailyCountKey)
+        return true
+    }
+
+    /// How many questions the user can still ask today.
+    var remainingMessagesToday: Int {
+        let defaults = UserDefaults.standard
+        let today = Calendar.current.startOfDay(for: Date())
+        let storedDay = (defaults.object(forKey: dailyDateKey) as? Date).map { Calendar.current.startOfDay(for: $0) }
+        if storedDay != today { return dailyMessageLimit }
+        return max(0, dailyMessageLimit - defaults.integer(forKey: dailyCountKey))
     }
 
     private func appendErrorResponse(_ message: String) {
-        let response = RulesMessage(content: message, isUser: false)
-        messages.append(response)
+        messages.append(RulesMessage(content: message, isUser: false))
         currentStreamingContent = ""
     }
 

@@ -81,3 +81,12 @@ extension Color {
     static let lorcanaBlue = Color(red: 0.2, green: 0.4, blue: 0.8)
     static let lorcanaPurple = Color(red: 0.5, green: 0.2, blue: 0.8)
 }
+
+/// Bridges the custom palette into `ShapeStyle` contexts so the leading-dot syntax
+/// (e.g. `foregroundStyle(.lorcanaGold)`, `fill(.lorcanaDark)`) resolves like the system colors do.
+extension ShapeStyle where Self == Color {
+    static var lorcanaGold: Color { .lorcanaGold }
+    static var lorcanaDark: Color { .lorcanaDark }
+    static var lorcanaBlue: Color { .lorcanaBlue }
+    static var lorcanaPurple: Color { .lorcanaPurple }
+}

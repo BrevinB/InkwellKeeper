@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftUI
-import Combine
 
 // MARK: - AI Deck Suggestion Model
 struct AIDeckSuggestion: Identifiable, Hashable {
@@ -28,16 +27,17 @@ struct AIDeckSuggestion: Identifiable, Hashable {
 
 // MARK: - AI Deck Service
 @MainActor
-class AIDeckService: ObservableObject {
+@Observable
+class AIDeckService {
     static let shared = AIDeckService()
 
-    @Published var isLoading = false
-    @Published var currentStreamingContent: String = ""
-    @Published var suggestions: [AIDeckSuggestion] = []
-    @Published var rawResponse: String = ""
-    @Published var errorMessage: String?
-    @Published var colorConstraintNote: String?
-    @Published var availability: RulesAssistantAvailability = .checking
+    var isLoading = false
+    var currentStreamingContent: String = ""
+    var suggestions: [AIDeckSuggestion] = []
+    var rawResponse: String = ""
+    var errorMessage: String?
+    var colorConstraintNote: String?
+    var availability: RulesAssistantAvailability = .checking
 
     private var apiKey: String?
     private let dataManager = SetsDataManager.shared
@@ -266,7 +266,7 @@ class AIDeckService: ObservableObject {
             prompt += "Archetype: \(archetype.rawValue)\n"
         }
         prompt += "\nDeck List (\(deck.totalCards) cards):\n"
-        for card in deck.cards.sorted(by: { $0.cost < $1.cost }) {
+        for card in (deck.cards ?? []).sorted(by: { $0.cost < $1.cost }) {
             prompt += "  \(card.quantity)x \(card.name) (Cost \(card.cost), \(card.type), \(card.inkColor ?? "Unknown"))\n"
         }
 

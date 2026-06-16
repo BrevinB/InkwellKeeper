@@ -16,13 +16,20 @@ class OpenAIService {
     static let shared = OpenAIService()
 
     private let endpoint = URL(string: "https://api.openai.com/v1/chat/completions")!
-    private let model = "gpt-4o-mini"
+    private let defaultModel = "gpt-4o-mini"
 
     private init() {}
 
+    /// Streams a chat completion.
+    /// - Parameters:
+    ///   - model: Overrides the default model. Pass a stronger model for reasoning-heavy tasks.
+    ///   - temperature: When provided, pins the sampling temperature. Lower values give more
+    ///     deterministic, factual answers (use for the rules assistant).
     func streamChatCompletion(
         apiKey: String,
-        messages: [OpenAIChatMessage]
+        messages: [OpenAIChatMessage],
+        model: String? = nil,
+        temperature: Double? = nil
     ) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             let task = Task {
@@ -32,11 +39,14 @@ class OpenAIService {
                     request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
                     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-                    let body: [String: Any] = [
-                        "model": model,
+                    var body: [String: Any] = [
+                        "model": model ?? defaultModel,
                         "messages": messages.map { ["role": $0.role, "content": $0.content] },
                         "stream": true
                     ]
+                    if let temperature {
+                        body["temperature"] = temperature
+                    }
                     request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
                     let (bytes, response) = try await URLSession.shared.bytes(for: request)

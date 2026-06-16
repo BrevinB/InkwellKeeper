@@ -9,15 +9,25 @@ import SwiftUI
 import Combine
 import SwiftData
 import Foundation
+import CoreData
 
 class DeckManager: ObservableObject {
     var modelContext: ModelContext?
     @Published var decks: [Deck] = []
 
+    /// Observer token for CloudKit remote-change notifications.
+    private var remoteChangeObserver: NSObjectProtocol?
+
     init(modelContext: ModelContext? = nil) {
         self.modelContext = modelContext
         if let context = modelContext {
             loadDecks(context: context)
+        }
+    }
+
+    deinit {
+        if let remoteChangeObserver {
+            NotificationCenter.default.removeObserver(remoteChangeObserver)
         }
     }
 
@@ -30,6 +40,73 @@ class DeckManager: ObservableObject {
             decks = try context.fetch(descriptor)
         } catch {
             decks = []
+        }
+
+        startObservingRemoteChanges()
+    }
+
+    /// CloudKit imports changes on a background context and posts
+    /// `.NSPersistentStoreRemoteChange`. Our `decks` array is populated by manual fetches,
+    /// so we re-merge duplicate deck cards + reload whenever synced data lands.
+    private func startObservingRemoteChanges() {
+        guard remoteChangeObserver == nil, let context = modelContext else { return }
+        remoteChangeObserver = NotificationCenter.default.addObserver(
+            forName: .NSPersistentStoreRemoteChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                guard let self else { return }
+                self.mergeDuplicateDeckCards()
+                self.loadDecks(context: context)
+            }
+        }
+    }
+
+    /// Collapses duplicate `DeckCard` rows within a deck that appear when two devices each add
+    /// the same card to the same deck while offline and CloudKit later merges both. Rows are the
+    /// "same card" when they share (uniqueId, else name||setName) + variant. Mirrors the merge
+    /// logic in `CollectionManager.mergeDuplicateCollectedCards`.
+    func mergeDuplicateDeckCards() {
+        guard let context = modelContext else { return }
+
+        do {
+            let allDecks = try context.fetch(FetchDescriptor<Deck>())
+
+            var didChange = false
+            for deck in allDecks {
+                let cards = deck.cards ?? []
+                guard cards.count > 1 else { continue }
+
+                var groups: [String: [DeckCard]] = [:]
+                for card in cards {
+                    let identity = (card.uniqueId?.isEmpty == false)
+                        ? card.uniqueId!
+                        : "\(card.name)||\(card.setName)"
+                    let key = "\(identity)|\(card.variant)"
+                    groups[key, default: []].append(card)
+                }
+
+                let maxCopies = deck.deckFormat.maxCopiesPerCard
+                for (_, rows) in groups where rows.count > 1 {
+                    // Keep the earliest-added row; fold the rest into it.
+                    let sorted = rows.sorted { $0.cardId < $1.cardId }
+                    let survivor = sorted[0]
+                    for dup in sorted.dropFirst() {
+                        survivor.quantity = min(max(survivor.quantity, dup.quantity), maxCopies)
+                        if survivor.price == nil { survivor.price = dup.price }
+                        deck.cards?.removeAll { $0 === dup }
+                        context.delete(dup)
+                        didChange = true
+                    }
+                }
+            }
+
+            if didChange {
+                try context.save()
+            }
+        } catch {
+            // Non-fatal — duplicates are cosmetic and will be retried on the next sync.
         }
     }
 
@@ -99,7 +176,7 @@ class DeckManager: ObservableObject {
         var cardToUpdate: DeckCard?
 
         // Check if card already exists in deck
-        if let existingCard = deck.cards.first(where: { $0.cardId == card.id }) {
+        if let existingCard = (deck.cards ?? []).first(where: { $0.cardId == card.id }) {
             // Increment quantity (respecting max copies)
             let newQuantity = min(existingCard.quantity + quantity, deck.deckFormat.maxCopiesPerCard)
             existingCard.quantity = newQuantity
@@ -107,7 +184,8 @@ class DeckManager: ObservableObject {
         } else {
             // Add new card
             let deckCard = DeckCard(from: card, quantity: min(quantity, deck.deckFormat.maxCopiesPerCard))
-            deck.cards.append(deckCard)
+            if deck.cards == nil { deck.cards = [] }
+            deck.cards?.append(deckCard)
             context.insert(deckCard)
             cardToUpdate = deckCard
         }
@@ -149,8 +227,8 @@ class DeckManager: ObservableObject {
     func removeCard(_ deckCard: DeckCard, from deck: Deck) {
         guard let context = modelContext else { return }
 
-        if let index = deck.cards.firstIndex(where: { $0.cardId == deckCard.cardId }) {
-            let removedCard = deck.cards.remove(at: index)
+        if let index = (deck.cards ?? []).firstIndex(where: { $0.cardId == deckCard.cardId }),
+           let removedCard = deck.cards?.remove(at: index) {
             context.delete(removedCard)
             deck.lastModified = Date()
 
@@ -192,7 +270,7 @@ class DeckManager: ObservableObject {
         )
 
         // Copy all cards
-        for deckCard in deck.cards {
+        for deckCard in deck.cards ?? [] {
             let card = deckCard.toLorcanaCard
             addCard(card, to: newDeck, quantity: deckCard.quantity)
         }
@@ -227,7 +305,7 @@ class DeckManager: ObservableObject {
         output += "\n"
 
         // Group cards by cost
-        let cardsByCost = Dictionary(grouping: deck.cards) { $0.cost }
+        let cardsByCost = Dictionary(grouping: deck.cards ?? []) { $0.cost }
         let sortedCosts = cardsByCost.keys.sorted()
 
         for cost in sortedCosts {
@@ -247,7 +325,7 @@ class DeckManager: ObservableObject {
     func getMissingCards(for deck: Deck, collectionManager: CollectionManager) -> [(card: DeckCard, needed: Int)] {
         var missing: [(card: DeckCard, needed: Int)] = []
 
-        for deckCard in deck.cards {
+        for deckCard in deck.cards ?? [] {
             // Try ID match first, then fallback to name match
             var ownedQuantity = collectionManager.getCollectedQuantity(for: deckCard.cardId)
             if ownedQuantity == 0 {
@@ -300,7 +378,7 @@ class DeckManager: ObservableObject {
             format: deck.format,
             inkColors: deck.inkColors,
             archetype: deck.archetype,
-            cards: deck.cards.map { card in
+            cards: (deck.cards ?? []).map { card in
                 ShareableCard(
                     cardId: card.cardId,
                     name: card.name,
@@ -368,7 +446,8 @@ class DeckManager: ObservableObject {
                 ),
                 quantity: cardData.quantity
             )
-            deck.cards.append(deckCard)
+            if deck.cards == nil { deck.cards = [] }
+            deck.cards?.append(deckCard)
             context.insert(deckCard)
         }
 
@@ -386,7 +465,7 @@ class DeckManager: ObservableObject {
         // Automatically detect ink colors from added cards
         var detectedColors = Set<InkColor>()
 
-        for card in deck.cards {
+        for card in deck.cards ?? [] {
             if let inkColor = card.cardInkColor {
                 detectedColors.insert(inkColor)
             }

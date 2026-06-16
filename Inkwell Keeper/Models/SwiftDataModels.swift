@@ -11,20 +11,20 @@ import Foundation
 
 @Model
 class CollectedCard {
-    @Attribute(.unique) var cardId: String
-    var name: String
-    var cost: Int
-    var type: String
-    var rarity: String
-    var setName: String
-    var cardText: String
-    var imageUrl: String
+    var cardId: String = ""
+    var name: String = ""
+    var cost: Int = 0
+    var type: String = ""
+    var rarity: String = ""
+    var setName: String = ""
+    var cardText: String = ""
+    var imageUrl: String = ""
     var price: Double?
-    var dateAdded: Date
-    var quantity: Int
-    var condition: String
-    var isWishlisted: Bool
-    var notes: String
+    var dateAdded: Date = Date.now
+    var quantity: Int = 1
+    var condition: String = "Near Mint"
+    var isWishlisted: Bool = false
+    var notes: String = ""
     var variant: String?
     var inkColor: String?
     var uniqueId: String?
@@ -95,11 +95,11 @@ class CollectedCard {
 
 @Model
 class CardSet {
-    @Attribute(.unique) var setId: String
-    var name: String
-    var releaseDate: Date
-    var totalCards: Int
-    var setCode: String
+    var setId: String = ""
+    var name: String = ""
+    var releaseDate: Date = Date.now
+    var totalCards: Int = 0
+    var setCode: String = ""
     var imageUrl: String?
     
     @Relationship(deleteRule: .cascade, inverse: \CollectionStats.cardSet)
@@ -117,9 +117,9 @@ class CardSet {
 
 @Model
 class CollectionStats {
-    var totalValue: Double
-    var totalCards: Int
-    var lastUpdated: Date
+    var totalValue: Double = 0
+    var totalCards: Int = 0
+    var lastUpdated: Date = Date.now
     var favoriteRarity: String?
     
     @Relationship(deleteRule: .nullify)
@@ -135,11 +135,11 @@ class CollectionStats {
 
 @Model
 class PriceHistory {
-    @Attribute(.unique) var id: UUID
-    var cardId: String
-    var price: Double
-    var date: Date
-    var source: String
+    var id: UUID = UUID()
+    var cardId: String = ""
+    var price: Double = 0
+    var date: Date = Date.now
+    var source: String = ""
     
     init(cardId: String, price: Double, source: String = "Unknown") {
         self.id = UUID()

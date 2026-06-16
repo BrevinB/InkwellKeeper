@@ -20,9 +20,37 @@ class SubscriptionManager: ObservableObject {
     static let entitlementID = "Ink Well Keeper Pro"
     static let offeringID = "default"
 
-    private init() {}
+    #if DEBUG
+    private static let debugOverrideKey = "debug_premium_override"
+
+    var debugPremiumOverride: Bool {
+        get { UserDefaults.standard.bool(forKey: Self.debugOverrideKey) }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Self.debugOverrideKey)
+            if newValue {
+                isSubscribed = true
+            } else {
+                checkSubscriptionStatus()
+            }
+        }
+    }
+    #endif
+
+    private init() {
+        #if DEBUG
+        if debugPremiumOverride {
+            isSubscribed = true
+        }
+        #endif
+    }
 
     func checkSubscriptionStatus() {
+        #if DEBUG
+        if debugPremiumOverride {
+            isSubscribed = true
+            return
+        }
+        #endif
         Task {
             do {
                 let customerInfo = try await Purchases.shared.customerInfo()

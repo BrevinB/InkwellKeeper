@@ -12,7 +12,7 @@ struct AIDeckBuilderView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var deckManager: DeckManager
     @EnvironmentObject var collectionManager: CollectionManager
-    @StateObject private var aiService = AIDeckService.shared
+    @State private var aiService = AIDeckService.shared
     @StateObject private var subscriptionManager = SubscriptionManager.shared
 
     @State private var deckName = ""
@@ -625,7 +625,7 @@ struct AIDeckCompleterView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var deckManager: DeckManager
     @EnvironmentObject var collectionManager: CollectionManager
-    @StateObject private var aiService = AIDeckService.shared
+    @State private var aiService = AIDeckService.shared
     @StateObject private var subscriptionManager = SubscriptionManager.shared
 
     @State private var additionalNotes = ""
@@ -747,7 +747,7 @@ struct AIDeckCompleterView: View {
                     // Card summary
                     Divider().background(Color.gray.opacity(0.3))
 
-                    let cardsByCost = Dictionary(grouping: deck.cards) { $0.cost }
+                    let cardsByCost = Dictionary(grouping: deck.cards ?? []) { $0.cost }
                     HStack(alignment: .bottom, spacing: 4) {
                         ForEach(0..<10) { cost in
                             let count = cardsByCost[cost]?.reduce(0, { $0 + $1.quantity }) ?? 0
@@ -1115,7 +1115,7 @@ struct AIDeckCompleterView: View {
                 description = "My deck already has 60 cards. Please suggest improvements - which cards to swap out and what to replace them with. " + description
             }
             await aiService.completeDeck(
-                existingCards: deck.cards,
+                existingCards: deck.cards ?? [],
                 format: deck.deckFormat,
                 inkColors: deck.deckInkColors,
                 archetype: deck.deckArchetype,
@@ -1509,7 +1509,7 @@ struct CardReplacementView: View {
 struct AIDeckStrategyView: View {
     let deck: Deck
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var aiService = AIDeckService.shared
+    @State private var aiService = AIDeckService.shared
     @StateObject private var subscriptionManager = SubscriptionManager.shared
 
     @State private var hasStarted = false

@@ -610,7 +610,7 @@ struct DeckDetailView: View {
     }
 
     var cardsByCost: [(cost: Int, cards: [DeckCard])] {
-        let grouped = Dictionary(grouping: deck.cards) { $0.cost }
+        let grouped = Dictionary(grouping: deck.cards ?? []) { $0.cost }
         return grouped.map { (cost: $0.key, cards: $0.value.sorted { $0.name < $1.name }) }
             .sorted { $0.cost < $1.cost }
     }
@@ -1510,7 +1510,7 @@ struct DeckBuilderView: View {
                                 BuilderCardView(
                                     card: card,
                                     deck: deck,
-                                    inDeck: deck.cards.first(where: { $0.cardId == card.id }),
+                                    inDeck: (deck.cards ?? []).first(where: { $0.cardId == card.id }),
                                     onTap: { showingCardToAdd = card }
                                 )
                             }
@@ -1655,7 +1655,7 @@ struct AddCardToDeckView: View {
     }
 
     var existingInDeck: DeckCard? {
-        deck.cards.first(where: { $0.cardId == card.id })
+        (deck.cards ?? []).first(where: { $0.cardId == card.id })
     }
 
     var currentDeckQuantity: Int {

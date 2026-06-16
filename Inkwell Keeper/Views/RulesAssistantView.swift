@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct RulesAssistantView: View {
-    @StateObject private var service = RulesAssistantService.shared
-    @StateObject private var dataManager = SetsDataManager.shared
+    @State private var service = RulesAssistantService.shared
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var inputText = ""
     @State private var showingHistory = false
@@ -22,18 +21,27 @@ struct RulesAssistantView: View {
     var initialCard: LorcanaCard?
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 LorcanaBackground()
 
                 if !subscriptionManager.isSubscribed {
                     RulesPaywallView()
                 } else if service.availability == .available {
-                    availableContent
+                    RulesAvailableView(
+                        service: service,
+                        inputText: $inputText,
+                        attachedCards: $attachedCards,
+                        showingHistory: $showingHistory,
+                        showingCardSearch: $showingCardSearch,
+                        isInputFocused: $isInputFocused
+                    )
                 } else if service.availability == .checking {
-                    checkingContent
+                    RulesCheckingView()
                 } else {
-                    unavailableContent
+                    RulesUnavailableView(availability: service.availability) {
+                        service.checkAvailability()
+                    }
                 }
             }
             .navigationTitle("Rules Assistant")
@@ -41,26 +49,24 @@ struct RulesAssistantView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     if subscriptionManager.isSubscribed && service.availability == .available {
-                        Button(action: { showingHistory = true }) {
-                            Image(systemName: "clock.arrow.circlepath")
-                                .foregroundColor(.lorcanaGold)
+                        Button("History", systemImage: "clock.arrow.circlepath") {
+                            showingHistory = true
                         }
+                        .foregroundStyle(.lorcanaGold)
                     }
                 }
 
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    if subscriptionManager.isSubscribed && service.availability == .available {
-                        if !service.messages.isEmpty {
-                            Button(action: { showingSaveAlert = true }) {
-                                Image(systemName: "square.and.arrow.down")
-                                    .foregroundColor(.lorcanaGold)
-                            }
-
-                            Button(action: { service.startNewChat() }) {
-                                Image(systemName: "plus.bubble")
-                                    .foregroundColor(.lorcanaGold)
-                            }
+                    if subscriptionManager.isSubscribed && service.availability == .available && !service.messages.isEmpty {
+                        Button("Save chat", systemImage: "square.and.arrow.down") {
+                            showingSaveAlert = true
                         }
+                        .foregroundStyle(.lorcanaGold)
+
+                        Button("New chat", systemImage: "plus.bubble") {
+                            service.startNewChat()
+                        }
+                        .foregroundStyle(.lorcanaGold)
                     }
                 }
             }
@@ -83,28 +89,48 @@ struct RulesAssistantView: View {
         .onAppear {
             subscriptionManager.checkSubscriptionStatus()
             if let card = initialCard, service.messages.isEmpty, subscriptionManager.isSubscribed {
-                Task {
-                    await service.sendMessage("Tell me about the rules for this card and how to use it effectively.", cardContexts: [card])
-                }
+                service.send("Tell me about the rules for this card and how to use it effectively.", cardContexts: [card])
             }
         }
     }
+}
 
-    // MARK: - Available Content
-    private var availableContent: some View {
+// MARK: - Available Content
+
+struct RulesAvailableView: View {
+    let service: RulesAssistantService
+    @Binding var inputText: String
+    @Binding var attachedCards: [LorcanaCard]
+    @Binding var showingHistory: Bool
+    @Binding var showingCardSearch: Bool
+    @FocusState.Binding var isInputFocused: Bool
+
+    var body: some View {
         VStack(spacing: 0) {
             if service.messages.isEmpty && service.currentStreamingContent.isEmpty {
-                welcomeScreen
+                RulesWelcomeView(service: service, showingHistory: $showingHistory)
             } else {
-                chatMessages
+                RulesChatView(service: service)
             }
 
-            inputBar
+            RulesInputBar(
+                service: service,
+                inputText: $inputText,
+                attachedCards: $attachedCards,
+                showingCardSearch: $showingCardSearch,
+                isInputFocused: $isInputFocused
+            )
         }
     }
+}
 
-    // MARK: - Welcome Screen
-    private var welcomeScreen: some View {
+// MARK: - Welcome Screen
+
+struct RulesWelcomeView: View {
+    let service: RulesAssistantService
+    @Binding var showingHistory: Bool
+
+    var body: some View {
         ScrollView {
             VStack(spacing: 24) {
                 Spacer()
@@ -112,46 +138,44 @@ struct RulesAssistantView: View {
 
                 Image(systemName: "book.circle.fill")
                     .font(.system(size: 70))
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
 
                 VStack(spacing: 8) {
                     Text("Lorcana Rules Assistant")
                         .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .bold()
+                        .foregroundStyle(.white)
 
                     Text("Ask about rules, keywords, or card interactions")
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                         .multilineTextAlignment(.center)
                 }
 
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Try asking:")
                         .font(.headline)
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                         .padding(.horizontal)
 
                     ForEach(RulesAssistantService.suggestedQuestions, id: \.self) { question in
-                        Button(action: {
-                            Task {
-                                await service.sendMessage(question)
-                            }
-                        }) {
+                        Button {
+                            service.send(question)
+                        } label: {
                             HStack {
                                 Image(systemName: "sparkles")
-                                    .foregroundColor(.lorcanaGold)
+                                    .foregroundStyle(.lorcanaGold)
                                     .font(.caption)
 
                                 Text(question)
                                     .font(.subheadline)
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                                     .multilineTextAlignment(.leading)
 
                                 Spacer()
 
                                 Image(systemName: "chevron.right")
-                                    .foregroundColor(.lorcanaGold.opacity(0.5))
+                                    .foregroundStyle(.lorcanaGold.opacity(0.5))
                                     .font(.caption)
                             }
                             .padding(12)
@@ -164,60 +188,8 @@ struct RulesAssistantView: View {
                     }
                 }
 
-                // Recent chats section
                 if !service.savedChats.isEmpty {
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack {
-                            Text("Recent Chats")
-                                .font(.headline)
-                                .foregroundColor(.lorcanaGold)
-
-                            Spacer()
-
-                            Button("See All") {
-                                showingHistory = true
-                            }
-                            .font(.caption)
-                            .foregroundColor(.lorcanaGold.opacity(0.8))
-                        }
-                        .padding(.horizontal)
-
-                        ForEach(service.savedChats.prefix(3)) { chat in
-                            Button(action: { service.loadChat(chat) }) {
-                                HStack {
-                                    if chat.isPinned {
-                                        Image(systemName: "pin.fill")
-                                            .foregroundColor(.lorcanaGold)
-                                            .font(.caption)
-                                    }
-
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(chat.title)
-                                            .font(.subheadline)
-                                            .foregroundColor(.white)
-                                            .lineLimit(1)
-
-                                        Text(chat.updatedAt, style: .relative)
-                                            .font(.caption2)
-                                            .foregroundColor(.gray)
-                                    }
-
-                                    Spacer()
-
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(.gray)
-                                        .font(.caption)
-                                }
-                                .padding(12)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .fill(Color.lorcanaDark.opacity(0.6))
-                                )
-                            }
-                            .padding(.horizontal)
-                        }
-                    }
-                    .padding(.top, 8)
+                    recentChats
                 }
 
                 Spacer()
@@ -226,8 +198,70 @@ struct RulesAssistantView: View {
         }
     }
 
-    // MARK: - Chat Messages
-    private var chatMessages: some View {
+    private var recentChats: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Recent Chats")
+                    .font(.headline)
+                    .foregroundStyle(.lorcanaGold)
+
+                Spacer()
+
+                Button("See All") {
+                    showingHistory = true
+                }
+                .font(.caption)
+                .foregroundStyle(.lorcanaGold.opacity(0.8))
+            }
+            .padding(.horizontal)
+
+            ForEach(service.savedChats.prefix(3)) { chat in
+                Button {
+                    service.loadChat(chat)
+                } label: {
+                    HStack {
+                        if chat.isPinned {
+                            Image(systemName: "pin.fill")
+                                .foregroundStyle(.lorcanaGold)
+                                .font(.caption)
+                        }
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(chat.title)
+                                .font(.subheadline)
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+
+                            Text(chat.updatedAt, style: .relative)
+                                .font(.caption2)
+                                .foregroundStyle(.gray)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .foregroundStyle(.gray)
+                            .font(.caption)
+                    }
+                    .padding(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.lorcanaDark.opacity(0.6))
+                    )
+                }
+                .padding(.horizontal)
+            }
+        }
+        .padding(.top, 8)
+    }
+}
+
+// MARK: - Chat Messages
+
+struct RulesChatView: View {
+    let service: RulesAssistantService
+
+    var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 12) {
@@ -246,94 +280,86 @@ struct RulesAssistantView: View {
                             .id("typing")
                     }
 
-                    // Bottom padding for keyboard
+                    if service.lastSendFailed && !service.isLoading {
+                        retryButton
+                    }
+
                     Color.clear.frame(height: 8)
                         .id("bottom")
                 }
                 .padding(.horizontal)
                 .padding(.top, 12)
             }
-            .onChange(of: service.messages.count) { _ in
+            .scrollDismissesKeyboard(.interactively)
+            .onChange(of: service.messages.count) {
                 withAnimation(.easeOut(duration: 0.2)) {
                     proxy.scrollTo("bottom", anchor: .bottom)
                 }
             }
-            .onChange(of: service.currentStreamingContent) { _ in
+            .onChange(of: service.currentStreamingContent) {
                 proxy.scrollTo("bottom", anchor: .bottom)
-            }
-            .onTapGesture {
-                isInputFocused = false
             }
         }
     }
 
-    // MARK: - Input Bar
-    private var inputBar: some View {
+    private var retryButton: some View {
+        Button("Retry", systemImage: "arrow.clockwise") {
+            service.retryLast()
+        }
+        .font(.subheadline)
+        .foregroundStyle(.lorcanaGold)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 16)
+        .background(
+            Capsule()
+                .stroke(Color.lorcanaGold.opacity(0.5), lineWidth: 1)
+        )
+    }
+}
+
+// MARK: - Input Bar
+
+struct RulesInputBar: View {
+    let service: RulesAssistantService
+    @Binding var inputText: String
+    @Binding var attachedCards: [LorcanaCard]
+    @Binding var showingCardSearch: Bool
+    @FocusState.Binding var isInputFocused: Bool
+
+    private var canSend: Bool {
+        !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !service.isLoading
+    }
+
+    var body: some View {
         VStack(spacing: 0) {
-            // Attached cards preview
             if !attachedCards.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(attachedCards, id: \.id) { card in
-                            HStack(spacing: 6) {
-                                AsyncImage(url: card.bestImageUrl()) { image in
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                } placeholder: {
-                                    RoundedRectangle(cornerRadius: 4)
-                                        .fill(Color.gray.opacity(0.3))
-                                }
-                                .frame(width: 24, height: 34)
-                                .clipShape(RoundedRectangle(cornerRadius: 3))
-
-                                Text(card.name)
-                                    .font(.caption2)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(.white)
-                                    .lineLimit(1)
-
-                                Button(action: {
-                                    attachedCards.removeAll { $0.id == card.id }
-                                }) {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .font(.caption2)
-                                        .foregroundColor(.gray)
-                                }
-                            }
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 6)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(Color.lorcanaDark.opacity(0.9))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(Color.lorcanaGold.opacity(0.3), lineWidth: 1)
-                                    )
-                            )
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                }
-                .padding(.vertical, 8)
-                .background(Color.lorcanaDark.opacity(0.95))
+                attachedCardsPreview
             }
 
             Divider()
                 .background(Color.lorcanaGold.opacity(0.3))
 
+            if service.remainingMessagesToday <= 5 {
+                Text("\(service.remainingMessagesToday) question\(service.remainingMessagesToday == 1 ? "" : "s") left today")
+                    .font(.caption2)
+                    .foregroundStyle(.gray)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, 6)
+            }
+
             HStack(spacing: 10) {
-                // Attach card button
-                Button(action: { showingCardSearch = true }) {
+                Button {
+                    showingCardSearch = true
+                } label: {
                     ZStack(alignment: .topTrailing) {
                         Image(systemName: attachedCards.isEmpty ? "rectangle.stack.badge.plus" : "rectangle.stack.badge.checkmark")
                             .font(.system(size: 20))
-                            .foregroundColor(attachedCards.isEmpty ? .gray : .lorcanaGold)
+                            .foregroundStyle(attachedCards.isEmpty ? .gray : .lorcanaGold)
 
                         if attachedCards.count > 1 {
                             Text("\(attachedCards.count)")
                                 .font(.system(size: 9, weight: .bold))
-                                .foregroundColor(.black)
+                                .foregroundStyle(.black)
                                 .frame(width: 14, height: 14)
                                 .background(Circle().fill(Color.lorcanaGold))
                                 .offset(x: 4, y: -4)
@@ -353,20 +379,26 @@ struct RulesAssistantView: View {
                                     .stroke(Color.lorcanaGold.opacity(0.3), lineWidth: 1)
                             )
                     )
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .focused($isInputFocused)
                     .lineLimit(1...4)
                     .submitLabel(.send)
-                    .onSubmit {
-                        sendMessage()
-                    }
+                    .onSubmit(sendMessage)
 
-                Button(action: sendMessage) {
-                    Image(systemName: "arrow.up.circle.fill")
+                if service.isLoading {
+                    Button("Stop", systemImage: "stop.circle.fill") {
+                        service.stopGenerating()
+                    }
+                    .labelStyle(.iconOnly)
+                    .font(.system(size: 32))
+                    .foregroundStyle(.red)
+                } else {
+                    Button("Send", systemImage: "arrow.up.circle.fill", action: sendMessage)
+                        .labelStyle(.iconOnly)
                         .font(.system(size: 32))
-                        .foregroundColor(canSend ? .lorcanaGold : .gray.opacity(0.5))
+                        .foregroundStyle(canSend ? .lorcanaGold : .gray.opacity(0.5))
+                        .disabled(!canSend)
                 }
-                .disabled(!canSend)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
@@ -377,8 +409,51 @@ struct RulesAssistantView: View {
         }
     }
 
-    private var canSend: Bool {
-        !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !service.isLoading
+    private var attachedCardsPreview: some View {
+        ScrollView(.horizontal) {
+            HStack(spacing: 8) {
+                ForEach(attachedCards, id: \.id) { card in
+                    HStack(spacing: 6) {
+                        AsyncImage(url: card.bestImageUrl()) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                        } placeholder: {
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color.gray.opacity(0.3))
+                        }
+                        .frame(width: 24, height: 34)
+                        .clipShape(.rect(cornerRadius: 3))
+
+                        Text(card.name)
+                            .font(.caption2)
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+
+                        Button("Remove", systemImage: "xmark.circle.fill") {
+                            attachedCards.removeAll { $0.id == card.id }
+                        }
+                        .labelStyle(.iconOnly)
+                        .font(.caption2)
+                        .foregroundStyle(.gray)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 6)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.lorcanaDark.opacity(0.9))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.lorcanaGold.opacity(0.3), lineWidth: 1)
+                            )
+                    )
+                }
+            }
+            .padding(.horizontal, 16)
+        }
+        .scrollIndicators(.hidden)
+        .padding(.vertical, 8)
+        .background(Color.lorcanaDark.opacity(0.95))
     }
 
     private func sendMessage() {
@@ -388,14 +463,14 @@ struct RulesAssistantView: View {
         let cardsToSend = attachedCards
         inputText = ""
         attachedCards = []
-
-        Task {
-            await service.sendMessage(text, cardContexts: cardsToSend)
-        }
+        service.send(text, cardContexts: cardsToSend)
     }
+}
 
-    // MARK: - Checking Content
-    private var checkingContent: some View {
+// MARK: - Checking Content
+
+struct RulesCheckingView: View {
+    var body: some View {
         VStack(spacing: 20) {
             ProgressView()
                 .scaleEffect(1.5)
@@ -403,68 +478,64 @@ struct RulesAssistantView: View {
 
             Text("Checking availability...")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
         }
     }
+}
 
-    // MARK: - Unavailable Content
-    private var unavailableContent: some View {
+// MARK: - Unavailable Content
+
+struct RulesUnavailableView: View {
+    let availability: RulesAssistantAvailability
+    let onRetry: () -> Void
+
+    var body: some View {
         ScrollView {
             VStack(spacing: 24) {
                 Spacer()
                     .frame(height: 60)
 
-                Image(systemName: service.availability.systemImage)
+                Image(systemName: availability.systemImage)
                     .font(.system(size: 80))
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
 
                 VStack(spacing: 12) {
-                    Text(service.availability.title)
+                    Text(availability.title)
                         .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .bold()
+                        .foregroundStyle(.white)
 
-                    Text(service.availability.description)
+                    Text(availability.description)
                         .font(.body)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
                 }
 
-                Button(action: {
-                    service.checkAvailability()
-                }) {
-                    HStack {
-                        Image(systemName: "arrow.clockwise")
-                        Text("Try Again")
-                    }
+                Button("Try Again", systemImage: "arrow.clockwise", action: onRetry)
                     .font(.headline)
-                    .foregroundColor(.black)
+                    .foregroundStyle(.black)
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 12)
                             .fill(Color.lorcanaGold)
                     )
-                }
-                .padding(.top, 8)
+                    .padding(.top, 8)
 
                 VStack(spacing: 16) {
                     Text("In the meantime, you can find the official rules at:")
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
 
                     Link(destination: URL(string: "https://www.disneylorcana.com/en-US/resources#tabcontent-4")!) {
-                        HStack {
-                            Image(systemName: "book.fill")
-                            Text("Official Lorcana Rules")
-                        }
-                        .font(.headline)
-                        .foregroundColor(.black)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.lorcanaGold)
-                        )
+                        Label("Official Lorcana Rules", systemImage: "book.fill")
+                            .font(.headline)
+                            .foregroundStyle(.black)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.lorcanaGold)
+                            )
                     }
                 }
                 .padding(.top, 20)
@@ -476,15 +547,16 @@ struct RulesAssistantView: View {
 }
 
 // MARK: - Chat History View
+
 struct ChatHistoryView: View {
-    @ObservedObject var service: RulesAssistantService
+    let service: RulesAssistantService
     @Binding var isPresented: Bool
     @State private var chatToRename: SavedChat?
     @State private var renameText = ""
     @State private var chatToDelete: SavedChat?
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 LorcanaBackground()
 
@@ -492,15 +564,15 @@ struct ChatHistoryView: View {
                     VStack(spacing: 16) {
                         Image(systemName: "bubble.left.and.bubble.right")
                             .font(.system(size: 60))
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
 
                         Text("No Saved Chats")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
 
                         Text("Your conversations will appear here")
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                 } else {
                     List {
@@ -511,7 +583,7 @@ struct ChatHistoryView: View {
                                 }
                             } header: {
                                 Label("Pinned", systemImage: "pin.fill")
-                                    .foregroundColor(.lorcanaGold)
+                                    .foregroundStyle(.lorcanaGold)
                             }
                             .listRowBackground(Color.lorcanaDark.opacity(0.6))
                         }
@@ -523,7 +595,7 @@ struct ChatHistoryView: View {
                         } header: {
                             if service.savedChats.contains(where: { $0.isPinned }) {
                                 Text("Recent")
-                                    .foregroundColor(.lorcanaGold)
+                                    .foregroundStyle(.lorcanaGold)
                             }
                         }
                         .listRowBackground(Color.lorcanaDark.opacity(0.6))
@@ -539,7 +611,7 @@ struct ChatHistoryView: View {
                     Button("Done") {
                         isPresented = false
                     }
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                 }
             }
             .alert("Rename Chat", isPresented: Binding(
@@ -580,27 +652,27 @@ struct ChatHistoryView: View {
 
     @ViewBuilder
     private func chatRow(_ chat: SavedChat) -> some View {
-        Button(action: {
+        Button {
             service.loadChat(chat)
             isPresented = false
-        }) {
+        } label: {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Text(chat.title)
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .lineLimit(1)
 
                     Spacer()
 
                     Text(chat.updatedAt, style: .relative)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 }
 
                 Text("\(chat.messages.count) messages")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
             }
             .padding(.vertical, 4)
         }
@@ -659,15 +731,86 @@ struct ChatHistoryView: View {
     }
 }
 
-// MARK: - Markdown Helper
-private func markdownText(_ string: String) -> Text {
-    if let attributed = try? AttributedString(markdown: string, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)) {
-        return Text(attributed)
+// MARK: - Markdown Rendering
+
+/// Lightweight block-level markdown renderer for assistant replies. Handles headings, bullet
+/// lists, and inline emphasis — block elements that `Text(AttributedString)` alone can't show.
+struct MarkdownContentView: View {
+    let text: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            ForEach(blocks) { block in
+                block.view
+            }
+        }
     }
-    return Text(string)
+
+    private var blocks: [MarkdownBlock] {
+        text
+            .components(separatedBy: "\n")
+            .map { MarkdownBlock(line: $0) }
+            .filter { !$0.isBlank }
+    }
+}
+
+private struct MarkdownBlock: Identifiable {
+    let id = UUID()
+    let line: String
+
+    var isBlank: Bool { line.trimmingCharacters(in: .whitespaces).isEmpty }
+
+    @ViewBuilder
+    var view: some View {
+        let trimmed = line.trimmingCharacters(in: .whitespaces)
+        if let heading = heading(for: trimmed) {
+            heading
+        } else if let bullet = bulletBody(for: trimmed) {
+            HStack(alignment: .top, spacing: 8) {
+                Text("•")
+                    .foregroundStyle(.lorcanaGold)
+                Self.inline(bullet)
+                    .tint(.lorcanaGold)
+            }
+        } else {
+            Self.inline(trimmed)
+                .tint(.lorcanaGold)
+        }
+    }
+
+    private func heading(for string: String) -> Text? {
+        if string.hasPrefix("### ") {
+            return Self.inline(String(string.dropFirst(4))).font(.subheadline).bold()
+        }
+        if string.hasPrefix("## ") {
+            return Self.inline(String(string.dropFirst(3))).font(.headline).bold()
+        }
+        if string.hasPrefix("# ") {
+            return Self.inline(String(string.dropFirst(2))).font(.title3).bold()
+        }
+        return nil
+    }
+
+    private func bulletBody(for string: String) -> String? {
+        for prefix in ["- ", "* ", "• "] where string.hasPrefix(prefix) {
+            return String(string.dropFirst(prefix.count))
+        }
+        return nil
+    }
+
+    static func inline(_ string: String) -> Text {
+        if let attributed = try? AttributedString(
+            markdown: string,
+            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        ) {
+            return Text(attributed)
+        }
+        return Text(string)
+    }
 }
 
 // MARK: - Message Bubble
+
 struct MessageBubble: View {
     let message: RulesMessage
 
@@ -681,7 +824,7 @@ struct MessageBubble: View {
                 if message.isUser {
                     Text(message.content)
                         .font(.body)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 10)
                         .background(
@@ -690,10 +833,9 @@ struct MessageBubble: View {
                         )
                         .textSelection(.enabled)
                 } else {
-                    markdownText(message.content)
+                    MarkdownContentView(text: message.content)
                         .font(.body)
-                        .foregroundColor(.white)
-                        .tint(.lorcanaGold)
+                        .foregroundStyle(.white)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 10)
                         .background(
@@ -705,7 +847,7 @@ struct MessageBubble: View {
 
                 Text(message.timestamp, style: .time)
                     .font(.caption2)
-                    .foregroundColor(.gray.opacity(0.8))
+                    .foregroundStyle(.gray.opacity(0.8))
                     .padding(.horizontal, 4)
             }
 
@@ -717,16 +859,16 @@ struct MessageBubble: View {
 }
 
 // MARK: - Streaming Bubble
+
 struct StreamingBubble: View {
     let content: String
 
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                markdownText(content)
+                MarkdownContentView(text: content)
                     .font(.body)
-                    .foregroundColor(.white)
-                    .tint(.lorcanaGold)
+                    .foregroundStyle(.white)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
                     .background(
@@ -740,7 +882,7 @@ struct StreamingBubble: View {
                         .tint(.lorcanaGold)
                     Text("Thinking...")
                         .font(.caption2)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 }
                 .padding(.horizontal, 4)
             }
@@ -751,6 +893,7 @@ struct StreamingBubble: View {
 }
 
 // MARK: - Typing Indicator
+
 struct TypingIndicator: View {
     @State private var dotOpacities: [Double] = [0.3, 0.3, 0.3]
 
@@ -792,6 +935,7 @@ struct TypingIndicator: View {
 }
 
 // MARK: - Card Search Sheet
+
 struct CardSearchSheet: View {
     @StateObject private var dataManager = SetsDataManager.shared
     @Binding var attachedCards: [LorcanaCard]
@@ -807,192 +951,23 @@ struct CardSearchSheet: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 LorcanaBackground()
 
                 VStack(spacing: 0) {
-                    // Attached cards summary
                     if !attachedCards.isEmpty {
-                        VStack(spacing: 6) {
-                            HStack {
-                                Text("\(attachedCards.count) card\(attachedCards.count == 1 ? "" : "s") attached")
-                                    .font(.caption)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(.lorcanaGold)
-                                Spacer()
-                                if attachedCards.count > 1 {
-                                    Button("Clear All") {
-                                        attachedCards.removeAll()
-                                    }
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                                }
-                            }
-
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 6) {
-                                    ForEach(attachedCards, id: \.id) { card in
-                                        HStack(spacing: 4) {
-                                            Text(card.name)
-                                                .font(.caption2)
-                                                .foregroundColor(.white)
-                                                .lineLimit(1)
-
-                                            Button(action: {
-                                                attachedCards.removeAll { $0.id == card.id }
-                                            }) {
-                                                Image(systemName: "xmark.circle.fill")
-                                                    .font(.caption2)
-                                                    .foregroundColor(.gray)
-                                            }
-                                        }
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 6)
-                                                .fill(Color.lorcanaGold.opacity(0.2))
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(Color.lorcanaDark.opacity(0.95))
+                        attachedSummary
                     }
 
-                    // Search bar
-                    HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.gray)
-
-                        TextField("Search for a card...", text: $searchText)
-                            .textFieldStyle(.plain)
-                            .foregroundColor(.white)
-                            .autocorrectionDisabled()
-
-                        if !searchText.isEmpty {
-                            Button(action: { searchText = "" }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.gray)
-                            }
-                        }
-                    }
-                    .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.lorcanaDark.opacity(0.8))
-                    )
-                    .padding()
-                    .onChange(of: searchText) { newValue in
-                        searchTask?.cancel()
-                        searchTask = Task {
-                            try? await Task.sleep(nanoseconds: 200_000_000)
-                            if !Task.isCancelled {
-                                await MainActor.run {
-                                    performSearch(query: newValue)
-                                }
-                            }
-                        }
-                    }
+                    searchField
 
                     if searchText.isEmpty {
-                        // Empty state
-                        VStack(spacing: 16) {
-                            Spacer()
-                            Image(systemName: "rectangle.stack.badge.plus")
-                                .font(.system(size: 50))
-                                .foregroundColor(.gray)
-                            Text(attachedCards.isEmpty ? "Search for a card to attach" : "Search for another card")
-                                .font(.headline)
-                                .foregroundColor(.white)
-                            Text("Attach up to \(maxAttachedCards) cards to ask about interactions")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal)
-                            Spacer()
-                        }
+                        emptyState
                     } else if searchResults.isEmpty {
-                        VStack(spacing: 16) {
-                            Spacer()
-                            Image(systemName: "magnifyingglass")
-                                .font(.system(size: 50))
-                                .foregroundColor(.gray)
-                            Text("No cards found")
-                                .font(.headline)
-                                .foregroundColor(.white)
-                            Spacer()
-                        }
+                        noResults
                     } else {
-                        // Results list
-                        List(searchResults, id: \.id) { card in
-                            let alreadyAttached = isCardAttached(card)
-                            Button(action: {
-                                if alreadyAttached {
-                                    attachedCards.removeAll { $0.id == card.id }
-                                } else if attachedCards.count < maxAttachedCards {
-                                    attachedCards.append(card)
-                                }
-                            }) {
-                                HStack(spacing: 12) {
-                                    AsyncImage(url: card.bestImageUrl()) { image in
-                                        image
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                    } placeholder: {
-                                        RoundedRectangle(cornerRadius: 4)
-                                            .fill(Color.gray.opacity(0.3))
-                                    }
-                                    .frame(width: 40, height: 56)
-                                    .clipShape(RoundedRectangle(cornerRadius: 4))
-
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(card.name)
-                                            .font(.headline)
-                                            .foregroundColor(.white)
-                                            .lineLimit(1)
-
-                                        HStack(spacing: 8) {
-                                            Text(card.type)
-                                                .font(.caption)
-                                                .foregroundColor(.gray)
-
-                                            Text("•")
-                                                .foregroundColor(.gray)
-
-                                            Text("\(card.cost) ink")
-                                                .font(.caption)
-                                                .foregroundColor(.lorcanaGold)
-                                        }
-                                    }
-
-                                    Spacer()
-
-                                    if alreadyAttached {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(.lorcanaGold)
-                                    } else if attachedCards.count >= maxAttachedCards {
-                                        Image(systemName: "circle")
-                                            .foregroundColor(.gray.opacity(0.3))
-                                    } else {
-                                        Image(systemName: "plus.circle")
-                                            .foregroundColor(.lorcanaGold)
-                                    }
-                                }
-                                .padding(.vertical, 4)
-                                .opacity((!alreadyAttached && attachedCards.count >= maxAttachedCards) ? 0.5 : 1.0)
-                            }
-                            .disabled(!alreadyAttached && attachedCards.count >= maxAttachedCards)
-                            .listRowBackground(
-                                alreadyAttached
-                                    ? Color.lorcanaGold.opacity(0.1)
-                                    : Color.lorcanaDark.opacity(0.6)
-                            )
-                        }
-                        .scrollContentBackground(.hidden)
-                        .listStyle(.plain)
+                        resultsList
                     }
                 }
             }
@@ -1003,7 +978,7 @@ struct CardSearchSheet: View {
                     Button("Cancel") {
                         isPresented = false
                     }
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -1012,7 +987,7 @@ struct CardSearchSheet: View {
                             isPresented = false
                         }
                         .fontWeight(.semibold)
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                     }
                 }
             }
@@ -1020,6 +995,189 @@ struct CardSearchSheet: View {
         .onDisappear {
             searchTask?.cancel()
         }
+    }
+
+    private var attachedSummary: some View {
+        VStack(spacing: 6) {
+            HStack {
+                Text("\(attachedCards.count) card\(attachedCards.count == 1 ? "" : "s") attached")
+                    .font(.caption)
+                    .foregroundStyle(.lorcanaGold)
+                Spacer()
+                if attachedCards.count > 1 {
+                    Button("Clear All") {
+                        attachedCards.removeAll()
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.gray)
+                }
+            }
+
+            ScrollView(.horizontal) {
+                HStack(spacing: 6) {
+                    ForEach(attachedCards, id: \.id) { card in
+                        HStack(spacing: 4) {
+                            Text(card.name)
+                                .font(.caption2)
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+
+                            Button("Remove", systemImage: "xmark.circle.fill") {
+                                attachedCards.removeAll { $0.id == card.id }
+                            }
+                            .labelStyle(.iconOnly)
+                            .font(.caption2)
+                            .foregroundStyle(.gray)
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(Color.lorcanaGold.opacity(0.2))
+                        )
+                    }
+                }
+            }
+            .scrollIndicators(.hidden)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(Color.lorcanaDark.opacity(0.95))
+    }
+
+    private var searchField: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.gray)
+
+            TextField("Search for a card...", text: $searchText)
+                .textFieldStyle(.plain)
+                .foregroundStyle(.white)
+                .autocorrectionDisabled()
+
+            if !searchText.isEmpty {
+                Button("Clear", systemImage: "xmark.circle.fill") {
+                    searchText = ""
+                }
+                .labelStyle(.iconOnly)
+                .foregroundStyle(.gray)
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.lorcanaDark.opacity(0.8))
+        )
+        .padding()
+        .onChange(of: searchText) { _, newValue in
+            searchTask?.cancel()
+            searchTask = Task {
+                try? await Task.sleep(for: .milliseconds(200))
+                if !Task.isCancelled {
+                    performSearch(query: newValue)
+                }
+            }
+        }
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 16) {
+            Spacer()
+            Image(systemName: "rectangle.stack.badge.plus")
+                .font(.system(size: 50))
+                .foregroundStyle(.gray)
+            Text(attachedCards.isEmpty ? "Search for a card to attach" : "Search for another card")
+                .font(.headline)
+                .foregroundStyle(.white)
+            Text("Attach up to \(maxAttachedCards) cards to ask about interactions")
+                .font(.subheadline)
+                .foregroundStyle(.gray)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+            Spacer()
+        }
+    }
+
+    private var noResults: some View {
+        VStack(spacing: 16) {
+            Spacer()
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 50))
+                .foregroundStyle(.gray)
+            Text("No cards found")
+                .font(.headline)
+                .foregroundStyle(.white)
+            Spacer()
+        }
+    }
+
+    private var resultsList: some View {
+        List(searchResults, id: \.id) { card in
+            let alreadyAttached = isCardAttached(card)
+            Button {
+                if alreadyAttached {
+                    attachedCards.removeAll { $0.id == card.id }
+                } else if attachedCards.count < maxAttachedCards {
+                    attachedCards.append(card)
+                }
+            } label: {
+                HStack(spacing: 12) {
+                    AsyncImage(url: card.bestImageUrl()) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                    } placeholder: {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.gray.opacity(0.3))
+                    }
+                    .frame(width: 40, height: 56)
+                    .clipShape(.rect(cornerRadius: 4))
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(card.name)
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+
+                        HStack(spacing: 8) {
+                            Text(card.type)
+                                .font(.caption)
+                                .foregroundStyle(.gray)
+
+                            Text("•")
+                                .foregroundStyle(.gray)
+
+                            Text("\(card.cost) ink")
+                                .font(.caption)
+                                .foregroundStyle(.lorcanaGold)
+                        }
+                    }
+
+                    Spacer()
+
+                    if alreadyAttached {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.lorcanaGold)
+                    } else if attachedCards.count >= maxAttachedCards {
+                        Image(systemName: "circle")
+                            .foregroundStyle(.gray.opacity(0.3))
+                    } else {
+                        Image(systemName: "plus.circle")
+                            .foregroundStyle(.lorcanaGold)
+                    }
+                }
+                .padding(.vertical, 4)
+                .opacity((!alreadyAttached && attachedCards.count >= maxAttachedCards) ? 0.5 : 1.0)
+            }
+            .disabled(!alreadyAttached && attachedCards.count >= maxAttachedCards)
+            .listRowBackground(
+                alreadyAttached
+                    ? Color.lorcanaGold.opacity(0.1)
+                    : Color.lorcanaDark.opacity(0.6)
+            )
+        }
+        .scrollContentBackground(.hidden)
+        .listStyle(.plain)
     }
 
     private func performSearch(query: String) {

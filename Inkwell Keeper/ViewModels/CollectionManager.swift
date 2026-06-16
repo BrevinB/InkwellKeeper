@@ -9,10 +9,14 @@ import SwiftUI
 import SwiftData
 import Foundation
 import Combine
+import CoreData
 
 class CollectionManager: ObservableObject {
     private var modelContext: ModelContext?
     private let pricingService = PricingService.shared
+
+    /// Observer token for CloudKit remote-change notifications.
+    private var remoteChangeObserver: NSObjectProtocol?
 
     @Published var collectedCards: [LorcanaCard] = []
     @Published var wishlistCards: [LorcanaCard] = []
@@ -32,7 +36,78 @@ class CollectionManager: ObservableObject {
         self.modelContext = context
         wipeStaleEstimatedPricesIfNeeded(context: context)
         repairBulkAddVariantCorruptionIfNeeded(context: context)
+        mergeDuplicateCollectedCards()
         loadCollection()
+        startObservingRemoteChanges()
+    }
+
+    deinit {
+        if let remoteChangeObserver {
+            NotificationCenter.default.removeObserver(remoteChangeObserver)
+        }
+    }
+
+    /// CloudKit imports changes on a background context and posts
+    /// `.NSPersistentStoreRemoteChange`. Our @Published arrays are populated by manual
+    /// fetches, so we re-merge + reload whenever synced data lands.
+    private func startObservingRemoteChanges() {
+        guard remoteChangeObserver == nil else { return }
+        remoteChangeObserver = NotificationCenter.default.addObserver(
+            forName: .NSPersistentStoreRemoteChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                guard let self else { return }
+                self.mergeDuplicateCollectedCards()
+                self.loadCollection()
+            }
+        }
+    }
+
+    /// Collapses duplicate `CollectedCard` rows that appear when two devices each insert
+    /// the same physical card while offline and CloudKit later merges both. Rows are the
+    /// "same card" when they share wishlist state + (uniqueId, else name||setName) +
+    /// variant. Mirrors the merge logic in `performBulkAddRepair`.
+    func mergeDuplicateCollectedCards() {
+        guard let context = modelContext else { return }
+
+        do {
+            let all = try context.fetch(FetchDescriptor<CollectedCard>())
+
+            var groups: [String: [CollectedCard]] = [:]
+            for card in all {
+                let identity = (card.uniqueId?.isEmpty == false)
+                    ? card.uniqueId!
+                    : "\(card.name)||\(card.setName)"
+                let key = "\(card.isWishlisted)|\(identity)|\(card.variant ?? "Normal")"
+                groups[key, default: []].append(card)
+            }
+
+            var didChange = false
+            for (_, rows) in groups where rows.count > 1 {
+                // Keep the earliest-added row; fold the rest into it.
+                let sorted = rows.sorted { $0.dateAdded < $1.dateAdded }
+                let survivor = sorted[0]
+                for dup in sorted.dropFirst() {
+                    survivor.quantity = max(survivor.quantity, dup.quantity)
+                    if survivor.price == nil { survivor.price = dup.price }
+                    if let extra = dup.imageAttachments, !extra.isEmpty {
+                        var merged = survivor.imageAttachments ?? []
+                        merged.append(contentsOf: extra)
+                        survivor.imageAttachments = merged
+                    }
+                    context.delete(dup)
+                    didChange = true
+                }
+            }
+
+            if didChange {
+                try context.save()
+            }
+        } catch {
+            // Non-fatal — duplicates are cosmetic and will be retried on the next sync.
+        }
     }
 
     /// One-time repair for a pre-fix bulk-add bug. Prior versions of "Bulk Add" in

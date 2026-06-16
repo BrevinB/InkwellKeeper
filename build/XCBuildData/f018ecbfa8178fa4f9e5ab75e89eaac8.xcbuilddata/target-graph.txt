@@ -1,9 +1,0 @@
-Target dependency graph (4 targets)
-Target 'Inkwell Keeper' in project 'Inkwell Keeper'
-➜ Explicit dependency on target 'RevenueCat' in project 'RevenueCat'
-Target 'RevenueCat' in project 'RevenueCat'
-➜ Explicit dependency on target 'RevenueCat' in project 'RevenueCat'
-➜ Explicit dependency on target 'RevenueCat_RevenueCat' in project 'RevenueCat'
-Target 'RevenueCat' in project 'RevenueCat'
-➜ Explicit dependency on target 'RevenueCat_RevenueCat' in project 'RevenueCat'
-Target 'RevenueCat_RevenueCat' in project 'RevenueCat' (no dependencies)

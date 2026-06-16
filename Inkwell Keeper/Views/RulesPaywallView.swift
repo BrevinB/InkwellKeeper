@@ -23,18 +23,18 @@ struct RulesPaywallView: View {
                 // Hero icon
                 Image(systemName: "book.circle.fill")
                     .font(.system(size: 80))
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
 
                 // Title and description
                 VStack(spacing: 12) {
                     Text("Inkwell Pro")
                         .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .bold()
+                        .foregroundStyle(.white)
 
                     Text("Get instant, AI-powered answers to any Disney Lorcana rules question.")
                         .font(.body)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
                 }
@@ -79,7 +79,7 @@ struct RulesPaywallView: View {
                                 .tint(.black)
                         } else {
                             Text("Subscribe Now")
-                                .fontWeight(.bold)
+                                .bold()
                         }
                     }
                     .frame(maxWidth: .infinity)
@@ -88,7 +88,7 @@ struct RulesPaywallView: View {
                         RoundedRectangle(cornerRadius: 14)
                             .fill(selectedPackage != nil ? Color.lorcanaGold : Color.gray.opacity(0.4))
                     )
-                    .foregroundColor(selectedPackage != nil ? .black : .gray)
+                    .foregroundStyle(selectedPackage != nil ? .black : .gray)
                 }
                 .disabled(selectedPackage == nil || isPurchasing)
                 .padding(.horizontal, 24)
@@ -99,7 +99,7 @@ struct RulesPaywallView: View {
                 }) {
                     Text("Restore Purchases")
                         .font(.subheadline)
-                        .foregroundColor(.lorcanaGold.opacity(0.8))
+                        .foregroundStyle(.lorcanaGold.opacity(0.8))
                 }
                 .disabled(isPurchasing)
 
@@ -110,14 +110,14 @@ struct RulesPaywallView: View {
                         Text("Read the Official Rules")
                     }
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                 }
 
                 // Legal
                 VStack(spacing: 6) {
                     Text("Subscriptions auto-renew unless cancelled at least 24 hours before the end of the current period. Manage subscriptions in Settings.")
                         .font(.caption2)
-                        .foregroundColor(.gray.opacity(0.7))
+                        .foregroundStyle(.gray.opacity(0.7))
                         .multilineTextAlignment(.center)
 
                     HStack(spacing: 16) {
@@ -125,11 +125,11 @@ struct RulesPaywallView: View {
                             showingPrivacyPolicy = true
                         }
                         .font(.caption2)
-                        .foregroundColor(.lorcanaGold.opacity(0.6))
+                        .foregroundStyle(.lorcanaGold.opacity(0.6))
 
                         Link("Terms of Use", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
                             .font(.caption2)
-                            .foregroundColor(.lorcanaGold.opacity(0.6))
+                            .foregroundStyle(.lorcanaGold.opacity(0.6))
                     }
                 }
                 .padding(.horizontal, 32)
@@ -159,18 +159,18 @@ struct RulesPaywallView: View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: icon)
                 .font(.system(size: 20))
-                .foregroundColor(.lorcanaGold)
+                .foregroundStyle(.lorcanaGold)
                 .frame(width: 28, alignment: .center)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
 
                 Text(description)
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
             }
         }
     }
@@ -235,12 +235,12 @@ struct SubscriptionOptionCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(periodLabel)
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
 
                     if let intro = package.storeProduct.introductoryDiscount {
                         Text(introText(for: intro))
                             .font(.caption)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                     }
                 }
 
@@ -248,13 +248,13 @@ struct SubscriptionOptionCard: View {
 
                 Text(package.localizedPriceString)
                     .font(.title3)
-                    .fontWeight(.bold)
-                    .foregroundColor(.lorcanaGold)
+                    .bold()
+                    .foregroundStyle(.lorcanaGold)
             }
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemGray6).opacity(0.3))
+                    .fill(Color.lorcanaDark.opacity(0.4))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)

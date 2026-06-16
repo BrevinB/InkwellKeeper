@@ -288,6 +288,14 @@ struct SettingsView: View {
     #if DEBUG
     private var debugSection: some View {
         Section("Debug Options") {
+            Toggle(isOn: Binding(
+                get: { SubscriptionManager.shared.debugPremiumOverride },
+                set: { SubscriptionManager.shared.debugPremiumOverride = $0 }
+            )) {
+                Label("Premium Override", systemImage: "crown.fill")
+                    .foregroundStyle(.orange)
+            }
+
             if isAddingCards {
                 HStack {
                     ProgressView()

@@ -35,10 +35,12 @@ struct MultiScanReviewView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Back") {
-                        isPresented = false
+                    if !showExportPrompt {
+                        Button("Back") {
+                            isPresented = false
+                        }
+                        .foregroundColor(.lorcanaGold)
                     }
-                    .foregroundColor(.lorcanaGold)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if !cameraManager.scannedCards.isEmpty && !showExportPrompt {

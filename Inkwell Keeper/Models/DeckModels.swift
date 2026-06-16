@@ -113,18 +113,18 @@ enum DeckArchetype: String, Codable, CaseIterable {
 // MARK: - Deck Model
 @Model
 class Deck {
-    @Attribute(.unique) var id: UUID
-    var name: String
-    var deckDescription: String
-    var format: String // DeckFormat rawValue
-    var inkColors: [String] // InkColor rawValues
+    var id: UUID = UUID()
+    var name: String = ""
+    var deckDescription: String = ""
+    var format: String = DeckFormat.infinityConstructed.rawValue // DeckFormat rawValue
+    var inkColors: [String] = [] // InkColor rawValues
     var archetype: String? // DeckArchetype rawValue
-    var createdDate: Date
-    var lastModified: Date
-    var notes: String
+    var createdDate: Date = Date.now
+    var lastModified: Date = Date.now
+    var notes: String = ""
 
     @Relationship(deleteRule: .cascade, inverse: \DeckCard.deck)
-    var cards: [DeckCard]
+    var cards: [DeckCard]?
 
     // Computed properties
     var deckFormat: DeckFormat {
@@ -146,11 +146,11 @@ class Deck {
     }
 
     var totalCards: Int {
-        cards.reduce(0) { $0 + $1.quantity }
+        (cards ?? []).reduce(0) { $0 + $1.quantity }
     }
 
     var uniqueCards: Int {
-        cards.count
+        (cards ?? []).count
     }
 
     init(
@@ -177,17 +177,17 @@ class Deck {
 // MARK: - Deck Card Model
 @Model
 class DeckCard {
-    var cardId: String
-    var name: String
-    var cost: Int
-    var type: String
-    var rarity: String
-    var setName: String
-    var imageUrl: String
+    var cardId: String = ""
+    var name: String = ""
+    var cost: Int = 0
+    var type: String = ""
+    var rarity: String = ""
+    var setName: String = ""
+    var imageUrl: String = ""
     var inkColor: String?
-    var inkwell: Bool
-    var quantity: Int
-    var variant: String
+    var inkwell: Bool = false
+    var quantity: Int = 1
+    var variant: String = CardVariant.normal.rawValue
     var price: Double?
     var cardNumber: Int?
     var uniqueId: String?
@@ -291,7 +291,7 @@ struct DeckValidation {
 
         // Check for banned sets in Core Constructed
         if format == .coreConstructed {
-            let bannedSetCards = deck.cards.filter { card in
+            let bannedSetCards = (deck.cards ?? []).filter { card in
                 format.bannedSets.contains(card.setName)
             }
             if !bannedSetCards.isEmpty {
@@ -301,14 +301,14 @@ struct DeckValidation {
         }
 
         // Check for max copies per card
-        for card in deck.cards {
+        for card in deck.cards ?? [] {
             if card.quantity > format.maxCopiesPerCard {
                 errors.append("\(card.name): \(card.quantity) copies (max \(format.maxCopiesPerCard))")
             }
         }
 
         // Check ink color consistency
-        let cardsWithWrongInk = deck.cards.filter { card in
+        let cardsWithWrongInk = (deck.cards ?? []).filter { card in
             guard let cardInk = card.cardInkColor else { return false }
             return !deckInkColors.contains(cardInk)
         }
@@ -317,7 +317,7 @@ struct DeckValidation {
         }
 
         // Check inkable ratio
-        let inkableCards = deck.cards.filter { $0.inkwell }.reduce(0) { $0 + $1.quantity }
+        let inkableCards = (deck.cards ?? []).filter { $0.inkwell }.reduce(0) { $0 + $1.quantity }
         let inkableRatio = totalCards > 0 ? Double(inkableCards) / Double(totalCards) : 0
         if inkableRatio < 0.3 && totalCards >= 30 {
             warnings.append("Low inkable ratio (\(Int(inkableRatio * 100))%). Recommended 30-40%.")
@@ -348,7 +348,7 @@ struct DeckStatistics {
     let costToComplete: Double
 
     static func calculate(for deck: Deck, collectionManager: CollectionManager) -> DeckStatistics {
-        let cards = deck.cards
+        let cards = deck.cards ?? []
         let totalCards = deck.totalCards
 
         // Cost distribution and average

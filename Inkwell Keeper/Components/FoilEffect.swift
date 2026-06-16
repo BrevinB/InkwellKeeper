@@ -109,30 +109,34 @@ struct StaticFoilEffect: ViewModifier {
         content
             .overlay(
                 // Static rainbow gradient
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color.clear,
-                        Color.purple.opacity(0.2),
-                        Color.cyan.opacity(0.2),
-                        Color.yellow.opacity(0.2),
-                        Color.clear
-                    ]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+                Group {
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.clear,
+                            Color.purple.opacity(0.2),
+                            Color.cyan.opacity(0.2),
+                            Color.yellow.opacity(0.2),
+                            Color.clear
+                        ]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
                 .blendMode(.screen)
             )
             .overlay(
                 // Subtle shine
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color.white.opacity(0.0),
-                        Color.white.opacity(0.15),
-                        Color.white.opacity(0.0)
-                    ]),
-                    startPoint: .topLeading,
-                    endPoint: .center
-                )
+                Group {
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.white.opacity(0.0),
+                            Color.white.opacity(0.15),
+                            Color.white.opacity(0.0)
+                        ]),
+                        startPoint: .topLeading,
+                        endPoint: .center
+                    )
+                }
                 .blendMode(.screen)
             )
     }
