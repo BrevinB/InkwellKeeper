@@ -863,6 +863,8 @@ struct ExportView: View {
             do {
                 try content.write(to: tempURL, atomically: true, encoding: .utf8)
 
+                Analytics.send(.exportCompleted(format: exportFormat.fileExtension))
+
                 await MainActor.run {
                     exportedFileURL = tempURL
                     isExporting = false

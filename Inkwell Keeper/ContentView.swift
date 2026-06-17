@@ -90,6 +90,10 @@ struct ContentView: View {
             collectionManager.setModelContext(modelContext)
             checkOnboardingStatus()
             ReviewManager.shared.recordAppLaunch()
+            Analytics.send(.screenViewed(name: Self.tabName(for: selectedTab)))
+        }
+        .onChange(of: selectedTab) { _, newTab in
+            Analytics.send(.screenViewed(name: Self.tabName(for: newTab)))
         }
         .sheet(isPresented: $showOnboarding) {
             OnboardingView(onImportTap: {
@@ -105,6 +109,20 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showWhatsNew) {
             WhatsNewView()
+        }
+    }
+
+    /// Maps a tab's selection tag to a human-readable screen name for analytics.
+    private static func tabName(for tag: Int) -> String {
+        switch tag {
+        case 0: "Collection"
+        case 1: "Scan"
+        case 2: "Sets"
+        case 3: "Decks"
+        case 7: "Support"
+        case 8: "Rules"
+        case 9: "Play"
+        default: "Tab\(tag)"
         }
     }
 
@@ -130,4 +148,3 @@ struct ContentView: View {
         }
     }
 }
-

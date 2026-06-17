@@ -583,6 +583,9 @@ struct AIDeckBuilderView: View {
 
     private func generate() {
         hasGenerated = true
+        Analytics.send(.aiDeckGenerated(
+            ink: selectedColors.map(\.rawValue).sorted().joined(separator: "/")
+        ))
         let ownedQuantities = useCollectionOnly ? collectionManager.collectedCardQuantities : [:]
         Task {
             await aiService.generateDeck(

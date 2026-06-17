@@ -383,6 +383,11 @@ class CollectionManager: ObservableObject {
 
             try context.save()
 
+            Analytics.send(.collectionCardAdded(
+                rarity: card.rarity.rawValue,
+                set: card.setName,
+                foil: card.variant == .foil
+            ))
         } catch {
             // Handle error silently
         }
@@ -435,6 +440,7 @@ class CollectionManager: ObservableObject {
                 context.delete(cardData)
             }
             try context.save()
+            Analytics.send(.collectionCardRemoved)
             updateCollectedCardsInPlace()
         } catch {
             // Handle error silently
@@ -466,6 +472,7 @@ class CollectionManager: ObservableObject {
         
         do {
             try context.save()
+            Analytics.send(.wishlistAdded)
             updateWishlistCardsInPlace()
         } catch {
             // Handle error silently
@@ -489,6 +496,7 @@ class CollectionManager: ObservableObject {
             }
             
             try context.save()
+            Analytics.send(.wishlistRemoved)
             updateWishlistCardsInPlace()
         } catch {
             // Handle error silently
@@ -736,6 +744,7 @@ class CollectionManager: ObservableObject {
                     existingCard.quantity = newQuantity
                 }
                 try context.save()
+                Analytics.send(.collectionQuantityChanged)
                 updateCollectedCardsInPlace()
             }
         } catch {

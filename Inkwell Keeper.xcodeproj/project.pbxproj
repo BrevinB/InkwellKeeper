@@ -16,6 +16,7 @@
 		232D42912ECE317500FF9283 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 232D42902ECE317500FF9283 /* RevenueCat */; };
 		232D42932ECE320A00FF9283 /* TipJarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D42922ECE320A00FF9283 /* TipJarView.swift */; };
 		232D42952ECE321D00FF9283 /* TipJarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D42942ECE321D00FF9283 /* TipJarManager.swift */; };
+		A1A1A1A1000000020000A002 /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1000000010000A001 /* Analytics.swift */; };
 		232D42972ECE322400FF9283 /* TipProduct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D42962ECE322400FF9283 /* TipProduct.swift */; };
 		2333654F2E77961C00BE5BD4 /* SetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2333654E2E77961C00BE5BD4 /* SetsView.swift */; };
 		233365502E77961C00BE5BD4 /* SetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2333654D2E77961C00BE5BD4 /* SetDetailView.swift */; };
@@ -30,6 +31,7 @@
 		233365672E77B05400BE5BD4 /* azurite_sea.json in Resources */ = {isa = PBXBuildFile; fileRef = 233365592E77B05400BE5BD4 /* azurite_sea.json */; };
 		233365682E77B05400BE5BD4 /* reign_of_jafar.json in Resources */ = {isa = PBXBuildFile; fileRef = 2333655C2E77B05400BE5BD4 /* reign_of_jafar.json */; };
 		233365692E77B05400BE5BD4 /* rise_of_the_floodborn.json in Resources */ = {isa = PBXBuildFile; fileRef = 2333655D2E77B05400BE5BD4 /* rise_of_the_floodborn.json */; };
+		2344283C2FE1132B008AA115 /* TelemetryDeck in Frameworks */ = {isa = PBXBuildFile; productRef = 2344283B2FE1132B008AA115 /* TelemetryDeck */; };
 		234EDF472F41766B0016D086 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 234EDF462F41766B0016D086 /* SubscriptionManager.swift */; };
 		234EDF492F4176860016D086 /* RulesPaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 234EDF482F4176860016D086 /* RulesPaywallView.swift */; };
 		23B90AFC2E66323500214C40 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B90AF82E66323500214C40 /* ContentView.swift */; };
@@ -134,6 +136,7 @@
 		230F91DA2EA89EF7006E5A70 /* starter_decks.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = starter_decks.json; sourceTree = "<group>"; };
 		232D42922ECE320A00FF9283 /* TipJarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipJarView.swift; sourceTree = "<group>"; };
 		232D42942ECE321D00FF9283 /* TipJarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipJarManager.swift; sourceTree = "<group>"; };
+		A1A1A1A1000000010000A001 /* Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Analytics.swift; sourceTree = "<group>"; };
 		232D42962ECE322400FF9283 /* TipProduct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipProduct.swift; sourceTree = "<group>"; };
 		2333654D2E77961C00BE5BD4 /* SetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDetailView.swift; sourceTree = "<group>"; };
 		2333654E2E77961C00BE5BD4 /* SetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetsView.swift; sourceTree = "<group>"; };
@@ -255,6 +258,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				232D42912ECE317500FF9283 /* RevenueCat in Frameworks */,
+				2344283C2FE1132B008AA115 /* TelemetryDeck in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -374,6 +378,7 @@
 				D1E2F3A4B5C6D7E8F9A0B1C3 /* OpenAIService.swift */,
 				1E3D652CBA4843E9BA303B2E /* DataMigrationService.swift */,
 				232D42942ECE321D00FF9283 /* TipJarManager.swift */,
+				A1A1A1A1000000010000A001 /* Analytics.swift */,
 				B8B0A43E08D93192BD18673C /* ReviewManager.swift */,
 				23CB6DD02EB8546600630416 /* ImportService.swift */,
 				23D9D4452EA3F1C80089D552 /* AffiliateService.swift */,
@@ -492,6 +497,7 @@
 			name = "Inkwell Keeper";
 			packageProductDependencies = (
 				232D42902ECE317500FF9283 /* RevenueCat */,
+				2344283B2FE1132B008AA115 /* TelemetryDeck */,
 			);
 			productName = "Inkwell Keeper";
 			productReference = 230352EE2E66220700CA8AA3 /* Inkwell Keeper.app */;
@@ -523,6 +529,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				232D428F2ECE317500FF9283 /* XCRemoteSwiftPackageReference "purchases-ios" */,
+				2344283A2FE1132B008AA115 /* XCRemoteSwiftPackageReference "SwiftSDK" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 230352EF2E66220700CA8AA3 /* Products */;
@@ -601,6 +608,7 @@
 				23D9D4462EA3F1C80089D552 /* AffiliateService.swift in Sources */,
 				23D9D4482EA3FEFE0089D552 /* DecksView.swift in Sources */,
 				232D42952ECE321D00FF9283 /* TipJarManager.swift in Sources */,
+				A1A1A1A1000000020000A002 /* Analytics.swift in Sources */,
 				53F307B176D5D34B253D3526 /* ReviewManager.swift in Sources */,
 				23B90B1B2E66332100214C40 /* ScanOverlay.swift in Sources */,
 				23BC47A92F4ABE8100E7037B /* AIDeckBuilderView.swift in Sources */,
@@ -897,6 +905,14 @@
 				minimumVersion = 5.48.0;
 			};
 		};
+		2344283A2FE1132B008AA115 /* XCRemoteSwiftPackageReference "SwiftSDK" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/TelemetryDeck/SwiftSDK";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.14.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -904,6 +920,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 232D428F2ECE317500FF9283 /* XCRemoteSwiftPackageReference "purchases-ios" */;
 			productName = RevenueCat;
+		};
+		2344283B2FE1132B008AA115 /* TelemetryDeck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2344283A2FE1132B008AA115 /* XCRemoteSwiftPackageReference "SwiftSDK" */;
+			productName = TelemetryDeck;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

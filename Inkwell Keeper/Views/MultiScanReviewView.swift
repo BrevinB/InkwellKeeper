@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MultiScanReviewView: View {
     @EnvironmentObject var collectionManager: CollectionManager
-    @ObservedObject var cameraManager: CameraManager
+    var cameraManager: CameraManager
     @Binding var isPresented: Bool
 
     @State private var addedAll = false
@@ -17,7 +17,7 @@ struct MultiScanReviewView: View {
     @State private var showingExportView = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 0) {
                 if cameraManager.scannedCards.isEmpty {
                     emptyState
@@ -39,7 +39,7 @@ struct MultiScanReviewView: View {
                         Button("Back") {
                             isPresented = false
                         }
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -47,7 +47,7 @@ struct MultiScanReviewView: View {
                         Button("Clear All") {
                             cameraManager.clearScannedCards()
                         }
-                        .foregroundColor(.red)
+                        .foregroundStyle(.red)
                     }
                 }
             }
@@ -67,17 +67,17 @@ struct MultiScanReviewView: View {
         VStack(spacing: 24) {
             Image(systemName: "rectangle.stack.badge.minus")
                 .font(.system(size: 60))
-                .foregroundColor(.lorcanaGold.opacity(0.6))
+                .foregroundStyle(.lorcanaGold.opacity(0.6))
 
             VStack(spacing: 8) {
                 Text("No Cards Scanned Yet")
                     .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .bold()
+                    .foregroundStyle(.white)
 
                 Text("Go back and scan some cards!")
                     .font(.body)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                     .multilineTextAlignment(.center)
             }
         }
@@ -114,11 +114,11 @@ struct MultiScanReviewView: View {
             HStack {
                 Text("\(cameraManager.scannedCards.count) unique cards")
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                 Spacer()
                 Text("\(cameraManager.totalScannedCount) total")
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
             }
 
             Button(action: addAllToCollection) {
@@ -129,7 +129,7 @@ struct MultiScanReviewView: View {
                     Text(addedAll ? "Added to Collection!" : "Add All to Collection")
                         .font(.headline)
                 }
-                .foregroundColor(addedAll ? .white : .black)
+                .foregroundStyle(addedAll ? .white : .black)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .background(addedAll ? Color.green : Color.lorcanaGold)
@@ -146,15 +146,15 @@ struct MultiScanReviewView: View {
         VStack(spacing: 12) {
             HStack(spacing: 8) {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
+                    .foregroundStyle(.green)
                 Text("\(scannedCount) cards added to your collection!")
                     .font(.subheadline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
             }
 
             Text("Would you like to export these cards?")
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
 
             HStack(spacing: 12) {
                 Button("Done") {
@@ -162,7 +162,7 @@ struct MultiScanReviewView: View {
                     isPresented = false
                 }
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .background(Color.white.opacity(0.15))
@@ -172,7 +172,7 @@ struct MultiScanReviewView: View {
                     showingExportView = true
                 }
                 .font(.headline)
-                .foregroundColor(.black)
+                .foregroundStyle(.black)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .background(Color.lorcanaGold)
@@ -201,6 +201,8 @@ struct MultiScanReviewView: View {
         // Haptic feedback
         let feedback = UINotificationFeedbackGenerator()
         feedback.notificationOccurred(.success)
+
+        Analytics.send(.scanMultiConfirmed(count: cameraManager.scannedCards.count))
 
         // Track multi-scan completion for review prompt
         ReviewManager.shared.recordMultiScanCompleted(cardsScanned: cameraManager.scannedCards.count)
@@ -239,13 +241,13 @@ struct ScannedCardRow: View {
                 Text(entry.card.name)
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .lineLimit(1)
 
                 HStack(spacing: 6) {
                     Text(entry.card.setName)
                         .font(.caption2)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
 
                     RarityBadge(rarity: entry.card.rarity)
 
@@ -274,15 +276,16 @@ struct ScannedCardRow: View {
                 }) {
                     Image(systemName: "minus.circle.fill")
                         .font(.title3)
-                        .foregroundColor(entry.quantity <= 1 ? .red.opacity(0.6) : .lorcanaGold)
+                        .foregroundStyle(entry.quantity <= 1 ? .red.opacity(0.6) : .lorcanaGold)
                         .frame(width: 44, height: 44)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.borderless)
+                .accessibilityLabel("Decrease quantity")
 
                 Text("\(entry.quantity)")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .frame(minWidth: 24)
 
                 Button(action: {
@@ -290,11 +293,12 @@ struct ScannedCardRow: View {
                 }) {
                     Image(systemName: "plus.circle.fill")
                         .font(.title3)
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                         .frame(width: 44, height: 44)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.borderless)
+                .accessibilityLabel("Increase quantity")
             }
         }
         .padding(.vertical, 4)
@@ -311,11 +315,11 @@ private struct VariantChip: View {
             Text(label)
                 .font(.caption2)
                 .fontWeight(isSelected ? .bold : .regular)
-                .foregroundColor(isSelected ? .black : .gray)
+                .foregroundStyle(isSelected ? .black : .gray)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 3)
                 .background(isSelected ? Color.lorcanaGold : Color.white.opacity(0.1))
-                .cornerRadius(8)
+                .clipShape(.rect(cornerRadius: 8))
         }
         .buttonStyle(.borderless)
     }

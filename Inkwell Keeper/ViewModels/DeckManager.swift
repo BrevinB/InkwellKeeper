@@ -134,6 +134,7 @@ class DeckManager: ObservableObject {
 
         do {
             try context.save()
+            Analytics.send(.deckCreated)
             loadDecks(context: context)
         } catch {
             // Handle error silently
@@ -150,6 +151,7 @@ class DeckManager: ObservableObject {
 
         do {
             try context.save()
+            Analytics.send(.deckDeleted)
             loadDecks(context: context)
         } catch {
             // Handle error silently
@@ -194,6 +196,7 @@ class DeckManager: ObservableObject {
 
         do {
             try context.save()
+            Analytics.send(.deckCardAdded)
 
             // Fetch price for the card in background
             if let deckCard = cardToUpdate {
@@ -234,6 +237,7 @@ class DeckManager: ObservableObject {
 
             do {
                 try context.save()
+                Analytics.send(.deckCardRemoved)
             } catch {
                 // Handle error silently
             }
@@ -453,6 +457,7 @@ class DeckManager: ObservableObject {
 
         do {
             try context.save()
+            Analytics.send(.deckImported)
             loadDecks(context: context)
             return deck
         } catch {

@@ -23,10 +23,11 @@ struct ScanOverlay: View {
             )
             .stroke(Color.lorcanaGold, lineWidth: lineWidth)
             .frame(width: frameWidth, height: frameHeight)
+            .accessibilityHidden(true)
 
             Text("Position card within frame")
                 .font(.caption)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
                 .background(

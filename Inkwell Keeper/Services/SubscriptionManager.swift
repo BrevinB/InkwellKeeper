@@ -118,6 +118,9 @@ class SubscriptionManager: ObservableObject {
             await MainActor.run {
                 self.isSubscribed = isNowSubscribed
             }
+            if isNowSubscribed {
+                Analytics.send(.subscriptionPurchased(product: package.storeProduct.productIdentifier))
+            }
             return isNowSubscribed
         } catch {
             await MainActor.run {

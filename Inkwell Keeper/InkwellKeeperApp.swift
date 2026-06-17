@@ -8,12 +8,15 @@
 import SwiftUI
 import SwiftData
 import RevenueCat
+import TelemetryDeck
 
 @main
 struct InkwellKeeperApp: App {
     let container: ModelContainer
 
     init() {
+        let config = TelemetryDeck.Config(appID: "F297E779-0C2D-4BBB-837D-71EB70FC8F18")
+        TelemetryDeck.initialize(config: config)
         // Initialize optimized image cache on app launch
         _ = ImageCache.shared
 

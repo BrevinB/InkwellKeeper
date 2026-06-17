@@ -15,25 +15,24 @@ struct SearchBar: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
-                .foregroundColor(isFocused ? .lorcanaGold : .gray)
-                .font(.system(size: 16, weight: .medium))
+                .foregroundStyle(isFocused ? .lorcanaGold : .gray)
+                .font(.body)
                 .animation(.easeInOut(duration: 0.2), value: isFocused)
 
             TextField(placeholder, text: $text)
-                .textFieldStyle(PlainTextFieldStyle())
-                .foregroundColor(.white)
-                .font(.system(size: 16))
+                .textFieldStyle(.plain)
+                .foregroundStyle(.white)
+                .font(.body)
                 .focused($isFocused)
                 .autocorrectionDisabled()
-            
+
             if !text.isEmpty {
-                Button(action: {
+                Button("Clear search", systemImage: "xmark.circle.fill") {
                     text = ""
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.gray)
-                        .font(.system(size: 16))
                 }
+                .labelStyle(.iconOnly)
+                .foregroundStyle(.gray)
+                .font(.body)
                 .transition(.scale.combined(with: .opacity))
             }
         }

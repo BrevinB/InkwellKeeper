@@ -131,6 +131,7 @@ struct TipJarView: View {
         do {
             let success = try await tipManager.purchase(package)
             if success {
+                Analytics.send(.tipPurchased(product: package.storeProduct.productIdentifier))
                 showThankYou = true
                 ReviewManager.shared.recordTipCompleted()
             }

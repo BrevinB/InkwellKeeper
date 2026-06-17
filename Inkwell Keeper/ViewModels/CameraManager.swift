@@ -8,7 +8,6 @@
 import SwiftUI
 internal import AVFoundation
 import Vision
-import Combine
 
 struct ScannedCardEntry: Identifiable {
     let id = UUID()
@@ -18,34 +17,40 @@ struct ScannedCardEntry: Identifiable {
     var variant: CardVariant = .normal
 }
 
-class CameraManager: NSObject, ObservableObject {
-    @Published var isSessionRunning = false
-    @Published var detectedCard: LorcanaCard?
-    @Published var permissionStatus: AVAuthorizationStatus = .notDetermined
-    @Published var errorMessage: String?
-    @Published var isProcessingCard = false
-    @Published var showCaptureFlash = false
-    @Published var isAutoScanEnabled = false
-    @Published var isAutoScanPaused = false
-    @Published var autoScanStatus: String? = nil
+@Observable
+@MainActor
+class CameraManager: NSObject {
+    var isSessionRunning = false
+    var detectedCard: LorcanaCard?
+    var permissionStatus: AVAuthorizationStatus = .notDetermined
+    var errorMessage: String?
+    var isProcessingCard = false
+    var showCaptureFlash = false
+    var isAutoScanEnabled = false
+    var isAutoScanPaused = false
+    var autoScanStatus: String? = nil
     // Multi-scan mode
-    @Published var isMultiScanMode = false
-    @Published var scannedCards: [ScannedCardEntry] = []
-    @Published var lastScannedCardName: String? = nil
-    @Published var lastScannedEntry: ScannedCardEntry? = nil
-    @Published var isFoilMode = false
-    @Published var isCorrectionActive = false
+    var isMultiScanMode = false
+    var scannedCards: [ScannedCardEntry] = []
+    var lastScannedCardName: String? = nil
+    var lastScannedEntry: ScannedCardEntry? = nil
+    var isFoilMode = false
+    var isCorrectionActive = false
     // Set disambiguation — when scanner can't determine which set a reprint belongs to
-    @Published var pendingSetChoices: [LorcanaCard]? = nil
+    var pendingSetChoices: [LorcanaCard]? = nil
 
-    private let captureSession = AVCaptureSession()
-    private var currentDevice: AVCaptureDevice?
-    private let captureOutput = AVCapturePhotoOutput()
+    // Debug: human-readable summary of the most recent scan attempt (OCR + match decision).
+    var lastScanDebug: String?
+
+    @ObservationIgnored private let captureSession = AVCaptureSession()
+    @ObservationIgnored private var currentDevice: AVCaptureDevice?
+    @ObservationIgnored private let captureOutput = AVCapturePhotoOutput()
     let previewLayer: AVCaptureVideoPreviewLayer?
-    
-    private var autoScanTimer: Timer?
-    private let autoScanInterval: TimeInterval = 1.5  // Fast scanning for quick workflow
-    private var lastSuccessfulScanTime: Date?
+
+    @ObservationIgnored private var autoScanTask: Task<Void, Never>?
+    @ObservationIgnored private let autoScanInterval: TimeInterval = 1.5  // Fast scanning for quick workflow
+    @ObservationIgnored private var lastSuccessfulScanTime: Date?
+    @ObservationIgnored private var lastMatchMethod = "—"  // Which matching path produced the last result
     
     // Card detection thresholds (relaxed for better detection)
     private let cardDetectionConfidence: Float = 0.5  // Lower threshold for more forgiving detection
@@ -65,22 +70,21 @@ class CameraManager: NSObject, ObservableObject {
     deinit {
         // Stop synchronously during deallocation to avoid accessing self after dealloc
         captureSession.stopRunning()
-        autoScanTimer?.invalidate()
-        autoScanTimer = nil
+        autoScanTask?.cancel()
     }
 
     func startSession() {
         guard permissionStatus == .authorized else { return }
 
-        DispatchQueue.global(qos: .background).async { [weak self] in
-            guard let self = self else { return }
-            if !self.captureSession.isRunning {
-                self.captureSession.startRunning()
+        // Starting the session blocks, so run it off the main actor.
+        let session = captureSession
+        Task.detached(priority: .userInitiated) {
+            if !session.isRunning {
+                session.startRunning()
             }
-
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                self.isSessionRunning = self.captureSession.isRunning
+            await MainActor.run { [weak self] in
+                guard let self else { return }
+                self.isSessionRunning = session.isRunning
 
                 // Start auto scan if it was enabled
                 if self.isAutoScanEnabled {
@@ -91,13 +95,12 @@ class CameraManager: NSObject, ObservableObject {
     }
 
     func stopSession() {
-        DispatchQueue.global(qos: .background).async { [weak self] in
-            guard let self = self else { return }
-            if self.captureSession.isRunning {
-                self.captureSession.stopRunning()
+        let session = captureSession
+        Task.detached(priority: .userInitiated) {
+            if session.isRunning {
+                session.stopRunning()
             }
-
-            DispatchQueue.main.async { [weak self] in
+            await MainActor.run { [weak self] in
                 self?.isSessionRunning = false
                 self?.stopAutoScan()
             }
@@ -112,12 +115,13 @@ class CameraManager: NSObject, ObservableObject {
             setupCamera()
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
-                DispatchQueue.main.async {
-                    self?.permissionStatus = granted ? .authorized : .denied
+                Task { @MainActor in
+                    guard let self else { return }
+                    self.permissionStatus = granted ? .authorized : .denied
                     if granted {
-                        self?.setupCamera()
+                        self.setupCamera()
                     } else {
-                        self?.errorMessage = "Camera access is required to scan cards"
+                        self.errorMessage = "Camera access is required to scan cards"
                     }
                 }
             }
@@ -196,10 +200,13 @@ class CameraManager: NSObject, ObservableObject {
         
         let settings = AVCapturePhotoSettings()
         captureOutput.capturePhoto(with: settings, delegate: self)
-        
+
+        Analytics.send(.scanStarted(mode: isMultiScanMode ? "multi" : "manual"))
+
         // Hide flash after brief moment
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            self.showCaptureFlash = false
+        Task {
+            try? await Task.sleep(for: .seconds(0.2))
+            showCaptureFlash = false
         }
     }
     
@@ -251,33 +258,35 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     private func startAutoScan() {
-        guard isSessionRunning && autoScanTimer == nil else { return }
-        
-        autoScanTimer = Timer.scheduledTimer(withTimeInterval: autoScanInterval, repeats: true) { [weak self] _ in
-            guard let self = self else { return }
-            
-            // Only auto-capture if we're not already processing a card
-            if !self.isProcessingCard {
-                // Add a small delay after successful scans to avoid rapid-fire captures of the same card
+        guard isSessionRunning && autoScanTask == nil else { return }
+
+        autoScanTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(self?.autoScanInterval ?? 1.5))
+                guard let self, !Task.isCancelled else { return }
+
+                // Only auto-capture if we're not already processing a card
+                guard !self.isProcessingCard else { continue }
+
+                // Skip briefly after a successful scan to avoid rapid-fire re-captures of the same card
                 if let lastScan = self.lastSuccessfulScanTime,
                    Date().timeIntervalSince(lastScan) < 3.0 {
-                    return
+                    continue
                 }
 
                 self.capturePhoto()
             }
         }
     }
-    
+
     private func stopAutoScan() {
-        autoScanTimer?.invalidate()
-        autoScanTimer = nil
+        autoScanTask?.cancel()
+        autoScanTask = nil
     }
 
     func pauseAutoScan() {
         isAutoScanPaused = true
-        autoScanTimer?.invalidate()
-        autoScanTimer = nil
+        stopAutoScan()
     }
 
     func resumeAutoScan() {
@@ -312,8 +321,9 @@ class CameraManager: NSObject, ObservableObject {
         feedback.notificationOccurred(.success)
 
         // Clear the last scanned info after a moment (longer to allow undo/correction)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) { [weak self] in
-            guard let self = self, !self.isCorrectionActive else { return }
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(3.5))
+            guard let self, !self.isCorrectionActive else { return }
             if self.lastScannedCardName == card.name {
                 self.lastScannedCardName = nil
                 self.lastScannedEntry = nil
@@ -396,8 +406,9 @@ class CameraManager: NSObject, ObservableObject {
         feedback.notificationOccurred(.success)
 
         // Clear after delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) { [weak self] in
-            guard let self = self, !self.isCorrectionActive else { return }
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(3.5))
+            guard let self, !self.isCorrectionActive else { return }
             if self.lastScannedCardName == newCard.name {
                 self.lastScannedCardName = nil
                 self.lastScannedEntry = nil
@@ -436,10 +447,9 @@ class CameraManager: NSObject, ObservableObject {
 }
 
 extension CameraManager: AVCapturePhotoCaptureDelegate {
-    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
-        
-        if let error = error {
-            DispatchQueue.main.async {
+    nonisolated func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+        if let error {
+            Task { @MainActor in
                 self.errorMessage = "Failed to capture photo: \(error.localizedDescription)"
             }
             return
@@ -447,189 +457,196 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
         
         guard let imageData = photo.fileDataRepresentation(),
               let image = UIImage(data: imageData) else { 
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.errorMessage = "Failed to process captured image"
             }
-            return 
-        }
-        
-        processCardImage(image)
-    }
-    
-    private func processCardImage(_ image: UIImage) {
-        isProcessingCard = true
-
-        // Run rectangle detection, text recognition, and rarity detection in parallel
-        let dispatchGroup = DispatchGroup()
-        var cardDetected = false
-        var recognizedCard: LorcanaCard?
-        var ocrTexts: [String] = []
-        var symbolRarity: CardRarity?
-
-        // Start rectangle detection (optional check)
-        dispatchGroup.enter()
-        detectCardInImage(image) { isCard in
-            cardDetected = isCard
-            dispatchGroup.leave()
-        }
-
-        // Start text recognition simultaneously (primary check)
-        dispatchGroup.enter()
-        recognizeCard(in: image) { card, detectedTexts in
-            recognizedCard = card
-            ocrTexts = detectedTexts
-            dispatchGroup.leave()
-        }
-
-        // Start rarity symbol detection in parallel
-        dispatchGroup.enter()
-        detectRaritySymbol(in: image) { rarity in
-            symbolRarity = rarity
-            dispatchGroup.leave()
-        }
-
-        // Wait for both operations to complete
-        dispatchGroup.notify(queue: .main) { [weak self] in
-            guard let self = self else { return }
-            self.isProcessingCard = false
-
-            // Accept the card if we found one through text recognition
-            // Rectangle detection is now just a hint, not a hard requirement
-            if let card = recognizedCard {
-                self.lastSuccessfulScanTime = Date()
-
-                // Resolve which set this card belongs to
-                let resolved = self.resolveCardSet(card, detectedTexts: ocrTexts, detectedRarity: symbolRarity)
-
-                // If pendingSetChoices was set, the UI will handle it — don't add yet
-                if self.pendingSetChoices != nil {
-                    return
-                }
-
-                if self.isMultiScanMode {
-                    self.addToScannedCards(resolved)
-                } else {
-                    self.detectedCard = resolved
-                }
-            } else {
-
-                // Only show error for manual captures, not auto scan
-                if !self.isAutoScanEnabled && !self.isMultiScanMode {
-                    if !cardDetected {
-                        self.errorMessage = "No card detected. Try adjusting angle or lighting."
-                    } else {
-                        self.errorMessage = "Card text not readable. Try better lighting or focus."
-                    }
-
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                        self.errorMessage = nil
-                    }
-                } else {
-                    // Show brief status for auto scan / multi-scan
-                    self.autoScanStatus = !cardDetected ? "Searching for card..." : "Reading card text..."
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                        self.autoScanStatus = nil
-                    }
-                }
-            }
-        }
-    }
-    
-    private func recognizeCard(in image: UIImage, completion: @escaping (LorcanaCard?, [String]) -> Void) {
-        // Downscale image for faster processing (max 1200px on longest side)
-        let scaledImage = image.scaledDown(to: 1200)
-
-        guard let cgImage = scaledImage.cgImage else {
-            completion(nil, [])
             return
         }
 
-        let request = VNRecognizeTextRequest { request, error in
-            if let error = error {
-                completion(nil, [])
+        Task { @MainActor in
+            await self.processCardImage(image)
+        }
+    }
+    
+    private func processCardImage(_ image: UIImage) async {
+        isProcessingCard = true
+
+        // Normalize once: bake in orientation (upright) and downscale. Both Vision
+        // requests share this image so rectangle detection no longer runs on raw,
+        // possibly-rotated pixels while OCR runs on an upright copy.
+        let normalizedImage = image.uprightScaled(to: 1200)
+
+        // Run rectangle detection and text recognition concurrently.
+        // These helpers are nonisolated, so they execute off the main actor.
+        async let cardDetectedResult = detectCardInImage(normalizedImage)
+        async let recognitionResult = recognizeCard(in: normalizedImage)
+
+        let cardDetected = await cardDetectedResult
+        let (recognizedCard, ocrTexts) = await recognitionResult
+
+        isProcessingCard = false
+
+        // Accept the card if we found one through text recognition.
+        // Rectangle detection is now just a hint, not a hard requirement.
+        if let card = recognizedCard {
+            lastSuccessfulScanTime = Date()
+            Analytics.send(.scanCardRecognized)
+
+            // Resolve which set this card belongs to
+            let resolved = resolveCardSet(card, detectedTexts: ocrTexts)
+            updateScanDebug(ocrTexts: ocrTexts, result: resolved)
+
+            // If pendingSetChoices was set, the UI will handle it — don't add yet
+            if pendingSetChoices != nil {
                 return
             }
 
-            guard let observations = request.results as? [VNRecognizedTextObservation] else {
-                completion(nil, [])
-                return
+            if isMultiScanMode {
+                addToScannedCards(resolved)
+            } else {
+                detectedCard = resolved
             }
+        } else {
+            updateScanDebug(ocrTexts: ocrTexts, result: nil)
 
-            let detectedTexts = observations.compactMap { observation in
-                observation.topCandidates(1).first?.string
-            }
+            // Only show error for manual captures, not auto scan
+            if !isAutoScanEnabled && !isMultiScanMode {
+                errorMessage = cardDetected
+                    ? "Card text not readable. Try better lighting or focus."
+                    : "No card detected. Try adjusting angle or lighting."
 
-            self.searchForCard(with: detectedTexts) { card in
-                completion(card, detectedTexts)
+                Task {
+                    try? await Task.sleep(for: .seconds(2))
+                    errorMessage = nil
+                }
+            } else {
+                // Show brief status for auto scan / multi-scan
+                autoScanStatus = cardDetected ? "Reading card text..." : "Searching for card..."
+                Task {
+                    try? await Task.sleep(for: .seconds(1.5))
+                    autoScanStatus = nil
+                }
             }
         }
-        
+    }
+    
+    /// Build the on-screen debug summary for the most recent scan attempt.
+    private func updateScanDebug(ocrTexts: [String], result: LorcanaCard?) {
+        var lines: [String] = []
+        lines.append("OCR [\(ocrTexts.count)]: " + ocrTexts.prefix(10).joined(separator: " | "))
+
+        if let info = parseCardNumber(from: ocrTexts) {
+            lines.append("num: \(info.cardNumber)/\(info.setTotal)  set:\(info.setNumber ?? "?")")
+        } else {
+            lines.append("num: (not parsed)")
+        }
+
+        lines.append("via: \(lastMatchMethod)")
+
+        if let result {
+            let number = result.cardNumber.map(String.init) ?? "?"
+            lines.append("→ \(result.name)  [\(result.setName) #\(number) \(result.variant)]")
+        } else {
+            lines.append("→ (no match)")
+        }
+
+        lastScanDebug = lines.joined(separator: "\n")
+    }
+
+    nonisolated private func recognizeCard(in image: UIImage) async -> (LorcanaCard?, [String]) {
+        let detectedTexts = performTextRecognition(in: image)
+        guard !detectedTexts.isEmpty else { return (nil, []) }
+        let card = await searchForCard(with: detectedTexts)
+        return (card, detectedTexts)
+    }
+
+    /// Run Vision text recognition and return reasonably confident text candidates.
+    /// Reads `request.results` synchronously after `perform`, avoiding completion-handler
+    /// callbacks (and the double-resume hazard they pose with continuations).
+    nonisolated private func performTextRecognition(in image: UIImage) -> [String] {
+        // Image is already upright and downscaled by processCardImage.
+        guard let cgImage = image.cgImage else { return [] }
+
+        let request = VNRecognizeTextRequest()
         request.recognitionLevel = .accurate  // Use accurate mode for better text recognition
         request.usesLanguageCorrection = true
         request.minimumTextHeight = 0.02  // Lower threshold to catch more text (was 0.03)
         request.recognitionLanguages = ["en-US"]  // English only for better accuracy
-        
+
         let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-        
-        DispatchQueue.global(qos: .userInitiated).async {
-            do {
-                try handler.perform([request])
-            } catch {
-                completion(nil, [])
-            }
+        do {
+            try handler.perform([request])
+        } catch {
+            return []
+        }
+
+        guard let observations = request.results else { return [] }
+
+        // Keep only reasonably confident text — low-confidence candidates are
+        // usually OCR noise that pollutes name extraction and fallback matching.
+        return observations.compactMap { observation -> String? in
+            guard let candidate = observation.topCandidates(1).first,
+                  candidate.confidence >= 0.3 else { return nil }
+            return candidate.string
         }
     }
-    
-    private func searchForCard(with detectedTexts: [String], completion: @escaping (LorcanaCard?) -> Void) {
+
+    private func searchForCard(with detectedTexts: [String]) async -> LorcanaCard? {
         let setsDataManager = SetsDataManager.shared
 
-        Task {
-            // Ensure data is loaded before searching
-            if !setsDataManager.isDataLoaded {
-                // Give it a moment and check again
-                try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
-
-                if !setsDataManager.isDataLoaded {
-                    completion(nil)
-                    return
-                }
-            }
-
-            // First, try to find the card by its printed card number (most reliable)
-            if let cardByNumber = findCardByNumber(from: detectedTexts) {
-                completion(cardByNumber)
-                return
-            }
-
-            // Fall back to name-based search
-            let potentialNames = extractCardNames(from: detectedTexts)
-
-            for name in potentialNames {
-                let results = setsDataManager.searchCards(query: name)
-
-                if !results.isEmpty {
-                    if let bestMatch = findBestMatch(for: name, in: results, allDetectedTexts: detectedTexts) {
-                        completion(bestMatch)
-                        return
-                    }
-                }
-            }
-
-            // If no specific searches found results, try broader search with all text combined
-            let combinedText = detectedTexts.filter { $0.count > 2 }.joined(separator: " ")
-            if !combinedText.isEmpty {
-                let fallbackResults = setsDataManager.searchCards(query: combinedText)
-                if let bestMatch = fallbackResults.first {
-                    completion(bestMatch)
-                    return
-                }
-            }
-
-            completion(nil)
+        // Ensure data is loaded before searching — poll briefly instead of a one-shot wait.
+        var attempts = 0
+        while !setsDataManager.isDataLoaded && attempts < 10 {
+            try? await Task.sleep(for: .milliseconds(200))
+            attempts += 1
         }
+        guard setsDataManager.isDataLoaded else { return nil }
+
+        // Match by the printed card number (structured text, usually most reliable).
+        let cardByNumber = findCardByNumber(from: detectedTexts)
+
+        // Trust the number match outright ONLY when the card's name is also present in
+        // the OCR text. A single misread digit in the small, low-contrast card-number
+        // text otherwise returns a confidently-wrong card, so corroborate it with the
+        // name before short-circuiting name-based matching.
+        if let cardByNumber, cardNameMatchesDetectedText(cardByNumber, detectedTexts: detectedTexts) {
+            lastMatchMethod = "number+name"
+            return cardByNumber
+        }
+
+        // Name-based search.
+        let potentialNames = extractCardNames(from: detectedTexts)
+
+        for name in potentialNames {
+            let results = setsDataManager.searchCards(query: name)
+            if !results.isEmpty,
+               let bestMatch = findBestMatch(for: name, in: results, allDetectedTexts: detectedTexts) {
+                lastMatchMethod = "name(\(name))"
+                return bestMatch
+            }
+        }
+
+        // Broader search with all detected text combined. This is a low-confidence
+        // path, so only accept a candidate whose name actually appears in the OCR
+        // text — otherwise report "not recognized" rather than guessing.
+        let combinedText = detectedTexts.filter { $0.count > 2 }.joined(separator: " ")
+        if !combinedText.isEmpty {
+            let fallbackResults = setsDataManager.searchCards(query: combinedText)
+            if let bestMatch = fallbackResults.first(where: {
+                cardNameMatchesDetectedText($0, detectedTexts: detectedTexts)
+            }) {
+                lastMatchMethod = "combined-text"
+                return bestMatch
+            }
+        }
+
+        // Last resort: the number match, even though its name wasn't corroborated —
+        // the name text was likely unreadable, and a structured number beats nothing.
+        lastMatchMethod = cardByNumber == nil ? "none" : "number(uncorroborated)"
+        return cardByNumber
     }
     
-    private func extractCardNames(from texts: [String]) -> [String] {
+    nonisolated private func extractCardNames(from texts: [String]) -> [String] {
         var mainNames: [String] = []      // ALL-CAPS main names like "RAFIKI", "SKULL ROCK"
         var subNames: [String] = []       // Capitalized subnames like "Shaman of the Savanna"
         var otherNames: [String] = []     // Other potential names
@@ -702,62 +719,44 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
         return searchQueries
     }
     
-    private func detectCardInImage(_ image: UIImage, completion: @escaping (Bool) -> Void) {
-        guard let cgImage = image.cgImage else {
-            completion(false)
-            return
-        }
-        
-        let request = VNDetectRectanglesRequest { request, error in
-            if let error = error {
-                completion(false)
-                return
-            }
-            
-            guard let observations = request.results as? [VNRectangleObservation] else {
-                completion(false)
-                return
-            }
-            
-            // Check if we found any rectangles that could be cards
-            let cardLikeRectangles = observations.filter { observation in
-                // Cards typically have an aspect ratio around 2.5:3.5 (0.714)
-                let aspectRatio = Float(observation.boundingBox.width / observation.boundingBox.height)
-                let isCardLikeRatio = aspectRatio >= self.cardAspectRatioMin && aspectRatio <= self.cardAspectRatioMax
-                
-                // Rectangle should be reasonably large in the image
-                let area = Float(observation.boundingBox.width * observation.boundingBox.height)
-                let isReasonableSize = area >= self.minimumCardArea
-                
-                // Confidence should meet our threshold
-                let isConfident = observation.confidence >= self.cardDetectionConfidence
-                
-                
-                return isCardLikeRatio && isReasonableSize && isConfident
-            }
-            
-            let hasCardLikeRectangle = !cardLikeRectangles.isEmpty
-            
-            completion(hasCardLikeRectangle)
-        }
-        
+    nonisolated private func detectCardInImage(_ image: UIImage) async -> Bool {
+        guard let cgImage = image.cgImage else { return false }
+
+        let request = VNDetectRectanglesRequest()
         request.minimumAspectRatio = 0.5
         request.maximumAspectRatio = 1.0
         request.minimumSize = 0.1
         request.maximumObservations = 10
-        
+
         let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-        
-        DispatchQueue.global(qos: .userInitiated).async {
-            do {
-                try handler.perform([request])
-            } catch {
-                completion(false)
-            }
+        do {
+            try handler.perform([request])
+        } catch {
+            return false
         }
+
+        guard let observations = request.results else { return false }
+
+        // Check if we found any rectangles that could be cards
+        let cardLikeRectangles = observations.filter { observation in
+            // Cards typically have an aspect ratio around 2.5:3.5 (0.714)
+            let aspectRatio = Float(observation.boundingBox.width / observation.boundingBox.height)
+            let isCardLikeRatio = aspectRatio >= cardAspectRatioMin && aspectRatio <= cardAspectRatioMax
+
+            // Rectangle should be reasonably large in the image
+            let area = Float(observation.boundingBox.width * observation.boundingBox.height)
+            let isReasonableSize = area >= minimumCardArea
+
+            // Confidence should meet our threshold
+            let isConfident = observation.confidence >= cardDetectionConfidence
+
+            return isCardLikeRatio && isReasonableSize && isConfident
+        }
+
+        return !cardLikeRectangles.isEmpty
     }
     
-    private func findBestMatch(for searchTerm: String, in cards: [LorcanaCard], allDetectedTexts: [String]) -> LorcanaCard? {
+    nonisolated private func findBestMatch(for searchTerm: String, in cards: [LorcanaCard], allDetectedTexts: [String]) -> LorcanaCard? {
         let lowercaseSearch = searchTerm.lowercased()
 
         // Look for exact matches first (highest priority)
@@ -873,212 +872,36 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
             return containsMatches.first
         }
 
-        // Last resort: return first result
-        return cards.first
-    }
-
-    // MARK: - Rarity Symbol Detection
-
-    /// Detect the rarity symbol from the bottom region of a card image.
-    /// Lorcana rarity symbols: ○ Common, ● Uncommon, ◆ Rare, ★ Super Rare, ⬠ Legendary
-    private func detectRaritySymbol(in image: UIImage, completion: @escaping (CardRarity?) -> Void) {
-        guard let cgImage = image.cgImage else {
-            completion(nil)
-            return
-        }
-
-        let imageWidth = CGFloat(cgImage.width)
-        let imageHeight = CGFloat(cgImage.height)
-
-        // Crop the bottom ~12% of the image, left-center area where the rarity symbol sits
-        // On Lorcana cards, the symbol is near the card number at the bottom
-        let cropRect = CGRect(
-            x: imageWidth * 0.05,
-            y: imageHeight * 0.88,
-            width: imageWidth * 0.5,
-            height: imageHeight * 0.10
-        )
-
-        guard let croppedCGImage = cgImage.cropping(to: cropRect) else {
-            completion(nil)
-            return
-        }
-
-        // Use contour detection to find the rarity symbol shape
-        let contourRequest = VNDetectContoursRequest()
-        contourRequest.contrastAdjustment = 2.0
-        contourRequest.detectsDarkOnLight = true
-
-        let handler = VNImageRequestHandler(cgImage: croppedCGImage, options: [:])
-
-        DispatchQueue.global(qos: .userInitiated).async {
-            do {
-                try handler.perform([contourRequest])
-
-                guard let contoursResult = contourRequest.results?.first else {
-                    completion(nil)
-                    return
-                }
-
-                // Find contours that could be the rarity symbol
-                // The symbol is typically the most prominent shape in this region
-                let topLevelCount = contoursResult.topLevelContourCount
-                guard topLevelCount > 0 else {
-                    completion(nil)
-                    return
-                }
-
-                // Analyze the largest contour(s)
-                var bestRarity: CardRarity?
-                var bestArea: Float = 0
-
-                for i in 0..<min(topLevelCount, 5) {
-                    guard let contour = try? contoursResult.contour(at: IndexPath(index: i)) else { continue }
-
-                    let points = contour.normalizedPoints
-                    guard points.count >= 4 else { continue }
-
-                    // Calculate bounding box area
-                    let xs = points.map { $0.x }
-                    let ys = points.map { $0.y }
-                    guard let minX = xs.min(), let maxX = xs.max(),
-                          let minY = ys.min(), let maxY = ys.max() else { continue }
-
-                    let width = maxX - minX
-                    let height = maxY - minY
-                    let area = width * height
-
-                    // Skip very small or very large contours
-                    guard area > 0.001 && area < 0.5 else { continue }
-
-                    // Skip very elongated shapes (not a symbol)
-                    let aspectRatio = width / max(height, 0.001)
-                    guard aspectRatio > 0.4 && aspectRatio < 2.5 else { continue }
-
-                    if area > bestArea {
-                        bestArea = area
-                        bestRarity = self.classifyRarityShape(points: points, width: width, height: height)
-                    }
-                }
-
-                completion(bestRarity)
-
-            } catch {
-                completion(nil)
-            }
-        }
-    }
-
-    /// Classify a contour shape as a rarity based on geometric properties.
-    private func classifyRarityShape(points: [simd_float2], width: Float, height: Float) -> CardRarity? {
-        let pointCount = points.count
-
-        // Calculate circularity: how close the shape is to a circle
-        // Circularity = 4π * area / perimeter²
-        let area = polygonArea(points: points)
-        let perimeter = polygonPerimeter(points: points)
-        let circularity = perimeter > 0 ? (4 * Float.pi * abs(area)) / (perimeter * perimeter) : 0
-
-        // Calculate convex hull and count dominant vertices/corners
-        let corners = countDominantCorners(points: points)
-
-        // Classification based on shape properties:
-        // Common (○): Hollow circle — high circularity, smooth
-        // Uncommon (●): Filled circle — high circularity
-        // Rare (◆): Diamond — 4 corners, medium circularity
-        // Super Rare (★): Star — many points/corners, low circularity
-        // Legendary (⬠): Hexagonal star — distinct star with more points
-
-        if circularity > 0.7 {
-            // Circular shape — Common or Uncommon
-            // Distinguish by whether it's hollow (common) or filled (uncommon)
-            // Hollow circles have more points in the contour (inner + outer edge)
-            if pointCount > 60 {
-                return .common  // Hollow circle has more contour points (two edges)
-            } else {
-                return .uncommon  // Filled circle is a simpler contour
-            }
-        } else if corners <= 5 && circularity > 0.5 {
-            // Diamond/rhombus shape — Rare
-            return .rare
-        } else if corners >= 8 && circularity < 0.5 {
-            // Star shape with many points
-            if corners >= 10 {
-                return .legendary  // More complex star
-            } else {
-                return .superRare  // 5-pointed star
-            }
-        } else if corners >= 5 && corners <= 7 {
-            // Pentagon/hexagon-like — could be Legendary
-            return .legendary
-        }
-
+        // No reliable match found. Returning nil lets the caller report
+        // "card not recognized" instead of silently guessing a wrong card.
         return nil
     }
 
-    /// Calculate the area of a polygon using the shoelace formula
-    private func polygonArea(points: [simd_float2]) -> Float {
-        guard points.count >= 3 else { return 0 }
-        var area: Float = 0
-        let n = points.count
-        for i in 0..<n {
-            let j = (i + 1) % n
-            area += points[i].x * points[j].y
-            area -= points[j].x * points[i].y
-        }
-        return area / 2
-    }
+    /// Lightweight sanity check that a candidate card's name actually appears in the
+    /// detected OCR text. Used to gate low-confidence fallback matches so the scanner
+    /// reports "not recognized" rather than silently adding the wrong card.
+    nonisolated private func cardNameMatchesDetectedText(_ card: LorcanaCard, detectedTexts: [String]) -> Bool {
+        let haystack = detectedTexts.joined(separator: " ").lowercased()
+        guard !haystack.isEmpty else { return false }
 
-    /// Calculate the perimeter of a polygon
-    private func polygonPerimeter(points: [simd_float2]) -> Float {
-        guard points.count >= 2 else { return 0 }
-        var perimeter: Float = 0
-        for i in 0..<points.count {
-            let j = (i + 1) % points.count
-            let dx = points[j].x - points[i].x
-            let dy = points[j].y - points[i].y
-            perimeter += sqrt(dx * dx + dy * dy)
-        }
-        return perimeter
-    }
+        // Corroborate on the MAIN name (the character/given name before " - "), which is
+        // the discriminating part. Matching on a shared franchise word like "duck" or
+        // "mouse" is NOT enough — that let misread card numbers resolve to the wrong
+        // character (e.g. a Darkwing Duck scan matching "Daisy Duck" via "duck").
+        let mainName = card.name.components(separatedBy: " - ").first ?? card.name
+        let tokens = mainName
+            .lowercased()
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { $0.count >= 4 }
 
-    /// Count the dominant corners/vertices by detecting significant direction changes
-    private func countDominantCorners(points: [simd_float2]) -> Int {
-        guard points.count >= 6 else { return points.count }
-
-        // Sample points at regular intervals for stability
-        let sampleCount = min(points.count, 36)
-        let step = max(points.count / sampleCount, 1)
-        var sampled: [simd_float2] = []
-        for i in stride(from: 0, to: points.count, by: step) {
-            sampled.append(points[i])
-        }
-        guard sampled.count >= 3 else { return 0 }
-
-        var corners = 0
-        let threshold: Float = 0.5  // ~30 degrees in radians
-
-        for i in 0..<sampled.count {
-            let prev = sampled[(i - 1 + sampled.count) % sampled.count]
-            let curr = sampled[i]
-            let next = sampled[(i + 1) % sampled.count]
-
-            let v1 = simd_float2(curr.x - prev.x, curr.y - prev.y)
-            let v2 = simd_float2(next.x - curr.x, next.y - curr.y)
-
-            let len1 = simd_length(v1)
-            let len2 = simd_length(v2)
-            guard len1 > 0 && len2 > 0 else { continue }
-
-            let cosAngle = simd_dot(v1, v2) / (len1 * len2)
-            let angle = acos(min(max(cosAngle, -1), 1))
-
-            if angle > threshold {
-                corners += 1
-            }
+        // Names with no significant token fall back to whole main-name containment.
+        guard let distinctive = tokens.max(by: { $0.count < $1.count }) else {
+            return haystack.contains(mainName.lowercased())
         }
 
-        return corners
+        // Require the most distinctive (longest) token of the main name to appear —
+        // usually the character's given name (e.g. "daisy", "willie", "donald").
+        return haystack.contains(distinctive)
     }
 
     // MARK: - Set Detection from OCR
@@ -1127,7 +950,7 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
 
     /// Parse card info from OCR text. Looks for patterns like:
     /// "207/204 · EN · 9", "42/204 EN 9", "23/204 · EN · P1"
-    private func parseCardNumber(from texts: [String]) -> CardNumberInfo? {
+    nonisolated private func parseCardNumber(from texts: [String]) -> CardNumberInfo? {
         // First try the full pattern with set number: "X/Y · EN · Z" or "X/Y EN Z"
         // The set number can be a number or alphanumeric (P1, P2, D23, CP, Q1, etc.)
         let fullPattern = #"(\d{1,4})\s*/\s*(\d{2,4})\s*[·.\-\s]+\s*EN\s*[·.\-\s]+\s*([A-Z0-9]+)"#
@@ -1225,23 +1048,13 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
 
     /// Resolve a matched card to the correct set version and variant (enchanted vs normal).
     /// Returns the card if determined, or sets pendingSetChoices if user needs to pick.
-    private func resolveCardSet(_ card: LorcanaCard, detectedTexts: [String], detectedRarity: CardRarity? = nil) -> LorcanaCard {
+    private func resolveCardSet(_ card: LorcanaCard, detectedTexts: [String]) -> LorcanaCard {
         let dataManager = SetsDataManager.shared
         let allCards = dataManager.getAllCards()
 
         // First, check if this is an enchanted/special card via card number
         if let resolved = resolveVariant(for: card, detectedTexts: detectedTexts, allCards: allCards) {
             return resolved
-        }
-
-        // If rarity detection says enchanted but card number didn't catch it,
-        // look for an enchanted variant of this card
-        if detectedRarity == .enchanted {
-            if let enchantedCard = allCards.first(where: {
-                $0.name == card.name && $0.variant == .enchanted
-            }) {
-                return enchantedCard
-            }
         }
 
         // Get all normal versions of this card across sets
@@ -1257,15 +1070,8 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
             return resolved
         }
 
-        // Use detected rarity to narrow down if versions have different rarities
-        if let detectedRarity = detectedRarity {
-            let rarityMatches = allVersions.filter { $0.rarity == detectedRarity }
-            if rarityMatches.count == 1 {
-                return rarityMatches[0]
-            }
-        }
-
-        // Can't determine set — signal the UI to ask the user
+        // Can't determine set — signal the UI to ask the user rather than guess
+        // from an unreliable rarity-symbol reading.
         pendingSetChoices = allVersions
 
         // Return the card as-is (caller checks pendingSetChoices before using it)
@@ -1370,14 +1176,14 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
 
 // MARK: - UIImage Extension for Performance
 extension UIImage {
-    func scaledDown(to maxDimension: CGFloat) -> UIImage {
+    /// Returns an upright (`.up` orientation) copy scaled so its longest side is at most
+    /// `maxDimension`. Always redraws — even when no downscaling is needed — so the
+    /// resulting `cgImage` has correct pixel orientation for Vision requests, which
+    /// ignore `UIImage.imageOrientation` metadata.
+    func uprightScaled(to maxDimension: CGFloat) -> UIImage {
         let size = self.size
         let longestSide = max(size.width, size.height)
-
-        // If image is already smaller, return as-is
-        guard longestSide > maxDimension else { return self }
-
-        let scale = maxDimension / longestSide
+        let scale = longestSide > maxDimension ? maxDimension / longestSide : 1
         let newSize = CGSize(width: size.width * scale, height: size.height * scale)
 
         let renderer = UIGraphicsImageRenderer(size: newSize)

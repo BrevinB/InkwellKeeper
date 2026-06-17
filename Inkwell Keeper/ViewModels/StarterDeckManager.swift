@@ -93,6 +93,8 @@ class StarterDeckManager: ObservableObject {
             }
         }
 
+        Analytics.send(.starterDeckImported(name: starterDeck.name))
+
         return (deck, unmatchedCards, addedToCollectionCount)
     }
 

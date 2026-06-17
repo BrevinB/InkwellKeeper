@@ -503,6 +503,11 @@ struct BulkImportView: View {
                 }
             )
 
+            Analytics.send(.importCompleted(
+                source: String(describing: detectedFormat),
+                count: result.totalCardsCount
+            ))
+
             await MainActor.run {
                 importStats.progress = 1.0
                 importStats.totalCards = result.totalCardsCount

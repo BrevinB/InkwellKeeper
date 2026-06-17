@@ -10,7 +10,7 @@ internal import AVFoundation
 
 struct ScannerView: View {
     @EnvironmentObject var collectionManager: CollectionManager
-    @StateObject private var cameraManager = CameraManager()
+    @State private var cameraManager = CameraManager()
     @State private var showingManualAdd = false
     @State private var detectedCard: LorcanaCard?
     @State private var showingCardDetail = false
@@ -18,6 +18,7 @@ struct ScannerView: View {
     @State private var isCapturePressed = false
     @State private var showingCorrectionSearch = false
     @State private var showingSetPicker = false
+    @State private var showScanDebug = true  // On-screen scan debug overlay (temporary)
     @Binding var isActive: Bool  // Track if this tab is active
 
     var body: some View {
@@ -42,12 +43,12 @@ struct ScannerView: View {
                     VStack(spacing: 20) {
                         Image(systemName: "camera.fill")
                             .font(.system(size: 50))
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
 
                         Text(errorMessage)
                             .font(.title2)
                             .multilineTextAlignment(.center)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .padding(.horizontal)
 
                         if cameraManager.permissionStatus == .denied {
@@ -67,11 +68,11 @@ struct ScannerView: View {
                                 Text("Manual Add Card")
                                     .font(.headline)
                             }
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .padding(.horizontal, 20)
                             .padding(.vertical, 12)
                             .background(Color.lorcanaGold)
-                            .cornerRadius(25)
+                            .clipShape(.rect(cornerRadius: 25))
                         }
                         .padding(.top, 10)
                     }
@@ -107,27 +108,30 @@ struct ScannerView: View {
                                         .clipShape(RoundedRectangle(cornerRadius: 4))
 
                                         // Card name (tappable area)
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            HStack(spacing: 4) {
-                                                Image(systemName: "checkmark.circle.fill")
-                                                    .foregroundColor(.green)
-                                                    .font(.caption)
-                                                Text(entry.card.name)
-                                                    .foregroundColor(.white)
-                                                    .fontWeight(.semibold)
-                                                    .font(.subheadline)
-                                                    .lineLimit(1)
-                                            }
-                                            HStack(spacing: 6) {
-                                                Text("Tap to correct")
-                                                    .font(.caption2)
-                                                    .foregroundColor(.gray)
-                                                AsyncPriceWithConfidenceView(card: entry.card, style: .inline)
-                                            }
-                                        }
-                                        .onTapGesture {
+                                        Button {
                                             showingCorrectionSearch = true
+                                        } label: {
+                                            VStack(alignment: .leading, spacing: 2) {
+                                                HStack(spacing: 4) {
+                                                    Image(systemName: "checkmark.circle.fill")
+                                                        .foregroundStyle(.green)
+                                                        .font(.caption)
+                                                    Text(entry.card.name)
+                                                        .foregroundStyle(.white)
+                                                        .fontWeight(.semibold)
+                                                        .font(.subheadline)
+                                                        .lineLimit(1)
+                                                }
+                                                HStack(spacing: 6) {
+                                                    Text("Tap to correct")
+                                                        .font(.caption2)
+                                                        .foregroundStyle(.gray)
+                                                    AsyncPriceWithConfidenceView(card: entry.card, style: .inline)
+                                                }
+                                            }
                                         }
+                                        .buttonStyle(.plain)
+                                        .accessibilityHint("Opens search to correct this card")
 
                                         Spacer()
 
@@ -140,17 +144,18 @@ struct ScannerView: View {
                                             }) {
                                                 Image(systemName: "minus")
                                                     .font(.caption2.weight(.bold))
-                                                    .foregroundColor(entry.quantity > 1 ? .white : .gray.opacity(0.4))
+                                                    .foregroundStyle(entry.quantity > 1 ? .white : .gray.opacity(0.4))
                                                     .frame(width: 24, height: 24)
                                                     .background(Color.white.opacity(entry.quantity > 1 ? 0.2 : 0.05))
                                                     .clipShape(Circle())
                                             }
                                             .disabled(entry.quantity <= 1)
+                                            .accessibilityLabel("Decrease quantity")
 
                                             Text("\(entry.quantity)")
                                                 .font(.subheadline)
-                                                .fontWeight(.bold)
-                                                .foregroundColor(.white)
+                                                .bold()
+                                                .foregroundStyle(.white)
                                                 .frame(minWidth: 20)
 
                                             Button(action: {
@@ -160,11 +165,12 @@ struct ScannerView: View {
                                             }) {
                                                 Image(systemName: "plus")
                                                     .font(.caption2.weight(.bold))
-                                                    .foregroundColor(.white)
+                                                    .foregroundStyle(.white)
                                                     .frame(width: 24, height: 24)
                                                     .background(Color.white.opacity(0.2))
                                                     .clipShape(Circle())
                                             }
+                                            .accessibilityLabel("Increase quantity")
                                         }
 
                                         // Undo button
@@ -175,18 +181,18 @@ struct ScannerView: View {
                                         }) {
                                             Text("Undo")
                                                 .font(.caption)
-                                                .fontWeight(.bold)
-                                                .foregroundColor(.lorcanaGold)
+                                                .bold()
+                                                .foregroundStyle(.lorcanaGold)
                                                 .padding(.horizontal, 10)
                                                 .padding(.vertical, 6)
                                                 .background(Color.lorcanaGold.opacity(0.2))
-                                                .cornerRadius(12)
+                                                .clipShape(.rect(cornerRadius: 12))
                                         }
                                     }
                                     .padding(.horizontal, 14)
                                     .padding(.vertical, 10)
                                     .background(Color.black.opacity(0.85))
-                                    .cornerRadius(16)
+                                    .clipShape(.rect(cornerRadius: 16))
                                     .padding(.horizontal, 16)
                                     .padding(.bottom, 8)
                                 }
@@ -201,6 +207,9 @@ struct ScannerView: View {
                         bottomControlPanel
                     }
                 }
+            }
+            .overlay(alignment: .top) {
+                ScanDebugOverlay(text: cameraManager.lastScanDebug, isExpanded: $showScanDebug)
             }
             .navigationTitle("Scan Cards")
             .navigationBarTitleDisplayMode(.inline)
@@ -239,7 +248,7 @@ struct ScannerView: View {
                 }
             }
         }
-        .onChange(of: cameraManager.pendingSetChoices) { choices in
+        .onChange(of: cameraManager.pendingSetChoices) { _, choices in
             if choices != nil {
                 showingSetPicker = true
                 if cameraManager.isAutoScanEnabled {
@@ -248,7 +257,8 @@ struct ScannerView: View {
             } else if !showingSetPicker {
                 // Resume auto-scan after set picker dismissed
                 if cameraManager.isAutoScanEnabled {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    Task {
+                        try? await Task.sleep(for: .seconds(2))
                         if cameraManager.isAutoScanEnabled && !showingSetPicker {
                             cameraManager.resumeAutoScan()
                         }
@@ -256,16 +266,17 @@ struct ScannerView: View {
                 }
             }
         }
-        .onChange(of: showingSetPicker) { isShowing in
+        .onChange(of: showingSetPicker) { _, isShowing in
             if !isShowing && cameraManager.isAutoScanEnabled {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                Task {
+                    try? await Task.sleep(for: .seconds(2))
                     if cameraManager.isAutoScanEnabled && !showingSetPicker {
                         cameraManager.resumeAutoScan()
                     }
                 }
             }
         }
-        .onChange(of: cameraManager.detectedCard) { card in
+        .onChange(of: cameraManager.detectedCard) { _, card in
             if let card = card {
                 detectedCard = card
                 showingCardDetail = true
@@ -277,31 +288,34 @@ struct ScannerView: View {
                 }
             }
         }
-        .onChange(of: showingCardDetail) { isShowing in
+        .onChange(of: showingCardDetail) { _, isShowing in
             // Resume auto-scan with buffer when modal closes
             if !isShowing && cameraManager.isAutoScanEnabled {
                 // Add 2-second buffer to allow user to reposition phone
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                Task {
+                    try? await Task.sleep(for: .seconds(2))
                     if cameraManager.isAutoScanEnabled && !showingCardDetail {
                         cameraManager.resumeAutoScan()
                     }
                 }
             }
         }
-        .onChange(of: showingCorrectionSearch) { isShowing in
+        .onChange(of: showingCorrectionSearch) { _, isShowing in
             cameraManager.isCorrectionActive = isShowing
             if isShowing {
                 cameraManager.pauseAutoScan()
             } else {
                 // Clear the toast after correction sheet closes
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+                Task {
+                    try? await Task.sleep(for: .seconds(3.5))
                     if !cameraManager.isCorrectionActive {
                         cameraManager.lastScannedCardName = nil
                         cameraManager.lastScannedEntry = nil
                     }
                 }
                 if cameraManager.isAutoScanEnabled {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    Task {
+                        try? await Task.sleep(for: .seconds(2))
                         if cameraManager.isAutoScanEnabled && !showingCorrectionSearch {
                             cameraManager.resumeAutoScan()
                         }
@@ -335,7 +349,7 @@ struct ScannerView: View {
             HStack {
                 Text("Scan Cards")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
@@ -348,15 +362,15 @@ struct ScannerView: View {
     private var processingIndicator: some View {
         HStack(spacing: 12) {
             ProgressView()
-                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                .tint(.white)
             Text("Recognizing Card...")
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .font(.headline)
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 16)
         .background(.ultraThinMaterial)
-        .cornerRadius(12)
+        .clipShape(.rect(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.lorcanaGold.opacity(0.3), lineWidth: 1)
@@ -376,21 +390,22 @@ struct ScannerView: View {
                             .frame(width: 8, height: 8)
                             .opacity(cameraManager.isProcessingCard ? 0.3 : 1.0)
                             .animation(.easeInOut(duration: 1).repeatForever(), value: cameraManager.isProcessingCard)
+                            .accessibilityHidden(true)
 
                         Text(cameraManager.isAutoScanPaused ? "Auto Scan Paused" : "Auto Scan Active")
                             .font(.caption)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                     }
 
                     // Show status message if available
                     if let status = cameraManager.autoScanStatus {
                         Text(status)
                             .font(.caption2)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     } else if cameraManager.isAutoScanPaused {
                         Text("Resuming in 2 seconds...")
                             .font(.caption2)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                 }
             }
@@ -405,11 +420,11 @@ struct ScannerView: View {
                                 .frame(width: 48, height: 48)
                             Image(systemName: "plus.circle.fill")
                                 .font(.title2)
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                         }
                         Text("Manual Add")
                             .font(.caption)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                     }
                 }
 
@@ -425,11 +440,11 @@ struct ScannerView: View {
                                 .frame(width: 48, height: 48)
                             Image(systemName: "camera.rotate.fill")
                                 .font(.title2)
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                         }
                         Text("Flip")
                             .font(.caption)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                     }
                 }
                 .disabled(!cameraManager.isSessionRunning)
@@ -485,7 +500,7 @@ struct ScannerView: View {
                     Group {
                         if cameraManager.isProcessingCard {
                             ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .tint(.white)
                                 .scaleEffect(1.5)
                         } else {
                             Circle()
@@ -500,6 +515,8 @@ struct ScannerView: View {
                 .animation(.easeInOut(duration: 0.1), value: isCapturePressed)
         }
         .disabled(isDisabled)
+        .accessibilityLabel("Capture card")
+        .accessibilityHint("Takes a photo and scans the card")
         .onLongPressGesture(minimumDuration: .infinity, pressing: { pressing in
             isCapturePressed = pressing
         }, perform: {})
@@ -517,20 +534,20 @@ struct ScannerView: View {
                         .frame(width: 36, height: 36)
                     Text("\(cameraManager.totalScannedCount)")
                         .font(.headline)
-                        .fontWeight(.bold)
-                        .foregroundColor(.black)
+                        .bold()
+                        .foregroundStyle(.black)
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Multi Scan Mode")
                         .font(.subheadline)
                         .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                     Text(cameraManager.scannedCards.isEmpty
                          ? "Scan cards to build a batch"
                          : "\(cameraManager.scannedCards.count) unique card\(cameraManager.scannedCards.count == 1 ? "" : "s") scanned")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 }
 
                 Spacer()
@@ -539,11 +556,11 @@ struct ScannerView: View {
                     Text("Review")
                         .font(.caption)
                         .fontWeight(.semibold)
-                        .foregroundColor(.black)
+                        .foregroundStyle(.black)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
                         .background(Color.lorcanaGold)
-                        .cornerRadius(12)
+                        .clipShape(.rect(cornerRadius: 12))
                 }
             }
             .padding(.horizontal, 16)
@@ -558,7 +575,7 @@ struct ScannerView: View {
 // MARK: - Scan Correction Search View
 
 struct ScanCorrectionSearchView: View {
-    @ObservedObject var cameraManager: CameraManager
+    var cameraManager: CameraManager
     @Binding var isPresented: Bool
     @StateObject private var dataManager = SetsDataManager.shared
     @State private var searchText = ""
@@ -566,14 +583,14 @@ struct ScanCorrectionSearchView: View {
     @State private var searchTask: Task<Void, Never>?
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 SearchBar(text: $searchText)
                     .padding()
-                    .onChange(of: searchText) { newValue in
+                    .onChange(of: searchText) { _, newValue in
                         searchTask?.cancel()
                         searchTask = Task {
-                            try? await Task.sleep(nanoseconds: 200_000_000)
+                            try? await Task.sleep(for: .milliseconds(200))
                             if !Task.isCancelled {
                                 await MainActor.run {
                                     searchCards(query: newValue)
@@ -586,18 +603,18 @@ struct ScanCorrectionSearchView: View {
                     VStack(spacing: 16) {
                         Image(systemName: "magnifyingglass")
                             .font(.largeTitle)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         Text("No cards found")
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if searchText.isEmpty {
                     VStack(spacing: 16) {
                         Image(systemName: "arrow.triangle.2.circlepath")
                             .font(.largeTitle)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         Text("Search for the correct card")
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
@@ -644,7 +661,7 @@ struct SetPickerSheet: View {
     let onCancel: () -> Void
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 16) {
                 // Card preview (use first card's image)
                 if let first = cards.first {
@@ -663,13 +680,13 @@ struct SetPickerSheet: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(first.name)
                                 .font(.headline)
-                                .foregroundColor(.white)
+                                .foregroundStyle(.white)
                             Text("This card appears in multiple sets.")
                                 .font(.subheadline)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
                             Text("Which set is this copy from?")
                                 .font(.subheadline)
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                         }
                         Spacer()
                     }
@@ -688,19 +705,19 @@ struct SetPickerSheet: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(card.setName)
                                     .font(.headline)
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
 
                                 if let num = card.cardNumber {
                                     Text("Card #\(num)")
                                         .font(.caption)
-                                        .foregroundColor(.gray)
+                                        .foregroundStyle(.gray)
                                 }
                             }
 
                             Spacer()
 
                             Image(systemName: "chevron.right")
-                                .foregroundColor(.lorcanaGold.opacity(0.6))
+                                .foregroundStyle(.lorcanaGold.opacity(0.6))
                                 .font(.caption)
                         }
                         .padding(.vertical, 4)
@@ -727,6 +744,39 @@ struct SetPickerSheet: View {
     }
 }
 
+// MARK: - Scan Debug Overlay (temporary diagnostics)
+
+struct ScanDebugOverlay: View {
+    let text: String?
+    @Binding var isExpanded: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Button(isExpanded ? "Hide debug" : "Show debug") {
+                isExpanded.toggle()
+            }
+            .font(.caption2.bold())
+            .foregroundStyle(.yellow)
+
+            if isExpanded {
+                ScrollView {
+                    Text(text ?? "No scan yet — capture a card.")
+                        .font(.system(.caption2, design: .monospaced))
+                        .foregroundStyle(.green)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .textSelection(.enabled)
+                }
+                .frame(maxHeight: 170)
+                .padding(8)
+                .background(.black.opacity(0.8))
+                .clipShape(.rect(cornerRadius: 8))
+            }
+        }
+        .padding(.horizontal, 8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
 private struct ScanToggleButton: View {
     let label: String
     let icon: String
@@ -741,11 +791,11 @@ private struct ScanToggleButton: View {
                 Text(label)
                     .font(.subheadline)
             }
-            .foregroundColor(isActive ? .white : .lorcanaGold)
+            .foregroundStyle(isActive ? .white : .lorcanaGold)
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
             .background(isActive ? Color.lorcanaGold.opacity(0.8) : Color.black.opacity(0.7))
-            .cornerRadius(25)
+            .clipShape(.rect(cornerRadius: 25))
         }
     }
 }

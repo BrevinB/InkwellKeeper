@@ -271,6 +271,7 @@ struct OnboardingView: View {
 
     private func completeOnboarding() {
         UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
+        Analytics.send(.onboardingCompleted)
         dismiss()
     }
 }

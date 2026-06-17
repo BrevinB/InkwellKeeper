@@ -137,6 +137,9 @@ struct RulesPaywallView: View {
             }
         }
         .background(LorcanaBackground())
+        .onAppear {
+            Analytics.send(.paywallShown(source: "rulesPro"))
+        }
         .task {
             await subscriptionManager.loadOfferings()
             // Auto-select the first package if available

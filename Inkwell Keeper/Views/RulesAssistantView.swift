@@ -463,6 +463,7 @@ struct RulesInputBar: View {
         let cardsToSend = attachedCards
         inputText = ""
         attachedCards = []
+        Analytics.send(.aiRulesQuestionAsked)
         service.send(text, cardContexts: cardsToSend)
     }
 }

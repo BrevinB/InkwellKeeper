@@ -192,6 +192,7 @@ struct LoreCounterView: View {
 
             // Start Game button
             Button {
+                Analytics.send(.loreCounterGameStarted(players: playerCount))
                 showGame = true
             } label: {
                 HStack(spacing: 10) {
