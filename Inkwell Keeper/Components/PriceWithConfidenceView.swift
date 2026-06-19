@@ -18,6 +18,7 @@ struct PriceWithConfidenceView: View {
     enum DisplayStyle {
         case inline       // Small, for card tiles
         case detailed     // Larger, for detail views
+        case hero         // Extra-large, for the scan reveal
     }
 
     var body: some View {
@@ -26,6 +27,21 @@ struct PriceWithConfidenceView: View {
             inlineView
         case .detailed:
             detailedView
+        case .hero:
+            heroView
+        }
+    }
+
+    private var heroView: some View {
+        VStack(spacing: 8) {
+            Text(PricingService.formatPrice(price))
+                .font(.system(.largeTitle, design: .rounded))
+                .bold()
+                .foregroundStyle(Color.lorcanaGold)
+                .minimumScaleFactor(0.6)
+                .lineLimit(1)
+
+            confidenceBadge
         }
     }
 
@@ -92,6 +108,10 @@ struct PriceUnavailableView: View {
         case .inline:
             Text("—")
                 .font(.caption)
+                .foregroundStyle(.gray)
+        case .hero:
+            Text("No price")
+                .font(.title3)
                 .foregroundStyle(.gray)
         case .detailed:
             VStack(alignment: .leading, spacing: 4) {

@@ -15,6 +15,7 @@ struct MultiScanReviewView: View {
     @State private var addedAll = false
     @State private var showExportPrompt = false
     @State private var showingExportView = false
+    @State private var correctingTarget: CorrectingTarget?
 
     var body: some View {
         NavigationStack {
@@ -54,6 +55,11 @@ struct MultiScanReviewView: View {
             .sheet(isPresented: $showingExportView, onDismiss: dismissAfterExport) {
                 ExportView(initialDateFilter: .today)
                     .environmentObject(collectionManager)
+            }
+            .sheet(item: $correctingTarget) { target in
+                ScanCorrectionSearchView { newCard in
+                    cameraManager.replaceScannedCard(at: target.index, with: newCard)
+                }
             }
         }
     }
@@ -95,6 +101,9 @@ struct MultiScanReviewView: View {
                     },
                     onVariantChange: { newVariant in
                         cameraManager.updateScannedCardVariant(at: index, variant: newVariant)
+                    },
+                    onChangeCard: {
+                        correctingTarget = CorrectingTarget(index: index)
                     }
                 )
                 .listRowBackground(Color.white.opacity(0.05))
@@ -221,20 +230,31 @@ struct ScannedCardRow: View {
     let entry: ScannedCardEntry
     let onQuantityChange: (Int) -> Void
     let onVariantChange: (CardVariant) -> Void
+    let onChangeCard: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
-            // Card image thumbnail
-            AsyncImage(url: entry.card.bestImageUrl()) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-            } placeholder: {
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(Color.gray.opacity(0.3))
+            // Card image thumbnail — tap to change/correct this card
+            Button(action: onChangeCard) {
+                AsyncImage(url: entry.card.bestImageUrl()) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                } placeholder: {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.gray.opacity(0.3))
+                }
+                .frame(width: 50, height: 70)
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+                .overlay(alignment: .bottomTrailing) {
+                    Image(systemName: "pencil.circle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.white, Color.lorcanaGold)
+                        .padding(1)
+                }
             }
-            .frame(width: 50, height: 70)
-            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .buttonStyle(.plain)
+            .accessibilityLabel("Change card: \(entry.card.name)")
 
             // Card info
             VStack(alignment: .leading, spacing: 4) {
@@ -249,12 +269,13 @@ struct ScannedCardRow: View {
                         .font(.caption2)
                         .foregroundStyle(.gray)
 
-                    RarityBadge(rarity: entry.card.rarity)
-
                     Spacer()
 
                     AsyncPriceWithConfidenceView(card: entry.card, style: .inline)
                 }
+                
+                RarityBadge(rarity: entry.card.rarity)
+                    .padding(2)
 
                 // Variant picker
                 HStack(spacing: 6) {
@@ -323,4 +344,72 @@ private struct VariantChip: View {
         }
         .buttonStyle(.borderless)
     }
+}
+
+/// Identifies which batch row is being corrected (drives the correction sheet).
+private struct CorrectingTarget: Identifiable {
+    let id = UUID()
+    let index: Int
+}
+
+@MainActor
+private func makePreviewCamera() -> CameraManager {
+    let camera = CameraManager()
+    camera.scannedCards = [
+        ScannedCardEntry(
+            card: LorcanaCard(
+                name: "Elsa - Snow Queen",
+                cost: 6,
+                type: "Character",
+                rarity: .legendary,
+                setName: "The First Chapter",
+                imageUrl: "",
+                price: 12.50,
+                cardNumber: 43
+            ),
+            quantity: 2,
+            scannedAt: Date()
+        ),
+        ScannedCardEntry(
+            card: LorcanaCard(
+                name: "Moana - Of Motunui",
+                cost: 4,
+                type: "Character",
+                rarity: .superRare,
+                setName: "Rise of the Floodborn",
+                imageUrl: "",
+                price: 3.75,
+                variant: .foil,
+                cardNumber: 7
+            ),
+            quantity: 1,
+            scannedAt: Date(),
+            variant: .foil
+        ),
+        ScannedCardEntry(
+            card: LorcanaCard(
+                name: "Be Our Guest",
+                cost: 3,
+                type: "Action",
+                rarity: .common,
+                setName: "The First Chapter",
+                imageUrl: "",
+                price: 0.25,
+                cardNumber: 22
+            ),
+            quantity: 3,
+            scannedAt: Date()
+        )
+    ]
+    return camera
+}
+
+#Preview("With Cards") {
+    MultiScanReviewView(cameraManager: makePreviewCamera(), isPresented: .constant(true))
+        .environmentObject(CollectionManager())
+}
+
+#Preview("Empty") {
+    MultiScanReviewView(cameraManager: CameraManager(), isPresented: .constant(true))
+        .environmentObject(CollectionManager())
 }

@@ -20,6 +20,15 @@ struct RarityBadge: View {
                 Capsule()
                     .fill(rarity.color.opacity(0.8))
             )
-            .foregroundColor(.white)
+            .foregroundStyle(.white)
     }
+}
+
+#Preview {
+    VStack(spacing: 8) {
+        ForEach(CardRarity.allCases, id: \.self) { rarity in
+            RarityBadge(rarity: rarity)
+        }
+    }
+    .padding()
 }

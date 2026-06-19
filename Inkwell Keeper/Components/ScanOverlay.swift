@@ -8,11 +8,27 @@
 import SwiftUI
 
 struct ScanOverlay: View {
+    var alignment: CameraManager.CardAlignment = .searching
+
     private let frameWidth: CGFloat = 250
     private let frameHeight: CGFloat = 350
     private let cornerRadius: CGFloat = 20
     private let armLength: CGFloat = 40
     private let lineWidth: CGFloat = 3
+
+    private var strokeColor: Color {
+        switch alignment {
+        case .searching, .detected: return .lorcanaGold
+        case .aligned: return .green
+        }
+    }
+
+    private var message: String {
+        switch alignment {
+        case .searching, .detected: return "Position card within frame"
+        case .aligned: return "Ready to scan"
+        }
+    }
 
     var body: some View {
         VStack(spacing: 16) {
@@ -21,19 +37,22 @@ struct ScanOverlay: View {
                 armLength: armLength,
                 lineWidth: lineWidth
             )
-            .stroke(Color.lorcanaGold, lineWidth: lineWidth)
+            .stroke(strokeColor, lineWidth: lineWidth)
             .frame(width: frameWidth, height: frameHeight)
+            .animation(.easeInOut(duration: 0.2), value: alignment)
             .accessibilityHidden(true)
 
-            Text("Position card within frame")
+            Text(message)
                 .font(.caption)
-                .foregroundStyle(.white)
+                .bold()
+                .foregroundStyle(alignment == .aligned ? .green : .white)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
                 .background(
                     Capsule()
                         .fill(Color.black.opacity(0.7))
                 )
+                .animation(.easeInOut(duration: 0.2), value: alignment)
         }
     }
 }

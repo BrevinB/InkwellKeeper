@@ -29,8 +29,8 @@ class CameraManager: NSObject {
     var isAutoScanEnabled = false
     var isAutoScanPaused = false
     var autoScanStatus: String? = nil
-    // Multi-scan mode
-    var isMultiScanMode = false
+    // Multi-scan (batch) is the only mode — scans always accumulate into the tray.
+    var isMultiScanMode = true
     var scannedCards: [ScannedCardEntry] = []
     var lastScannedCardName: String? = nil
     var lastScannedEntry: ScannedCardEntry? = nil
@@ -39,18 +39,41 @@ class CameraManager: NSObject {
     // Set disambiguation — when scanner can't determine which set a reprint belongs to
     var pendingSetChoices: [LorcanaCard]? = nil
 
-    // Debug: human-readable summary of the most recent scan attempt (OCR + match decision).
-    var lastScanDebug: String?
+    // Bumped on each successful multi-scan add; drives the center-reveal animation.
+    var scanEventID = 0
+
+    // Live framing guidance from the continuous video feed.
+    enum CardAlignment: Equatable {
+        case searching   // no card-like rectangle in view
+        case detected    // a card is visible but not well-framed
+        case aligned     // a card fills the frame and is centered
+
+        /// Ordering used for smoothing: higher = better framing.
+        nonisolated var rank: Int {
+            switch self {
+            case .searching: return 0
+            case .detected: return 1
+            case .aligned: return 2
+            }
+        }
+    }
+    var alignmentState: CardAlignment = .searching
 
     @ObservationIgnored private let captureSession = AVCaptureSession()
     @ObservationIgnored private var currentDevice: AVCaptureDevice?
     @ObservationIgnored private let captureOutput = AVCapturePhotoOutput()
+    @ObservationIgnored private let videoOutput = AVCaptureVideoDataOutput()
+    @ObservationIgnored private let videoAnalysisQueue = DispatchQueue(
+        label: "co.brevinb.inkwellkeeper.cardAlignment", qos: .userInitiated)
+    // Accessed only on videoAnalysisQueue (serial), so unsynchronized access is safe.
+    @ObservationIgnored nonisolated(unsafe) private var lastAlignmentAnalysis: CFAbsoluteTime = 0
+    @ObservationIgnored nonisolated(unsafe) private var smoothedAlignment: CardAlignment = .searching
+    @ObservationIgnored nonisolated(unsafe) private var alignmentDowngradeStreak = 0
     let previewLayer: AVCaptureVideoPreviewLayer?
 
-    @ObservationIgnored private var autoScanTask: Task<Void, Never>?
-    @ObservationIgnored private let autoScanInterval: TimeInterval = 1.5  // Fast scanning for quick workflow
     @ObservationIgnored private var lastSuccessfulScanTime: Date?
-    @ObservationIgnored private var lastMatchMethod = "—"  // Which matching path produced the last result
+    // Auto-capture re-arms only after a card leaves the frame (see maybeAutoCapture).
+    @ObservationIgnored private var armedForAutoCapture = true
     
     // Card detection thresholds (relaxed for better detection)
     private let cardDetectionConfidence: Float = 0.5  // Lower threshold for more forgiving detection
@@ -70,7 +93,6 @@ class CameraManager: NSObject {
     deinit {
         // Stop synchronously during deallocation to avoid accessing self after dealloc
         captureSession.stopRunning()
-        autoScanTask?.cancel()
     }
 
     func startSession() {
@@ -85,11 +107,7 @@ class CameraManager: NSObject {
             await MainActor.run { [weak self] in
                 guard let self else { return }
                 self.isSessionRunning = session.isRunning
-
-                // Start auto scan if it was enabled
-                if self.isAutoScanEnabled {
-                    self.startAutoScan()
-                }
+                self.armedForAutoCapture = true
             }
         }
     }
@@ -102,7 +120,7 @@ class CameraManager: NSObject {
             }
             await MainActor.run { [weak self] in
                 self?.isSessionRunning = false
-                self?.stopAutoScan()
+                self?.alignmentState = .searching
             }
         }
     }
@@ -171,10 +189,22 @@ class CameraManager: NSObject {
             } else {
                 throw NSError(domain: "CameraError", code: 2, userInfo: [NSLocalizedDescriptionKey: "Cannot add photo output"])
             }
-            
+
+            // Optional live-framing analysis. If the session can't take a second output,
+            // we simply skip alignment guidance — scanning still works normally.
+            if captureSession.canAddOutput(videoOutput) {
+                videoOutput.alwaysDiscardsLateVideoFrames = true
+                videoOutput.setSampleBufferDelegate(self, queue: videoAnalysisQueue)
+                captureSession.addOutput(videoOutput)
+            }
+
             previewLayer?.videoGravity = .resizeAspectFill
 
             captureSession.commitConfiguration()
+
+            // Keep the camera continuously focusing/exposing so it re-focuses on each
+            // new card instead of locking after the first one.
+            configureContinuousFocus(captureDevice)
 
             // Don't auto-start the session - let the view control when to start
             // This prevents the camera from running when the tab is not active
@@ -225,20 +255,53 @@ class CameraManager: NSObject {
         setupCamera()
     }
 
+    /// Configure the device for continuous autofocus/exposure tuned for scanning cards
+    /// up close, so focus tracks each new card rather than locking after the first.
+    private func configureContinuousFocus(_ device: AVCaptureDevice) {
+        do {
+            try device.lockForConfiguration()
+
+            if device.isFocusModeSupported(.continuousAutoFocus) {
+                device.focusMode = .continuousAutoFocus
+            }
+            if device.isExposureModeSupported(.continuousAutoExposure) {
+                device.exposureMode = .continuousAutoExposure
+            }
+            if device.isSmoothAutoFocusSupported {
+                device.isSmoothAutoFocusEnabled = true
+            }
+            // Cards are held close to the lens — don't bias focus to far subjects.
+            if device.isAutoFocusRangeRestrictionSupported {
+                device.autoFocusRangeRestriction = .none
+            }
+            if device.isFocusPointOfInterestSupported {
+                device.focusPointOfInterest = CGPoint(x: 0.5, y: 0.5)
+            }
+
+            device.unlockForConfiguration()
+        } catch {
+            // Handle error silently
+        }
+    }
+
     func focusOnPoint(_ point: CGPoint) {
         guard let device = currentDevice else { return }
 
         do {
             try device.lockForConfiguration()
 
-            if device.isFocusPointOfInterestSupported {
+            // Bias focus/exposure to the tapped point but keep CONTINUOUS modes so it
+            // doesn't lock — the next card still re-focuses automatically.
+            if device.isFocusPointOfInterestSupported,
+               device.isFocusModeSupported(.continuousAutoFocus) {
                 device.focusPointOfInterest = point
-                device.focusMode = .autoFocus
+                device.focusMode = .continuousAutoFocus
             }
 
-            if device.isExposurePointOfInterestSupported {
+            if device.isExposurePointOfInterestSupported,
+               device.isExposureModeSupported(.continuousAutoExposure) {
                 device.exposurePointOfInterest = point
-                device.exposureMode = .autoExpose
+                device.exposureMode = .continuousAutoExposure
             }
 
             device.unlockForConfiguration()
@@ -247,59 +310,30 @@ class CameraManager: NSObject {
         }
     }
     
+    /// Auto-capture is driven by live alignment (see `updateAlignment`), not a timer:
+    /// a card is captured the moment it snaps into the frame, and re-arms only after
+    /// the card leaves — so a card sitting in view is captured once, not repeatedly.
     func toggleAutoScan() {
         isAutoScanEnabled.toggle()
-        
-        if isAutoScanEnabled {
-            startAutoScan()
-        } else {
-            stopAutoScan()
-        }
-    }
-    
-    private func startAutoScan() {
-        guard isSessionRunning && autoScanTask == nil else { return }
-
-        autoScanTask = Task { [weak self] in
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(self?.autoScanInterval ?? 1.5))
-                guard let self, !Task.isCancelled else { return }
-
-                // Only auto-capture if we're not already processing a card
-                guard !self.isProcessingCard else { continue }
-
-                // Skip briefly after a successful scan to avoid rapid-fire re-captures of the same card
-                if let lastScan = self.lastSuccessfulScanTime,
-                   Date().timeIntervalSince(lastScan) < 3.0 {
-                    continue
-                }
-
-                self.capturePhoto()
-            }
-        }
-    }
-
-    private func stopAutoScan() {
-        autoScanTask?.cancel()
-        autoScanTask = nil
+        armedForAutoCapture = true
     }
 
     func pauseAutoScan() {
         isAutoScanPaused = true
-        stopAutoScan()
     }
 
     func resumeAutoScan() {
         isAutoScanPaused = false
-        if isAutoScanEnabled && isSessionRunning {
-            startAutoScan()
-        }
+        armedForAutoCapture = true
     }
 
-    // MARK: - Multi-Scan Mode
-
-    func toggleMultiScanMode() {
-        isMultiScanMode.toggle()
+    /// Capture automatically when a freshly-framed card aligns, if auto-capture is on.
+    private func maybeAutoCapture() {
+        guard isAutoScanEnabled, !isAutoScanPaused, !isProcessingCard, armedForAutoCapture else { return }
+        // Debounce so a brief alignment flicker can't double-fire.
+        if let last = lastSuccessfulScanTime, Date().timeIntervalSince(last) < 1.0 { return }
+        armedForAutoCapture = false
+        capturePhoto()
     }
 
     private func addToScannedCards(_ card: LorcanaCard) {
@@ -315,6 +349,7 @@ class CameraManager: NSObject {
 
         lastScannedCardName = card.name
         lastScannedEntry = scannedCards.first(where: { $0.card.name == card.name && $0.card.setName == card.setName })
+        scanEventID += 1  // Trigger the center-reveal animation
 
         // Haptic feedback for successful scan
         let feedback = UINotificationFeedbackGenerator()
@@ -421,6 +456,28 @@ class CameraManager: NSObject {
         scannedCards.remove(at: index)
     }
 
+    /// Replace a mis-scanned card in the batch with the correct one, preserving its
+    /// quantity and variant. Merges into an existing matching entry if present.
+    func replaceScannedCard(at index: Int, with newCard: LorcanaCard) {
+        guard index >= 0 && index < scannedCards.count else { return }
+        let variant = scannedCards[index].variant
+        let quantity = scannedCards[index].quantity
+
+        scannedCards.remove(at: index)
+
+        if let existing = scannedCards.firstIndex(where: {
+            $0.card.name == newCard.name && $0.card.setName == newCard.setName && $0.variant == variant
+        }) {
+            scannedCards[existing].quantity += quantity
+        } else {
+            let entry = ScannedCardEntry(card: newCard.withVariant(variant),
+                                         quantity: quantity, scannedAt: Date(), variant: variant)
+            scannedCards.insert(entry, at: min(index, scannedCards.count))
+        }
+
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+
     func updateScannedCardQuantity(at index: Int, quantity: Int) {
         guard index >= 0 && index < scannedCards.count else { return }
         if quantity <= 0 {
@@ -494,7 +551,6 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
 
             // Resolve which set this card belongs to
             let resolved = resolveCardSet(card, detectedTexts: ocrTexts)
-            updateScanDebug(ocrTexts: ocrTexts, result: resolved)
 
             // If pendingSetChoices was set, the UI will handle it — don't add yet
             if pendingSetChoices != nil {
@@ -507,8 +563,6 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
                 detectedCard = resolved
             }
         } else {
-            updateScanDebug(ocrTexts: ocrTexts, result: nil)
-
             // Only show error for manual captures, not auto scan
             if !isAutoScanEnabled && !isMultiScanMode {
                 errorMessage = cardDetected
@@ -530,29 +584,6 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
         }
     }
     
-    /// Build the on-screen debug summary for the most recent scan attempt.
-    private func updateScanDebug(ocrTexts: [String], result: LorcanaCard?) {
-        var lines: [String] = []
-        lines.append("OCR [\(ocrTexts.count)]: " + ocrTexts.prefix(10).joined(separator: " | "))
-
-        if let info = parseCardNumber(from: ocrTexts) {
-            lines.append("num: \(info.cardNumber)/\(info.setTotal)  set:\(info.setNumber ?? "?")")
-        } else {
-            lines.append("num: (not parsed)")
-        }
-
-        lines.append("via: \(lastMatchMethod)")
-
-        if let result {
-            let number = result.cardNumber.map(String.init) ?? "?"
-            lines.append("→ \(result.name)  [\(result.setName) #\(number) \(result.variant)]")
-        } else {
-            lines.append("→ (no match)")
-        }
-
-        lastScanDebug = lines.joined(separator: "\n")
-    }
-
     nonisolated private func recognizeCard(in image: UIImage) async -> (LorcanaCard?, [String]) {
         let detectedTexts = performTextRecognition(in: image)
         guard !detectedTexts.isEmpty else { return (nil, []) }
@@ -610,7 +641,6 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
         // text otherwise returns a confidently-wrong card, so corroborate it with the
         // name before short-circuiting name-based matching.
         if let cardByNumber, cardNameMatchesDetectedText(cardByNumber, detectedTexts: detectedTexts) {
-            lastMatchMethod = "number+name"
             return cardByNumber
         }
 
@@ -621,7 +651,6 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
             let results = setsDataManager.searchCards(query: name)
             if !results.isEmpty,
                let bestMatch = findBestMatch(for: name, in: results, allDetectedTexts: detectedTexts) {
-                lastMatchMethod = "name(\(name))"
                 return bestMatch
             }
         }
@@ -635,14 +664,12 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
             if let bestMatch = fallbackResults.first(where: {
                 cardNameMatchesDetectedText($0, detectedTexts: detectedTexts)
             }) {
-                lastMatchMethod = "combined-text"
                 return bestMatch
             }
         }
 
         // Last resort: the number match, even though its name wasn't corroborated —
         // the name text was likely unreadable, and a structured number beats nothing.
-        lastMatchMethod = cardByNumber == nil ? "none" : "number(uncorroborated)"
         return cardByNumber
     }
     
@@ -1171,6 +1198,93 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
 
     func dismissSetChoice() {
         pendingSetChoices = nil
+    }
+}
+
+// MARK: - Live Card-Alignment Detection
+
+extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
+    // Mirror of the published state, read/written only on videoAnalysisQueue, so we
+    // only hop to the main actor when the alignment actually changes.
+    nonisolated private static let centeredTolerance = 0.30
+    nonisolated private static let alignedMinArea = 0.18
+    // Frames a worse reading must persist before we downgrade (acquire fast, release slow).
+    nonisolated private static let downgradeFrames = 4
+
+    nonisolated func captureOutput(_ output: AVCaptureOutput,
+                                   didOutput sampleBuffer: CMSampleBuffer,
+                                   from connection: AVCaptureConnection) {
+        // Throttle to ~10fps so live analysis never competes with capture or the UI.
+        let now = CFAbsoluteTimeGetCurrent()
+        guard now - lastAlignmentAnalysis >= 0.1 else { return }
+        lastAlignmentAnalysis = now
+
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+
+        let request = VNDetectRectanglesRequest()
+        request.minimumAspectRatio = 0.45
+        request.maximumAspectRatio = 1.0
+        request.minimumSize = 0.15
+        request.maximumObservations = 6
+        request.minimumConfidence = 0.4
+
+        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .right, options: [:])
+        try? handler.perform([request])
+
+        // Largest card-shaped rectangle in view, if any.
+        let best = (request.results ?? [])
+            .filter {
+                let ratio = Float($0.boundingBox.width / $0.boundingBox.height)
+                return ratio >= cardAspectRatioMin && ratio <= cardAspectRatioMax
+            }
+            .max { ($0.boundingBox.width * $0.boundingBox.height) < ($1.boundingBox.width * $1.boundingBox.height) }
+
+        let rawState: CardAlignment
+        if let best {
+            let box = best.boundingBox
+            let area = box.width * box.height
+            let centered = abs(box.midX - 0.5) < Self.centeredTolerance
+                && abs(box.midY - 0.5) < Self.centeredTolerance
+            rawState = (area >= Self.alignedMinArea && centered) ? .aligned : .detected
+        } else {
+            rawState = .searching
+        }
+
+        // Asymmetric smoothing: upgrade immediately (snappy), but require several
+        // consecutive worse frames before downgrading — this stops the reticle from
+        // flickering between states on noisy per-frame detection.
+        if rawState.rank >= smoothedAlignment.rank {
+            smoothedAlignment = rawState
+            alignmentDowngradeStreak = 0
+        } else {
+            alignmentDowngradeStreak += 1
+            if alignmentDowngradeStreak >= Self.downgradeFrames {
+                smoothedAlignment = rawState
+                alignmentDowngradeStreak = 0
+            }
+        }
+
+        let committed = smoothedAlignment
+        Task { @MainActor in
+            self.updateAlignment(committed)
+        }
+    }
+
+    @MainActor
+    func updateAlignment(_ newState: CardAlignment) {
+        guard alignmentState != newState else { return }
+        let wasAligned = alignmentState == .aligned
+        alignmentState = newState
+        if newState == .aligned {
+            // Gentle nudge the moment the card snaps into good framing.
+            if !wasAligned {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            }
+            maybeAutoCapture()
+        } else {
+            // Card left the frame (or isn't well-framed): re-arm for the next card.
+            armedForAutoCapture = true
+        }
     }
 }
 

@@ -8,234 +8,117 @@
 import SwiftUI
 internal import AVFoundation
 
+// MARK: - Liquid Glass helper (iOS 26+) with material fallback
+
+extension View {
+    /// Liquid Glass background clipped to `shape` on iOS 26+, `.ultraThinMaterial`
+    /// fallback on iOS 18. Used for the floating scan chrome.
+    @ViewBuilder
+    func glassBackground<S: Shape>(in shape: S) -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassEffect(.regular, in: shape)
+        } else {
+            self.background(.ultraThinMaterial, in: shape)
+        }
+    }
+}
+
+
 struct ScannerView: View {
     @EnvironmentObject var collectionManager: CollectionManager
     @State private var cameraManager = CameraManager()
     @State private var showingManualAdd = false
-    @State private var detectedCard: LorcanaCard?
-    @State private var showingCardDetail = false
-    @State private var showingMultiScanReview = false
-    @State private var isCapturePressed = false
+    @State private var showingBatchReview = false
     @State private var showingCorrectionSearch = false
     @State private var showingSetPicker = false
-    @State private var showScanDebug = true  // On-screen scan debug overlay (temporary)
+    @State private var revealEntry: ScannedCardEntry?  // Reveal of the just-scanned card
+    @State private var revealTask: Task<Void, Never>?
     @Binding var isActive: Bool  // Track if this tab is active
 
     var body: some View {
         NavigationStack {
             ZStack {
+                // Camera feed (or black when unavailable)
                 if cameraManager.permissionStatus == .authorized && cameraManager.errorMessage == nil {
                     CameraPreview(cameraManager: cameraManager)
-                        .ignoresSafeArea(.all)
+                        .ignoresSafeArea()
                 } else {
-                    Color.black.ignoresSafeArea(.all)
+                    Color.black.ignoresSafeArea()
                 }
 
-                // Capture flash effect
+                // Capture flash
                 if cameraManager.showCaptureFlash {
                     Color.white
-                        .ignoresSafeArea(.all)
+                        .ignoresSafeArea()
                         .opacity(0.7)
                         .animation(.easeOut(duration: 0.2), value: cameraManager.showCaptureFlash)
                 }
 
                 if let errorMessage = cameraManager.errorMessage {
-                    VStack(spacing: 20) {
-                        Image(systemName: "camera.fill")
-                            .font(.system(size: 50))
-                            .foregroundStyle(.gray)
-
-                        Text(errorMessage)
-                            .font(.title2)
-                            .multilineTextAlignment(.center)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal)
-
-                        if cameraManager.permissionStatus == .denied {
-                            Button("Open Settings") {
-                                if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
-                                    UIApplication.shared.open(settingsUrl)
-                                }
-                            }
-                            .buttonStyle(LorcanaButtonStyle())
-                        }
-
-                        // Always show manual add when camera is unavailable
-                        Button(action: { showingManualAdd = true }) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.title2)
-                                Text("Manual Add Card")
-                                    .font(.headline)
-                            }
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 12)
-                            .background(Color.lorcanaGold)
-                            .clipShape(.rect(cornerRadius: 25))
-                        }
-                        .padding(.top, 10)
-                    }
+                    CameraUnavailableView(
+                        message: errorMessage,
+                        isDenied: cameraManager.permissionStatus == .denied,
+                        onManualAdd: { showingManualAdd = true }
+                    )
                 } else {
                     VStack(spacing: 0) {
-                        // MARK: - Top Header Bar
-                        topHeaderBar
+                        ScanTopBar(
+                            isFoilOn: cameraManager.isFoilMode,
+                            onToggleFoil: { cameraManager.isFoilMode.toggle() }
+                        )
 
                         Spacer()
 
                         ZStack {
-                            ScanOverlay()
-
+                            ScanOverlay(alignment: cameraManager.alignmentState)
                             if cameraManager.isProcessingCard {
-                                processingIndicator
-                            }
-
-                            // Last scanned card toast in multi-scan mode
-                            if cameraManager.isMultiScanMode, let entry = cameraManager.lastScannedEntry {
-                                VStack {
-                                    Spacer()
-                                    HStack(spacing: 10) {
-                                        // Card thumbnail
-                                        AsyncImage(url: entry.card.bestImageUrl()) { image in
-                                            image
-                                                .resizable()
-                                                .aspectRatio(contentMode: .fit)
-                                        } placeholder: {
-                                            RoundedRectangle(cornerRadius: 4)
-                                                .fill(Color.gray.opacity(0.3))
-                                        }
-                                        .frame(width: 32, height: 45)
-                                        .clipShape(RoundedRectangle(cornerRadius: 4))
-
-                                        // Card name (tappable area)
-                                        Button {
-                                            showingCorrectionSearch = true
-                                        } label: {
-                                            VStack(alignment: .leading, spacing: 2) {
-                                                HStack(spacing: 4) {
-                                                    Image(systemName: "checkmark.circle.fill")
-                                                        .foregroundStyle(.green)
-                                                        .font(.caption)
-                                                    Text(entry.card.name)
-                                                        .foregroundStyle(.white)
-                                                        .fontWeight(.semibold)
-                                                        .font(.subheadline)
-                                                        .lineLimit(1)
-                                                }
-                                                HStack(spacing: 6) {
-                                                    Text("Tap to correct")
-                                                        .font(.caption2)
-                                                        .foregroundStyle(.gray)
-                                                    AsyncPriceWithConfidenceView(card: entry.card, style: .inline)
-                                                }
-                                            }
-                                        }
-                                        .buttonStyle(.plain)
-                                        .accessibilityHint("Opens search to correct this card")
-
-                                        Spacer()
-
-                                        // Quantity stepper
-                                        HStack(spacing: 6) {
-                                            Button(action: {
-                                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                                    cameraManager.decrementLastScannedQuantity()
-                                                }
-                                            }) {
-                                                Image(systemName: "minus")
-                                                    .font(.caption2.weight(.bold))
-                                                    .foregroundStyle(entry.quantity > 1 ? .white : .gray.opacity(0.4))
-                                                    .frame(width: 24, height: 24)
-                                                    .background(Color.white.opacity(entry.quantity > 1 ? 0.2 : 0.05))
-                                                    .clipShape(Circle())
-                                            }
-                                            .disabled(entry.quantity <= 1)
-                                            .accessibilityLabel("Decrease quantity")
-
-                                            Text("\(entry.quantity)")
-                                                .font(.subheadline)
-                                                .bold()
-                                                .foregroundStyle(.white)
-                                                .frame(minWidth: 20)
-
-                                            Button(action: {
-                                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                                    cameraManager.incrementLastScannedQuantity()
-                                                }
-                                            }) {
-                                                Image(systemName: "plus")
-                                                    .font(.caption2.weight(.bold))
-                                                    .foregroundStyle(.white)
-                                                    .frame(width: 24, height: 24)
-                                                    .background(Color.white.opacity(0.2))
-                                                    .clipShape(Circle())
-                                            }
-                                            .accessibilityLabel("Increase quantity")
-                                        }
-
-                                        // Undo button
-                                        Button(action: {
-                                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                                cameraManager.undoLastScan()
-                                            }
-                                        }) {
-                                            Text("Undo")
-                                                .font(.caption)
-                                                .bold()
-                                                .foregroundStyle(.lorcanaGold)
-                                                .padding(.horizontal, 10)
-                                                .padding(.vertical, 6)
-                                                .background(Color.lorcanaGold.opacity(0.2))
-                                                .clipShape(.rect(cornerRadius: 12))
-                                        }
-                                    }
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 10)
-                                    .background(Color.black.opacity(0.85))
-                                    .clipShape(.rect(cornerRadius: 16))
-                                    .padding(.horizontal, 16)
-                                    .padding(.bottom, 8)
-                                }
-                                .transition(.move(edge: .bottom).combined(with: .opacity))
-                                .animation(.spring(response: 0.35, dampingFraction: 0.75), value: cameraManager.lastScannedCardName)
+                                ProcessingPill()
                             }
                         }
 
                         Spacer()
 
-                        // MARK: - Bottom Control Panel
-                        bottomControlPanel
+                        ScanControlBar(
+                            cameraManager: cameraManager,
+                            onManualAdd: { showingManualAdd = true },
+                            onReview: { showingBatchReview = true }
+                        )
                     }
                 }
             }
-            .overlay(alignment: .top) {
-                ScanDebugOverlay(text: cameraManager.lastScanDebug, isExpanded: $showScanDebug)
+            .overlay(alignment: .bottomTrailing) {
+                if let entry = revealEntry {
+                    MultiScanRevealView(entry: entry) {
+                        // Tap the reveal to correct a mis-scan.
+                        revealTask?.cancel()
+                        withAnimation { revealEntry = nil }
+                        showingCorrectionSearch = true
+                    }
+                    .padding(.trailing, 12)
+                    .padding(.bottom, 210)  // float above the control bar
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                }
             }
-            .navigationTitle("Scan Cards")
-            .navigationBarTitleDisplayMode(.inline)
+            .onChange(of: cameraManager.scanEventID) { _, _ in
+                showScanReveal()
+            }
+            .onChange(of: cameraManager.isProcessingCard) { _, processing in
+                // The next capture is starting — clear the previous reveal so rapid
+                // scanning isn't gated on it.
+                if processing { dismissReveal() }
+            }
             .navigationBarHidden(true)
         }
         .sheet(isPresented: $showingManualAdd) {
             ManualAddCardView(isPresented: $showingManualAdd)
                 .environmentObject(collectionManager)
         }
-        .sheet(isPresented: $showingCardDetail) {
-            if let card = detectedCard {
-                AddCardModal(card: card, isPresented: $showingCardDetail, onAdd: { selectedCard, quantity in
-                    for _ in 0..<quantity {
-                        collectionManager.addCard(selectedCard)
-                    }
-                    showingCardDetail = false
-                }, isWishlist: false)
-                .environmentObject(collectionManager)
-            }
-        }
-        .sheet(isPresented: $showingMultiScanReview) {
-            MultiScanReviewView(cameraManager: cameraManager, isPresented: $showingMultiScanReview)
+        .sheet(isPresented: $showingBatchReview) {
+            MultiScanReviewView(cameraManager: cameraManager, isPresented: $showingBatchReview)
                 .environmentObject(collectionManager)
         }
         .sheet(isPresented: $showingCorrectionSearch) {
-            ScanCorrectionSearchView(cameraManager: cameraManager, isPresented: $showingCorrectionSearch)
+            ScanCorrectionSearchView { cameraManager.replaceLastScannedCard(with: $0) }
         }
         .sheet(isPresented: $showingSetPicker) {
             if let choices = cameraManager.pendingSetChoices {
@@ -251,53 +134,21 @@ struct ScannerView: View {
         .onChange(of: cameraManager.pendingSetChoices) { _, choices in
             if choices != nil {
                 showingSetPicker = true
-                if cameraManager.isAutoScanEnabled {
-                    cameraManager.pauseAutoScan()
-                }
+                cameraManager.pauseAutoScan()
             } else if !showingSetPicker {
-                // Resume auto-scan after set picker dismissed
-                if cameraManager.isAutoScanEnabled {
-                    Task {
-                        try? await Task.sleep(for: .seconds(2))
-                        if cameraManager.isAutoScanEnabled && !showingSetPicker {
-                            cameraManager.resumeAutoScan()
-                        }
-                    }
-                }
+                resumeAutoScanAfterDelay { !showingSetPicker }
             }
         }
         .onChange(of: showingSetPicker) { _, isShowing in
-            if !isShowing && cameraManager.isAutoScanEnabled {
-                Task {
-                    try? await Task.sleep(for: .seconds(2))
-                    if cameraManager.isAutoScanEnabled && !showingSetPicker {
-                        cameraManager.resumeAutoScan()
-                    }
-                }
+            if !isShowing {
+                resumeAutoScanAfterDelay { !showingSetPicker }
             }
         }
-        .onChange(of: cameraManager.detectedCard) { _, card in
-            if let card = card {
-                detectedCard = card
-                showingCardDetail = true
-                cameraManager.detectedCard = nil
-
-                // Pause auto-scan while modal is open
-                if cameraManager.isAutoScanEnabled {
-                    cameraManager.pauseAutoScan()
-                }
-            }
-        }
-        .onChange(of: showingCardDetail) { _, isShowing in
-            // Resume auto-scan with buffer when modal closes
-            if !isShowing && cameraManager.isAutoScanEnabled {
-                // Add 2-second buffer to allow user to reposition phone
-                Task {
-                    try? await Task.sleep(for: .seconds(2))
-                    if cameraManager.isAutoScanEnabled && !showingCardDetail {
-                        cameraManager.resumeAutoScan()
-                    }
-                }
+        .onChange(of: showingBatchReview) { _, isShowing in
+            if isShowing {
+                cameraManager.pauseAutoScan()
+            } else {
+                resumeAutoScanAfterDelay { !showingBatchReview }
             }
         }
         .onChange(of: showingCorrectionSearch) { _, isShowing in
@@ -305,7 +156,6 @@ struct ScannerView: View {
             if isShowing {
                 cameraManager.pauseAutoScan()
             } else {
-                // Clear the toast after correction sheet closes
                 Task {
                     try? await Task.sleep(for: .seconds(3.5))
                     if !cameraManager.isCorrectionActive {
@@ -313,260 +163,378 @@ struct ScannerView: View {
                         cameraManager.lastScannedEntry = nil
                     }
                 }
-                if cameraManager.isAutoScanEnabled {
-                    Task {
-                        try? await Task.sleep(for: .seconds(2))
-                        if cameraManager.isAutoScanEnabled && !showingCorrectionSearch {
-                            cameraManager.resumeAutoScan()
-                        }
-                    }
-                }
+                resumeAutoScanAfterDelay { !showingCorrectionSearch }
             }
         }
         .task(id: isActive) {
-            // This runs on initial render AND whenever isActive changes
             if isActive {
-                // Tab is active - start camera
                 cameraManager.startSession()
             } else {
-                // Tab is inactive - stop camera
                 cameraManager.stopSession()
             }
         }
         .onDisappear {
-            // Always stop when view disappears (app backgrounded, etc.)
             cameraManager.stopSession()
         }
     }
 
-    // MARK: - Top Header Bar
-
-    @ViewBuilder
-    private var topHeaderBar: some View {
-        if cameraManager.isMultiScanMode {
-            multiScanBanner
-        } else {
-            HStack {
-                Text("Scan Cards")
-                    .font(.headline)
-                    .foregroundStyle(.white)
+    /// Briefly reveal the just-scanned card large and centered, then dismiss it
+    /// (it animates downward, "docking" toward the batch tray). It also gets dismissed
+    /// the moment the next capture begins (see the isProcessingCard onChange), so
+    /// rapid card-after-card scanning is never gated on the reveal.
+    private func showScanReveal() {
+        guard let entry = cameraManager.lastScannedEntry else { return }
+        revealTask?.cancel()
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+            revealEntry = entry
+        }
+        revealTask = Task {
+            try? await Task.sleep(for: .seconds(2.0))
+            withAnimation(.easeInOut(duration: 0.3)) {
+                revealEntry = nil
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(.ultraThinMaterial)
         }
     }
 
-    // MARK: - Processing Indicator
+    private func dismissReveal() {
+        guard revealEntry != nil else { return }
+        revealTask?.cancel()
+        withAnimation(.easeInOut(duration: 0.2)) {
+            revealEntry = nil
+        }
+    }
 
-    private var processingIndicator: some View {
+    /// Resume auto-capture a beat after a sheet closes, if still appropriate.
+    private func resumeAutoScanAfterDelay(_ stillValid: @escaping () -> Bool) {
+        guard cameraManager.isAutoScanEnabled else { return }
+        Task {
+            try? await Task.sleep(for: .seconds(1.5))
+            if cameraManager.isAutoScanEnabled && stillValid() {
+                cameraManager.resumeAutoScan()
+            }
+        }
+    }
+}
+
+// MARK: - Scan Top Bar (mode/feature toggles)
+
+struct ScanTopBar: View {
+    let isFoilOn: Bool
+    let onToggleFoil: () -> Void
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Spacer()
+            ScanToggleButton(label: "Foil", icon: "sparkles",
+                             isActive: isFoilOn, action: onToggleFoil)
+        }
+        .padding(.top, 8)
+        .padding(.horizontal, 16)
+    }
+}
+
+// MARK: - Processing Pill
+
+struct ProcessingPill: View {
+    var body: some View {
         HStack(spacing: 12) {
             ProgressView()
                 .tint(.white)
-            Text("Recognizing Card...")
-                .foregroundStyle(.white)
+            Text("Recognizing…")
                 .font(.headline)
+                .foregroundStyle(.white)
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 16)
-        .background(.ultraThinMaterial)
-        .clipShape(.rect(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.lorcanaGold.opacity(0.3), lineWidth: 1)
-        )
+        .glassBackground(in: .rect(cornerRadius: 16))
     }
+}
 
-    // MARK: - Bottom Control Panel
+// MARK: - Camera Unavailable / Permission Fallback
 
-    private var bottomControlPanel: some View {
+struct CameraUnavailableView: View {
+    let message: String
+    let isDenied: Bool
+    let onManualAdd: () -> Void
+
+    var body: some View {
         VStack(spacing: 20) {
-            // Auto scan status indicator (integrated into panel)
-            if cameraManager.isAutoScanEnabled {
-                VStack(spacing: 4) {
-                    HStack(spacing: 8) {
-                        Circle()
-                            .fill(cameraManager.isAutoScanPaused ? Color.orange : Color.red)
-                            .frame(width: 8, height: 8)
-                            .opacity(cameraManager.isProcessingCard ? 0.3 : 1.0)
-                            .animation(.easeInOut(duration: 1).repeatForever(), value: cameraManager.isProcessingCard)
-                            .accessibilityHidden(true)
+            Image(systemName: "camera.fill")
+                .font(.system(size: 50))
+                .foregroundStyle(.gray)
 
-                        Text(cameraManager.isAutoScanPaused ? "Auto Scan Paused" : "Auto Scan Active")
-                            .font(.caption)
-                            .foregroundStyle(.white)
-                    }
+            Text(message)
+                .font(.title2)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.white)
+                .padding(.horizontal)
 
-                    // Show status message if available
-                    if let status = cameraManager.autoScanStatus {
-                        Text(status)
-                            .font(.caption2)
-                            .foregroundStyle(.gray)
-                    } else if cameraManager.isAutoScanPaused {
-                        Text("Resuming in 2 seconds...")
-                            .font(.caption2)
-                            .foregroundStyle(.gray)
+            if isDenied {
+                Button("Open Settings") {
+                    if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(settingsUrl)
                     }
                 }
+                .buttonStyle(LorcanaButtonStyle())
             }
 
-            HStack(spacing: 40) {
-                // Manual Add button
-                Button(action: { showingManualAdd = true }) {
-                    VStack(spacing: 6) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.black.opacity(0.5))
-                                .frame(width: 48, height: 48)
-                            Image(systemName: "plus.circle.fill")
-                                .font(.title2)
-                                .foregroundStyle(.lorcanaGold)
-                        }
-                        Text("Manual Add")
-                            .font(.caption)
-                            .foregroundStyle(.lorcanaGold)
-                    }
+            Button(action: onManualAdd) {
+                HStack(spacing: 8) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title2)
+                    Text("Manual Add Card")
+                        .font(.headline)
                 }
-
-                // Capture button
-                captureButton
-
-                // Flip camera button
-                Button(action: cameraManager.switchCamera) {
-                    VStack(spacing: 6) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.black.opacity(0.5))
-                                .frame(width: 48, height: 48)
-                            Image(systemName: "camera.rotate.fill")
-                                .font(.title2)
-                                .foregroundStyle(.lorcanaGold)
-                        }
-                        Text("Flip")
-                            .font(.caption)
-                            .foregroundStyle(.lorcanaGold)
-                    }
-                }
-                .disabled(!cameraManager.isSessionRunning)
+                .foregroundStyle(.white)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(Color.lorcanaGold)
+                .clipShape(.rect(cornerRadius: 25))
             }
-
-            // Scan mode toggles
-            HStack(spacing: 12) {
-                ScanToggleButton(
-                    label: "Auto Scan",
-                    icon: cameraManager.isAutoScanEnabled ? "timer" : "timer.slash",
-                    isActive: cameraManager.isAutoScanEnabled,
-                    action: cameraManager.toggleAutoScan
-                )
-                .disabled(!cameraManager.isSessionRunning)
-
-                ScanToggleButton(
-                    label: "Multi Scan",
-                    icon: cameraManager.isMultiScanMode ? "rectangle.stack.fill" : "rectangle.stack",
-                    isActive: cameraManager.isMultiScanMode,
-                    action: cameraManager.toggleMultiScanMode
-                )
-                .disabled(!cameraManager.isSessionRunning)
-
-                ScanToggleButton(
-                    label: "Foil",
-                    icon: cameraManager.isFoilMode ? "sparkles" : "sparkles",
-                    isActive: cameraManager.isFoilMode,
-                    action: { cameraManager.isFoilMode.toggle() }
-                )
-                .disabled(!cameraManager.isSessionRunning)
-            }
+            .padding(.top, 10)
         }
-        .padding(.top, 20)
-        .padding(.horizontal, 16)
-        .padding(.bottom, 16)
-        .background(
-            UnevenRoundedRectangle(topLeadingRadius: 20, topTrailingRadius: 20)
-                .fill(.ultraThinMaterial)
-                .ignoresSafeArea(.container, edges: .bottom)
-        )
+    }
+}
+
+// MARK: - Scan Control Bar (tray + capture + secondary actions)
+
+struct ScanControlBar: View {
+    let cameraManager: CameraManager
+    let onManualAdd: () -> Void
+    let onReview: () -> Void
+
+    private var captureDisabled: Bool {
+        !cameraManager.isSessionRunning || cameraManager.isProcessingCard
     }
 
-    // MARK: - Capture Button
+    var body: some View {
+        VStack(spacing: 16) {
+            if !cameraManager.scannedCards.isEmpty {
+                ScanTrayView(cameraManager: cameraManager, onReview: onReview)
+            }
 
-    private var captureButton: some View {
-        let isDisabled = !cameraManager.isSessionRunning || cameraManager.isProcessingCard
+            HStack {
+                ScanSecondaryButton(title: "Add", icon: "plus", action: onManualAdd)
 
-        return Button(action: cameraManager.capturePhoto) {
-            Circle()
-                .fill(Color.lorcanaGold)
-                .frame(width: 80, height: 80)
-                .overlay(
-                    Group {
+                Spacer()
+
+                Button { cameraManager.capturePhoto() } label: {
+                    ZStack {
+                        Circle()
+                            .fill(cameraManager.isAutoScanEnabled ? Color.green : Color.lorcanaGold)
+                            .frame(width: 76, height: 76)
                         if cameraManager.isProcessingCard {
                             ProgressView()
                                 .tint(.white)
-                                .scaleEffect(1.5)
+                                .scaleEffect(1.4)
                         } else {
                             Circle()
-                                .stroke(Color.white, lineWidth: 4)
-                                .frame(width: 70, height: 70)
+                                .stroke(.white, lineWidth: 4)
+                                .frame(width: 66, height: 66)
+                            if cameraManager.isAutoScanEnabled {
+                                Image(systemName: "bolt.fill")
+                                    .foregroundStyle(.white)
+                            }
                         }
                     }
-                )
-                .shadow(color: .lorcanaGold.opacity(0.4), radius: 8)
-                .opacity(isDisabled ? 0.5 : 1.0)
-                .scaleEffect(isCapturePressed ? 0.95 : 1.0)
-                .animation(.easeInOut(duration: 0.1), value: isCapturePressed)
-        }
-        .disabled(isDisabled)
-        .accessibilityLabel("Capture card")
-        .accessibilityHint("Takes a photo and scans the card")
-        .onLongPressGesture(minimumDuration: .infinity, pressing: { pressing in
-            isCapturePressed = pressing
-        }, perform: {})
-    }
-
-    // MARK: - Multi-Scan Banner
-
-    private var multiScanBanner: some View {
-        Button(action: { showingMultiScanReview = true }) {
-            HStack(spacing: 12) {
-                // Scanned cards count badge
-                ZStack {
-                    Circle()
-                        .fill(Color.lorcanaGold)
-                        .frame(width: 36, height: 36)
-                    Text("\(cameraManager.totalScannedCount)")
-                        .font(.headline)
-                        .bold()
-                        .foregroundStyle(.black)
+                    .shadow(color: .black.opacity(0.3), radius: 8)
+                    .opacity(captureDisabled ? 0.6 : 1)
                 }
+                .buttonStyle(ShutterButtonStyle())
+                .disabled(captureDisabled)
+                .accessibilityLabel(cameraManager.isAutoScanEnabled ? "Capture card (auto on)" : "Capture card")
+
+                Spacer()
+
+                ScanSecondaryButton(title: "Flip", icon: "camera.rotate") {
+                    cameraManager.switchCamera()
+                }
+                .disabled(!cameraManager.isSessionRunning)
+            }
+            .padding(.horizontal, 24)
+        }
+        .padding(18)
+        .glassBackground(in: .rect(cornerRadius: 28))
+        .padding(.horizontal, 12)
+        .padding(.bottom, 8)
+    }
+}
+
+// MARK: - Scan Tray (batch summary)
+
+struct ScanTrayView: View {
+    let cameraManager: CameraManager
+    let onReview: () -> Void
+
+    var body: some View {
+        Button(action: onReview) {
+            HStack(spacing: 12) {
+                ScrollView(.horizontal) {
+                    HStack(spacing: -10) {
+                        ForEach(cameraManager.scannedCards.suffix(8).reversed()) { entry in
+                            AsyncImage(url: entry.card.bestImageUrl()) { image in
+                                image.resizable().aspectRatio(contentMode: .fit)
+                            } placeholder: {
+                                RoundedRectangle(cornerRadius: 4).fill(Color.gray.opacity(0.3))
+                            }
+                            .frame(width: 34, height: 47)
+                            .clipShape(.rect(cornerRadius: 4))
+                            .overlay(RoundedRectangle(cornerRadius: 4).stroke(.white.opacity(0.4), lineWidth: 0.5))
+                        }
+                    }
+                }
+                .scrollIndicators(.hidden)
+                .frame(maxWidth: 120, alignment: .leading)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Multi Scan Mode")
+                    Text("\(cameraManager.totalScannedCount) card\(cameraManager.totalScannedCount == 1 ? "" : "s")")
                         .font(.subheadline)
-                        .fontWeight(.semibold)
+                        .bold()
                         .foregroundStyle(.white)
-                    Text(cameraManager.scannedCards.isEmpty
-                         ? "Scan cards to build a batch"
-                         : "\(cameraManager.scannedCards.count) unique card\(cameraManager.scannedCards.count == 1 ? "" : "s") scanned")
-                        .font(.caption)
-                        .foregroundStyle(.gray)
+                    BatchHaulView(entries: cameraManager.scannedCards)
                 }
 
                 Spacer()
 
-                if !cameraManager.scannedCards.isEmpty {
+                HStack(spacing: 4) {
                     Text("Review")
+                        .font(.subheadline)
+                        .bold()
+                    Image(systemName: "chevron.right")
                         .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.black)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.lorcanaGold)
-                        .clipShape(.rect(cornerRadius: 12))
+                }
+                .foregroundStyle(Color.lorcanaGold)
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Review \(cameraManager.totalScannedCount) scanned cards")
+    }
+}
+
+// MARK: - Batch Haul Value
+
+struct BatchHaulView: View {
+    let entries: [ScannedCardEntry]
+
+    @State private var total: Double?
+    private let pricing = PricingService.shared
+
+    var body: some View {
+        Group {
+            if let total {
+                Text(PricingService.formatPrice(total))
+                    .font(.subheadline)
+                    .foregroundStyle(Color.lorcanaGold)
+            } else {
+                Text("—")
+                    .font(.subheadline)
+                    .foregroundStyle(.gray)
+            }
+        }
+        .task(id: entries.map { "\($0.id)x\($0.quantity)" }.joined()) {
+            var sum = 0.0
+            for entry in entries {
+                if let result = await pricing.getPriceWithConfidence(for: entry.card) {
+                    sum += result.price * Double(entry.quantity)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(.ultraThinMaterial)
+            total = sum
         }
+    }
+}
+
+// MARK: - Scan Secondary Button
+
+struct ScanSecondaryButton: View {
+    let title: String
+    let icon: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.title3)
+                    .foregroundStyle(.white)
+                    .frame(width: 48, height: 48)
+                    .glassBackground(in: .circle)
+                Text(title)
+                    .font(.caption2)
+                    .foregroundStyle(.white)
+            }
+        }
+        .accessibilityLabel(title)
+    }
+}
+
+// MARK: - Shutter Button Style
+
+struct ShutterButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.92 : 1)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+    }
+}
+
+// MARK: - Multi-Scan Center Reveal
+
+struct MultiScanRevealView: View {
+    let entry: ScannedCardEntry
+    var onCorrect: (() -> Void)?
+
+    var body: some View {
+        Button {
+            onCorrect?()
+        } label: {
+            HStack(spacing: 10) {
+                AsyncImage(url: entry.card.bestImageUrl()) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                } placeholder: {
+                    RoundedRectangle(cornerRadius: 5)
+                        .fill(Color.gray.opacity(0.3))
+                }
+                .frame(width: 44, height: 62)
+                .clipShape(.rect(cornerRadius: 5))
+                .overlay(alignment: .topTrailing) {
+                    if entry.variant == .foil {
+                        Image(systemName: "sparkles")
+                            .font(.caption2)
+                            .foregroundStyle(Color.lorcanaGold)
+                            .padding(3)
+                            .background(.black.opacity(0.6), in: .circle)
+                            .padding(2)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.green)
+                        Text(entry.card.name)
+                            .font(.subheadline)
+                            .bold()
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                    }
+                    AsyncPriceWithConfidenceView(card: entry.card, style: .inline)
+                }
+            }
+            .padding(10)
+            .frame(maxWidth: 250, alignment: .leading)
+            .glassBackground(in: .rect(cornerRadius: 14))
+            .overlay {
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color.lorcanaGold.opacity(0.35), lineWidth: 1)
+            }
+            .shadow(color: .black.opacity(0.35), radius: 10, y: 4)
+        }
+        .buttonStyle(.plain)
+        .disabled(onCorrect == nil)
+        .accessibilityLabel("Scanned \(entry.card.name). Tap to correct.")
     }
 }
 
@@ -575,8 +543,8 @@ struct ScannerView: View {
 // MARK: - Scan Correction Search View
 
 struct ScanCorrectionSearchView: View {
-    var cameraManager: CameraManager
-    @Binding var isPresented: Bool
+    let onSelect: (LorcanaCard) -> Void
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var dataManager = SetsDataManager.shared
     @State private var searchText = ""
     @State private var searchResults: [LorcanaCard] = []
@@ -620,8 +588,8 @@ struct ScanCorrectionSearchView: View {
                 } else {
                     List(searchResults, id: \.id) { card in
                         SimpleCardSearchRow(card: card) {
-                            cameraManager.replaceLastScannedCard(with: card)
-                            isPresented = false
+                            onSelect(card)
+                            dismiss()
                         }
                     }
                     .listStyle(PlainListStyle())
@@ -634,7 +602,7 @@ struct ScanCorrectionSearchView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Cancel") {
-                        isPresented = false
+                        dismiss()
                     }
                 }
             }
@@ -741,39 +709,6 @@ struct SetPickerSheet: View {
             }
         }
         .presentationDetents([.medium])
-    }
-}
-
-// MARK: - Scan Debug Overlay (temporary diagnostics)
-
-struct ScanDebugOverlay: View {
-    let text: String?
-    @Binding var isExpanded: Bool
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Button(isExpanded ? "Hide debug" : "Show debug") {
-                isExpanded.toggle()
-            }
-            .font(.caption2.bold())
-            .foregroundStyle(.yellow)
-
-            if isExpanded {
-                ScrollView {
-                    Text(text ?? "No scan yet — capture a card.")
-                        .font(.system(.caption2, design: .monospaced))
-                        .foregroundStyle(.green)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .textSelection(.enabled)
-                }
-                .frame(maxHeight: 170)
-                .padding(8)
-                .background(.black.opacity(0.8))
-                .clipShape(.rect(cornerRadius: 8))
-            }
-        }
-        .padding(.horizontal, 8)
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
