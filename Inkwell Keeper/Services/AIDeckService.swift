@@ -43,6 +43,8 @@ class AIDeckService {
     private let dataManager = SetsDataManager.shared
     private var currentCollectionOnly = false
     private var currentOwnedCardQuantities: [String: Int] = [:]
+    /// Max ink colors allowed for the format being generated (e.g. 2 for Core/Casual, 6 for Infinity).
+    private var currentMaxInkColors = 2
     /// How many cards the suggestions should total — 60 for a new deck, fewer for completion
     private var targetSuggestionCount = 60
 
@@ -76,15 +78,17 @@ class AIDeckService {
 
     IMPORTANT RULES:
     - A deck must contain exactly 60 cards
-    - A deck MUST have exactly 1 or 2 ink colors. NEVER use cards from 3 or more ink colors.
+    - Use only the ink colors specified in the request. The allowed number of ink colors is given per request — never exceed it.
     - Maximum 4 copies of any card (by full name, e.g., "Elsa - Snow Queen")
     - Cards must be inkable to go into the inkwell
     - A good deck should have 30-40% inkable cards
     - Cost curve matters: a good mix of low, mid, and high cost cards
 
     DECK FORMATS:
-    - Core Constructed: Only sets 5+ are legal (Shimmering Skies, Azurite Sea, Fabled, Archazia's Island, Reign of Jafar, Whispers in the Well, Winterspell). Sets 1-4 (The First Chapter, Rise of the Floodborn, Into the Inklands, Ursula's Return) are BANNED.
-    - Infinity Constructed: All sets are legal.
+    - Casual: All sets are legal; up to 2 ink colors.
+    - Core Constructed: Rotating format — only the legal sets listed in the request may be used; up to 2 ink colors.
+    - Infinity Constructed: All sets are legal; up to 6 ink colors (the two-ink limit is removed).
+    - Triple Deck: Each deck uses 2 ink colors.
 
     RESPONSE FORMAT:
     You MUST respond in two parts:
@@ -114,7 +118,7 @@ class AIDeckService {
     THEME & DESCRIPTION PRIORITY:
     - The player's description is the MOST IMPORTANT input. Honor the theme above competitiveness.
     - If the card list has a "★★★ PRIORITY CHARACTERS" section, use those for ALL character slots in the deck.
-    - Pick the best priority characters that fit the chosen ink colors. You do NOT need to use every single priority character — only include ones that match your 2 ink colors and make strategic sense.
+    - Pick the best priority characters that fit the chosen ink colors. You do NOT need to use every single priority character — only include ones that match your chosen ink colors and make strategic sense.
     - Use 3-4 copies of low/mid cost priority characters (cost 1-5), and 2-3 copies of expensive ones (cost 6+).
     - Aim for about 25-30 characters total from the priority list.
     - Fill the remaining 30-35 slots with the BEST non-character cards (Items, Actions, Songs, Locations) from the OTHER AVAILABLE CARDS list. Choose cards that are competitively strong and synergize with your characters.
@@ -131,6 +135,7 @@ class AIDeckService {
         ownedCardQuantities: [String: Int] = [:]
     ) async {
         reset()
+        currentMaxInkColors = format.maxInkColors
         isLoading = true
         errorMessage = nil
 
@@ -146,15 +151,15 @@ class AIDeckService {
         if !inkColors.isEmpty {
             prompt += "- Ink Colors: \(inkColors.map { $0.rawValue }.joined(separator: " / "))\n"
         } else {
-            prompt += "- Choose the best 2 ink colors for the strategy\n"
+            prompt += "- Choose the best ink colors for the strategy (up to \(format.maxInkColors))\n"
         }
 
         if let archetype = archetype {
             prompt += "- Archetype: \(archetype.rawValue)\n"
         }
 
-        if format == .coreConstructed {
-            prompt += "- IMPORTANT: Only use cards from legal sets (Sets 5+: Shimmering Skies, Azurite Sea, Fabled, Archazia's Island, Reign of Jafar, Whispers in the Well, Winterspell)\n"
+        if let legalSets = format.legalSets {
+            prompt += "- IMPORTANT: Only use cards from these legal sets: \(legalSets.sorted().joined(separator: ", "))\n"
         }
 
         prompt += "\nPlayer's description (THIS IS THE TOP PRIORITY — build the deck around this): \(description)"
@@ -175,6 +180,7 @@ class AIDeckService {
         ownedCardQuantities: [String: Int] = [:]
     ) async {
         reset()
+        currentMaxInkColors = format.maxInkColors
         isLoading = true
         errorMessage = nil
 
@@ -221,8 +227,8 @@ class AIDeckService {
         prompt += "Analyze the existing cards, identify the deck's strategy, and fill in gaps. "
         prompt += "Consider the cost curve, inkable ratio, and synergies with existing cards."
 
-        if format == .coreConstructed {
-            prompt += "\nIMPORTANT: Only suggest cards from legal sets (Sets 5+)."
+        if let legalSets = format.legalSets {
+            prompt += "\nIMPORTANT: Only suggest cards from these legal sets: \(legalSets.sorted().joined(separator: ", "))."
         }
 
         prompt += buildCardCatalog(format: format, inkColors: effectiveColors, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities)
@@ -301,15 +307,16 @@ class AIDeckService {
 
     // MARK: - Build Card Catalog for AI Prompt
     private func buildCardCatalog(format: DeckFormat, inkColors: [InkColor], collectionOnly: Bool = false, ownedCardQuantities: [String: Int] = [:], description: String = "") -> String {
-        let legalSetNames: Set<String>
-        if format == .coreConstructed {
-            legalSetNames = ["Shimmering Skies", "Azurite Sea", "Fabled", "Archazia's Island", "Reign of Jafar", "Whispers in the Well", "Winterspell"]
-        } else {
-            legalSetNames = Set(dataManager.getAllCards().map { $0.setName })
+        let allCards = dataManager.getAllCards()
+        let legalSetNames = format.legalSets ?? Set(allCards.map { $0.setName })
+
+        var filteredCards = allCards.filter {
+            $0.variant == .normal && legalSetNames.contains($0.setName)
         }
 
-        var filteredCards = dataManager.getAllCards().filter {
-            $0.variant == .normal && legalSetNames.contains($0.setName)
+        // Exclude cards banned in this format so the AI never suggests them
+        if !format.bannedCards.isEmpty {
+            filteredCards = filteredCards.filter { !format.isBanned($0.name) }
         }
 
         // Deduplicate cards by name (same card can appear in multiple sets)
@@ -359,10 +366,12 @@ class AIDeckService {
             catalog += formatCardList(filteredCards, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities)
             return catalog
         } else {
-            // No colors specified: group by ink color so the AI clearly sees 2 choices to make
+            // No colors specified: group by ink color so the AI clearly sees its color choices
             guard !filteredCards.isEmpty else { return "" }
 
-            var catalog = "\n\nCRITICAL RULE: You MUST choose EXACTLY 2 ink color sections below and use cards ONLY from those 2 sections. Every single card in your [DECKLIST] must come from the same 2 colors. Do NOT use cards from any other color section.\nCopy each card name EXACTLY as written — do not modify, shorten, or invent names. Every card in your [DECKLIST] MUST appear in this list.\n"
+            let maxInks = format.maxInkColors
+
+            var catalog = "\n\nCRITICAL RULE: You MUST choose UP TO \(maxInks) ink color sections below and use cards ONLY from those sections. Every single card in your [DECKLIST] must come from your chosen colors (no more than \(maxInks)). Do NOT use cards from any other color section.\nCopy each card name EXACTLY as written — do not modify, shorten, or invent names. Every card in your [DECKLIST] MUST appear in this list.\n"
             if collectionOnly && !ownedCardQuantities.isEmpty {
                 catalog += "IMPORTANT: The number before each card is how many copies the player OWNS. You MUST NOT suggest more copies than the player owns. For example, if a card shows \"1x\", you can only use 1 copy in the deck.\n"
             }
@@ -370,16 +379,16 @@ class AIDeckService {
             if !themeKeywords.isEmpty {
                 let (themed, _) = partitionByTheme(cards: filteredCards, keywords: themeKeywords)
                 if !themed.isEmpty {
-                    // Detect which colors the themed cards span to help the AI pick the right 2 colors
+                    // Detect which colors the themed cards span to help the AI pick the right colors
                     let themedColors = Set(themed.compactMap { $0.inkColor })
-                    catalog += "\nThe player wants cards matching their theme. These themed cards are in: \(themedColors.sorted().joined(separator: ", ")). Choose 2 colors that include the MOST themed cards.\n"
-                    catalog += "\n★★★ PRIORITY CHARACTERS (Use these for ALL character slots — pick the ones matching your chosen 2 ink colors) ★★★\n"
+                    catalog += "\nThe player wants cards matching their theme. These themed cards are in: \(themedColors.sorted().joined(separator: ", ")). Choose up to \(maxInks) colors that include the MOST themed cards.\n"
+                    catalog += "\n★★★ PRIORITY CHARACTERS (Use these for ALL character slots — pick the ones matching your chosen ink colors) ★★★\n"
                     catalog += formatCardList(themed, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities)
                     catalog += "\n"
                 }
             }
 
-            catalog += "\nCHOOSE 2 COLORS AND USE ONLY THOSE:\n"
+            catalog += "\nCHOOSE UP TO \(maxInks) COLORS AND USE ONLY THOSE:\n"
 
             let byColor = Dictionary(grouping: filteredCards) { $0.inkColor ?? "Unknown" }
             for colorName in byColor.keys.sorted() {
@@ -650,18 +659,19 @@ class AIDeckService {
         return dp[m][n]
     }
 
-    // MARK: - Enforce 2-Color Constraint
+    // MARK: - Enforce Ink-Color Constraint
     private func enforceColorConstraint() {
+        let maxInks = currentMaxInkColors
         var colorCounts: [String: Int] = [:]
         for suggestion in suggestions {
             guard let card = suggestion.matchedCard, let inkColor = card.inkColor else { continue }
             colorCounts[inkColor, default: 0] += suggestion.quantity
         }
 
-        guard colorCounts.count > 2 else { return }
+        guard colorCounts.count > maxInks else { return }
 
         // Prefer colors the AI explicitly stated in its strategy text
-        let intendedColors = detectIntendedColors(from: colorCounts)
+        let intendedColors = detectIntendedColors(from: colorCounts, limit: maxInks)
         let removedColors = Set(colorCounts.keys).subtracting(intendedColors)
 
         suggestions = suggestions.filter { suggestion in
@@ -670,23 +680,23 @@ class AIDeckService {
         }
 
         let colorList = intendedColors.sorted().joined(separator: " & ")
-        colorConstraintNote = "Deck trimmed to 2 ink colors (\(colorList)). Removed cards from: \(removedColors.sorted().joined(separator: ", "))."
+        colorConstraintNote = "Deck trimmed to \(maxInks) ink colors (\(colorList)). Removed cards from: \(removedColors.sorted().joined(separator: ", "))."
     }
 
-    /// Detect the 2 ink colors the AI intended to use.
-    /// Prefers colors explicitly mentioned in the strategy text; falls back to top 2 by card count.
-    private func detectIntendedColors(from colorCounts: [String: Int]) -> Set<String> {
+    /// Detect the ink colors the AI intended to use, capped at `limit`.
+    /// Prefers colors explicitly mentioned in the strategy text; falls back to the top colors by card count.
+    private func detectIntendedColors(from colorCounts: [String: Int], limit: Int) -> Set<String> {
         let text = strategyText.lowercased()
         let mentionedColors = InkColor.allCases
             .map { $0.rawValue }
             .filter { colorCounts[$0] != nil && text.contains($0.lowercased()) }
 
-        if mentionedColors.count == 2 {
+        if !mentionedColors.isEmpty && mentionedColors.count <= limit {
             return Set(mentionedColors)
         }
 
-        // Fall back to top 2 by total card count
-        return Set(colorCounts.sorted { $0.value > $1.value }.prefix(2).map { $0.key })
+        // Fall back to the top colors by total card count
+        return Set(colorCounts.sorted { $0.value > $1.value }.prefix(limit).map { $0.key })
     }
 
     // MARK: - Auto-Fix Unmatched Suggestions
@@ -1190,6 +1200,7 @@ class AIDeckService {
         isLoading = false
         currentCollectionOnly = false
         currentOwnedCardQuantities = [:]
+        currentMaxInkColors = 2
         targetSuggestionCount = 60
     }
 }

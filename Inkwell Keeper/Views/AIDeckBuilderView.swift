@@ -17,7 +17,7 @@ struct AIDeckBuilderView: View {
 
     @State private var deckName = ""
     @State private var deckDescription = ""
-    @State private var selectedFormat: DeckFormat = .infinityConstructed
+    @State private var selectedFormat: DeckFormat = .casual
     @State private var selectedColors: Set<InkColor> = []
     @State private var selectedArchetype: DeckArchetype? = nil
     @State private var userPrompt = ""
@@ -26,9 +26,10 @@ struct AIDeckBuilderView: View {
     @State private var showingApplyConfirm = false
     @State private var showingAddCard = false
     @State private var suggestionToReplace: AIDeckSuggestion?
+    @State private var generationTask: Task<Void, Never>?
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 LorcanaBackground()
 
@@ -47,18 +48,21 @@ struct AIDeckBuilderView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
-                        aiService.reset()
+                        cancelGeneration()
                         dismiss()
                     }
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                 }
             }
         }
+        .sensoryFeedback(.success, trigger: aiService.isLoading) { wasLoading, isLoading in
+            wasLoading && !isLoading && aiService.matchedCount > 0
+        }
         .sheet(item: $suggestionToReplace) { suggestion in
-            CardReplacementView(suggestion: suggestion, aiService: aiService, collectionOnly: useCollectionOnly, collectionManager: collectionManager)
+            CardSelectionView(mode: .replace(suggestion), aiService: aiService, collectionOnly: useCollectionOnly, collectionManager: collectionManager)
         }
         .sheet(isPresented: $showingAddCard) {
-            CardAdditionView(aiService: aiService, collectionOnly: useCollectionOnly, collectionManager: collectionManager)
+            CardSelectionView(mode: .add, aiService: aiService, collectionOnly: useCollectionOnly, collectionManager: collectionManager)
         }
         .onAppear {
             subscriptionManager.checkSubscriptionStatus()
@@ -73,16 +77,16 @@ struct AIDeckBuilderView: View {
                 VStack(spacing: 8) {
                     Image(systemName: "sparkles")
                         .font(.system(size: 50))
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
 
                     Text("AI Deck Builder")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
 
                     Text("Describe the deck you want and AI will build it for you")
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.top, 8)
@@ -93,7 +97,7 @@ struct AIDeckBuilderView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Deck Name")
                             .font(.caption)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                         TextField("My AI Deck", text: $deckName)
                             .textFieldStyle(.plain)
                             .padding(12)
@@ -105,14 +109,14 @@ struct AIDeckBuilderView: View {
                                             .stroke(Color.lorcanaGold.opacity(0.3), lineWidth: 1)
                                     )
                             )
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                     }
 
                     // Format
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Format")
                             .font(.caption)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
 
                         Picker("Format", selection: $selectedFormat) {
                             ForEach(DeckFormat.allCases.filter { $0 != .tripleDeck }, id: \.self) { format in
@@ -120,6 +124,14 @@ struct AIDeckBuilderView: View {
                             }
                         }
                         .pickerStyle(.segmented)
+                        .onChange(of: selectedFormat) { _, newFormat in
+                            // Trim any colors beyond the new format's limit
+                            while selectedColors.count > newFormat.maxInkColors {
+                                if let extra = selectedColors.first {
+                                    selectedColors.remove(extra)
+                                }
+                            }
+                        }
                     }
 
                     // Ink Colors
@@ -127,13 +139,13 @@ struct AIDeckBuilderView: View {
                         HStack {
                             Text("Ink Colors")
                                 .font(.caption)
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
 
                             Spacer()
 
-                            Text("optional - max 2")
+                            Text("optional - max \(selectedFormat.maxInkColors)")
                                 .font(.caption2)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
                         }
 
                         LazyVGrid(columns: [
@@ -145,7 +157,7 @@ struct AIDeckBuilderView: View {
                                 Button(action: {
                                     if selectedColors.contains(color) {
                                         selectedColors.remove(color)
-                                    } else if selectedColors.count < 2 {
+                                    } else if selectedColors.count < selectedFormat.maxInkColors {
                                         selectedColors.insert(color)
                                     }
                                 }) {
@@ -166,7 +178,7 @@ struct AIDeckBuilderView: View {
                                                     .stroke(selectedColors.contains(color) ? color.color : Color.clear, lineWidth: 1.5)
                                             )
                                     )
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                                 }
                             }
                         }
@@ -177,13 +189,13 @@ struct AIDeckBuilderView: View {
                         HStack {
                             Text("Archetype")
                                 .font(.caption)
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
 
                             Spacer()
 
                             Text("optional")
                                 .font(.caption2)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
                         }
 
                         ScrollView(.horizontal, showsIndicators: false) {
@@ -208,7 +220,7 @@ struct AIDeckBuilderView: View {
                                                         .stroke(selectedArchetype == archetype ? Color.lorcanaGold : Color.clear, lineWidth: 1.5)
                                                 )
                                         )
-                                        .foregroundColor(selectedArchetype == archetype ? .lorcanaGold : .white)
+                                        .foregroundStyle(selectedArchetype == archetype ? .lorcanaGold : .white)
                                     }
                                 }
                             }
@@ -219,7 +231,7 @@ struct AIDeckBuilderView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Card Source")
                             .font(.caption)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
 
                         HStack {
                             Button(action: { useCollectionOnly = false }) {
@@ -239,7 +251,7 @@ struct AIDeckBuilderView: View {
                                                 .stroke(!useCollectionOnly ? Color.lorcanaGold : Color.clear, lineWidth: 1.5)
                                         )
                                 )
-                                .foregroundColor(!useCollectionOnly ? .lorcanaGold : .white)
+                                .foregroundStyle(!useCollectionOnly ? .lorcanaGold : .white)
                             }
 
                             Button(action: { useCollectionOnly = true }) {
@@ -259,14 +271,14 @@ struct AIDeckBuilderView: View {
                                                 .stroke(useCollectionOnly ? Color.lorcanaGold : Color.clear, lineWidth: 1.5)
                                         )
                                 )
-                                .foregroundColor(useCollectionOnly ? .lorcanaGold : .white)
+                                .foregroundStyle(useCollectionOnly ? .lorcanaGold : .white)
                             }
                         }
 
                         if useCollectionOnly {
                             Text("\(collectionManager.collectedCards.count) cards in your collection")
                                 .font(.caption2)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
                         }
                     }
 
@@ -274,7 +286,7 @@ struct AIDeckBuilderView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Describe your deck")
                             .font(.caption)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
 
                         TextField("e.g., A fast aggro deck focused on questing with low-cost characters...", text: $userPrompt, axis: .vertical)
                             .textFieldStyle(.plain)
@@ -288,7 +300,7 @@ struct AIDeckBuilderView: View {
                                             .stroke(Color.lorcanaGold.opacity(0.3), lineWidth: 1)
                                     )
                             )
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                     }
                 }
                 .padding(.horizontal)
@@ -297,7 +309,7 @@ struct AIDeckBuilderView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Quick Ideas")
                         .font(.caption)
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                         .padding(.horizontal)
 
                     ForEach(quickIdeas, id: \.self) { idea in
@@ -305,15 +317,15 @@ struct AIDeckBuilderView: View {
                             HStack {
                                 Image(systemName: "sparkles")
                                     .font(.caption)
-                                    .foregroundColor(.lorcanaGold)
+                                    .foregroundStyle(.lorcanaGold)
                                 Text(idea)
                                     .font(.subheadline)
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                                     .multilineTextAlignment(.leading)
                                 Spacer()
                                 Image(systemName: "chevron.right")
                                     .font(.caption2)
-                                    .foregroundColor(.gray)
+                                    .foregroundStyle(.gray)
                             }
                             .padding(12)
                             .background(
@@ -343,7 +355,7 @@ struct AIDeckBuilderView: View {
                         RoundedRectangle(cornerRadius: 14)
                             .fill(canGenerate ? Color.lorcanaGold : Color.gray.opacity(0.4))
                     )
-                    .foregroundColor(canGenerate ? .black : .gray)
+                    .foregroundStyle(canGenerate ? .black : .gray)
                 }
                 .disabled(!canGenerate)
                 .padding(.horizontal)
@@ -365,12 +377,12 @@ struct AIDeckBuilderView: View {
 
                         Text("Building your deck...")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
 
                         if !aiService.currentStreamingContent.isEmpty {
                             markdownText(aiService.currentStreamingContent)
                                 .font(.body)
-                                .foregroundColor(.white)
+                                .foregroundStyle(.white)
                                 .tint(.lorcanaGold)
                                 .padding()
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -379,6 +391,11 @@ struct AIDeckBuilderView: View {
                                         .fill(Color.lorcanaDark.opacity(0.8))
                                 )
                         }
+
+                        Button("Cancel", role: .cancel, action: cancelGeneration)
+                            .buttonStyle(.bordered)
+                            .tint(.lorcanaGold)
+                            .padding(.top, 4)
                     }
                     .padding()
                 } else {
@@ -387,12 +404,12 @@ struct AIDeckBuilderView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Label("Strategy", systemImage: "lightbulb.fill")
                                 .font(.headline)
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
 
                             ScrollView {
                                 markdownText(aiService.strategyText)
                                     .font(.body)
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                                     .tint(.lorcanaGold)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
@@ -425,7 +442,7 @@ struct AIDeckBuilderView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Deck List")
                             .font(.headline)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                             .padding(.horizontal)
 
                         ForEach(aiService.suggestions) { suggestion in
@@ -445,7 +462,7 @@ struct AIDeckBuilderView: View {
                                     .font(.subheadline)
                                     .fontWeight(.medium)
                             }
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
                             .background(
@@ -464,10 +481,10 @@ struct AIDeckBuilderView: View {
                     if let note = aiService.colorConstraintNote {
                         HStack(spacing: 8) {
                             Image(systemName: "paintpalette.fill")
-                                .foregroundColor(.blue)
+                                .foregroundStyle(.blue)
                             Text(note)
                                 .font(.caption)
-                                .foregroundColor(.blue)
+                                .foregroundStyle(.blue)
                         }
                         .padding()
                         .background(
@@ -481,10 +498,10 @@ struct AIDeckBuilderView: View {
                     if aiService.unmatchedCount > 0 {
                         HStack(spacing: 8) {
                             Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.orange)
+                                .foregroundStyle(.orange)
                             Text("\(aiService.unmatchedCount) cards could not be matched. Tap a card to replace it.")
                                 .font(.caption)
-                                .foregroundColor(.orange)
+                                .foregroundStyle(.orange)
                         }
                         .padding()
                         .background(
@@ -508,7 +525,7 @@ struct AIDeckBuilderView: View {
                                 RoundedRectangle(cornerRadius: 14)
                                     .fill(aiService.matchedCount > 0 ? Color.lorcanaGold : Color.gray.opacity(0.4))
                             )
-                            .foregroundColor(aiService.matchedCount > 0 ? .black : .gray)
+                            .foregroundStyle(aiService.matchedCount > 0 ? .black : .gray)
                         }
                         .disabled(aiService.matchedCount == 0)
 
@@ -521,7 +538,7 @@ struct AIDeckBuilderView: View {
                                 Text("Start Over")
                             }
                             .font(.subheadline)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                         }
                     }
                     .padding(.horizontal)
@@ -545,17 +562,17 @@ struct AIDeckBuilderView: View {
         VStack(spacing: 24) {
             Image(systemName: aiService.availability.systemImage)
                 .font(.system(size: 70))
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
 
             VStack(spacing: 8) {
                 Text("AI Deck Builder Unavailable")
                     .font(.title3)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
 
                 Text(aiService.availability.description)
                     .font(.body)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
             }
@@ -566,7 +583,7 @@ struct AIDeckBuilderView: View {
                     Text("Try Again")
                 }
                 .font(.headline)
-                .foregroundColor(.black)
+                .foregroundStyle(.black)
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 12)
@@ -587,7 +604,7 @@ struct AIDeckBuilderView: View {
             ink: selectedColors.map(\.rawValue).sorted().joined(separator: "/")
         ))
         let ownedQuantities = useCollectionOnly ? collectionManager.collectedCardQuantities : [:]
-        Task {
+        generationTask = Task {
             await aiService.generateDeck(
                 description: userPrompt,
                 format: selectedFormat,
@@ -597,6 +614,13 @@ struct AIDeckBuilderView: View {
                 ownedCardQuantities: ownedQuantities
             )
         }
+    }
+
+    private func cancelGeneration() {
+        generationTask?.cancel()
+        generationTask = nil
+        aiService.reset()
+        hasGenerated = false
     }
 
     private func applyAndCreate() {
@@ -639,7 +663,7 @@ struct AIDeckCompleterView: View {
     @State private var suggestionToReplace: AIDeckSuggestion?
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 LorcanaBackground()
 
@@ -661,15 +685,15 @@ struct AIDeckCompleterView: View {
                         aiService.reset()
                         dismiss()
                     }
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                 }
             }
         }
         .sheet(item: $suggestionToReplace) { suggestion in
-            CardReplacementView(suggestion: suggestion, aiService: aiService, collectionOnly: useCollectionOnly, collectionManager: collectionManager)
+            CardSelectionView(mode: .replace(suggestion), aiService: aiService, collectionOnly: useCollectionOnly, collectionManager: collectionManager)
         }
         .sheet(isPresented: $showingAddCard) {
-            CardAdditionView(aiService: aiService, collectionOnly: useCollectionOnly, collectionManager: collectionManager)
+            CardSelectionView(mode: .add, aiService: aiService, collectionOnly: useCollectionOnly, collectionManager: collectionManager)
         }
         .onAppear {
             subscriptionManager.checkSubscriptionStatus()
@@ -684,16 +708,16 @@ struct AIDeckCompleterView: View {
                 VStack(spacing: 8) {
                     Image(systemName: "wand.and.stars")
                         .font(.system(size: 50))
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
 
                     Text("Complete Your Deck")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
 
                     Text("AI will analyze your current cards and suggest additions")
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.top, 8)
@@ -703,17 +727,17 @@ struct AIDeckCompleterView: View {
                     HStack {
                         Text(deck.name)
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                         Spacer()
                         Text("\(deck.totalCards)/60 cards")
                             .font(.subheadline)
-                            .foregroundColor(deck.totalCards >= 60 ? .green : .orange)
+                            .foregroundStyle(deck.totalCards >= 60 ? .green : .orange)
                     }
 
                     HStack(spacing: 8) {
                         Text(deck.deckFormat.rawValue)
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
 
                         ForEach(deck.deckInkColors, id: \.self) { color in
                             HStack(spacing: 4) {
@@ -722,7 +746,7 @@ struct AIDeckCompleterView: View {
                                     .frame(width: 10, height: 10)
                                 Text(color.rawValue)
                                     .font(.caption)
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                             }
                         }
 
@@ -733,17 +757,17 @@ struct AIDeckCompleterView: View {
                                 Text(archetype.rawValue)
                                     .font(.caption)
                             }
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                         }
                     }
 
                     if deck.totalCards >= 60 {
                         HStack(spacing: 6) {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
+                                .foregroundStyle(.green)
                             Text("Your deck already has 60 cards. AI will suggest improvements and swaps instead.")
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
                         }
                     }
 
@@ -757,13 +781,13 @@ struct AIDeckCompleterView: View {
                             VStack(spacing: 2) {
                                 Text("\(count)")
                                     .font(.system(size: 9))
-                                    .foregroundColor(count > 0 ? .white : .clear)
+                                    .foregroundStyle(count > 0 ? .white : .clear)
                                 RoundedRectangle(cornerRadius: 2)
                                     .fill(count > 0 ? Color.lorcanaGold : Color.gray.opacity(0.2))
                                     .frame(height: max(CGFloat(count) * 4, 2))
                                 Text("\(cost)")
                                     .font(.system(size: 9))
-                                    .foregroundColor(.gray)
+                                    .foregroundStyle(.gray)
                             }
                             .frame(maxWidth: .infinity)
                         }
@@ -785,7 +809,7 @@ struct AIDeckCompleterView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Additional Notes (optional)")
                         .font(.caption)
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
 
                     TextField("e.g., I want to focus more on questing, add more removal...", text: $additionalNotes, axis: .vertical)
                         .textFieldStyle(.plain)
@@ -799,7 +823,7 @@ struct AIDeckCompleterView: View {
                                         .stroke(Color.lorcanaGold.opacity(0.3), lineWidth: 1)
                                 )
                         )
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                 }
                 .padding(.horizontal)
 
@@ -807,7 +831,7 @@ struct AIDeckCompleterView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Card Source")
                         .font(.caption)
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
 
                     HStack {
                         Button(action: { useCollectionOnly = false }) {
@@ -827,7 +851,7 @@ struct AIDeckCompleterView: View {
                                             .stroke(!useCollectionOnly ? Color.lorcanaGold : Color.clear, lineWidth: 1.5)
                                     )
                             )
-                            .foregroundColor(!useCollectionOnly ? .lorcanaGold : .white)
+                            .foregroundStyle(!useCollectionOnly ? .lorcanaGold : .white)
                         }
 
                         Button(action: { useCollectionOnly = true }) {
@@ -847,14 +871,14 @@ struct AIDeckCompleterView: View {
                                             .stroke(useCollectionOnly ? Color.lorcanaGold : Color.clear, lineWidth: 1.5)
                                     )
                             )
-                            .foregroundColor(useCollectionOnly ? .lorcanaGold : .white)
+                            .foregroundStyle(useCollectionOnly ? .lorcanaGold : .white)
                         }
                     }
 
                     if useCollectionOnly {
                         Text("\(collectionManager.collectedCards.count) cards in your collection")
                             .font(.caption2)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                 }
                 .padding(.horizontal)
@@ -877,7 +901,7 @@ struct AIDeckCompleterView: View {
                         RoundedRectangle(cornerRadius: 14)
                             .fill(!aiService.isLoading ? Color.lorcanaGold : Color.gray.opacity(0.4))
                     )
-                    .foregroundColor(!aiService.isLoading ? .black : .gray)
+                    .foregroundStyle(!aiService.isLoading ? .black : .gray)
                 }
                 .disabled(aiService.isLoading)
                 .padding(.horizontal)
@@ -898,12 +922,12 @@ struct AIDeckCompleterView: View {
 
                         Text("Analyzing your deck...")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
 
                         if !aiService.currentStreamingContent.isEmpty {
                             markdownText(aiService.currentStreamingContent)
                                 .font(.body)
-                                .foregroundColor(.white)
+                                .foregroundStyle(.white)
                                 .tint(.lorcanaGold)
                                 .padding()
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -920,12 +944,12 @@ struct AIDeckCompleterView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Label("Analysis", systemImage: "lightbulb.fill")
                                 .font(.headline)
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
 
                             ScrollView {
                                 markdownText(aiService.strategyText)
                                     .font(.body)
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                                     .tint(.lorcanaGold)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
@@ -958,7 +982,7 @@ struct AIDeckCompleterView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Suggested Additions")
                             .font(.headline)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                             .padding(.horizontal)
 
                         ForEach(aiService.suggestions) { suggestion in
@@ -978,7 +1002,7 @@ struct AIDeckCompleterView: View {
                                     .font(.subheadline)
                                     .fontWeight(.medium)
                             }
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
                             .background(
@@ -997,10 +1021,10 @@ struct AIDeckCompleterView: View {
                     if let note = aiService.colorConstraintNote {
                         HStack(spacing: 8) {
                             Image(systemName: "paintpalette.fill")
-                                .foregroundColor(.blue)
+                                .foregroundStyle(.blue)
                             Text(note)
                                 .font(.caption)
-                                .foregroundColor(.blue)
+                                .foregroundStyle(.blue)
                         }
                         .padding()
                         .background(
@@ -1013,10 +1037,10 @@ struct AIDeckCompleterView: View {
                     if aiService.unmatchedCount > 0 {
                         HStack(spacing: 8) {
                             Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.orange)
+                                .foregroundStyle(.orange)
                             Text("\(aiService.unmatchedCount) cards could not be matched. Tap a card to replace it.")
                                 .font(.caption)
-                                .foregroundColor(.orange)
+                                .foregroundStyle(.orange)
                         }
                         .padding()
                         .background(
@@ -1040,7 +1064,7 @@ struct AIDeckCompleterView: View {
                                 RoundedRectangle(cornerRadius: 14)
                                     .fill(aiService.matchedCount > 0 ? Color.lorcanaGold : Color.gray.opacity(0.4))
                             )
-                            .foregroundColor(aiService.matchedCount > 0 ? .black : .gray)
+                            .foregroundStyle(aiService.matchedCount > 0 ? .black : .gray)
                         }
                         .disabled(aiService.matchedCount == 0)
 
@@ -1053,7 +1077,7 @@ struct AIDeckCompleterView: View {
                                 Text("Try Again")
                             }
                             .font(.subheadline)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                         }
                     }
                     .padding(.horizontal)
@@ -1077,17 +1101,17 @@ struct AIDeckCompleterView: View {
         VStack(spacing: 24) {
             Image(systemName: aiService.availability.systemImage)
                 .font(.system(size: 70))
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
 
             VStack(spacing: 8) {
                 Text("AI Unavailable")
                     .font(.title3)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
 
                 Text(aiService.availability.description)
                     .font(.body)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
             }
@@ -1098,7 +1122,7 @@ struct AIDeckCompleterView: View {
                     Text("Try Again")
                 }
                 .font(.headline)
-                .foregroundColor(.black)
+                .foregroundStyle(.black)
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 12)
@@ -1169,7 +1193,7 @@ struct AISuggestionRow: View {
                         .overlay(
                             Image(systemName: "questionmark")
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
                         )
                 }
 
@@ -1177,7 +1201,7 @@ struct AISuggestionRow: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("\(suggestion.quantity)x \(suggestion.cardName)")
                         .font(.subheadline)
-                        .foregroundColor(isMatched ? .white : .gray)
+                        .foregroundStyle(isMatched ? .white : .gray)
                         .lineLimit(1)
 
                     if let card = suggestion.matchedCard {
@@ -1189,22 +1213,22 @@ struct AISuggestionRow: View {
                                         .frame(width: 8, height: 8)
                                     Text(inkColor.rawValue)
                                         .font(.caption2)
-                                        .foregroundColor(.gray)
+                                        .foregroundStyle(.gray)
                                 }
                             }
 
                             Text("Cost \(card.cost)")
                                 .font(.caption2)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
 
                             Text(card.type)
                                 .font(.caption2)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
                         }
                     } else {
                         Text("Card not found — tap to replace")
                             .font(.caption2)
-                            .foregroundColor(.orange)
+                            .foregroundStyle(.orange)
                     }
                 }
 
@@ -1212,12 +1236,12 @@ struct AISuggestionRow: View {
 
                 // Swap icon
                 Image(systemName: "arrow.2.squarepath")
-                    .foregroundColor(.lorcanaGold.opacity(0.6))
+                    .foregroundStyle(.lorcanaGold.opacity(0.6))
                     .font(.caption)
 
                 // Match indicator
                 Image(systemName: isMatched ? "checkmark.circle.fill" : "exclamationmark.circle")
-                    .foregroundColor(isMatched ? .green : .orange)
+                    .foregroundStyle(isMatched ? .green : .orange)
                     .font(.subheadline)
             }
             .padding(.horizontal)
@@ -1245,8 +1269,15 @@ struct AISuggestionRow: View {
 }
 
 // MARK: - Card Replacement View
-struct CardReplacementView: View {
-    let suggestion: AIDeckSuggestion
+/// Unified card-search sheet used for both replacing an unmatched AI suggestion and adding a new card.
+/// `mode` controls the header, action button, initial quantity, and commit behavior.
+struct CardSelectionView: View {
+    enum Mode {
+        case replace(AIDeckSuggestion)
+        case add
+    }
+
+    let mode: Mode
     let aiService: AIDeckService
     var collectionOnly: Bool = false
     var collectionManager: CollectionManager? = nil
@@ -1255,6 +1286,46 @@ struct CardReplacementView: View {
     @State private var searchText = ""
     @State private var selectedCard: LorcanaCard? = nil
     @State private var quantity: Int = 1
+
+    private let resultLimit = 50
+
+    private var navTitle: String {
+        switch mode {
+        case .replace: return "Replace Card"
+        case .add: return "Add Card"
+        }
+    }
+
+    private var emptyPrompt: (icon: String, text: String) {
+        switch mode {
+        case .replace: return ("magnifyingglass", "Search for a card to replace with")
+        case .add: return ("plus.circle", "Search for a card to add")
+        }
+    }
+
+    private var actionLabel: (icon: String, text: String) {
+        switch mode {
+        case .replace: return ("arrow.2.squarepath", "Replace")
+        case .add: return ("plus.circle.fill", "Add")
+        }
+    }
+
+    private var defaultQuantity: Int {
+        switch mode {
+        case .replace(let suggestion): return suggestion.quantity
+        case .add: return 1
+        }
+    }
+
+    private func commit(_ card: LorcanaCard) {
+        switch mode {
+        case .replace(let suggestion):
+            aiService.replaceSuggestion(id: suggestion.id, with: card, quantity: quantity)
+        case .add:
+            aiService.addSuggestion(card: card, quantity: quantity)
+        }
+        dismiss()
+    }
 
     private var allNormalCards: [LorcanaCard] {
         let cards = SetsDataManager.shared.getAllCards().filter { $0.variant == .normal }
@@ -1276,235 +1347,252 @@ struct CardReplacementView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 LorcanaBackground()
 
                 VStack(spacing: 0) {
-                    // Original card header
-                    VStack(spacing: 4) {
-                        Text("Replacing")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                        Text("\(suggestion.quantity)x \(suggestion.cardName)")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .lineLimit(1)
+                    // "Replacing X" header only applies to replace mode
+                    if case .replace(let suggestion) = mode {
+                        VStack(spacing: 4) {
+                            Text("Replacing")
+                                .font(.caption)
+                                .foregroundStyle(.gray)
+                            Text("\(suggestion.quantity)x \(suggestion.cardName)")
+                                .font(.headline)
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.lorcanaDark.opacity(0.8))
                     }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.lorcanaDark.opacity(0.8))
 
-                    // Search
                     SearchBar(text: $searchText)
                         .padding(.horizontal)
                         .padding(.top, 12)
 
                     if let card = selectedCard {
-                        // Selected card confirmation
-                        VStack(spacing: 16) {
-                            Spacer()
-
-                            // Card preview
-                            AsyncImage(url: card.bestImageUrl()) { image in
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                            } placeholder: {
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(Color.gray.opacity(0.3))
-                            }
-                            .frame(height: 260)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-
-                            Text(card.name)
-                                .font(.headline)
-                                .foregroundColor(.white)
-
-                            HStack(spacing: 12) {
-                                if let inkColor = InkColor.fromString(card.inkColor ?? "") {
-                                    HStack(spacing: 4) {
-                                        Circle()
-                                            .fill(inkColor.color)
-                                            .frame(width: 10, height: 10)
-                                        Text(inkColor.rawValue)
-                                            .font(.caption)
-                                            .foregroundColor(.gray)
-                                    }
-                                }
-                                Text("Cost \(card.cost)")
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                                Text(card.type)
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                            }
-
-                            // Quantity picker
-                            HStack(spacing: 16) {
-                                Text("Quantity:")
-                                    .font(.subheadline)
-                                    .foregroundColor(.white)
-
-                                HStack(spacing: 0) {
-                                    ForEach(1...4, id: \.self) { num in
-                                        Button(action: { quantity = num }) {
-                                            Text("\(num)")
-                                                .font(.headline)
-                                                .frame(width: 44, height: 40)
-                                                .background(
-                                                    RoundedRectangle(cornerRadius: 8)
-                                                        .fill(quantity == num ? Color.lorcanaGold : Color.lorcanaDark.opacity(0.6))
-                                                )
-                                                .foregroundColor(quantity == num ? .black : .white)
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Action buttons
-                            HStack(spacing: 12) {
-                                Button(action: {
-                                    selectedCard = nil
-                                    quantity = 1
-                                }) {
-                                    Text("Back")
-                                        .font(.subheadline)
-                                        .foregroundColor(.lorcanaGold)
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .stroke(Color.lorcanaGold, lineWidth: 1)
-                                        )
-                                }
-
-                                Button(action: {
-                                    aiService.replaceSuggestion(id: suggestion.id, with: card, quantity: quantity)
-                                    dismiss()
-                                }) {
-                                    HStack {
-                                        Image(systemName: "arrow.2.squarepath")
-                                        Text("Replace")
-                                            .fontWeight(.bold)
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(Color.lorcanaGold)
-                                    )
-                                    .foregroundColor(.black)
-                                }
-                            }
-                            .padding(.horizontal)
-
-                            Spacer()
-                        }
-                        .padding()
+                        selectionDetail(card)
                     } else {
-                        // Search results list
-                        if filteredCards.isEmpty && !searchText.isEmpty {
-                            VStack(spacing: 8) {
-                                Spacer()
-                                Image(systemName: "magnifyingglass")
-                                    .font(.title)
-                                    .foregroundColor(.gray)
-                                Text("No cards found")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                                Spacer()
-                            }
-                        } else if searchText.isEmpty {
-                            VStack(spacing: 8) {
-                                Spacer()
-                                Image(systemName: "magnifyingglass")
-                                    .font(.title)
-                                    .foregroundColor(.gray)
-                                Text("Search for a card to replace with")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                                Spacer()
-                            }
-                        } else {
-                            ScrollView {
-                                LazyVStack(spacing: 4) {
-                                    ForEach(filteredCards.prefix(50)) { card in
-                                        Button(action: {
-                                            selectedCard = card
-                                            quantity = suggestion.quantity
-                                        }) {
-                                            HStack(spacing: 10) {
-                                                AsyncImage(url: card.bestImageUrl()) { image in
-                                                    image
-                                                        .resizable()
-                                                        .aspectRatio(contentMode: .fit)
-                                                } placeholder: {
-                                                    RoundedRectangle(cornerRadius: 4)
-                                                        .fill(Color.gray.opacity(0.3))
-                                                }
-                                                .frame(width: 32, height: 44)
-                                                .clipShape(RoundedRectangle(cornerRadius: 4))
-
-                                                VStack(alignment: .leading, spacing: 2) {
-                                                    Text(card.name)
-                                                        .font(.subheadline)
-                                                        .foregroundColor(.white)
-                                                        .lineLimit(1)
-
-                                                    HStack(spacing: 6) {
-                                                        if let inkColor = InkColor.fromString(card.inkColor ?? "") {
-                                                            HStack(spacing: 2) {
-                                                                Circle()
-                                                                    .fill(inkColor.color)
-                                                                    .frame(width: 8, height: 8)
-                                                                Text(inkColor.rawValue)
-                                                                    .font(.caption2)
-                                                                    .foregroundColor(.gray)
-                                                            }
-                                                        }
-                                                        Text("Cost \(card.cost)")
-                                                            .font(.caption2)
-                                                            .foregroundColor(.gray)
-                                                        Text(card.setName)
-                                                            .font(.caption2)
-                                                            .foregroundColor(.gray)
-                                                            .lineLimit(1)
-                                                    }
-                                                }
-
-                                                Spacer()
-
-                                                Image(systemName: "chevron.right")
-                                                    .font(.caption2)
-                                                    .foregroundColor(.gray)
-                                            }
-                                            .padding(.horizontal)
-                                            .padding(.vertical, 8)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 8)
-                                                    .fill(Color.lorcanaDark.opacity(0.6))
-                                            )
-                                        }
-                                        .buttonStyle(.plain)
-                                        .padding(.horizontal)
-                                    }
-                                }
-                                .padding(.top, 8)
-                            }
-                        }
+                        searchResults
                     }
                 }
             }
-            .navigationTitle("Replace Card")
+            .navigationTitle(navTitle)
             .navigationBarTitleDisplayMode(.inline)
+            .sensoryFeedback(.selection, trigger: selectedCard?.id)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { dismiss() }
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                 }
             }
         }
+    }
+
+    // MARK: Selected-card confirmation
+
+    private func selectionDetail(_ card: LorcanaCard) -> some View {
+        VStack(spacing: 16) {
+            Spacer()
+
+            AsyncImage(url: card.bestImageUrl()) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+            } placeholder: {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.gray.opacity(0.3))
+            }
+            .frame(height: 260)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+
+            Text(card.name)
+                .font(.headline)
+                .foregroundStyle(.white)
+
+            HStack(spacing: 12) {
+                if let inkColor = InkColor.fromString(card.inkColor ?? "") {
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(inkColor.color)
+                            .frame(width: 10, height: 10)
+                        Text(inkColor.rawValue)
+                            .font(.caption)
+                            .foregroundStyle(.gray)
+                    }
+                }
+                Text("Cost \(card.cost)")
+                    .font(.caption)
+                    .foregroundStyle(.gray)
+                Text(card.type)
+                    .font(.caption)
+                    .foregroundStyle(.gray)
+            }
+
+            // Quantity picker
+            HStack(spacing: 16) {
+                Text("Quantity:")
+                    .font(.subheadline)
+                    .foregroundStyle(.white)
+
+                HStack(spacing: 0) {
+                    ForEach(1...4, id: \.self) { num in
+                        Button(action: { quantity = num }) {
+                            Text("\(num)")
+                                .font(.headline)
+                                .frame(width: 44, height: 40)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(quantity == num ? Color.lorcanaGold : Color.lorcanaDark.opacity(0.6))
+                                )
+                                .foregroundStyle(quantity == num ? .black : .white)
+                        }
+                        .accessibilityLabel("Quantity \(num)")
+                        .accessibilityAddTraits(quantity == num ? .isSelected : [])
+                    }
+                }
+            }
+
+            // Action buttons
+            HStack(spacing: 12) {
+                Button(action: {
+                    selectedCard = nil
+                    quantity = 1
+                }) {
+                    Text("Back")
+                        .font(.subheadline)
+                        .foregroundStyle(.lorcanaGold)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.lorcanaGold, lineWidth: 1)
+                        )
+                }
+
+                Button(action: { commit(card) }) {
+                    HStack {
+                        Image(systemName: actionLabel.icon)
+                        Text(actionLabel.text)
+                            .bold()
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.lorcanaGold)
+                    )
+                    .foregroundStyle(.black)
+                }
+            }
+            .padding(.horizontal)
+
+            Spacer()
+        }
+        .padding()
+    }
+
+    // MARK: Search results
+
+    @ViewBuilder
+    private var searchResults: some View {
+        if filteredCards.isEmpty && !searchText.isEmpty {
+            emptyResults(icon: "magnifyingglass", text: "No cards found")
+        } else if searchText.isEmpty {
+            emptyResults(icon: emptyPrompt.icon, text: emptyPrompt.text)
+        } else {
+            ScrollView {
+                LazyVStack(spacing: 4) {
+                    ForEach(filteredCards.prefix(resultLimit)) { card in
+                        Button(action: {
+                            selectedCard = card
+                            quantity = defaultQuantity
+                        }) {
+                            cardResultRow(card)
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal)
+                    }
+
+                    if filteredCards.count > resultLimit {
+                        Text("Showing first \(resultLimit) of \(filteredCards.count) — refine your search")
+                            .font(.caption2)
+                            .foregroundStyle(.gray)
+                            .padding(.vertical, 8)
+                    }
+                }
+                .padding(.top, 8)
+            }
+        }
+    }
+
+    private func emptyResults(icon: String, text: String) -> some View {
+        VStack(spacing: 8) {
+            Spacer()
+            Image(systemName: icon)
+                .font(.title)
+                .foregroundStyle(.gray)
+            Text(text)
+                .font(.subheadline)
+                .foregroundStyle(.gray)
+            Spacer()
+        }
+    }
+
+    private func cardResultRow(_ card: LorcanaCard) -> some View {
+        HStack(spacing: 10) {
+            AsyncImage(url: card.bestImageUrl()) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+            } placeholder: {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.3))
+            }
+            .frame(width: 32, height: 44)
+            .clipShape(RoundedRectangle(cornerRadius: 4))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(card.name)
+                    .font(.subheadline)
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+
+                HStack(spacing: 6) {
+                    if let inkColor = InkColor.fromString(card.inkColor ?? "") {
+                        HStack(spacing: 2) {
+                            Circle()
+                                .fill(inkColor.color)
+                                .frame(width: 8, height: 8)
+                            Text(inkColor.rawValue)
+                                .font(.caption2)
+                                .foregroundStyle(.gray)
+                        }
+                    }
+                    Text("Cost \(card.cost)")
+                        .font(.caption2)
+                        .foregroundStyle(.gray)
+                    Text(card.setName)
+                        .font(.caption2)
+                        .foregroundStyle(.gray)
+                        .lineLimit(1)
+                }
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.caption2)
+                .foregroundStyle(.gray)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.lorcanaDark.opacity(0.6))
+        )
     }
 }
 
@@ -1518,7 +1606,7 @@ struct AIDeckStrategyView: View {
     @State private var hasStarted = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 LorcanaBackground()
 
@@ -1538,7 +1626,7 @@ struct AIDeckStrategyView: View {
                         aiService.reset()
                         dismiss()
                     }
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                 }
             }
         }
@@ -1560,16 +1648,16 @@ struct AIDeckStrategyView: View {
                 VStack(spacing: 6) {
                     Image(systemName: "brain.head.profile")
                         .font(.system(size: 36))
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
 
                     Text(deck.name)
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
 
                     HStack(spacing: 8) {
                         Text(deck.deckFormat.rawValue)
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
 
                         ForEach(deck.deckInkColors, id: \.self) { color in
                             HStack(spacing: 3) {
@@ -1578,13 +1666,13 @@ struct AIDeckStrategyView: View {
                                     .frame(width: 8, height: 8)
                                 Text(color.rawValue)
                                     .font(.caption)
-                                    .foregroundColor(.gray)
+                                    .foregroundStyle(.gray)
                             }
                         }
 
                         Text("\(deck.totalCards) cards")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                 }
                 .padding(.top, 8)
@@ -1597,12 +1685,12 @@ struct AIDeckStrategyView: View {
 
                         Text("Analyzing your deck...")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
 
                         if !aiService.currentStreamingContent.isEmpty {
                             markdownText(aiService.currentStreamingContent)
                                 .font(.body)
-                                .foregroundColor(.white)
+                                .foregroundStyle(.white)
                                 .tint(.lorcanaGold)
                                 .padding()
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -1621,7 +1709,7 @@ struct AIDeckStrategyView: View {
                 } else if !aiService.rawResponse.isEmpty {
                     markdownText(aiService.rawResponse)
                         .font(.body)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .tint(.lorcanaGold)
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -1646,17 +1734,17 @@ struct AIDeckStrategyView: View {
                             Text("Regenerate")
                         }
                         .font(.subheadline)
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                     }
                     .padding(.bottom, 20)
                 } else if let error = aiService.errorMessage {
                     VStack(spacing: 12) {
                         Image(systemName: "exclamationmark.triangle")
                             .font(.title)
-                            .foregroundColor(.orange)
+                            .foregroundStyle(.orange)
                         Text(error)
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                             .multilineTextAlignment(.center)
 
                         Button(action: {
@@ -1669,7 +1757,7 @@ struct AIDeckStrategyView: View {
                                 Text("Try Again")
                             }
                             .font(.headline)
-                            .foregroundColor(.black)
+                            .foregroundStyle(.black)
                             .padding()
                             .background(
                                 RoundedRectangle(cornerRadius: 12)
@@ -1687,17 +1775,17 @@ struct AIDeckStrategyView: View {
         VStack(spacing: 24) {
             Image(systemName: aiService.availability.systemImage)
                 .font(.system(size: 70))
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
 
             VStack(spacing: 8) {
                 Text("AI Unavailable")
                     .font(.title3)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
 
                 Text(aiService.availability.description)
                     .font(.body)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
             }
@@ -1708,260 +1796,12 @@ struct AIDeckStrategyView: View {
                     Text("Try Again")
                 }
                 .font(.headline)
-                .foregroundColor(.black)
+                .foregroundStyle(.black)
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 12)
                         .fill(Color.lorcanaGold)
                 )
-            }
-        }
-    }
-}
-
-// MARK: - Card Addition View
-struct CardAdditionView: View {
-    let aiService: AIDeckService
-    var collectionOnly: Bool = false
-    var collectionManager: CollectionManager? = nil
-    @Environment(\.dismiss) private var dismiss
-
-    @State private var searchText = ""
-    @State private var selectedCard: LorcanaCard? = nil
-    @State private var quantity: Int = 1
-
-    private var allNormalCards: [LorcanaCard] {
-        let cards = SetsDataManager.shared.getAllCards().filter { $0.variant == .normal }
-        if collectionOnly, let manager = collectionManager {
-            let ownedNames = Set(manager.collectedCards.map { $0.name })
-            return cards.filter { ownedNames.contains($0.name) }
-        }
-        return cards
-    }
-
-    private var filteredCards: [LorcanaCard] {
-        guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return []
-        }
-        let query = searchText.lowercased()
-        return allNormalCards
-            .filter { $0.name.lowercased().contains(query) || $0.type.lowercased().contains(query) }
-            .sorted { $0.name < $1.name }
-    }
-
-    var body: some View {
-        NavigationView {
-            ZStack {
-                LorcanaBackground()
-
-                VStack(spacing: 0) {
-                    // Search
-                    SearchBar(text: $searchText)
-                        .padding(.horizontal)
-                        .padding(.top, 12)
-
-                    if let card = selectedCard {
-                        // Selected card confirmation
-                        VStack(spacing: 16) {
-                            Spacer()
-
-                            AsyncImage(url: card.bestImageUrl()) { image in
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                            } placeholder: {
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(Color.gray.opacity(0.3))
-                            }
-                            .frame(height: 260)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-
-                            Text(card.name)
-                                .font(.headline)
-                                .foregroundColor(.white)
-
-                            HStack(spacing: 12) {
-                                if let inkColor = InkColor.fromString(card.inkColor ?? "") {
-                                    HStack(spacing: 4) {
-                                        Circle()
-                                            .fill(inkColor.color)
-                                            .frame(width: 10, height: 10)
-                                        Text(inkColor.rawValue)
-                                            .font(.caption)
-                                            .foregroundColor(.gray)
-                                    }
-                                }
-                                Text("Cost \(card.cost)")
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                                Text(card.type)
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                            }
-
-                            // Quantity picker
-                            HStack(spacing: 16) {
-                                Text("Quantity:")
-                                    .font(.subheadline)
-                                    .foregroundColor(.white)
-
-                                HStack(spacing: 0) {
-                                    ForEach(1...4, id: \.self) { num in
-                                        Button(action: { quantity = num }) {
-                                            Text("\(num)")
-                                                .font(.headline)
-                                                .frame(width: 44, height: 40)
-                                                .background(
-                                                    RoundedRectangle(cornerRadius: 8)
-                                                        .fill(quantity == num ? Color.lorcanaGold : Color.lorcanaDark.opacity(0.6))
-                                                )
-                                                .foregroundColor(quantity == num ? .black : .white)
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Action buttons
-                            HStack(spacing: 12) {
-                                Button(action: {
-                                    selectedCard = nil
-                                    quantity = 1
-                                }) {
-                                    Text("Back")
-                                        .font(.subheadline)
-                                        .foregroundColor(.lorcanaGold)
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .stroke(Color.lorcanaGold, lineWidth: 1)
-                                        )
-                                }
-
-                                Button(action: {
-                                    aiService.addSuggestion(card: card, quantity: quantity)
-                                    dismiss()
-                                }) {
-                                    HStack {
-                                        Image(systemName: "plus.circle.fill")
-                                        Text("Add")
-                                            .fontWeight(.bold)
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(Color.lorcanaGold)
-                                    )
-                                    .foregroundColor(.black)
-                                }
-                            }
-                            .padding(.horizontal)
-
-                            Spacer()
-                        }
-                        .padding()
-                    } else {
-                        // Search results list
-                        if filteredCards.isEmpty && !searchText.isEmpty {
-                            VStack(spacing: 8) {
-                                Spacer()
-                                Image(systemName: "magnifyingglass")
-                                    .font(.title)
-                                    .foregroundColor(.gray)
-                                Text("No cards found")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                                Spacer()
-                            }
-                        } else if searchText.isEmpty {
-                            VStack(spacing: 8) {
-                                Spacer()
-                                Image(systemName: "plus.circle")
-                                    .font(.title)
-                                    .foregroundColor(.gray)
-                                Text("Search for a card to add")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                                Spacer()
-                            }
-                        } else {
-                            ScrollView {
-                                LazyVStack(spacing: 4) {
-                                    ForEach(filteredCards.prefix(50)) { card in
-                                        Button(action: {
-                                            selectedCard = card
-                                            quantity = 1
-                                        }) {
-                                            HStack(spacing: 10) {
-                                                AsyncImage(url: card.bestImageUrl()) { image in
-                                                    image
-                                                        .resizable()
-                                                        .aspectRatio(contentMode: .fit)
-                                                } placeholder: {
-                                                    RoundedRectangle(cornerRadius: 4)
-                                                        .fill(Color.gray.opacity(0.3))
-                                                }
-                                                .frame(width: 32, height: 44)
-                                                .clipShape(RoundedRectangle(cornerRadius: 4))
-
-                                                VStack(alignment: .leading, spacing: 2) {
-                                                    Text(card.name)
-                                                        .font(.subheadline)
-                                                        .foregroundColor(.white)
-                                                        .lineLimit(1)
-
-                                                    HStack(spacing: 6) {
-                                                        if let inkColor = InkColor.fromString(card.inkColor ?? "") {
-                                                            HStack(spacing: 2) {
-                                                                Circle()
-                                                                    .fill(inkColor.color)
-                                                                    .frame(width: 8, height: 8)
-                                                                Text(inkColor.rawValue)
-                                                                    .font(.caption2)
-                                                                    .foregroundColor(.gray)
-                                                            }
-                                                        }
-                                                        Text("Cost \(card.cost)")
-                                                            .font(.caption2)
-                                                            .foregroundColor(.gray)
-                                                        Text(card.setName)
-                                                            .font(.caption2)
-                                                            .foregroundColor(.gray)
-                                                            .lineLimit(1)
-                                                    }
-                                                }
-
-                                                Spacer()
-
-                                                Image(systemName: "chevron.right")
-                                                    .font(.caption2)
-                                                    .foregroundColor(.gray)
-                                            }
-                                            .padding(.horizontal)
-                                            .padding(.vertical, 8)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 8)
-                                                    .fill(Color.lorcanaDark.opacity(0.6))
-                                            )
-                                        }
-                                        .buttonStyle(.plain)
-                                        .padding(.horizontal)
-                                    }
-                                }
-                                .padding(.top, 8)
-                            }
-                        }
-                    }
-                }
-            }
-            .navigationTitle("Add Card")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
-                        .foregroundColor(.lorcanaGold)
-                }
             }
         }
     }
@@ -1977,10 +1817,10 @@ struct StatPill: View {
         VStack(spacing: 2) {
             Text(value)
                 .font(.headline)
-                .foregroundColor(color)
+                .foregroundStyle(color)
             Text(label)
                 .font(.caption2)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)

@@ -23,9 +23,51 @@ class CollectionManager: ObservableObject {
     /// Card key ("name||setName") → total owned quantity (normal + foil), for AI deck building
     @Published var collectedCardQuantities: [String: Int] = [:]
 
+    /// O(1) ownership lookups, rebuilt whenever the collected set changes (see `rebuildCollectedIndexes`).
+    /// These replace per-card SwiftData fetches in hot paths such as deck-statistics calculation and
+    /// card-browser filtering, which previously ran a fetch for every card on every render.
+    private var ownedQuantityByCardId: [String: Int] = [:]
+    private var ownedQuantityByNameSetVariant: [String: Int] = [:]
+
     /// Build a compound key for card quantity lookups
     static func cardKey(name: String, setName: String) -> String {
         "\(name)||\(setName)"
+    }
+
+    /// Key for variant-specific ownership lookups (name + set + variant).
+    private static func ownershipKey(name: String, setName: String, variant: String) -> String {
+        "\(name)||\(setName)||\(variant)"
+    }
+
+    /// Rebuilds the in-memory ownership indexes from the non-wishlist collected rows.
+    /// Must be called whenever `collectedCards` is repopulated so lookups stay in sync.
+    private func rebuildCollectedIndexes(from collectedData: [CollectedCard]) {
+        var byId: [String: Int] = [:]
+        var byNameSetVariant: [String: Int] = [:]
+        var quantities: [String: Int] = [:]
+
+        for card in collectedData {
+            let variantString = card.variant ?? "Normal"
+            byId[card.cardId, default: 0] += card.quantity
+            byNameSetVariant[Self.ownershipKey(name: card.name, setName: card.setName, variant: variantString), default: 0] += card.quantity
+
+            // collectedCardQuantities counts normal + foil only (used for AI deck building)
+            let variant = CardVariant(rawValue: variantString) ?? .normal
+            if variant == .normal || variant == .foil {
+                quantities[Self.cardKey(name: card.name, setName: card.setName), default: 0] += card.quantity
+            }
+        }
+
+        self.ownedQuantityByCardId = byId
+        self.ownedQuantityByNameSetVariant = byNameSetVariant
+        self.collectedCardQuantities = quantities
+    }
+
+    /// Clears all ownership indexes (used when the collection is wiped).
+    private func clearCollectedIndexes() {
+        ownedQuantityByCardId = [:]
+        ownedQuantityByNameSetVariant = [:]
+        collectedCardQuantities = [:]
     }
     
     init() {
@@ -231,16 +273,7 @@ class CollectionManager: ObservableObject {
             )
             let collectedData = try context.fetch(descriptor)
             self.collectedCards = collectedData.map { $0.toLorcanaCard }
-
-            var quantities: [String: Int] = [:]
-            for card in collectedData {
-                let variant = CardVariant(rawValue: card.variant ?? "Normal") ?? .normal
-                if variant == .normal || variant == .foil {
-                    let key = CollectionManager.cardKey(name: card.name, setName: card.setName)
-                    quantities[key, default: 0] += card.quantity
-                }
-            }
-            self.collectedCardQuantities = quantities
+            rebuildCollectedIndexes(from: collectedData)
         } catch {
             // Fall back to full reload on error
             loadCollection()
@@ -289,17 +322,6 @@ class CollectionManager: ObservableObject {
             let collectedData = try context.fetch(collectedDescriptor)
             let newCollectedCards = collectedData.map { $0.toLorcanaCard }
 
-            // Build card key (name+set) → total owned quantity (normal + foil only)
-            var quantities: [String: Int] = [:]
-            for card in collectedData {
-                let variant = CardVariant(rawValue: card.variant ?? "Normal") ?? .normal
-                if variant == .normal || variant == .foil {
-                    let key = CollectionManager.cardKey(name: card.name, setName: card.setName)
-                    quantities[key, default: 0] += card.quantity
-                }
-            }
-            let newQuantities = quantities
-
             let wishlistDescriptor = FetchDescriptor<CollectedCard>(
                 predicate: #Predicate { $0.isWishlisted == true },
                 sortBy: [SortDescriptor(\.dateAdded, order: .reverse)]
@@ -309,7 +331,7 @@ class CollectionManager: ObservableObject {
 
             self.collectedCards = newCollectedCards
             self.wishlistCards = newWishlistCards
-            self.collectedCardQuantities = newQuantities
+            rebuildCollectedIndexes(from: collectedData)
 
         } catch {
             // Handle error silently
@@ -544,6 +566,7 @@ class CollectionManager: ObservableObject {
 
             self.collectedCards = []
             self.wishlistCards = []
+            clearCollectedIndexes()
 
         } catch {
             // Handle error silently
@@ -594,6 +617,7 @@ class CollectionManager: ObservableObject {
 
             self.collectedCards = []
             self.wishlistCards = []
+            clearCollectedIndexes()
         } catch {
             // Handle error silently
         }
@@ -871,37 +895,12 @@ class CollectionManager: ObservableObject {
     }
     
     func isCardCollected(_ cardId: String) -> Bool {
-        guard let context = modelContext else { return false }
-
-        do {
-            let descriptor = FetchDescriptor<CollectedCard>(
-                predicate: #Predicate<CollectedCard> { $0.cardId == cardId && $0.isWishlisted == false }
-            )
-            let cards = try context.fetch(descriptor)
-            return !cards.isEmpty
-        } catch {
-            return false
-        }
+        (ownedQuantityByCardId[cardId] ?? 0) > 0
     }
 
     func isCardCollectedByName(_ cardName: String, setName: String, variant: CardVariant) -> Bool {
-        guard let context = modelContext else { return false }
-
-        let variantString = variant.rawValue
-        do {
-            let descriptor = FetchDescriptor<CollectedCard>(
-                predicate: #Predicate<CollectedCard> {
-                    $0.name == cardName &&
-                    $0.setName == setName &&
-                    $0.variant == variantString &&
-                    $0.isWishlisted == false
-                }
-            )
-            let cards = try context.fetch(descriptor)
-            return !cards.isEmpty
-        } catch {
-            return false
-        }
+        let key = Self.ownershipKey(name: cardName, setName: setName, variant: variant.rawValue)
+        return (ownedQuantityByNameSetVariant[key] ?? 0) > 0
     }
 
     /// Check if a card is collected (matches by name + set)
@@ -932,37 +931,12 @@ class CollectionManager: ObservableObject {
     }
 
     func getCollectedQuantity(for cardId: String) -> Int {
-        guard let context = modelContext else { return 0 }
-
-        do {
-            let descriptor = FetchDescriptor<CollectedCard>(
-                predicate: #Predicate<CollectedCard> { $0.cardId == cardId && $0.isWishlisted == false }
-            )
-            let card = try context.fetch(descriptor).first
-            return card?.quantity ?? 0
-        } catch {
-            return 0
-        }
+        ownedQuantityByCardId[cardId] ?? 0
     }
 
     func getCollectedQuantityByName(_ cardName: String, setName: String, variant: CardVariant) -> Int {
-        guard let context = modelContext else { return 0 }
-
-        let variantString = variant.rawValue
-        do {
-            let descriptor = FetchDescriptor<CollectedCard>(
-                predicate: #Predicate<CollectedCard> {
-                    $0.name == cardName &&
-                    $0.setName == setName &&
-                    $0.variant == variantString &&
-                    $0.isWishlisted == false
-                }
-            )
-            let card = try context.fetch(descriptor).first
-            return card?.quantity ?? 0
-        } catch {
-            return 0
-        }
+        let key = Self.ownershipKey(name: cardName, setName: setName, variant: variant.rawValue)
+        return ownedQuantityByNameSetVariant[key] ?? 0
     }
 
     /// Get collected quantity by uniqueId (more reliable for promo cards)

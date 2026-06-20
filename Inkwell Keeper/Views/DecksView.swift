@@ -12,18 +12,20 @@ struct DecksView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var collectionManager: CollectionManager
     @StateObject private var deckManager = DeckManager()
-    @State private var showingCreateDeck = false
     @State private var showingStarterDecks = false
     @State private var showingAIDeckBuilder = false
     @State private var showingImportDeck = false
+    @State private var showingCreateDeck = false
+    @State private var newlyCreatedDeck: Deck?
+    @State private var path: [Deck] = []
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             ZStack {
                 LorcanaBackground()
 
                 if deckManager.decks.isEmpty {
-                    EmptyDecksView(showingCreateDeck: $showingCreateDeck)
+                    EmptyDecksView(onCreateDeck: { showingCreateDeck = true })
                         .environmentObject(deckManager)
                         .environmentObject(collectionManager)
                 } else {
@@ -40,6 +42,11 @@ struct DecksView: View {
                 }
             }
             .navigationTitle("Decks")
+            .navigationDestination(for: Deck.self) { deck in
+                DeckWorkspaceView(deck: deck)
+                    .environmentObject(collectionManager)
+                    .environmentObject(deckManager)
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { showingStarterDecks = true }) {
@@ -48,7 +55,7 @@ struct DecksView: View {
                             Text("Starter")
                         }
                         .font(.caption)
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                     }
                 }
 
@@ -56,28 +63,27 @@ struct DecksView: View {
                     HStack(spacing: 16) {
                         Button(action: { showingImportDeck = true }) {
                             Image(systemName: "square.and.arrow.down")
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                         }
+                        .accessibilityLabel("Import deck")
 
                         Button(action: { showingAIDeckBuilder = true }) {
                             Image(systemName: "sparkles")
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                         }
+                        .accessibilityLabel("AI deck builder")
 
                         Button(action: { showingCreateDeck = true }) {
                             Image(systemName: "plus")
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                         }
+                        .accessibilityLabel("Create deck")
                     }
                 }
             }
         }
         .onAppear {
             deckManager.loadDecks(context: modelContext)
-        }
-        .sheet(isPresented: $showingCreateDeck) {
-            CreateDeckView()
-                .environmentObject(deckManager)
         }
         .sheet(isPresented: $showingStarterDecks) {
             StarterDecksView()
@@ -92,12 +98,23 @@ struct DecksView: View {
             ImportDeckView()
                 .environmentObject(deckManager)
         }
+        .sheet(isPresented: $showingCreateDeck, onDismiss: pushCreatedDeck) {
+            NewDeckSheet(onCreated: { newlyCreatedDeck = $0 })
+                .environmentObject(deckManager)
+        }
+    }
+
+    /// After the create sheet dismisses, push into the new deck's workspace (already filtered to chosen inks).
+    private func pushCreatedDeck() {
+        guard let deck = newlyCreatedDeck else { return }
+        newlyCreatedDeck = nil
+        path.append(deck)
     }
 }
 
 // MARK: - Empty State
 struct EmptyDecksView: View {
-    @Binding var showingCreateDeck: Bool
+    let onCreateDeck: () -> Void
     @State private var showingStarterDecks = false
     @State private var showingAIDeckBuilder = false
     @EnvironmentObject var deckManager: DeckManager
@@ -107,33 +124,33 @@ struct EmptyDecksView: View {
         VStack(spacing: 24) {
             Image(systemName: "rectangle.stack.fill")
                 .font(.system(size: 72))
-                .foregroundColor(.lorcanaGold.opacity(0.5))
+                .foregroundStyle(.lorcanaGold.opacity(0.5))
 
             VStack(spacing: 8) {
                 Text("Build Your First Deck")
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
 
                 Text("Create competitive decks and track\nwhich cards you need to complete them")
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                     .multilineTextAlignment(.center)
             }
 
             VStack(spacing: 12) {
-                Button(action: { showingCreateDeck = true }) {
+                Button(action: onCreateDeck) {
                     HStack {
                         Image(systemName: "plus.circle.fill")
                         Text("Create Deck")
                     }
                     .font(.headline)
-                    .foregroundColor(.lorcanaDark)
+                    .foregroundStyle(.lorcanaDark)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 12)
                     .frame(maxWidth: .infinity)
                     .background(Color.lorcanaGold)
-                    .cornerRadius(10)
+                    .clipShape(.rect(cornerRadius: 10))
                 }
 
                 Button(action: { showingAIDeckBuilder = true }) {
@@ -142,7 +159,7 @@ struct EmptyDecksView: View {
                         Text("AI Deck Builder")
                     }
                     .font(.headline)
-                    .foregroundColor(.lorcanaDark)
+                    .foregroundStyle(.lorcanaDark)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 12)
                     .frame(maxWidth: .infinity)
@@ -153,7 +170,7 @@ struct EmptyDecksView: View {
                             endPoint: .trailing
                         )
                     )
-                    .cornerRadius(10)
+                    .clipShape(.rect(cornerRadius: 10))
                 }
 
                 Button(action: { showingStarterDecks = true }) {
@@ -162,7 +179,7 @@ struct EmptyDecksView: View {
                         Text("Import Starter Deck")
                     }
                     .font(.headline)
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 12)
                     .frame(maxWidth: .infinity)
@@ -192,7 +209,6 @@ struct DeckRow: View {
     let deck: Deck
     @EnvironmentObject var collectionManager: CollectionManager
     @EnvironmentObject var deckManager: DeckManager
-    @State private var showingDetail = false
 
     var statistics: DeckStatistics {
         deckManager.calculateStatistics(for: deck, collectionManager: collectionManager)
@@ -203,18 +219,18 @@ struct DeckRow: View {
     }
 
     var body: some View {
-        Button(action: { showingDetail = true }) {
+        NavigationLink(value: deck) {
             VStack(alignment: .leading, spacing: 12) {
                 // Header
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(deck.name)
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
 
                         Text(deck.deckFormat.rawValue)
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
 
                     Spacer()
@@ -222,13 +238,16 @@ struct DeckRow: View {
                     // Validation indicator
                     if !validation.isValid {
                         Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.orange)
+                            .foregroundStyle(.orange)
+                            .accessibilityLabel("Invalid deck")
                     } else if !validation.warnings.isEmpty {
                         Image(systemName: "exclamationmark.circle.fill")
-                            .foregroundColor(.yellow)
+                            .foregroundStyle(.yellow)
+                            .accessibilityLabel("Deck has warnings")
                     } else {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
+                            .foregroundStyle(.green)
+                            .accessibilityLabel("Valid deck")
                     }
                 }
 
@@ -242,7 +261,7 @@ struct DeckRow: View {
                                     .frame(width: 12, height: 12)
                                 Text(color.rawValue)
                                     .font(.caption2)
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                             }
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
@@ -259,7 +278,7 @@ struct DeckRow: View {
                                 Text(archetype.rawValue)
                                     .font(.caption2)
                             }
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
                             .background(
@@ -279,20 +298,20 @@ struct DeckRow: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Cards")
                             .font(.caption2)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         Text("\(statistics.totalCards)")
                             .font(.headline)
-                            .foregroundColor(statistics.totalCards >= 60 ? .white : .orange)
+                            .foregroundStyle(statistics.totalCards >= 60 ? .white : .orange)
                     }
 
                     // Completion
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Complete")
                             .font(.caption2)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         Text("\(Int(statistics.completionPercentage))%")
                             .font(.headline)
-                            .foregroundColor(statistics.completionPercentage == 100 ? .green : .lorcanaGold)
+                            .foregroundStyle(statistics.completionPercentage == 100 ? .green : .lorcanaGold)
                     }
 
                     // Missing cards
@@ -300,10 +319,10 @@ struct DeckRow: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Missing")
                                 .font(.caption2)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
                             Text("\(statistics.missingCards)")
                                 .font(.headline)
-                                .foregroundColor(.orange)
+                                .foregroundStyle(.orange)
                         }
                     }
 
@@ -314,10 +333,10 @@ struct DeckRow: View {
                         VStack(alignment: .trailing, spacing: 2) {
                             Text("Cost")
                                 .font(.caption2)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
                             Text(PricingService.formatPrice(statistics.costToComplete))
                                 .font(.headline)
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                         }
                     }
                 }
@@ -335,127 +354,7 @@ struct DeckRow: View {
                     )
             )
         }
-        .sheet(isPresented: $showingDetail) {
-            DeckDetailView(deck: deck)
-                .environmentObject(collectionManager)
-                .environmentObject(deckManager)
-        }
-    }
-}
-
-// MARK: - Create Deck View
-struct CreateDeckView: View {
-    @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var deckManager: DeckManager
-
-    @State private var deckName = ""
-    @State private var deckDescription = ""
-    @State private var selectedFormat: DeckFormat = .infinityConstructed
-    @State private var selectedColors: Set<InkColor> = []
-    @State private var selectedArchetype: DeckArchetype? = nil
-
-    var canCreate: Bool {
-        !deckName.isEmpty && selectedColors.count <= selectedFormat.maxInkColors
-    }
-
-    var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Basic Info")) {
-                    TextField("Deck Name", text: $deckName)
-                    TextField("Description (optional)", text: $deckDescription)
-                }
-
-                Section(header: Text("Format")) {
-                    Picker("Format", selection: $selectedFormat) {
-                        ForEach(DeckFormat.allCases, id: \.self) { format in
-                            VStack(alignment: .leading) {
-                                Text(format.rawValue)
-                                Text(format.description)
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                            }
-                            .tag(format)
-                        }
-                    }
-                    .pickerStyle(.menu)
-
-                    Text("Min \(selectedFormat.minimumCards) cards, max \(selectedFormat.maxInkColors) ink colors")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-
-                Section(header: Text("Ink Colors (max \(selectedFormat.maxInkColors))")) {
-                    ForEach(InkColor.allCases, id: \.self) { color in
-                        Button(action: {
-                            if selectedColors.contains(color) {
-                                selectedColors.remove(color)
-                            } else if selectedColors.count < selectedFormat.maxInkColors {
-                                selectedColors.insert(color)
-                            }
-                        }) {
-                            HStack {
-                                Circle()
-                                    .fill(color.color)
-                                    .frame(width: 20, height: 20)
-
-                                Text(color.rawValue)
-                                    .foregroundColor(.white)
-
-                                Spacer()
-
-                                if selectedColors.contains(color) {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.lorcanaGold)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Section(header: Text("Archetype (optional)")) {
-                    Picker("Archetype", selection: $selectedArchetype) {
-                        Text("None").tag(nil as DeckArchetype?)
-                        ForEach(DeckArchetype.allCases, id: \.self) { archetype in
-                            HStack {
-                                Image(systemName: archetype.systemImage)
-                                Text(archetype.rawValue)
-                            }
-                            .tag(archetype as DeckArchetype?)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                }
-            }
-            .navigationTitle("Create Deck")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Create") {
-                        createDeck()
-                    }
-                    .disabled(!canCreate)
-                    .foregroundColor(canCreate ? .lorcanaGold : .gray)
-                }
-            }
-        }
-    }
-
-    private func createDeck() {
-        _ = deckManager.createDeck(
-            name: deckName,
-            description: deckDescription,
-            format: selectedFormat,
-            inkColors: Array(selectedColors),
-            archetype: selectedArchetype
-        )
-        dismiss()
+        .buttonStyle(.plain)
     }
 }
 
@@ -485,7 +384,7 @@ struct EditDeckView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 Section(header: Text("Basic Info")) {
                     TextField("Deck Name", text: $deckName)
@@ -505,13 +404,21 @@ struct EditDeckView: View {
                         }
                     }
                     .pickerStyle(.menu)
+                    .onChange(of: selectedFormat) { _, newFormat in
+                        while selectedColors.count > newFormat.maxInkColors {
+                            if let extra = selectedColors.first {
+                                selectedColors.remove(extra)
+                            }
+                        }
+                    }
 
                     Text("Min \(selectedFormat.minimumCards) cards, max \(selectedFormat.maxInkColors) ink colors")
                         .font(.caption)
                         .foregroundStyle(.gray)
                 }
 
-                Section(header: Text("Ink Colors (max \(selectedFormat.maxInkColors))")) {
+                Section(header: Text("Ink Colors (max \(selectedFormat.maxInkColors))"),
+                        footer: Text("Optional — auto-detected from the cards you add.")) {
                     ForEach(InkColor.allCases, id: \.self) { color in
                         Button {
                             if selectedColors.contains(color) {
@@ -580,22 +487,12 @@ struct EditDeckView: View {
     }
 }
 
-// MARK: - Deck Detail View
-struct DeckDetailView: View {
+
+// MARK: - Deck Overview (deck stats + card list; shown in the workspace slide-up)
+struct DeckOverview: View {
     let deck: Deck
-    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var collectionManager: CollectionManager
     @EnvironmentObject var deckManager: DeckManager
-
-    @State private var showingBuilder = false
-    @State private var showingExport = false
-    @State private var showingDeleteConfirm = false
-    @State private var showingEditDeck = false
-    @State private var showingAICompleter = false
-    @State private var showingAIStrategy = false
-    @State private var showingShareSheet = false
-    @State private var exportedText = ""
-    @State private var shareCode = ""
 
     var statistics: DeckStatistics {
         deckManager.calculateStatistics(for: deck, collectionManager: collectionManager)
@@ -616,18 +513,31 @@ struct DeckDetailView: View {
     }
 
     var body: some View {
-        NavigationView {
-            ScrollView {
+        ScrollView {
+            if (deck.cards ?? []).isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "rectangle.stack.badge.plus")
+                        .font(.largeTitle)
+                        .foregroundStyle(.lorcanaGold.opacity(0.6))
+                    Text("No cards yet")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                    Text("Add cards from the browser to start building.")
+                        .font(.subheadline)
+                        .foregroundStyle(.gray)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 60)
+                .padding()
+            } else {
                 VStack(spacing: 16) {
-                    // Statistics Header
                     DeckStatisticsCard(statistics: statistics, validation: validation, deck: deck)
 
-                    // Validation Warnings/Errors
                     if !validation.errors.isEmpty || !validation.warnings.isEmpty {
                         ValidationCard(validation: validation)
                     }
 
-                    // Missing Cards
                     if !missingCards.isEmpty {
                         MissingCardsCard(
                             missingCards: missingCards,
@@ -635,43 +545,37 @@ struct DeckDetailView: View {
                         )
                     }
 
-                    // Cost Curve
                     CostCurveCard(costDistribution: statistics.costDistribution)
 
-                    // Card List
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Cards (\(statistics.totalCards))")
                             .font(.headline)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                             .padding(.horizontal)
 
                         ForEach(cardsByCost, id: \.cost) { section in
                             VStack(alignment: .leading, spacing: 8) {
-                                // Cost header
                                 HStack {
                                     Text("Cost \(section.cost)")
                                         .font(.subheadline)
                                         .fontWeight(.semibold)
-                                        .foregroundColor(.gray)
+                                        .foregroundStyle(.gray)
 
                                     Text("(\(section.cards.reduce(0) { $0 + $1.quantity }) cards)")
                                         .font(.caption)
-                                        .foregroundColor(.gray)
+                                        .foregroundStyle(.gray)
                                 }
                                 .padding(.horizontal)
 
-                                // Cards at this cost
                                 ForEach(section.cards, id: \.cardId) { card in
                                     DeckCardRow(
                                         card: card,
                                         deck: deck,
                                         ownedQuantity: {
-                                            // Try ID match first
                                             let byId = collectionManager.getCollectedQuantity(for: card.cardId)
                                             if byId > 0 {
                                                 return byId
                                             }
-                                            // Fallback to name match
                                             return collectionManager.getCollectedQuantityByName(
                                                 card.name,
                                                 setName: card.setName,
@@ -688,100 +592,78 @@ struct DeckDetailView: View {
                 }
                 .padding()
             }
-            .background(LorcanaBackground())
-            .navigationTitle(deck.name)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") {
-                        dismiss()
+        }
+        .background(LorcanaBackground())
+    }
+}
+
+// MARK: - Deck Summary Bar (live progress shown atop the workspace)
+struct DeckSummaryBar: View {
+    let count: Int
+    let inkColors: [InkColor]
+    let costDistribution: [Int: Int]
+    let isValid: Bool
+    let hasCards: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                Text("\(count)/60")
+                    .font(.headline)
+                    .bold()
+                    .foregroundStyle(count >= 60 ? .green : .lorcanaGold)
+
+                if !inkColors.isEmpty {
+                    HStack(spacing: 3) {
+                        ForEach(inkColors, id: \.self) { ink in
+                            Circle()
+                                .fill(ink.color)
+                                .frame(width: 10, height: 10)
+                        }
                     }
                 }
 
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Button(action: { showingBuilder = true }) {
-                            Label("Add Cards", systemImage: "plus.circle")
-                        }
+                if hasCards {
+                    CurveSparkline(costDistribution: costDistribution)
+                }
 
-                        Button(action: { showingAICompleter = true }) {
-                            Label("AI Complete Deck", systemImage: "sparkles")
-                        }
+                Spacer()
 
-                        Button(action: { showingAIStrategy = true }) {
-                            Label("AI Strategy Guide", systemImage: "brain.head.profile")
-                        }
-
-                        Button(action: { showingEditDeck = true }) {
-                            Label("Edit Deck Info", systemImage: "pencil")
-                        }
-
-                        Button(action: {
-                            exportedText = deckManager.exportDeckList(deck)
-                            showingExport = true
-                        }) {
-                            Label("Export Deck List", systemImage: "square.and.arrow.up")
-                        }
-
-                        Button(action: {
-                            if let code = deckManager.generateShareCode(for: deck) {
-                                shareCode = code
-                                showingShareSheet = true
-                            }
-                        }) {
-                            Label("Share Deck", systemImage: "paperplane")
-                        }
-
-                        Button(action: {
-                            _ = deckManager.duplicateDeck(deck)
-                        }) {
-                            Label("Duplicate Deck", systemImage: "doc.on.doc")
-                        }
-
-                        Divider()
-
-                        Button(role: .destructive, action: { showingDeleteConfirm = true }) {
-                            Label("Delete Deck", systemImage: "trash")
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                            .foregroundColor(.lorcanaGold)
-                    }
+                if hasCards {
+                    Image(systemName: isValid ? "checkmark.seal.fill" : "exclamationmark.triangle.fill")
+                        .font(.subheadline)
+                        .foregroundStyle(isValid ? .green : .orange)
                 }
             }
+            .padding(.horizontal)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity)
+            .background(Color.lorcanaDark.opacity(0.85))
         }
-        .sheet(isPresented: $showingBuilder) {
-            DeckBuilderView(deck: deck)
-                .environmentObject(deckManager)
-                .environmentObject(collectionManager)
-        }
-        .sheet(isPresented: $showingAICompleter) {
-            AIDeckCompleterView(deck: deck)
-                .environmentObject(deckManager)
-                .environmentObject(collectionManager)
-        }
-        .sheet(isPresented: $showingAIStrategy) {
-            AIDeckStrategyView(deck: deck)
-        }
-        .sheet(isPresented: $showingExport) {
-            ExportDeckView(deckText: exportedText, deckName: deck.name)
-        }
-        .sheet(isPresented: $showingShareSheet) {
-            ShareDeckView(shareCode: shareCode, deckName: deck.name)
-        }
-        .sheet(isPresented: $showingEditDeck) {
-            EditDeckView(deck: deck)
-                .environmentObject(deckManager)
-        }
-        .alert("Delete Deck?", isPresented: $showingDeleteConfirm) {
-            Button("Cancel", role: .cancel) { }
-            Button("Delete", role: .destructive) {
-                deckManager.deleteDeck(deck)
-                dismiss()
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(count) of 60 cards. Tap to view deck.")
+    }
+}
+
+// MARK: - Cost Curve Sparkline
+struct CurveSparkline: View {
+    let costDistribution: [Int: Int]
+
+    private var maxCount: Int {
+        max(costDistribution.values.max() ?? 1, 1)
+    }
+
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 2) {
+            ForEach(0..<8, id: \.self) { cost in
+                let value = costDistribution[cost] ?? 0
+                Capsule()
+                    .fill(value > 0 ? Color.lorcanaGold : Color.gray.opacity(0.3))
+                    .frame(width: 3, height: max(CGFloat(value) / CGFloat(maxCount) * 18, 2))
             }
-        } message: {
-            Text("Are you sure you want to delete \"\(deck.name)\"? This action cannot be undone.")
         }
+        .frame(height: 18)
     }
 }
 
@@ -797,7 +679,7 @@ struct DeckStatisticsCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(deck.deckFormat.rawValue)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
 
                     HStack(spacing: 6) {
                         ForEach(deck.deckInkColors, id: \.self) { color in
@@ -810,7 +692,7 @@ struct DeckStatisticsCard: View {
                             }
                         }
                     }
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                 }
 
                 Spacer()
@@ -821,14 +703,14 @@ struct DeckStatisticsCard: View {
                         Text("Valid")
                     }
                     .font(.caption)
-                    .foregroundColor(.green)
+                    .foregroundStyle(.green)
                 } else {
                     HStack(spacing: 4) {
                         Image(systemName: "exclamationmark.triangle.fill")
                         Text("Invalid")
                     }
                     .font(.caption)
-                    .foregroundColor(.orange)
+                    .foregroundStyle(.orange)
                 }
             }
 
@@ -870,10 +752,10 @@ struct StatItem: View {
             Text(value)
                 .font(.title3)
                 .fontWeight(.bold)
-                .foregroundColor(color)
+                .foregroundStyle(color)
             Text(label)
                 .font(.caption2)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
         }
     }
 }
@@ -887,12 +769,12 @@ struct ValidationCard: View {
             if !validation.errors.isEmpty {
                 Label("Errors", systemImage: "exclamationmark.triangle.fill")
                     .font(.headline)
-                    .foregroundColor(.red)
+                    .foregroundStyle(.red)
 
                 ForEach(validation.errors, id: \.self) { error in
                     Text("• \(error)")
                         .font(.caption)
-                        .foregroundColor(.red.opacity(0.9))
+                        .foregroundStyle(.red.opacity(0.9))
                 }
             }
 
@@ -903,12 +785,12 @@ struct ValidationCard: View {
 
                 Label("Warnings", systemImage: "exclamationmark.circle.fill")
                     .font(.headline)
-                    .foregroundColor(.orange)
+                    .foregroundStyle(.orange)
 
                 ForEach(validation.warnings, id: \.self) { warning in
                     Text("• \(warning)")
                         .font(.caption)
-                        .foregroundColor(.orange.opacity(0.9))
+                        .foregroundStyle(.orange.opacity(0.9))
                 }
             }
         }
@@ -934,27 +816,27 @@ struct MissingCardsCard: View {
             HStack {
                 Label("Missing Cards", systemImage: "cart")
                     .font(.headline)
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
 
                 Spacer()
 
                 Text(PricingService.formatPrice(costToComplete))
                     .font(.headline)
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
             }
 
             ForEach(Array(missingCards.prefix(5)), id: \.card.cardId) { item in
                 HStack {
                     Text("\(item.needed)x \(item.card.name)")
                         .font(.caption)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
 
                     Spacer()
 
                     if let price = item.card.price {
                         Text(PricingService.formatPrice(price * Double(item.needed)))
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                 }
             }
@@ -962,7 +844,7 @@ struct MissingCardsCard: View {
             if missingCards.count > 5 {
                 Text("+ \(missingCards.count - 5) more cards")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
             }
         }
         .padding()
@@ -989,7 +871,7 @@ struct CostCurveCard: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Cost Curve")
                 .font(.headline)
-                .foregroundColor(.lorcanaGold)
+                .foregroundStyle(.lorcanaGold)
 
             HStack(alignment: .bottom, spacing: 8) {
                 ForEach(0..<10) { cost in
@@ -999,7 +881,7 @@ struct CostCurveCard: View {
                     VStack(spacing: 4) {
                         Text("\(count)")
                             .font(.caption2)
-                            .foregroundColor(count > 0 ? .white : .clear)
+                            .foregroundStyle(count > 0 ? .white : .clear)
 
                         RoundedRectangle(cornerRadius: 4)
                             .fill(count > 0 ? Color.lorcanaGold : Color.gray.opacity(0.3))
@@ -1007,7 +889,7 @@ struct CostCurveCard: View {
 
                         Text("\(cost)")
                             .font(.caption2)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                 }
             }
@@ -1036,73 +918,115 @@ struct DeckCardRow: View {
         ownedQuantity >= card.quantity
     }
 
+    private var atMax: Bool { card.quantity >= deck.deckFormat.maxCopiesPerCard }
+
+    private func addOne() {
+        guard !atMax else { return }
+        deckManager.updateCardQuantity(card, in: deck, quantity: card.quantity + 1)
+    }
+
+    private func removeOne() {
+        if card.quantity <= 1 {
+            deckManager.removeCard(card, from: deck)
+        } else {
+            deckManager.updateCardQuantity(card, in: deck, quantity: card.quantity - 1)
+        }
+    }
+
     var body: some View {
-        Button(action: { showingDetail = true }) {
-            HStack(spacing: 12) {
-                AsyncImage(url: card.bestImageUrl()) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                } placeholder: {
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(Color.gray.opacity(0.3))
-                }
-                .frame(width: 40, height: 56)
-                .clipShape(RoundedRectangle(cornerRadius: 6))
+        HStack(spacing: 12) {
+            // Tap the image/info to open the full card detail
+            Button(action: { showingDetail = true }) {
+                HStack(spacing: 12) {
+                    AsyncImage(url: card.bestImageUrl()) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                    } placeholder: {
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Color.gray.opacity(0.3))
+                    }
+                    .frame(width: 40, height: 56)
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("\(card.quantity)x \(card.name)")
-                        .font(.subheadline)
-                        .foregroundColor(.white)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(card.name)
+                            .font(.subheadline)
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
 
-                    HStack(spacing: 6) {
-                        RarityBadge(rarity: card.cardRarity)
+                        HStack(spacing: 6) {
+                            RarityBadge(rarity: card.cardRarity)
 
-                        if let inkColor = card.cardInkColor {
-                            HStack(spacing: 2) {
-                                Circle()
-                                    .fill(inkColor.color)
-                                    .frame(width: 8, height: 8)
-                                Text(inkColor.rawValue)
+                            if let inkColor = card.cardInkColor {
+                                HStack(spacing: 2) {
+                                    Circle()
+                                        .fill(inkColor.color)
+                                        .frame(width: 8, height: 8)
+                                    Text(inkColor.rawValue)
+                                        .font(.caption2)
+                                        .foregroundStyle(.gray)
+                                }
+                            }
+
+                            if card.inkwell {
+                                Image(systemName: "drop.fill")
                                     .font(.caption2)
-                                    .foregroundColor(.gray)
+                                    .foregroundStyle(.blue)
                             }
                         }
 
-                        if card.inkwell {
-                            Image(systemName: "drop.fill")
+                        HStack(spacing: 6) {
+                            Image(systemName: isComplete ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
                                 .font(.caption2)
-                                .foregroundColor(.blue)
+                                .foregroundStyle(isComplete ? .green : .orange)
+                            Text("\(ownedQuantity)/\(card.quantity) owned")
+                                .font(.caption2)
+                                .foregroundStyle(isComplete ? .green : .orange)
+
+                            if let price = card.price {
+                                Text("· \(PricingService.formatPrice(price))")
+                                    .font(.caption2)
+                                    .foregroundStyle(.gray)
+                            }
                         }
                     }
                 }
-
-                Spacer()
-
-                VStack(alignment: .trailing, spacing: 4) {
-                    HStack(spacing: 4) {
-                        Text("\(ownedQuantity)/\(card.quantity)")
-                            .font(.caption)
-                            .foregroundColor(isComplete ? .green : .orange)
-                        Image(systemName: isComplete ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
-                            .font(.caption)
-                            .foregroundColor(isComplete ? .green : .orange)
-                    }
-
-                    if let price = card.price {
-                        Text(PricingService.formatPrice(price))
-                            .font(.caption2)
-                            .foregroundColor(.gray)
-                    }
-                }
             }
-            .padding(.vertical, 8)
-            .padding(.horizontal)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.lorcanaDark.opacity(0.6))
-            )
+            .buttonStyle(.plain)
+
+            Spacer()
+
+            // Inline quantity stepper
+            HStack(spacing: 12) {
+                Button(action: removeOne) {
+                    Image(systemName: "minus.circle.fill")
+                        .foregroundStyle(.red)
+                }
+                .accessibilityLabel("Remove one \(card.name)")
+
+                Text("\(card.quantity)")
+                    .font(.subheadline)
+                    .bold()
+                    .foregroundStyle(.white)
+                    .frame(minWidth: 18)
+
+                Button(action: addOne) {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundStyle(atMax ? .gray : .green)
+                }
+                .disabled(atMax)
+                .accessibilityLabel("Add one \(card.name)")
+            }
+            .font(.title3)
         }
+        .padding(.vertical, 8)
+        .padding(.horizontal)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.lorcanaDark.opacity(0.6))
+        )
+        .sensoryFeedback(.impact, trigger: card.quantity)
         .sheet(isPresented: $showingDetail) {
             DeckCardDetailView(card: card, deck: deck, ownedQuantity: ownedQuantity)
                 .environmentObject(deckManager)
@@ -1117,9 +1041,10 @@ struct DeckCardDetailView: View {
     let ownedQuantity: Int
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var deckManager: DeckManager
+    @State private var showingRemoveConfirm = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 20) {
                 AsyncImage(url: card.bestImageUrl()) { image in
                     image
@@ -1135,46 +1060,48 @@ struct DeckCardDetailView: View {
                 VStack(spacing: 12) {
                     HStack {
                         Text("Quantity:")
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         Spacer()
                         HStack(spacing: 12) {
                             Button(action: {
                                 deckManager.updateCardQuantity(card, in: deck, quantity: card.quantity - 1)
                             }) {
                                 Image(systemName: "minus.circle.fill")
-                                    .foregroundColor(.red)
+                                    .foregroundStyle(.red)
                             }
+                            .accessibilityLabel("Decrease quantity")
 
                             Text("\(card.quantity)")
                                 .font(.headline)
-                                .foregroundColor(.white)
+                                .foregroundStyle(.white)
                                 .frame(width: 40)
 
                             Button(action: {
                                 deckManager.updateCardQuantity(card, in: deck, quantity: card.quantity + 1)
                             }) {
                                 Image(systemName: "plus.circle.fill")
-                                    .foregroundColor(.green)
+                                    .foregroundStyle(.green)
                             }
                             .disabled(card.quantity >= deck.deckFormat.maxCopiesPerCard)
+                            .accessibilityLabel("Increase quantity")
                         }
                     }
 
                     HStack {
                         Text("You own:")
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         Spacer()
                         Text("\(ownedQuantity)")
-                            .foregroundColor(ownedQuantity >= card.quantity ? .green : .orange)
+                            .foregroundStyle(ownedQuantity >= card.quantity ? .green : .orange)
                     }
 
                     if ownedQuantity < card.quantity {
                         HStack {
                             Text("Need:")
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
                             Spacer()
                             Text("\(card.quantity - ownedQuantity) more")
-                                .foregroundColor(.orange)
+                                .foregroundStyle(.orange)
                         }
                     }
                 }
@@ -1185,15 +1112,14 @@ struct DeckCardDetailView: View {
                 )
 
                 Button(role: .destructive, action: {
-                    deckManager.removeCard(card, from: deck)
-                    dismiss()
+                    showingRemoveConfirm = true
                 }) {
                     Label("Remove from Deck", systemImage: "trash")
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
                         .background(Color.red)
-                        .cornerRadius(10)
+                        .clipShape(.rect(cornerRadius: 10))
                 }
 
                 Spacer()
@@ -1202,6 +1128,18 @@ struct DeckCardDetailView: View {
             .background(LorcanaBackground())
             .navigationTitle(card.name)
             .navigationBarTitleDisplayMode(.inline)
+            .sensoryFeedback(.selection, trigger: card.quantity)
+            .confirmationDialog(
+                "Remove \(card.name) from this deck?",
+                isPresented: $showingRemoveConfirm,
+                titleVisibility: .visible
+            ) {
+                Button("Remove", role: .destructive) {
+                    deckManager.removeCard(card, from: deck)
+                    dismiss()
+                }
+                Button("Cancel", role: .cancel) { }
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -1218,14 +1156,15 @@ struct ExportDeckView: View {
     let deckText: String
     let deckName: String
     @Environment(\.dismiss) private var dismiss
+    @State private var didCopy = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 20) {
                 ScrollView {
                     Text(deckText)
                         .font(.system(.body, design: .monospaced))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(
@@ -1236,14 +1175,17 @@ struct ExportDeckView: View {
 
                 Button(action: {
                     UIPasteboard.general.string = deckText
+                    withAnimation { didCopy = true }
                 }) {
-                    Label("Copy to Clipboard", systemImage: "doc.on.clipboard")
-                        .foregroundColor(.lorcanaDark)
+                    Label(didCopy ? "Copied!" : "Copy to Clipboard",
+                          systemImage: didCopy ? "checkmark" : "doc.on.clipboard")
+                        .foregroundStyle(.lorcanaDark)
                         .padding()
                         .frame(maxWidth: .infinity)
                         .background(Color.lorcanaGold)
-                        .cornerRadius(10)
+                        .clipShape(.rect(cornerRadius: 10))
                 }
+                .sensoryFeedback(.success, trigger: didCopy)
             }
             .padding()
             .background(LorcanaBackground())
@@ -1260,11 +1202,345 @@ struct ExportDeckView: View {
     }
 }
 
-// MARK: - Deck Builder View
-struct DeckBuilderView: View {
+
+// MARK: - New Deck Sheet (pick inks first; the workspace browser then filters to them)
+struct NewDeckSheet: View {
+    var onCreated: (Deck) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var deckManager: DeckManager
+
+    @State private var name = ""
+    @State private var format: DeckFormat = .casual
+    @State private var colors: Set<InkColor> = []
+
+    private var maxInks: Int { format.maxInkColors }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                LorcanaBackground()
+
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        // Name
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("DECK NAME")
+                                .font(.caption)
+                                .foregroundStyle(.lorcanaGold)
+                            TextField("New Deck", text: $name)
+                                .textFieldStyle(.plain)
+                                .foregroundStyle(.white)
+                                .padding()
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color.lorcanaDark.opacity(0.8))
+                                )
+                        }
+
+                        // Format
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("FORMAT")
+                                .font(.caption)
+                                .foregroundStyle(.lorcanaGold)
+                            Picker("Format", selection: $format) {
+                                ForEach([DeckFormat.casual, .coreConstructed, .infinityConstructed], id: \.self) { fmt in
+                                    Text(fmt.rawValue).tag(fmt)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            .onChange(of: format) { _, newFormat in
+                                while colors.count > newFormat.maxInkColors {
+                                    if let extra = colors.first { colors.remove(extra) }
+                                }
+                            }
+                        }
+
+                        // Ink colors
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("INK COLORS")
+                                    .font(.caption)
+                                    .foregroundStyle(.lorcanaGold)
+                                Spacer()
+                                Text("\(colors.count)/\(maxInks)")
+                                    .font(.caption2)
+                                    .foregroundStyle(.gray)
+                            }
+                            Text("The card browser will filter to just these colors.")
+                                .font(.caption2)
+                                .foregroundStyle(.gray)
+
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                                ForEach(InkColor.allCases, id: \.self) { ink in
+                                    inkButton(ink)
+                                }
+                            }
+                        }
+                    }
+                    .padding()
+                }
+            }
+            .navigationTitle("New Deck")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") { dismiss() }
+                        .foregroundStyle(.lorcanaGold)
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Start Building") { create() }
+                        .bold()
+                        .foregroundStyle(.lorcanaGold)
+                }
+            }
+        }
+    }
+
+    private func inkButton(_ ink: InkColor) -> some View {
+        let selected = colors.contains(ink)
+        return Button {
+            if selected {
+                colors.remove(ink)
+            } else if colors.count < maxInks {
+                colors.insert(ink)
+            }
+        } label: {
+            HStack(spacing: 10) {
+                Circle()
+                    .fill(ink.color)
+                    .frame(width: 24, height: 24)
+                Text(ink.rawValue)
+                    .foregroundStyle(.white)
+                Spacer()
+                if selected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.lorcanaGold)
+                }
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(selected ? ink.color.opacity(0.25) : Color.lorcanaDark.opacity(0.6))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(selected ? ink.color : .clear, lineWidth: 2)
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+        .disabled(!selected && colors.count >= maxInks)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    private func create() {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let deck = deckManager.createDeck(
+            name: trimmed.isEmpty ? "New Deck" : trimmed,
+            description: "",
+            format: format,
+            inkColors: Array(colors).sorted { $0.rawValue < $1.rawValue },
+            archetype: nil
+        )
+        onCreated(deck)
+        dismiss()
+    }
+}
+
+// MARK: - Deck Workspace (unified build + view screen)
+enum WorkspaceMode: Hashable {
+    case add
+    case deck
+}
+
+struct DeckWorkspaceView: View {
     let deck: Deck
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @EnvironmentObject var deckManager: DeckManager
+    @EnvironmentObject var collectionManager: CollectionManager
+
+    @State private var mode: WorkspaceMode
+
+    init(deck: Deck) {
+        self.deck = deck
+        // New/empty decks open on the browser; decks with cards open on the deck view
+        _mode = State(initialValue: (deck.cards ?? []).isEmpty ? .add : .deck)
+    }
+
+    // Workspace chrome
+    @State private var showingExport = false
+    @State private var showingDeleteConfirm = false
+    @State private var showingEditDeck = false
+    @State private var showingAICompleter = false
+    @State private var showingAIStrategy = false
+    @State private var showingShareSheet = false
+    @State private var showingRename = false
+    @State private var renameText = ""
+    @State private var exportedText = ""
+    @State private var shareCode = ""
+
+    private var gridHelper: AdaptiveGridHelper {
+        AdaptiveGridHelper(horizontalSizeClass: horizontalSizeClass)
+    }
+
+    var statistics: DeckStatistics {
+        deckManager.calculateStatistics(for: deck, collectionManager: collectionManager)
+    }
+
+    var validation: DeckValidation {
+        deckManager.validateDeck(deck)
+    }
+
+    private var deckCardCount: Int {
+        (deck.cards ?? []).reduce(0) { $0 + $1.quantity }
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Live summary bar
+            DeckSummaryBar(
+                count: deckCardCount,
+                inkColors: deck.deckInkColors,
+                costDistribution: statistics.costDistribution,
+                isValid: validation.isValid,
+                hasCards: deckCardCount > 0,
+                onTap: { withAnimation { mode = .deck } }
+            )
+
+            // Mode toggle: build (browser) vs. view your deck
+            Picker("View", selection: $mode.animation()) {
+                Text("Add Cards").tag(WorkspaceMode.add)
+                Text("Deck (\(deckCardCount))").tag(WorkspaceMode.deck)
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+            .background(Color.black.opacity(0.2))
+
+            if mode == .add {
+                BuilderBrowser(deck: deck, gridHelper: gridHelper)
+                    .environmentObject(deckManager)
+                    .environmentObject(collectionManager)
+            } else {
+                DeckOverview(deck: deck)
+                    .environmentObject(deckManager)
+                    .environmentObject(collectionManager)
+            }
+        }
+        .background(LorcanaBackground())
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Button(action: { renameText = deck.name; showingRename = true }) {
+                    HStack(spacing: 6) {
+                        Text(deck.name)
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                        Image(systemName: "pencil")
+                            .font(.caption)
+                            .foregroundStyle(.lorcanaGold)
+                    }
+                }
+                .accessibilityLabel("Deck name \(deck.name). Tap to rename.")
+            }
+
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button(action: { showingAICompleter = true }) {
+                        Label("AI Complete Deck", systemImage: "sparkles")
+                    }
+                    Button(action: { showingAIStrategy = true }) {
+                        Label("AI Strategy Guide", systemImage: "brain.head.profile")
+                    }
+                    Button(action: { showingEditDeck = true }) {
+                        Label("Edit Deck Info", systemImage: "pencil")
+                    }
+                    Button(action: {
+                        exportedText = deckManager.exportDeckList(deck)
+                        showingExport = true
+                    }) {
+                        Label("Export Deck List", systemImage: "square.and.arrow.up")
+                    }
+                    Button(action: {
+                        if let code = deckManager.generateShareCode(for: deck) {
+                            shareCode = code
+                            showingShareSheet = true
+                        }
+                    }) {
+                        Label("Share Deck", systemImage: "paperplane")
+                    }
+                    Button(action: {
+                        _ = deckManager.duplicateDeck(deck)
+                    }) {
+                        Label("Duplicate Deck", systemImage: "doc.on.doc")
+                    }
+
+                    Divider()
+
+                    Button(role: .destructive, action: { showingDeleteConfirm = true }) {
+                        Label("Delete Deck", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                        .foregroundStyle(.lorcanaGold)
+                }
+            }
+        }
+        .onDisappear {
+            // Only auto-detect inks when the user didn't choose them at creation
+            if deck.deckInkColors.isEmpty {
+                deckManager.updateDeckColorsFromCards(deck)
+            }
+        }
+        .sheet(isPresented: $showingAICompleter) {
+            AIDeckCompleterView(deck: deck)
+                .environmentObject(deckManager)
+                .environmentObject(collectionManager)
+        }
+        .sheet(isPresented: $showingAIStrategy) {
+            AIDeckStrategyView(deck: deck)
+        }
+        .sheet(isPresented: $showingExport) {
+            ExportDeckView(deckText: exportedText, deckName: deck.name)
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            ShareDeckView(shareCode: shareCode, deckName: deck.name)
+        }
+        .sheet(isPresented: $showingEditDeck) {
+            EditDeckView(deck: deck)
+                .environmentObject(deckManager)
+        }
+        .alert("Rename Deck", isPresented: $showingRename) {
+            TextField("Deck name", text: $renameText)
+            Button("Save") {
+                let trimmed = renameText.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !trimmed.isEmpty {
+                    deck.name = trimmed
+                    deck.lastModified = Date()
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        }
+        .alert("Delete Deck?", isPresented: $showingDeleteConfirm) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                deckManager.deleteDeck(deck)
+                dismiss()
+            }
+        } message: {
+            Text("Are you sure you want to delete \"\(deck.name)\"? This action cannot be undone.")
+        }
+    }
+
+}
+
+// MARK: - Builder Browser (search + filters + card grid with inline add)
+/// Owns its own search/filter state and the card list so that typing or filtering only re-renders
+/// the browser — not the parent workspace, which recomputes deck statistics/validation on each pass.
+struct BuilderBrowser: View {
+    let deck: Deck
+    let gridHelper: AdaptiveGridHelper
     @EnvironmentObject var deckManager: DeckManager
     @EnvironmentObject var collectionManager: CollectionManager
     @StateObject private var dataManager = SetsDataManager.shared
@@ -1274,11 +1550,6 @@ struct DeckBuilderView: View {
     @State private var selectedInkColor: InkColor? = nil
     @State private var selectedCost: Int? = nil
     @State private var availableCards: [LorcanaCard] = []
-    @State private var showingCardToAdd: LorcanaCard? = nil
-
-    private var gridHelper: AdaptiveGridHelper {
-        AdaptiveGridHelper(horizontalSizeClass: horizontalSizeClass)
-    }
 
     var filteredCards: [LorcanaCard] {
         var cards = availableCards
@@ -1290,13 +1561,11 @@ struct DeckBuilderView: View {
             if !cardsWithInk.isEmpty {
                 cards = cards.filter { card in
                     guard let cardInk = card.inkColor else {
-                        // If card has no ink color data, include it (data might be missing)
                         return true
                     }
-                    let matches = deck.deckInkColors.contains { deckColor in
+                    return deck.deckInkColors.contains { deckColor in
                         deckColor.rawValue.lowercased() == cardInk.lowercased()
                     }
-                    return matches
                 }
             }
         }
@@ -1311,20 +1580,16 @@ struct DeckBuilderView: View {
 
         // Filter by owned/all
         if showOwnedOnly {
-            let ownedCards = cards.filter { card in
-                // Try ID match first
+            cards = cards.filter { card in
                 if collectionManager.isCardCollected(card.id) {
                     return true
                 }
-
-                // Fallback: try name + set + variant match
                 return collectionManager.isCardCollectedByName(
                     card.name,
                     setName: card.setName,
                     variant: card.variant
                 )
             }
-            cards = ownedCards
         }
 
         // Filter by ink color (manual selection)
@@ -1343,226 +1608,201 @@ struct DeckBuilderView: View {
     }
 
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                // Search bar
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
+        VStack(spacing: 0) {
+            // Search bar
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(.gray)
 
-                    TextField("Search cards...", text: $searchText)
-                        .foregroundColor(.white)
-                        .autocorrectionDisabled()
+                TextField("Search cards...", text: $searchText)
+                    .foregroundStyle(.white)
+                    .autocorrectionDisabled()
 
-                    if !searchText.isEmpty {
-                        Button(action: { searchText = "" }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.gray)
-                        }
+                if !searchText.isEmpty {
+                    Button(action: { searchText = "" }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.gray)
                     }
+                    .accessibilityLabel("Clear search")
                 }
-                .padding()
-                .background(Color.lorcanaDark.opacity(0.6))
+            }
+            .padding()
+            .background(Color.lorcanaDark.opacity(0.6))
 
-                // Owned/All Toggle - Prominent
-                HStack {
-                    Text("Show:")
-                        .font(.caption)
-                        .foregroundColor(.gray)
+            // Owned/All toggle
+            HStack {
+                Text("Show:")
+                    .font(.caption)
+                    .foregroundStyle(.gray)
 
-                    Button(action: { showOwnedOnly = false }) {
-                        Text("All Cards")
-                            .font(.subheadline)
-                            .fontWeight(showOwnedOnly ? .regular : .bold)
-                            .foregroundColor(showOwnedOnly ? .gray : .lorcanaGold)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(showOwnedOnly ? Color.clear : Color.lorcanaGold.opacity(0.2))
-                            )
-                    }
-
-                    Button(action: { showOwnedOnly = true }) {
-                        Text("Owned Only")
-                            .font(.subheadline)
-                            .fontWeight(showOwnedOnly ? .bold : .regular)
-                            .foregroundColor(showOwnedOnly ? .lorcanaGold : .gray)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(showOwnedOnly ? Color.lorcanaGold.opacity(0.2) : Color.clear)
-                            )
-                    }
-
-                    Spacer()
+                Button(action: { showOwnedOnly = false }) {
+                    Text("All Cards")
+                        .font(.subheadline)
+                        .fontWeight(showOwnedOnly ? .regular : .bold)
+                        .foregroundStyle(showOwnedOnly ? .gray : .lorcanaGold)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(showOwnedOnly ? Color.clear : Color.lorcanaGold.opacity(0.2))
+                        )
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 8)
-                .background(Color.black.opacity(0.2))
+                .accessibilityAddTraits(showOwnedOnly ? [] : .isSelected)
 
-                // Filters
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
+                Button(action: { showOwnedOnly = true }) {
+                    Text("Owned Only")
+                        .font(.subheadline)
+                        .fontWeight(showOwnedOnly ? .bold : .regular)
+                        .foregroundStyle(showOwnedOnly ? .lorcanaGold : .gray)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(showOwnedOnly ? Color.lorcanaGold.opacity(0.2) : Color.clear)
+                        )
+                }
+                .accessibilityAddTraits(showOwnedOnly ? .isSelected : [])
 
-                        // Ink color filter
-                        Menu {
-                            Button("All Colors") {
-                                selectedInkColor = nil
-                            }
-                            Divider()
-                            ForEach(deck.deckInkColors.isEmpty ? InkColor.allCases : deck.deckInkColors, id: \.self) { color in
-                                Button(action: {
-                                    selectedInkColor = (selectedInkColor == color) ? nil : color
-                                }) {
-                                    HStack {
-                                        Circle()
-                                            .fill(color.color)
-                                            .frame(width: 12, height: 12)
-                                        Text(color.rawValue)
-                                    }
-                                }
-                            }
-                        } label: {
-                            HStack(spacing: 4) {
-                                if let color = selectedInkColor {
+                Spacer()
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+            .background(Color.black.opacity(0.2))
+
+            // Filters
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    Menu {
+                        Button("All Colors") { selectedInkColor = nil }
+                        Divider()
+                        ForEach(deck.deckInkColors.isEmpty ? InkColor.allCases : deck.deckInkColors, id: \.self) { color in
+                            Button(action: {
+                                selectedInkColor = (selectedInkColor == color) ? nil : color
+                            }) {
+                                HStack {
                                     Circle()
                                         .fill(color.color)
                                         .frame(width: 12, height: 12)
                                     Text(color.rawValue)
-                                } else {
-                                    Image(systemName: "paintpalette")
-                                    Text("Color")
                                 }
                             }
-                            .font(.caption)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(selectedInkColor != nil ? Color.lorcanaGold.opacity(0.2) : Color.lorcanaDark.opacity(0.6))
-                            )
                         }
-
-                        // Cost filter
-                        Menu {
-                            Button("All Costs") {
-                                selectedCost = nil
+                    } label: {
+                        HStack(spacing: 4) {
+                            if let color = selectedInkColor {
+                                Circle()
+                                    .fill(color.color)
+                                    .frame(width: 12, height: 12)
+                                Text(color.rawValue)
+                            } else {
+                                Image(systemName: "paintpalette")
+                                Text("Color")
                             }
-                            Divider()
-                            ForEach(0..<10) { cost in
-                                Button("\(cost)") {
-                                    selectedCost = (selectedCost == cost) ? nil : cost
-                                }
-                            }
-                        } label: {
-                            HStack(spacing: 4) {
-                                Image(systemName: "circle.hexagongrid")
-                                Text(selectedCost != nil ? "\(selectedCost!)" : "Cost")
-                            }
-                            .font(.caption)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(selectedCost != nil ? Color.lorcanaGold.opacity(0.2) : Color.lorcanaDark.opacity(0.6))
-                            )
                         }
-                    }
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                }
-                .background(Color.black.opacity(0.3))
-
-                // Results count
-                HStack {
-                    Text("\(filteredCards.count) cards")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(selectedInkColor != nil ? Color.lorcanaGold.opacity(0.2) : Color.lorcanaDark.opacity(0.6))
+                        )
+                    }
 
-                    Spacer()
+                    Menu {
+                        Button("All Costs") { selectedCost = nil }
+                        Divider()
+                        ForEach(0..<10) { cost in
+                            Button("\(cost)") {
+                                selectedCost = (selectedCost == cost) ? nil : cost
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "circle.hexagongrid")
+                            Text(selectedCost != nil ? "\(selectedCost!)" : "Cost")
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(selectedCost != nil ? Color.lorcanaGold.opacity(0.2) : Color.lorcanaDark.opacity(0.6))
+                        )
+                    }
                 }
                 .padding(.horizontal)
-                .padding(.vertical, 4)
+                .padding(.vertical, 8)
+            }
+            .background(Color.black.opacity(0.3))
 
-                // Cards grid
-                if filteredCards.isEmpty {
-                    VStack(spacing: 16) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.largeTitle)
-                            .foregroundColor(.gray)
-                        Text("No cards found")
-                            .foregroundColor(.gray)
-                        if showOwnedOnly {
-                            Text("Try showing all cards")
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    ScrollView {
-                        LazyVGrid(columns: gridHelper.deckGridColumns(), spacing: gridHelper.gridSpacing) {
-                            ForEach(filteredCards) { card in
-                                BuilderCardView(
-                                    card: card,
-                                    deck: deck,
-                                    inDeck: (deck.cards ?? []).first(where: { $0.cardId == card.id }),
-                                    onTap: { showingCardToAdd = card }
-                                )
-                            }
-                        }
-                        .padding(gridHelper.viewPadding)
+            // Results count
+            HStack {
+                Text("\(filteredCards.count) cards")
+                    .font(.caption)
+                    .foregroundStyle(.gray)
+                Spacer()
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 4)
+
+            // Cards grid
+            if filteredCards.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.largeTitle)
+                        .foregroundStyle(.gray)
+                    Text("No cards found")
+                        .foregroundStyle(.gray)
+                    if showOwnedOnly {
+                        Text("Try showing all cards")
+                            .font(.caption)
+                            .foregroundStyle(.gray)
                     }
                 }
-            }
-            .background(LorcanaBackground())
-            .navigationTitle("Add Cards")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                let deckCardsByCardId = deckCardLookup
+                ScrollView {
+                    LazyVGrid(columns: gridHelper.deckGridColumns(), spacing: gridHelper.gridSpacing) {
+                        ForEach(filteredCards) { card in
+                            BuilderCardView(
+                                card: card,
+                                deck: deck,
+                                inDeck: deckCardsByCardId[card.id]
+                            )
+                            .environmentObject(deckManager)
+                        }
                     }
+                    .padding(gridHelper.viewPadding)
                 }
             }
         }
-        .onAppear {
-            loadAllCards()
-        }
-        .onChange(of: dataManager.isDataLoaded) { isLoaded in
-            if isLoaded {
-                loadAllCards()
-            }
-        }
-        .sheet(item: $showingCardToAdd) { card in
-            AddCardToDeckView(card: card, deck: deck)
-                .environmentObject(deckManager)
-                .environmentObject(collectionManager)
+        .onAppear { loadAllCards() }
+        .onChange(of: dataManager.isDataLoaded) { _, isLoaded in
+            if isLoaded { loadAllCards() }
         }
     }
 
+    /// cardId → DeckCard, built once per render so each grid cell is an O(1) lookup
+    /// instead of an O(deck size) scan.
+    private var deckCardLookup: [String: DeckCard] {
+        Dictionary((deck.cards ?? []).map { ($0.cardId, $0) }, uniquingKeysWith: { first, _ in first })
+    }
+
     private func loadAllCards() {
-        // Check if data is loaded
         guard dataManager.isDataLoaded else {
             availableCards = []
             return
         }
 
-        // Load all cards from all sets
         var allCards: [LorcanaCard] = []
         for set in dataManager.sets {
-            let setCards = dataManager.getCardsForSet(set.name)
-            allCards.append(contentsOf: setCards)
+            allCards.append(contentsOf: dataManager.getCardsForSet(set.name))
         }
 
-        // Apply cached prices
-        availableCards = allCards.map { card in
-            dataManager.getCardWithCachedPrice(card)
-        }
+        availableCards = allCards.map { dataManager.getCardWithCachedPrice($0) }
     }
 }
 
@@ -1571,215 +1811,110 @@ struct BuilderCardView: View {
     let card: LorcanaCard
     let deck: Deck
     let inDeck: DeckCard?
-    let onTap: () -> Void
+    @EnvironmentObject var deckManager: DeckManager
 
     var quantityInDeck: Int {
         inDeck?.quantity ?? 0
     }
 
-    var body: some View {
-        VStack(spacing: 4) {
-            ZStack {
-                AsyncImage(url: card.bestImageUrl()) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                } placeholder: {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.gray.opacity(0.3))
-                        .aspectRatio(0.7, contentMode: .fit)
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(card.rarity.color, lineWidth: 1)
-                )
+    private var maxCopies: Int { deck.deckFormat.maxCopiesPerCard }
+    private var atMax: Bool { quantityInDeck >= maxCopies }
 
-                // In deck indicator
-                if quantityInDeck > 0 {
-                    VStack {
-                        HStack {
-                            Spacer()
-                            ZStack {
-                                Circle()
-                                    .fill(Color.lorcanaGold)
-                                    .frame(width: 28, height: 28)
-                                Text("\(quantityInDeck)")
-                                    .font(.caption)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.lorcanaDark)
-                            }
-                        }
-                        Spacer()
+    private func addOne() {
+        guard !atMax else { return }
+        deckManager.addCard(card, to: deck, quantity: 1)
+    }
+
+    private func removeOne() {
+        guard let inDeck else { return }
+        if quantityInDeck <= 1 {
+            deckManager.removeCard(inDeck, from: deck)
+        } else {
+            deckManager.updateCardQuantity(inDeck, in: deck, quantity: quantityInDeck - 1)
+        }
+    }
+
+    var body: some View {
+        VStack(spacing: 6) {
+            // Tap the image to add one copy
+            Button(action: addOne) {
+                ZStack {
+                    AsyncImage(url: card.bestImageUrl()) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                    } placeholder: {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.gray.opacity(0.3))
+                            .aspectRatio(0.7, contentMode: .fit)
                     }
-                    .padding(4)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(quantityInDeck > 0 ? Color.lorcanaGold : card.rarity.color,
+                                    lineWidth: quantityInDeck > 0 ? 2 : 1)
+                    )
+
+                    // In-deck quantity badge
+                    if quantityInDeck > 0 {
+                        VStack {
+                            HStack {
+                                Spacer()
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.lorcanaGold)
+                                        .frame(width: 28, height: 28)
+                                    Text("\(quantityInDeck)")
+                                        .font(.caption)
+                                        .bold()
+                                        .foregroundStyle(.lorcanaDark)
+                                }
+                            }
+                            Spacer()
+                        }
+                        .padding(4)
+                    }
                 }
+                .opacity(atMax ? 0.55 : 1.0)
             }
+            .buttonStyle(.plain)
+            .disabled(atMax)
+            .accessibilityLabel(card.name)
+            .accessibilityValue(quantityInDeck > 0 ? "\(quantityInDeck) in deck" : "Not in deck")
+            .accessibilityHint(atMax ? "At maximum copies" : "Add one copy")
 
             Text(card.name)
                 .font(.caption2)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
-        }
-        .opacity(quantityInDeck >= deck.deckFormat.maxCopiesPerCard ? 0.5 : 1.0)
-        .contentShape(Rectangle())
-        .onTapGesture {
-            onTap()
-        }
-    }
-}
 
-// MARK: - Add Card to Deck View
-struct AddCardToDeckView: View {
-    let card: LorcanaCard
-    let deck: Deck
-    @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var deckManager: DeckManager
-    @EnvironmentObject var collectionManager: CollectionManager
-
-    @State private var quantity = 1
-
-    var ownedQuantity: Int {
-        // Try ID match first
-        let byId = collectionManager.getCollectedQuantity(for: card.id)
-        if byId > 0 {
-            return byId
-        }
-        // Fallback to name match
-        return collectionManager.getCollectedQuantityByName(
-            card.name,
-            setName: card.setName,
-            variant: card.variant
-        )
-    }
-
-    var existingInDeck: DeckCard? {
-        (deck.cards ?? []).first(where: { $0.cardId == card.id })
-    }
-
-    var currentDeckQuantity: Int {
-        existingInDeck?.quantity ?? 0
-    }
-
-    var maxQuantity: Int {
-        deck.deckFormat.maxCopiesPerCard - currentDeckQuantity
-    }
-
-    var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                // Card image
-                AsyncImage(url: card.bestImageUrl()) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                } placeholder: {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.gray.opacity(0.3))
-                }
-                .frame(maxWidth: 300)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-
-                // Card info
-                VStack(spacing: 12) {
-                    if currentDeckQuantity > 0 {
-                        HStack {
-                            Text("In deck:")
-                                .foregroundColor(.gray)
-                            Spacer()
-                            Text("\(currentDeckQuantity)x")
-                                .foregroundColor(.lorcanaGold)
-                        }
+            // Inline stepper appears once the card is in the deck
+            if quantityInDeck > 0 {
+                HStack(spacing: 14) {
+                    Button(action: removeOne) {
+                        Image(systemName: "minus.circle.fill")
+                            .foregroundStyle(.red)
                     }
+                    .accessibilityLabel("Remove one \(card.name)")
 
-                    HStack {
-                        Text("You own:")
-                            .foregroundColor(.gray)
-                        Spacer()
-                        Text("\(ownedQuantity)x")
-                            .foregroundColor(ownedQuantity > 0 ? .green : .orange)
+                    Text("\(quantityInDeck)")
+                        .font(.subheadline)
+                        .bold()
+                        .foregroundStyle(.white)
+                        .frame(minWidth: 20)
+
+                    Button(action: addOne) {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundStyle(atMax ? .gray : .green)
                     }
-
-                    Divider()
-
-                    // Quantity selector
-                    VStack(spacing: 8) {
-                        Text("Add to deck:")
-                            .foregroundColor(.gray)
-
-                        HStack(spacing: 20) {
-                            Button(action: {
-                                if quantity > 1 { quantity -= 1 }
-                            }) {
-                                Image(systemName: "minus.circle.fill")
-                                    .font(.title2)
-                                    .foregroundColor(quantity > 1 ? .red : .gray)
-                            }
-                            .disabled(quantity <= 1)
-
-                            Text("\(quantity)x")
-                                .font(.title)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                                .frame(width: 80)
-
-                            Button(action: {
-                                if quantity < maxQuantity { quantity += 1 }
-                            }) {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.title2)
-                                    .foregroundColor(quantity < maxQuantity ? .green : .gray)
-                            }
-                            .disabled(quantity >= maxQuantity)
-                        }
-
-                        if maxQuantity == 0 {
-                            Text("Already at maximum (\(deck.deckFormat.maxCopiesPerCard) copies)")
-                                .font(.caption)
-                                .foregroundColor(.orange)
-                        } else {
-                            Text("Max: \(maxQuantity) more")
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                        }
-                    }
+                    .disabled(atMax)
+                    .accessibilityLabel("Add one \(card.name)")
                 }
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.lorcanaDark.opacity(0.8))
-                )
-
-                // Add button
-                Button(action: {
-                    deckManager.addCard(card, to: deck, quantity: quantity)
-                    dismiss()
-                }) {
-                    Text("Add to Deck")
-                        .font(.headline)
-                        .foregroundColor(.lorcanaDark)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.lorcanaGold)
-                        .cornerRadius(10)
-                }
-                .disabled(maxQuantity == 0)
-
-                Spacer()
-            }
-            .padding()
-            .background(LorcanaBackground())
-            .navigationTitle(card.name)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
+                .font(.title3)
             }
         }
+        .sensoryFeedback(.impact, trigger: quantityInDeck)
     }
 }
 
@@ -1791,21 +1926,21 @@ struct ShareDeckView: View {
     @State private var copied = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 20) {
                 VStack(spacing: 8) {
                     Image(systemName: "paperplane.fill")
                         .font(.system(size: 48))
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
 
                     Text("Share \"\(deckName)\"")
                         .font(.title3)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
 
                     Text("Send this code to a friend so they can import your deck into Ink Well Keeper.")
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.top)
@@ -1813,7 +1948,7 @@ struct ShareDeckView: View {
                 ScrollView {
                     Text(shareCode)
                         .font(.system(.caption2, design: .monospaced))
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundStyle(.white.opacity(0.8))
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(
@@ -1829,16 +1964,16 @@ struct ShareDeckView: View {
                         copied = true
                     }) {
                         Label(copied ? "Copied!" : "Copy Code", systemImage: copied ? "checkmark" : "doc.on.clipboard")
-                            .foregroundColor(.lorcanaDark)
+                            .foregroundStyle(.lorcanaDark)
                             .padding()
                             .frame(maxWidth: .infinity)
                             .background(Color.lorcanaGold)
-                            .cornerRadius(10)
+                            .clipShape(.rect(cornerRadius: 10))
                     }
 
                     ShareLink(item: shareCode) {
                         Label("Share via...", systemImage: "square.and.arrow.up")
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                             .padding()
                             .frame(maxWidth: .infinity)
                             .background(
@@ -1873,21 +2008,21 @@ struct ImportDeckView: View {
     @State private var importedDeckName = ""
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 20) {
                 VStack(spacing: 8) {
                     Image(systemName: "square.and.arrow.down.fill")
                         .font(.system(size: 48))
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
 
                     Text("Import a Deck")
                         .font(.title3)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
 
                     Text("Paste a deck share code from another Ink Well Keeper user to import their deck.")
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.top)
@@ -1895,7 +2030,7 @@ struct ImportDeckView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Deck Code")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
 
                     TextEditor(text: $shareCode)
                         .font(.system(.caption2, design: .monospaced))
@@ -1918,7 +2053,7 @@ struct ImportDeckView: View {
                     }) {
                         Label("Paste from Clipboard", systemImage: "doc.on.clipboard")
                             .font(.subheadline)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                     }
                 }
 
@@ -1932,11 +2067,11 @@ struct ImportDeckView: View {
                 }) {
                     Text("Import Deck")
                         .fontWeight(.semibold)
-                        .foregroundColor(.lorcanaDark)
+                        .foregroundStyle(.lorcanaDark)
                         .padding()
                         .frame(maxWidth: .infinity)
                         .background(shareCode.isEmpty ? Color.gray : Color.lorcanaGold)
-                        .cornerRadius(10)
+                        .clipShape(.rect(cornerRadius: 10))
                 }
                 .disabled(shareCode.isEmpty)
 

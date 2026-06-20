@@ -41,36 +41,36 @@ enum InkColor: String, Codable, CaseIterable, Hashable {
 
 // MARK: - Deck Format
 enum DeckFormat: String, Codable, CaseIterable {
+    case casual = "Casual"
     case coreConstructed = "Core Constructed"
     case infinityConstructed = "Infinity Constructed"
     case tripleDeck = "Triple Deck"
 
     var description: String {
         switch self {
+        case .casual:
+            return "All sets, up to 2 inks"
         case .coreConstructed:
             return "Rotating format (Sets 5+)"
         case .infinityConstructed:
-            return "All sets legal"
+            return "All sets, all 6 inks"
         case .tripleDeck:
-            return "Three decks, all 6 colors"
+            return "3 decks, each a unique ink pair covering all 6 colors"
         }
     }
 
     var minimumCards: Int {
-        switch self {
-        case .coreConstructed, .infinityConstructed:
-            return 60
-        case .tripleDeck:
-            return 60 // Per deck
-        }
+        60 // Per deck for Triple Deck
     }
 
     var maxInkColors: Int {
         switch self {
-        case .coreConstructed, .infinityConstructed:
+        case .casual, .coreConstructed:
             return 2
+        case .infinityConstructed:
+            return 6 // Infinity removes the two-ink limit
         case .tripleDeck:
-            return 2 // Per deck, but all 6 total
+            return 2 // Per deck, but all 6 total across 3 decks
         }
     }
 
@@ -78,14 +78,45 @@ enum DeckFormat: String, Codable, CaseIterable {
         return 4
     }
 
-    // Sets that have rotated out of Core Constructed
-    var bannedSets: [String] {
+    /// Sets legal for this format; `nil` means all sets are legal (no rotation).
+    var legalSets: Set<String>? {
         switch self {
         case .coreConstructed:
-            return ["The First Chapter", "Rise of the Floodborn", "Into the Inklands", "Ursula's Return"]
-        case .infinityConstructed, .tripleDeck:
+            return LorcanaSetRegistry.coreLegalSets
+        case .casual, .infinityConstructed, .tripleDeck:
+            return nil
+        }
+    }
+
+    /// Individually banned cards (by full name) for this format. Casual and Triple Deck have no bans.
+    var bannedCards: [String] {
+        switch self {
+        case .coreConstructed:
+            return LorcanaSetRegistry.coreBannedCards
+        case .infinityConstructed:
+            return LorcanaSetRegistry.infinityBannedCards
+        case .casual, .tripleDeck:
             return []
         }
+    }
+
+    /// Whether `cardName` is banned in this format. Matches on a normalized name so dash style and
+    /// spacing differences (e.g. "–" vs "-") don't cause false negatives.
+    func isBanned(_ cardName: String) -> Bool {
+        guard !bannedCards.isEmpty else { return false }
+        let normalized = Self.normalizeCardName(cardName)
+        return bannedCards.contains { Self.normalizeCardName($0) == normalized }
+    }
+
+    /// Normalizes a card name for comparison: unifies dash characters, lowercases, and collapses whitespace.
+    static func normalizeCardName(_ name: String) -> String {
+        name
+            .replacing("–", with: "-")
+            .replacing("—", with: "-")
+            .lowercased()
+            .components(separatedBy: .whitespaces)
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
     }
 }
 
@@ -253,81 +284,6 @@ class DeckCard {
     func bestImageUrl() -> URL? {
         // Convert to LorcanaCard and use its bestImageUrl method
         return toLorcanaCard.bestImageUrl()
-    }
-}
-
-// MARK: - Deck Validation
-struct DeckValidation {
-    let isValid: Bool
-    let warnings: [String]
-    let errors: [String]
-
-    static func validate(_ deck: Deck) -> DeckValidation {
-        var warnings: [String] = []
-        var errors: [String] = []
-
-        let format = deck.deckFormat
-        let totalCards = deck.totalCards
-
-        // Check minimum deck size
-        if totalCards < format.minimumCards {
-            errors.append("Deck has only \(totalCards) cards. Minimum is \(format.minimumCards).")
-        }
-
-        // Warn if under 60 but over minimum (shouldn't happen for standard formats)
-        if totalCards > 0 && totalCards < 60 {
-            warnings.append("Most competitive decks run exactly 60 cards.")
-        }
-
-        // Check ink color restrictions
-        let deckInkColors = deck.deckInkColors
-        if deckInkColors.count > format.maxInkColors {
-            errors.append("Deck has \(deckInkColors.count) ink colors. Maximum is \(format.maxInkColors).")
-        }
-
-        if deckInkColors.isEmpty && totalCards > 0 {
-            warnings.append("No ink colors selected. Cards may not match deck colors.")
-        }
-
-        // Check for banned sets in Core Constructed
-        if format == .coreConstructed {
-            let bannedSetCards = (deck.cards ?? []).filter { card in
-                format.bannedSets.contains(card.setName)
-            }
-            if !bannedSetCards.isEmpty {
-                let bannedSets = Set(bannedSetCards.map { $0.setName })
-                errors.append("Contains cards from rotated sets: \(bannedSets.joined(separator: ", "))")
-            }
-        }
-
-        // Check for max copies per card
-        for card in deck.cards ?? [] {
-            if card.quantity > format.maxCopiesPerCard {
-                errors.append("\(card.name): \(card.quantity) copies (max \(format.maxCopiesPerCard))")
-            }
-        }
-
-        // Check ink color consistency
-        let cardsWithWrongInk = (deck.cards ?? []).filter { card in
-            guard let cardInk = card.cardInkColor else { return false }
-            return !deckInkColors.contains(cardInk)
-        }
-        if !cardsWithWrongInk.isEmpty && !deckInkColors.isEmpty {
-            warnings.append("\(cardsWithWrongInk.count) cards don't match deck ink colors")
-        }
-
-        // Check inkable ratio
-        let inkableCards = (deck.cards ?? []).filter { $0.inkwell }.reduce(0) { $0 + $1.quantity }
-        let inkableRatio = totalCards > 0 ? Double(inkableCards) / Double(totalCards) : 0
-        if inkableRatio < 0.3 && totalCards >= 30 {
-            warnings.append("Low inkable ratio (\(Int(inkableRatio * 100))%). Recommended 30-40%.")
-        }
-
-        return DeckValidation(
-            isValid: errors.isEmpty,
-            warnings: warnings,
-            errors: errors
-        )
     }
 }
 

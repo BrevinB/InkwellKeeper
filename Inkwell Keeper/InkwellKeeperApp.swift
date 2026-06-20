@@ -26,6 +26,9 @@ struct InkwellKeeperApp: App {
         // Check subscription status on launch
         SubscriptionManager.shared.checkSubscriptionStatus()
 
+        // Refresh deck-construction rules (rotation + banned lists) from CloudKit
+        DeckRulesService.shared.refresh()
+
         container = Self.makeContainer()
     }
 

@@ -115,6 +115,9 @@
 		C1D2E3F4A5B6C7D8E9F0A1B6 /* InteractiveCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6C7D8E9F0A1B5 /* InteractiveCardView.swift */; };
 		C1D2E3F4A5B6C7D8E9F0A1B8 /* FullscreenCardViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6C7D8E9F0A1B7 /* FullscreenCardViewer.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C2 /* CloudKitKeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C1 /* CloudKitKeyService.swift */; };
+		D1E2F3A4B5C6D7E8F9A0B1D2 /* DeckRulesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1D1 /* DeckRulesService.swift */; };
+		D1E2F3A4B5C6D7E8F9A0B1E2 /* LorcanaSetRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1E1 /* LorcanaSetRegistry.swift */; };
+		D1E2F3A4B5C6D7E8F9A0B1F2 /* DeckValidation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1F1 /* DeckValidation.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C4 /* OpenAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C3 /* OpenAIService.swift */; };
 		D713553E04644B5A986AC5C2 /* TopValuableCardsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C326BEDCB4F436483894B4D /* TopValuableCardsCard.swift */; };
 		DBC03F974A434FEAA071F27B /* CostCurveCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3744E1396FD647F29C30135B /* CostCurveCard.swift */; };
@@ -236,6 +239,9 @@
 		C1D2E3F4A5B6C7D8E9F0A1B5 /* InteractiveCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractiveCardView.swift; sourceTree = "<group>"; };
 		C1D2E3F4A5B6C7D8E9F0A1B7 /* FullscreenCardViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullscreenCardViewer.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C6D7E8F9A0B1C1 /* CloudKitKeyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitKeyService.swift; sourceTree = "<group>"; };
+		D1E2F3A4B5C6D7E8F9A0B1D1 /* DeckRulesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckRulesService.swift; sourceTree = "<group>"; };
+		D1E2F3A4B5C6D7E8F9A0B1E1 /* LorcanaSetRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LorcanaSetRegistry.swift; sourceTree = "<group>"; };
+		D1E2F3A4B5C6D7E8F9A0B1F1 /* DeckValidation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckValidation.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C6D7E8F9A0B1C3 /* OpenAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIService.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C6D7E8F9A0B1C5 /* Inkwell Keeper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Inkwell Keeper.entitlements"; sourceTree = "<group>"; };
 		DBFF6B0A02D74D5DBDDBD4B1 /* TypeBreakdownCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeBreakdownCard.swift; sourceTree = "<group>"; };
@@ -347,6 +353,8 @@
 				232D42962ECE322400FF9283 /* TipProduct.swift */,
 				230F91D82EA89EA1006E5A70 /* StarterDeckModels.swift */,
 				23D9D4492EA3FF1A0089D552 /* DeckModels.swift */,
+				D1E2F3A4B5C6D7E8F9A0B1E1 /* LorcanaSetRegistry.swift */,
+				D1E2F3A4B5C6D7E8F9A0B1F1 /* DeckValidation.swift */,
 				23B90B362E66338500214C40 /* LorcanaCard.swift */,
 				23B90B342E66337F00214C40 /* CardRarity.swift */,
 				23B90B322E66337A00214C40 /* SwiftDataModels.swift */,
@@ -375,6 +383,7 @@
 				234EDF462F41766B0016D086 /* SubscriptionManager.swift */,
 				23D2466C2F2D9DEB00CF4128 /* RulesAssistantService.swift */,
 				D1E2F3A4B5C6D7E8F9A0B1C1 /* CloudKitKeyService.swift */,
+				D1E2F3A4B5C6D7E8F9A0B1D1 /* DeckRulesService.swift */,
 				D1E2F3A4B5C6D7E8F9A0B1C3 /* OpenAIService.swift */,
 				1E3D652CBA4843E9BA303B2E /* DataMigrationService.swift */,
 				232D42942ECE321D00FF9283 /* TipJarManager.swift */,
@@ -669,6 +678,9 @@
 				A1B2C3D4E5F6A7B8C9D0E1F3 /* HolographicCardImage.swift in Sources */,
 				C1D2E3F4A5B6C7D8E9F0A1B8 /* FullscreenCardViewer.swift in Sources */,
 				D1E2F3A4B5C6D7E8F9A0B1C2 /* CloudKitKeyService.swift in Sources */,
+				D1E2F3A4B5C6D7E8F9A0B1D2 /* DeckRulesService.swift in Sources */,
+				D1E2F3A4B5C6D7E8F9A0B1E2 /* LorcanaSetRegistry.swift in Sources */,
+				D1E2F3A4B5C6D7E8F9A0B1F2 /* DeckValidation.swift in Sources */,
 				D1E2F3A4B5C6D7E8F9A0B1C4 /* OpenAIService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
