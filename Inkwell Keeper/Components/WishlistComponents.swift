@@ -15,17 +15,15 @@ struct WishlistCardRow: View {
     var body: some View {
         HStack {
             AsyncImage(url: card.bestImageUrl()) { image in
-                Group {
-                    if card.variant == .foil {
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .foilEffect(isAnimated: true)
-                    } else {
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                    }
+                if card.variant == .foil {
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .foilEffect(isAnimated: true)
+                } else {
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
                 }
             } placeholder: {
                 RoundedRectangle(cornerRadius: 8)
@@ -61,7 +59,6 @@ struct WishlistCardRow: View {
                             )
                     }
                     
-                    CostBadge(cost: card.cost)
                     Spacer()
                 }
                 

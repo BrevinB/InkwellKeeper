@@ -92,3 +92,47 @@ struct FullscreenCardViewer: View {
         }
     }
 }
+
+#Preview("Normal Card") {
+    FullscreenCardViewer(card: LorcanaCard(
+        id: "preview-001",
+        name: "Elsa - Spirit of Winter",
+        cost: 6,
+        type: "Character",
+        rarity: .legendary,
+        setName: "The First Chapter",
+        cardText: "When you play this character, chosen opposing character can't quest for the rest of this turn.",
+        imageUrl: "",
+        price: 12.50,
+        variant: .normal,
+        cardNumber: 43,
+        inkwell: true,
+        strength: 3,
+        willpower: 6,
+        lore: 3,
+        franchise: "Frozen",
+        inkColor: "Amethyst"
+    ))
+}
+
+#Preview("Foil Variant") {
+    FullscreenCardViewer(card: LorcanaCard(
+        id: "preview-002",
+        name: "Mickey Mouse - Brave Little Tailor",
+        cost: 3,
+        type: "Character",
+        rarity: .superRare,
+        setName: "The First Chapter",
+        cardText: "Evasive (Only characters with Evasive can challenge this character.)",
+        imageUrl: "",
+        price: 45.00,
+        variant: .foil,
+        cardNumber: 89,
+        inkwell: false,
+        strength: 4,
+        willpower: 3,
+        lore: 2,
+        franchise: "Mickey & Friends",
+        inkColor: "Amber"
+    ))
+}

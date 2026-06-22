@@ -67,10 +67,13 @@ struct CardTile: View {
                     }
                     
                     Spacer()
-                    CostBadge(cost: card.cost)
+                    if let price = card.price {
+                        Text(price, format: .currency(code: "USD"))
+                            .font(.caption)
+                            .bold()
+                            .foregroundStyle(.lorcanaGold)
+                    }
                 }
-                
-                // Price/buy button removed from tile view - available in detail view
             }
         }
         .onAppear {
@@ -94,21 +97,7 @@ struct CardTile: View {
         .shadow(color: card.rarity.color.opacity(0.3), radius: 8, x: 0, y: 4)
         .scaleEffect(showingDetail ? 0.95 : 1.0)
         .onTapGesture {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                showingDetail = true
-            }
-
-            Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(100))
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                    showingDetail = false
-                }
-                if isWishlist {
-                    showingWishlistDetail = true
-                } else {
-                    showingCollectionDetail = true
-                }
-            }
+            handleCardTap()
         }
         .sheet(isPresented: $showingCollectionDetail) {
             CollectionCardDetailView(card: card, isPresented: $showingCollectionDetail)
@@ -166,6 +155,23 @@ struct CardTile: View {
         }
     }
 
+    private func handleCardTap() {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+            showingDetail = true
+        }
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(100))
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                showingDetail = false
+            }
+            if isWishlist {
+                showingWishlistDetail = true
+            } else {
+                showingCollectionDetail = true
+            }
+        }
+    }
+
     private func refreshCardData() {
         if card.variant == .normal || card.variant == .foil {
             cachedCollectedCard = collectionManager.getCollectedCardDataForVariant(card)
@@ -188,4 +194,71 @@ struct CardTile: View {
             self.loadingPrice = false
         }
     }
+}
+
+#Preview("Common — Collection") {
+    CardTile(
+        card: LorcanaCard(
+            id: "preview-1",
+            name: "Mickey Mouse",
+            cost: 3,
+            type: "Character",
+            rarity: .common,
+            setName: "The First Chapter",
+            cardText: "Whenever this character quests, you may draw a card.",
+            imageUrl: "",
+            price: 1.25,
+            variant: .normal,
+            cardNumber: 1
+        ),
+        isWishlist: false
+    )
+    .environmentObject(CollectionManager())
+    .padding()
+    .background(Color.black)
+}
+
+#Preview("Legendary — Wishlist") {
+    CardTile(
+        card: LorcanaCard(
+            id: "preview-2",
+            name: "Elsa, Snow Queen",
+            cost: 7,
+            type: "Character",
+            rarity: .legendary,
+            setName: "The First Chapter",
+            cardText: "Evasive. When you play this character, you may exert her to draw 2 cards.",
+            imageUrl: "",
+            price: 24.99,
+            variant: .normal,
+            cardNumber: 43
+        ),
+        isWishlist: true
+    )
+    .environmentObject(CollectionManager())
+    .padding()
+    .background(Color.black)
+}
+
+#Preview("Enchanted Variant — Reprints") {
+    CardTile(
+        card: LorcanaCard(
+            id: "preview-3",
+            name: "Simba, Returned King",
+            cost: 5,
+            type: "Character",
+            rarity: .enchanted,
+            setName: "Into the Inklands",
+            cardText: "Rush. This character can challenge the turn they're played.",
+            imageUrl: "",
+            price: 89.99,
+            variant: .enchanted,
+            cardNumber: 204
+        ),
+        isWishlist: false,
+        reprintCount: 3
+    )
+    .environmentObject(CollectionManager())
+    .padding()
+    .background(Color.black)
 }

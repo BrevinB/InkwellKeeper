@@ -56,6 +56,12 @@ enum Analytics {
         case importCompleted(source: String, count: Int)
         case exportCompleted(format: String)
 
+        // MARK: Sharing & deep links
+        case shareCardPresented(type: String)
+        case shareCompleted(type: String)
+        case shareDeckLinkCreated
+        case deepLinkOpened(type: String)
+
         // MARK: Lifecycle
         case onboardingCompleted
         case loreCounterGameStarted(players: Int)
@@ -85,6 +91,10 @@ enum Analytics {
             case .tipPurchased: "tipJar.tipPurchased"
             case .importCompleted: "import.completed"
             case .exportCompleted: "export.completed"
+            case .shareCardPresented: "share.cardPresented"
+            case .shareCompleted: "share.completed"
+            case .shareDeckLinkCreated: "share.deckLinkCreated"
+            case .deepLinkOpened: "deepLink.opened"
             case .onboardingCompleted: "onboarding.completed"
             case .loreCounterGameStarted: "loreCounter.gameStarted"
             }
@@ -115,6 +125,12 @@ enum Analytics {
                 ["source": source, "count": String(count)]
             case let .exportCompleted(format):
                 ["format": format]
+            case let .shareCardPresented(type):
+                ["type": type]
+            case let .shareCompleted(type):
+                ["type": type]
+            case let .deepLinkOpened(type):
+                ["type": type]
             case let .loreCounterGameStarted(players):
                 ["players": String(players)]
             default:

@@ -1,0 +1,10 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["YFXZ6WNN53.co.brevinb.Inkwell-Keeper"],
+        "paths": ["/deck", "/card", "/set"]
+      }
+    ]
+  }
+}

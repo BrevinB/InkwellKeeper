@@ -3,11 +3,18 @@ import SwiftData
 
 struct ContentView: View {
     @StateObject private var collectionManager = CollectionManager()
+    @StateObject private var deckManager = DeckManager()
     @Environment(\.modelContext) private var modelContext
+    @State private var router = DeepLinkRouter()
     @State private var selectedTab = 0
     @State private var showOnboarding = false
     @State private var showBulkImport = false
     @State private var showWhatsNew = false
+
+    // Deep-link presentation state
+    @State private var deckImportCode: String?
+    @State private var deckImportName = ""
+    @State private var deepLinkedCard: LorcanaCard?
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -88,12 +95,21 @@ struct ContentView: View {
         .preferredColorScheme(.dark)
         .onAppear {
             collectionManager.setModelContext(modelContext)
+            deckManager.loadDecks(context: modelContext)
             checkOnboardingStatus()
             ReviewManager.shared.recordAppLaunch()
             Analytics.send(.screenViewed(name: Self.tabName(for: selectedTab)))
         }
         .onChange(of: selectedTab) { _, newTab in
             Analytics.send(.screenViewed(name: Self.tabName(for: newTab)))
+        }
+        .onOpenURL { router.handle($0) }
+        .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { router.handle($0) }
+        .onChange(of: router.pendingRoute) { _, route in
+            if let route {
+                handleDeepLink(route)
+                router.pendingRoute = nil
+            }
         }
         .sheet(isPresented: $showOnboarding) {
             OnboardingView(onImportTap: {
@@ -109,6 +125,50 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showWhatsNew) {
             WhatsNewView()
+        }
+        .sheet(item: $deepLinkedCard) { card in
+            CollectionCardDetailView(
+                card: card,
+                isPresented: Binding(
+                    get: { deepLinkedCard != nil },
+                    set: { if !$0 { deepLinkedCard = nil } }
+                )
+            )
+            .environmentObject(collectionManager)
+        }
+        .alert("Import Deck", isPresented: Binding(
+            get: { deckImportCode != nil },
+            set: { if !$0 { deckImportCode = nil } }
+        )) {
+            Button("Cancel", role: .cancel) { deckImportCode = nil }
+            Button("Import") {
+                if let code = deckImportCode {
+                    _ = deckManager.importDeck(from: code)
+                    selectedTab = 3
+                }
+                deckImportCode = nil
+            }
+        } message: {
+            Text("Add “\(deckImportName)” to your decks?")
+        }
+    }
+
+    /// Routes a parsed deep link to the right tab and presentation.
+    private func handleDeepLink(_ route: DeepLinkRoute) {
+        switch route {
+        case let .deck(code):
+            // Only prompt when the code is valid and decodable.
+            if let preview = deckManager.previewShareCode(code) {
+                deckImportName = preview.name
+                deckImportCode = code
+            }
+        case let .card(id):
+            if let card = SetsDataManager.shared.getAllCards().first(where: { $0.id == id }) {
+                selectedTab = 0
+                deepLinkedCard = card
+            }
+        case .set:
+            selectedTab = route.tab
         }
     }
 

@@ -1372,9 +1372,14 @@ struct FieldSelectionView: View {
 
 struct ShareSheet: UIViewControllerRepresentable {
     let items: [Any]
+    /// Called when the share sheet is dismissed; `true` if the user completed a share action.
+    var onComplete: ((Bool) -> Void)?
 
     func makeUIViewController(context: Context) -> UIActivityViewController {
         let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        controller.completionWithItemsHandler = { _, completed, _, _ in
+            onComplete?(completed)
+        }
         return controller
     }
 

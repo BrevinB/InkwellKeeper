@@ -13,6 +13,7 @@ struct StatsView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel = StatsViewModel()
     @State private var isRefreshingPrices = false
+    @State private var showingShareImage = false
 
     var body: some View {
         NavigationStack {
@@ -46,6 +47,12 @@ struct StatsView: View {
             .background(LorcanaBackground())
             .navigationTitle("Stats")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Share", systemImage: "square.and.arrow.up") {
+                        showingShareImage = true
+                    }
+                    .disabled(viewModel.snapshot.totalCards == 0)
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Refresh prices", systemImage: "arrow.clockwise", action: refreshPrices)
                         .disabled(isRefreshingPrices || collectionManager.collectedCards.isEmpty)
@@ -56,6 +63,18 @@ struct StatsView: View {
             }
             .onChange(of: collectionManager.collectedCards.count) { _, _ in
                 viewModel.refresh(context: modelContext)
+            }
+            .sheet(isPresented: $showingShareImage) {
+                ShareCardPresenter(
+                    analyticsType: "stats",
+                    qrPayload: AppLinks.appStoreURLString,
+                    fileName: "InkwellKeeper-Collection"
+                ) { _ in
+                    StatsSummaryShareCardView(
+                        snapshot: viewModel.snapshot,
+                        currencyCode: PricingService.preferredCurrency
+                    )
+                }
             }
         }
     }

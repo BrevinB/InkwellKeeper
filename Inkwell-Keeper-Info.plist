@@ -17,5 +17,16 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>co.brevinb.Inkwell-Keeper</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>inkwellkeeper</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

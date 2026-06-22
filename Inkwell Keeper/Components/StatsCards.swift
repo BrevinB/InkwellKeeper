@@ -127,11 +127,19 @@ struct SetProgressRow: View {
     let setName: String
     let current: Int
     let total: Int
-    
+    @State private var showingShare = false
+
     private var percentage: Double {
-        Double(current) / Double(total)
+        total > 0 ? Double(current) / Double(total) : 0
     }
-    
+
+    /// A completed set is a bigger flex than partial progress.
+    private var milestone: ShareMilestone {
+        current >= total && total > 0
+            ? .setCompleted(name: setName)
+            : .setProgress(name: setName, percentage: percentage)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
@@ -142,11 +150,27 @@ struct SetProgressRow: View {
                 Text("\(current)/\(total)")
                     .font(.caption)
                     .foregroundColor(.gray)
+                Button("Share \(setName) progress", systemImage: "square.and.arrow.up") {
+                    showingShare = true
+                }
+                .labelStyle(.iconOnly)
+                .font(.caption)
+                .foregroundStyle(.lorcanaGold)
+                .buttonStyle(.plain)
             }
-            
+
             ProgressView(value: percentage)
                 .progressViewStyle(LinearProgressViewStyle(tint: .lorcanaGold))
                 .scaleEffect(x: 1, y: 0.5)
+        }
+        .sheet(isPresented: $showingShare) {
+            ShareCardPresenter(
+                analyticsType: "milestone",
+                qrPayload: AppLinks.appStoreURLString,
+                fileName: "InkwellKeeper-\(setName)"
+            ) { _ in
+                MilestoneShareCardView(milestone: milestone)
+            }
         }
     }
 }

@@ -407,6 +407,23 @@ class DeckManager: ObservableObject {
         return "IWK:" + (compressed as Data).base64EncodedString()
     }
 
+    /// Decodes a share code just far enough to preview it (name + card count) without importing.
+    /// Returns `nil` if the code is missing the `IWK:` prefix or can't be decoded.
+    func previewShareCode(_ shareCode: String) -> (name: String, totalCards: Int)? {
+        let code = shareCode.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard code.hasPrefix("IWK:") else { return nil }
+
+        let base64 = String(code.dropFirst(4))
+        guard let compressedData = Data(base64Encoded: base64),
+              let decompressed = try? (compressedData as NSData).decompressed(using: .lzfse),
+              let shareable = try? JSONDecoder().decode(ShareableDeck.self, from: decompressed as Data) else {
+            return nil
+        }
+
+        let total = shareable.cards.reduce(0) { $0 + $1.quantity }
+        return (shareable.name, total)
+    }
+
     func importDeck(from shareCode: String) -> Deck? {
         guard let context = modelContext else { return nil }
 

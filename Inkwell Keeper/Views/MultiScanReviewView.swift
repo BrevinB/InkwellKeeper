@@ -15,6 +15,7 @@ struct MultiScanReviewView: View {
     @State private var addedAll = false
     @State private var showExportPrompt = false
     @State private var showingExportView = false
+    @State private var showingShareImage = false
     @State private var correctingTarget: CorrectingTarget?
 
     var body: some View {
@@ -187,10 +188,25 @@ struct MultiScanReviewView: View {
                 .background(Color.lorcanaGold)
                 .clipShape(.rect(cornerRadius: 14))
             }
+
+            Button("Share Your Haul", systemImage: "square.and.arrow.up") {
+                showingShareImage = true
+            }
+            .font(.subheadline)
+            .foregroundStyle(.lorcanaGold)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(.ultraThinMaterial)
+        .sheet(isPresented: $showingShareImage) {
+            ShareCardPresenter(
+                analyticsType: "milestone",
+                qrPayload: AppLinks.appStoreURLString,
+                fileName: "InkwellKeeper-Haul"
+            ) { _ in
+                MilestoneShareCardView(milestone: .cardsScanned(count: scannedCount))
+            }
+        }
     }
 
     @State private var scannedCount = 0

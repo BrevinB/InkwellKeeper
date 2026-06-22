@@ -1374,6 +1374,7 @@ struct DeckWorkspaceView: View {
     @State private var showingAICompleter = false
     @State private var showingAIStrategy = false
     @State private var showingShareSheet = false
+    @State private var showingShareImage = false
     @State private var showingRename = false
     @State private var renameText = ""
     @State private var exportedText = ""
@@ -1393,6 +1394,44 @@ struct DeckWorkspaceView: View {
 
     private var deckCardCount: Int {
         (deck.cards ?? []).reduce(0) { $0 + $1.quantity }
+    }
+
+    /// Snapshots the deck into the value type the share template consumes, featuring the
+    /// highest-impact cards (rarest, then most expensive) first.
+    private func makeDeckShareData() -> DeckShareData {
+        let headline = (deck.cards ?? [])
+            .sorted { lhs, rhs in
+                if lhs.cardRarity.sortOrder != rhs.cardRarity.sortOrder {
+                    return lhs.cardRarity.sortOrder > rhs.cardRarity.sortOrder
+                }
+                return lhs.cost > rhs.cost
+            }
+            .prefix(4)
+            .map { DeckShareData.HeadlineCard(id: $0.cardId, name: $0.name, rarity: $0.cardRarity) }
+
+        return DeckShareData(
+            name: deck.name,
+            formatName: deck.deckFormat.rawValue,
+            totalCards: deck.totalCards,
+            inkColors: deck.deckInkColors,
+            costDistribution: statistics.costDistribution,
+            headlineCards: Array(headline)
+        )
+    }
+
+    /// Resolves artwork URLs for just the headline cards, keyed by card id for preloading.
+    private func deckHeadlineImageURLs(for data: DeckShareData) -> [String: URL] {
+        let cardsById = Dictionary(
+            (deck.cards ?? []).map { ($0.cardId, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        var urls: [String: URL] = [:]
+        for headline in data.headlineCards {
+            if let card = cardsById[headline.id], let url = card.bestImageUrl() {
+                urls[headline.id] = url
+            }
+        }
+        return urls
     }
 
     var body: some View {
@@ -1470,6 +1509,9 @@ struct DeckWorkspaceView: View {
                     }) {
                         Label("Share Deck", systemImage: "paperplane")
                     }
+                    Button(action: { showingShareImage = true }) {
+                        Label("Share as Image", systemImage: "photo")
+                    }
                     Button(action: {
                         _ = deckManager.duplicateDeck(deck)
                     }) {
@@ -1506,6 +1548,17 @@ struct DeckWorkspaceView: View {
         }
         .sheet(isPresented: $showingShareSheet) {
             ShareDeckView(shareCode: shareCode, deckName: deck.name)
+        }
+        .sheet(isPresented: $showingShareImage) {
+            let data = makeDeckShareData()
+            ShareCardPresenter(
+                analyticsType: "deck",
+                qrPayload: AppLinks.deckQRPayload(code: deckManager.generateShareCode(for: deck) ?? ""),
+                fileName: "InkwellKeeper-\(deck.name)",
+                preloadURLs: deckHeadlineImageURLs(for: data)
+            ) { images in
+                DeckShareCardView(deck: data, images: images)
+            }
         }
         .sheet(isPresented: $showingEditDeck) {
             EditDeckView(deck: deck)

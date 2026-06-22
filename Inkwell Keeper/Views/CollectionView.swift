@@ -184,7 +184,7 @@ struct CollectionView: View {
         case .cost:
             cards.sort { $0.cost < $1.cost }
         case .rarity:
-            cards.sort { $0.rarity.sortOrder < $1.rarity.sortOrder }
+            cards.sort { $0.rarity.sortOrder > $1.rarity.sortOrder }
         case .set:
             let setOrder: [String: (Int, String)] = SetsDataManager.shared.sets.reduce(into: [:]) { dict, set in
                 let numeric = Int(set.setNumber ?? "") ?? Int.max
