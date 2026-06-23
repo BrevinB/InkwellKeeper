@@ -199,13 +199,7 @@ struct MultiScanReviewView: View {
         .padding(.vertical, 12)
         .background(.ultraThinMaterial)
         .sheet(isPresented: $showingShareImage) {
-            ShareCardPresenter(
-                analyticsType: "milestone",
-                qrPayload: AppLinks.appStoreURLString,
-                fileName: "InkwellKeeper-Haul"
-            ) { _ in
-                MilestoneShareCardView(milestone: .cardsScanned(count: scannedCount))
-            }
+            HaulShareView(entries: cameraManager.scannedCards)
         }
     }
 

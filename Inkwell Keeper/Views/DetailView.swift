@@ -107,7 +107,8 @@ struct CollectionCardDetailView: View {
             variant: displayCard.variant,
             ownedQuantity: ownedQuantity,
             catalogImageURL: displayCard.bestImageUrl(),
-            userPhoto: photo
+            userPhoto: photo,
+            sourceCard: displayCard
         )
     }
 

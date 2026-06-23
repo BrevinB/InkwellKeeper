@@ -134,6 +134,7 @@
 		D468C36E3C603F1CDD825CFE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 970237FE7983AAD42D22CE47 /* Foundation.framework */; };
 		D713553E04644B5A986AC5C2 /* TopValuableCardsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C326BEDCB4F436483894B4D /* TopValuableCardsCard.swift */; };
 		DBC03F974A434FEAA071F27B /* CostCurveCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3744E1396FD647F29C30135B /* CostCurveCard.swift */; };
+		DBF26E31CEBF6320A28F7321 /* HaulShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E761EA81FCE34454D43AFF1 /* HaulShareView.swift */; };
 		E2F3A4B5C6D7E8F9A0B1C3D5 /* MultiScanReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F3A4B5C6D7E8F9A0B1C3D4 /* MultiScanReviewView.swift */; };
 		EC289C46CFDECD9AF1BA235D /* ShareMilestone.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0C40ABB4DEDF6D9008F0E1 /* ShareMilestone.swift */; };
 		F1CARD5EB6A63F /* CardSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1CARD5EA3181D /* CardSearchView.swift */; };
@@ -252,6 +253,7 @@
 		51F6FB2C58AC4849856F7DB2 /* PricingInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PricingInfoView.swift; sourceTree = "<group>"; };
 		53FCC9D910C812A33485BFD9 /* MilestoneShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MilestoneShareCardView.swift; sourceTree = "<group>"; };
 		5CA7F430112A28FB4022621C /* ShareImageRenderer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareImageRenderer.swift; sourceTree = "<group>"; };
+		5E761EA81FCE34454D43AFF1 /* HaulShareView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HaulShareView.swift; sourceTree = "<group>"; };
 		6AA815C9650049DB84CB04F7 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		6B694B966E1368E8FACC186E /* DeckShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckShareCardView.swift; sourceTree = "<group>"; };
 		7604DCFB6FA45F47A3674BC6 /* StatsSummaryShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StatsSummaryShareCardView.swift; sourceTree = "<group>"; };
@@ -294,6 +296,8 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		23CAEDD92ECEE796006786F7 /* CardImages */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = CardImages;
 			sourceTree = "<group>";
 		};
@@ -327,6 +331,7 @@
 				53FCC9D910C812A33485BFD9 /* MilestoneShareCardView.swift */,
 				7604DCFB6FA45F47A3674BC6 /* StatsSummaryShareCardView.swift */,
 				98C98BE20946FE8394E530FD /* CardFlexShareView.swift */,
+				5E761EA81FCE34454D43AFF1 /* HaulShareView.swift */,
 			);
 			path = Share;
 			sourceTree = "<group>";
@@ -817,6 +822,7 @@
 				A107F06F96BBA4E1AF0DB402 /* StatsSummaryShareCardView.swift in Sources */,
 				6C8C6444F34A271966DF81EA /* CardFlexShareView.swift in Sources */,
 				AC8AC085B681FC4C09B2DC4A /* DeepLinkRouter.swift in Sources */,
+				DBF26E31CEBF6320A28F7321 /* HaulShareView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

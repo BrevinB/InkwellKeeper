@@ -24,6 +24,8 @@ struct CardFlexShareData {
     let catalogImageURL: URL?
     /// The user's own attached photo, if any (already decoded — lives in memory).
     let userPhoto: UIImage?
+    /// The source card, used to fetch a live market price for the price pill. Nil in previews.
+    var sourceCard: LorcanaCard? = nil
 
     var hasUserPhoto: Bool { userPhoto != nil }
 }
@@ -33,6 +35,8 @@ struct CardFlexShareData {
 struct CardFlexShareCardView: View {
     let data: CardFlexShareData
     let image: UIImage?
+    /// Live market price to surface as a pill, or nil to hide it.
+    var price: Double?
 
     var body: some View {
         VStack(spacing: 16) {
@@ -85,6 +89,12 @@ struct CardFlexShareCardView: View {
                             .bold()
                             .foregroundStyle(.lorcanaGold)
                     }
+                    if let price {
+                        Text(PricingService.formatPrice(price))
+                            .font(.caption)
+                            .bold()
+                            .foregroundStyle(.lorcanaGold)
+                    }
                 }
 
                 Text(data.setName)
@@ -93,6 +103,7 @@ struct CardFlexShareCardView: View {
             }
 
             Spacer(minLength: 0)
+            
         }
         .frame(maxWidth: .infinity)
     }
@@ -120,8 +131,10 @@ struct CardFlexShareView: View {
     let data: CardFlexShareData
 
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("shareIncludePrices") private var includePrices = true
     @State private var useUserPhoto: Bool
     @State private var catalogImage: UIImage?
+    @State private var price: Double?
     @State private var rendered: UIImage?
     @State private var shareURL: URL?
     @State private var isPreparing = true
@@ -167,6 +180,13 @@ struct CardFlexShareView: View {
                         .padding(.horizontal, 32)
                     }
 
+                    if price != nil {
+                        Toggle("Include price", isOn: $includePrices)
+                            .tint(.lorcanaGold)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 32)
+                    }
+
                     Button("Share", systemImage: "square.and.arrow.up") {
                         showShareSheet = true
                     }
@@ -187,6 +207,7 @@ struct CardFlexShareView: View {
         }
         .task { await prepare() }
         .onChange(of: useUserPhoto) { _, _ in renderCard() }
+        .onChange(of: includePrices) { _, _ in renderCard() }
         .sheet(isPresented: $showShareSheet) {
             ShareSheet(items: shareItems) { completed in
                 if completed { Analytics.send(.shareCompleted(type: "cardFlex")) }
@@ -204,6 +225,9 @@ struct CardFlexShareView: View {
     private func prepare() async {
         Analytics.send(.shareCardPresented(type: "cardFlex"))
         catalogImage = await ShareImageRenderer.loadImage(from: data.catalogImageURL)
+        if let sourceCard = data.sourceCard {
+            price = await PricingService.shared.getMarketPrice(for: sourceCard)
+        }
         // If there's no user photo, fall back to catalog art as the active image.
         if data.userPhoto == nil { useUserPhoto = false }
         renderCard()
@@ -213,7 +237,7 @@ struct CardFlexShareView: View {
     @MainActor
     private func renderCard() {
         let composed = ShareCardChrome(qrPayload: qrPayload) {
-            CardFlexShareCardView(data: data, image: activeImage)
+            CardFlexShareCardView(data: data, image: activeImage, price: includePrices ? price : nil)
         }
         guard let image = ShareImageRenderer.render(composed) else { return }
         rendered = image
@@ -224,6 +248,18 @@ struct CardFlexShareView: View {
 // MARK: - Previews
 
 private extension CardFlexShareData {
+    static let previewCard = LorcanaCard(
+        id: "ARI-001",
+        name: "Elsa - Spirit of Winter",
+        cost: 6,
+        type: "Character",
+        rarity: .legendary,
+        setName: "Archazia's Island",
+        imageUrl: "",
+        variant: .foil,
+        cardNumber: 1
+    )
+
     static let preview = CardFlexShareData(
         id: "ARI-001",
         name: "Elsa - Spirit of Winter",
@@ -232,7 +268,8 @@ private extension CardFlexShareData {
         variant: .foil,
         ownedQuantity: 2,
         catalogImageURL: nil,
-        userPhoto: nil
+        userPhoto: nil,
+        sourceCard: previewCard
     )
 }
 

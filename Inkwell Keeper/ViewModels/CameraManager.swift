@@ -42,6 +42,12 @@ class CameraManager: NSObject {
     // Bumped on each successful multi-scan add; drives the center-reveal animation.
     var scanEventID = 0
 
+    // Lowercase words allowed inside an otherwise Title-Case card subtitle (e.g.
+    // "Snowman of Action", "Shaman of the Savanna") when extracting names from OCR.
+    nonisolated static let subnameConnectorWords: Set<String> = [
+        "of", "the", "and", "in", "on", "to", "a", "an", "for", "from", "with", "at", "by"
+    ]
+
     // Live framing guidance from the continuous video feed.
     enum CardAlignment: Equatable {
         case searching   // no card-like rectangle in view
@@ -348,7 +354,10 @@ class CameraManager: NSObject {
         }
 
         lastScannedCardName = card.name
-        lastScannedEntry = scannedCards.first(where: { $0.card.name == card.name && $0.card.setName == card.setName })
+        // Match the variant too — otherwise re-scanning the normal version of a card
+        // already in the tray as foil returns the earlier foil entry, and the reveal
+        // chip shows the wrong variant.
+        lastScannedEntry = scannedCards.first(where: { $0.card.name == card.name && $0.card.setName == card.setName && $0.variant == variant })
         scanEventID += 1  // Trigger the center-reveal animation
 
         // Haptic feedback for successful scan
@@ -395,8 +404,10 @@ class CameraManager: NSObject {
     func undoLastScan() {
         guard let entry = lastScannedEntry else { return }
 
-        // Find the matching card in scannedCards and decrement or remove
-        if let index = scannedCards.firstIndex(where: { $0.card.name == entry.card.name && $0.card.setName == entry.card.setName }) {
+        // Find the matching card in scannedCards and decrement or remove. Match the
+        // variant too, so undoing a normal scan doesn't decrement a foil entry of the
+        // same card sitting earlier in the tray.
+        if let index = scannedCards.firstIndex(where: { $0.card.name == entry.card.name && $0.card.setName == entry.card.setName && $0.variant == entry.variant }) {
             if scannedCards[index].quantity > 1 {
                 scannedCards[index].quantity -= 1
             } else {
@@ -415,9 +426,10 @@ class CameraManager: NSObject {
 
     func replaceLastScannedCard(with newCard: LorcanaCard) {
         guard let entry = lastScannedEntry else { return }
+        let variant = entry.variant
 
-        // Remove the wrongly scanned card
-        if let index = scannedCards.firstIndex(where: { $0.card.name == entry.card.name && $0.card.setName == entry.card.setName }) {
+        // Remove the wrongly scanned card (same variant as the one being corrected).
+        if let index = scannedCards.firstIndex(where: { $0.card.name == entry.card.name && $0.card.setName == entry.card.setName && $0.variant == variant }) {
             if scannedCards[index].quantity > 1 {
                 scannedCards[index].quantity -= 1
             } else {
@@ -425,16 +437,17 @@ class CameraManager: NSObject {
             }
         }
 
-        // Add the correct card
-        if let existingIndex = scannedCards.firstIndex(where: { $0.card.name == newCard.name && $0.card.setName == newCard.setName }) {
+        // Add the correct card, preserving the variant of the scan being corrected.
+        let newCardWithVariant = newCard.withVariant(variant)
+        if let existingIndex = scannedCards.firstIndex(where: { $0.card.name == newCard.name && $0.card.setName == newCard.setName && $0.variant == variant }) {
             scannedCards[existingIndex].quantity += 1
         } else {
-            scannedCards.append(ScannedCardEntry(card: newCard, quantity: 1, scannedAt: Date()))
+            scannedCards.append(ScannedCardEntry(card: newCardWithVariant, quantity: 1, scannedAt: Date(), variant: variant))
         }
 
         // Update toast to show the corrected card
         lastScannedCardName = newCard.name
-        lastScannedEntry = scannedCards.first(where: { $0.card.name == newCard.name && $0.card.setName == newCard.setName })
+        lastScannedEntry = scannedCards.first(where: { $0.card.name == newCard.name && $0.card.setName == newCard.setName && $0.variant == variant })
 
         // Haptic feedback
         let feedback = UINotificationFeedbackGenerator()
@@ -703,13 +716,23 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
                 continue
             }
             
-            // Identify subnames (Proper Title Case like "Shaman of the Savanna", "Isolated Fortress")
-            if cleanText.contains(" ") && cleanText.capitalized == cleanText && cleanText.count > 5 {
-                // Exclude obvious ability names
-                if !lowercaseText.contains("ground") && !lowercaseText.contains("haven") {
-                    subNames.append(cleanText)
+            // Identify subnames (Title Case, allowing lowercase connector words like
+            // "of"/"the": "Shaman of the Savanna", "Snowman of Action", "Isolated Fortress").
+            // A plain `capitalized` check rejects these because it title-cases "of" → "Of",
+            // which dropped the subtitle and left only the main name to match on.
+            if cleanText.contains(" ") && cleanText.count > 5 {
+                let words = cleanText.components(separatedBy: " ").filter { !$0.isEmpty }
+                let firstIsCapitalized = words.first?.first?.isUppercase == true
+                let everyWordIsNameLike = words.allSatisfy { word in
+                    word.first?.isUppercase == true || Self.subnameConnectorWords.contains(word.lowercased())
                 }
-                continue
+                if firstIsCapitalized && everyWordIsNameLike {
+                    // Exclude obvious ability names
+                    if !lowercaseText.contains("ground") && !lowercaseText.contains("haven") {
+                        subNames.append(cleanText)
+                    }
+                    continue
+                }
             }
             
             // Single word proper names (like "Training" from "Training Dummy")
@@ -860,21 +883,29 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
             return mainNameMatches.first
         } else if mainNameMatches.count > 1 {
 
-            // Try to disambiguate by checking if any subtitle words appear in ALL detected texts
+            // Disambiguate by scoring each candidate on how many distinctive subtitle
+            // words (>3 chars) appear in the detected text, then taking the single best.
+            // Returning the FIRST card with any matching word picked the wrong one when a
+            // word is shared: "snowman" is in both "Friendly Snowman" and "Snowman of
+            // Action", so the alphabetically-earlier card always won. Scoring lets the
+            // distinctive word ("action") break the tie.
             let allTextLowercased = allDetectedTexts.map { $0.lowercased() }.joined(separator: " ")
 
-            for card in mainNameMatches {
-                let cardParts = card.name.components(separatedBy: " - ")
-                if cardParts.count == 2 {
-                    let subName = cardParts[1].lowercased()
-                    let subWords = subName.components(separatedBy: " ")
+            let scored = mainNameMatches.map { card -> (card: LorcanaCard, score: Int) in
+                let subName = card.name.components(separatedBy: " - ").dropFirst().first?.lowercased() ?? ""
+                let score = subName.components(separatedBy: " ")
+                    .filter { $0.count > 3 }
+                    .reduce(0) { allTextLowercased.contains($1) ? $0 + 1 : $0 }
+                return (card, score)
+            }
 
-                    // Check if any significant word from the subtitle appears in the detected text
-                    for word in subWords where word.count > 3 {  // Only check words longer than 3 chars
-                        if allTextLowercased.contains(word) {
-                            return card
-                        }
-                    }
+            let bestScore = scored.map(\.score).max() ?? 0
+            if bestScore > 0 {
+                let leaders = scored.filter { $0.score == bestScore }
+                // Only commit when one candidate clearly wins; genuine ties fall through
+                // to the set-recency heuristic below rather than guessing.
+                if leaders.count == 1 {
+                    return leaders[0].card
                 }
             }
 
