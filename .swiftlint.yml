@@ -1,0 +1,110 @@
+# SwiftLint configuration for Inkwell Keeper
+# Run locally: swiftlint lint --config .swiftlint.yml
+# Enforced in CI via ci_scripts/ci_post_clone.sh (Xcode Cloud).
+
+included:
+  - "Inkwell Keeper"
+  - "Inkwell KeeperTests"
+
+excluded:
+  - env
+  - Website
+  - Scripts
+  - screenshots
+  - "**/*.xcassets"
+  - "**/Generated"
+
+# Opt-in rules that reinforce the modern-Swift house style (see CLAUDE.md).
+opt_in_rules:
+  - empty_count
+  - empty_string
+  - first_where
+  - last_where
+  - contains_over_filter_count
+  - contains_over_first_not_nil
+  - sorted_first_last
+  - redundant_nil_coalescing
+  - toggle_bool
+  - unneeded_parentheses_in_closure_argument
+  - closure_end_indentation
+  - operator_usage_whitespace
+  - prefer_self_in_static_references
+
+# Rules intentionally relaxed for an actively-evolving solo-dev app.
+# Note: pre-existing violations of the *enabled* rules are suppressed via
+# swiftlint-baseline.json — CI only fails on NEW violations. These rules below
+# are ones we don't want to enforce even going forward (size/structure metrics
+# and stylistic noise that doesn't fit a solo SwiftUI codebase).
+disabled_rules:
+  - line_length          # long SwiftUI modifier chains are common
+  - trailing_whitespace
+  - todo                 # don't fail the build on TODO/FIXME
+  - type_body_length     # large view/service types are fine here
+  - file_length
+  - function_body_length
+  - cyclomatic_complexity
+  - large_tuple
+  - nesting
+  - multiple_closures_with_trailing_closure  # idiomatic in SwiftUI
+
+identifier_name:
+  min_length: 2          # allow short names like `id`, `x`, `vm`
+  excluded:
+    - id
+    - x
+    - y
+
+type_name:
+  max_length:
+    warning: 60
+
+# Custom rules enforcing the highest-signal CLAUDE.md API bans.
+# Keep these as errors so anti-patterns can't land on main.
+custom_rules:
+  no_foreground_color:
+    name: "Use foregroundStyle"
+    regex: "\\.foregroundColor\\("
+    message: "Use foregroundStyle() instead of foregroundColor()."
+    severity: error
+
+  no_corner_radius:
+    name: "Use clipShape(.rect(cornerRadius:))"
+    regex: "\\.cornerRadius\\("
+    message: "Use clipShape(.rect(cornerRadius:)) instead of cornerRadius()."
+    severity: error
+
+  no_observable_object:
+    name: "Use @Observable"
+    regex: ":\\s*ObservableObject"
+    message: "Use @Observable classes instead of ObservableObject."
+    severity: error
+
+  no_dispatch_queue:
+    name: "Use Swift Concurrency"
+    regex: "DispatchQueue\\."
+    message: "Use modern Swift concurrency instead of DispatchQueue."
+    severity: error
+
+  no_task_sleep_nanoseconds:
+    name: "Use Task.sleep(for:)"
+    regex: "Task\\.sleep\\(nanoseconds:"
+    message: "Use Task.sleep(for:) instead of Task.sleep(nanoseconds:)."
+    severity: error
+
+  no_uiscreen_main_bounds:
+    name: "Avoid UIScreen.main.bounds"
+    regex: "UIScreen\\.main\\.bounds"
+    message: "Read available space from layout (GeometryReader/containerRelativeFrame) instead of UIScreen.main.bounds."
+    severity: error
+
+  no_tab_item:
+    name: "Use the Tab API"
+    regex: "\\.tabItem\\("
+    message: "Use the Tab API instead of tabItem()."
+    severity: error
+
+  no_navigation_view:
+    name: "Use NavigationStack"
+    regex: "NavigationView\\s*\\{"
+    message: "Use NavigationStack instead of NavigationView."
+    severity: error

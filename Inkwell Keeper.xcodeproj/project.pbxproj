@@ -108,6 +108,7 @@
 		6C8C6444F34A271966DF81EA /* CardFlexShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C98BE20946FE8394E530FD /* CardFlexShareView.swift */; };
 		724DBFC751281A16EE9C0D3F /* AppLinks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 986264D1FC458204909C9BFB /* AppLinks.swift */; };
 		80C0A7DBBA05FCA036421B83 /* ShareMilestoneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E624D8ABE9C6EC90741C35EC /* ShareMilestoneTests.swift */; };
+		8FFB5E5A73AFBE9B4EF1C7E0 /* attack_of_the_vine.json in Resources */ = {isa = PBXBuildFile; fileRef = D3F932B4B946EA58B9D03BB8 /* attack_of_the_vine.json */; };
 		A107F06F96BBA4E1AF0DB402 /* StatsSummaryShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7604DCFB6FA45F47A3674BC6 /* StatsSummaryShareCardView.swift */; };
 		A1A1A1A1000000020000A002 /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1000000010000A001 /* Analytics.swift */; };
 		A1B2C3D4E5F6789012345679 /* winterspell.json in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345678 /* winterspell.json */; };
@@ -286,6 +287,7 @@
 		D1E2F3A4B5C6D7E8F9A0B1D1 /* DeckRulesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckRulesService.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C6D7E8F9A0B1E1 /* LorcanaSetRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LorcanaSetRegistry.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C6D7E8F9A0B1F1 /* DeckValidation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckValidation.swift; sourceTree = "<group>"; };
+		D3F932B4B946EA58B9D03BB8 /* attack_of_the_vine.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = attack_of_the_vine.json; sourceTree = "<group>"; };
 		DBFF6B0A02D74D5DBDDBD4B1 /* TypeBreakdownCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeBreakdownCard.swift; sourceTree = "<group>"; };
 		E2F3A4B5C6D7E8F9A0B1C3D4 /* MultiScanReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiScanReviewView.swift; sourceTree = "<group>"; };
 		E624D8ABE9C6EC90741C35EC /* ShareMilestoneTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareMilestoneTests.swift; sourceTree = "<group>"; };
@@ -296,8 +298,6 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		23CAEDD92ECEE796006786F7 /* CardImages */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = CardImages;
 			sourceTree = "<group>";
 		};
@@ -389,6 +389,7 @@
 				233365522E779F3F00BE5BD4 /* SetsDataManager.swift */,
 				B281D76F664D42E898C5AFFB /* whispers_in_the_well.json */,
 				A1B2C3D4E5F6789012345678 /* winterspell.json */,
+				D3F932B4B946EA58B9D03BB8 /* attack_of_the_vine.json */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -700,6 +701,7 @@
 				233365692E77B05400BE5BD4 /* rise_of_the_floodborn.json in Resources */,
 				F9FA8CEF18B640868AFA0847 /* whispers_in_the_well.json in Resources */,
 				A1B2C3D4E5F6789012345679 /* winterspell.json in Resources */,
+				8FFB5E5A73AFBE9B4EF1C7E0 /* attack_of_the_vine.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

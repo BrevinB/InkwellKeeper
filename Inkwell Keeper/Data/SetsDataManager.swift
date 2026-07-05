@@ -128,7 +128,8 @@ class SetsDataManager: ObservableObject {
             "challenge_promo": "challenge_promo.json",
             "epcot_festival_of_the_arts": "epcot_festival_of_the_arts.json",
             "lorcana_challenge_year_3": "lorcana_challenge_year_3.json",
-            "wilds_unknown": "wilds_unknown.json"
+            "wilds_unknown": "wilds_unknown.json",
+            "attack_of_the_vine": "attack_of_the_vine.json"
         ]
 
         for (setId, filename) in setFilenames {

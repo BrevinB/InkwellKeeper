@@ -45,6 +45,12 @@ TARGETS = [
         "set_code": "WU",
         "set_name": "Wilds Unknown",
     },
+    {
+        "query": "13",
+        "filename": "attack_of_the_vine.json",
+        "set_code": "AOV",
+        "set_name": "Attack of the Vine!",
+    },
 ]
 
 

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-05-02",
+  "lastUpdated": "2026-07-05",
   "sets": [
     {
       "id": "the_first_chapter",
@@ -190,6 +190,16 @@
       "releaseDate": "2026-05-08",
       "cardCount": 204,
       "description": "Venture into uncharted lands as the realm's wild frontiers reveal new heroes and untamed magic.",
+      "isReleased": true
+    },
+    {
+      "id": "attack_of_the_vine",
+      "name": "Attack of the Vine!",
+      "setCode": "AOV",
+      "setNumber": "13",
+      "releaseDate": "2026-07-17",
+      "cardCount": 242,
+      "description": "A relentless botanical menace overtakes the realm, bringing new vine-based mechanics and fierce plant-powered characters.",
       "isReleased": true
     }
   ]

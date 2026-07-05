@@ -69,6 +69,7 @@ SET_FOLDER_MAP = {
     "EPCOT Festival of the Arts": "epcot_festival_of_the_arts",
     "Lorcana Challenge Year 3": "lorcana_challenge_year_3",
     "Wilds Unknown": "wilds_unknown",
+    "Attack of the Vine!": "attack_of_the_vine",
 }
 
 # Mirror of the `variantSuffix` switch in LorcanaCardExtensions.swift. JSON stores

@@ -38,6 +38,7 @@ SET_MAPPING = {
     "whispers_in_the_well": "10",
     "winterspell": "11",
     "wilds_unknown": "12",
+    "attack_of_the_vine": "13",
     "promo_set_1": "P1",
     "promo_set_2": "P2",
     "promo_set_3": "P3",

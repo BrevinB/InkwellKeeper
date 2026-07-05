@@ -291,6 +291,7 @@ class PricingService: ObservableObject {
         "EPCOT Festival of the Arts": "EFA",
         "Lorcana Challenge Year 3": "C2",
         "Wilds Unknown": "WU",
+        "Attack of the Vine!": "AOV",
     ]
 
     private static func setCode(for setName: String) -> String {
