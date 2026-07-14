@@ -1476,10 +1476,13 @@ struct DeckWorkspaceView: View {
                             .font(.headline)
                             .foregroundStyle(.white)
                             .lineLimit(1)
+                            .truncationMode(.tail)
+                            .minimumScaleFactor(0.7)
                         Image(systemName: "pencil")
                             .font(.caption)
                             .foregroundStyle(.lorcanaGold)
                     }
+                    .frame(maxWidth: 220)
                 }
                 .accessibilityLabel("Deck name \(deck.name). Tap to rename.")
             }

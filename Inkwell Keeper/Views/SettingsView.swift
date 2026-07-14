@@ -449,7 +449,7 @@ struct SettingsView: View {
 
     private func shareApp() {
         let shareText = "Check out Ink Well Keeper - a collection tracker for Disney Lorcana!"
-        let appURL = URL(string: "https://apps.apple.com/app/inkwell-keeper/id123456789")! // Update with real URL
+        guard let appURL = AppLinks.appStoreURL else { return }
 
         let activityVC = UIActivityViewController(
             activityItems: [shareText, appURL],
@@ -625,23 +625,26 @@ struct PrivacyPolicyView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     Text("Privacy Policy")
                         .font(.title)
-                        .fontWeight(.bold)
+                        .bold()
 
-                    Text("Last Updated: \(Date().formatted(date: .long, time: .omitted))")
+                    Text("Last Updated: July 6, 2026")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
 
                     introSection
-                    dataCollectionSection
-                    cameraPermissionSection
-                    dataStorageSection
-                    thirdPartySection
-                    userRightsSection
+                    collectionDataSection
+                    cameraSection
+                    analyticsSection
+                    aiFeaturesSection
+                    subscriptionsSection
+                    pricingSection
+                    neverDoSection
+                    childrenSection
                     contactSection
                 }
                 .padding()
@@ -665,24 +668,19 @@ struct PrivacyPolicyView: View {
                 .font(.headline)
 
             Text("""
-Ink Well Keeper ("we", "our", or "the app") is committed to protecting your privacy. This Privacy Policy explains how we handle your information when you use our Disney Lorcana collection tracking application.
+Ink Well Keeper ("the app") is built to keep your data yours. This policy explains what is collected, what isn't, and where your information goes.
 """)
             .font(.body)
         }
     }
 
-    private var dataCollectionSection: some View {
+    private var collectionDataSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Data We Collect")
+            Text("Your Collection Data")
                 .font(.headline)
 
             Text("""
-We do NOT collect, transmit, or store any personal information. All data remains on your device:
-
-• Card collection data (stored locally on your device)
-• Wishlist data (stored locally on your device)
-• App preferences (stored locally on your device)
-• Scanned card images (processed locally, not stored)
+Cards, decks, wishlists, photos you attach, and stats are stored on your device. If you enable iCloud sync, this data is also stored in your private iCloud database, which only you can access — we cannot read it. Deleting the app (and the app's iCloud data in iOS Settings) removes it entirely.
 
 We do not require account creation or login.
 """)
@@ -690,72 +688,87 @@ We do not require account creation or login.
         }
     }
 
-    private var cameraPermissionSection: some View {
+    private var cameraSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Camera Permission")
+            Text("Camera")
                 .font(.headline)
 
             Text("""
-The app requests camera access to enable card scanning features. Camera access is:
-
-• Only used when you explicitly scan cards
-• Images are processed locally on your device
-• No images are uploaded or transmitted
-• No images are permanently stored
-• You can revoke this permission anytime in iOS Settings
+The camera is used only to recognize trading cards. Recognition happens on your device; scan images are not uploaded anywhere. Photos you deliberately attach to a card stay in your collection data. You can revoke camera access anytime in iOS Settings.
 """)
             .font(.body)
         }
     }
 
-    private var dataStorageSection: some View {
+    private var analyticsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Data Storage")
+            Text("Analytics")
                 .font(.headline)
 
             Text("""
-All your collection data is stored locally on your device using Apple's SwiftData framework. Your data is:
-
-• Stored only on your device
-• Not synced to cloud servers
-• Not accessible to us or third parties
-• Removed if you delete the app
+The app uses TelemetryDeck, a privacy-focused analytics service, to understand which features are used (for example, "a scan happened"). Signals are anonymized before they reach TelemetryDeck; no personal identifiers, no advertising IDs, no cross-app tracking.
 """)
             .font(.body)
         }
     }
 
-    private var thirdPartySection: some View {
+    private var aiFeaturesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Third-Party Services")
+            Text("AI Features (Pro)")
                 .font(.headline)
 
             Text("""
-This app may access third-party websites for:
-
-• Card market pricing (Cardmarket)
-• Purchase links (affiliate links)
-
-When you click external links, you leave our app and are subject to those websites' privacy policies. We do not control or monitor these external sites.
-
-Note: Affiliate links may earn us a small commission at no cost to you. No personal data is shared with affiliate partners.
+When you use the Rules Assistant or AI Deck Builder, the text of your question and relevant card names are sent to OpenAI to generate a response. Don't include personal information in prompts. Your collection is not uploaded wholesale.
 """)
             .font(.body)
         }
     }
 
-    private var userRightsSection: some View {
+    private var subscriptionsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Your Rights")
+            Text("Subscriptions")
                 .font(.headline)
 
             Text("""
-Since all data is stored locally on your device, you have complete control:
+Ink Well Keeper Pro purchases are processed by Apple and managed through RevenueCat, which handles subscription status using anonymous identifiers. We never see your payment details.
+""")
+            .font(.body)
+        }
+    }
 
-• Export your collection anytime
-• Delete your data by uninstalling the app
-• No data requests needed (we don't have your data)
-• No tracking or analytics
+    private var pricingSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Prices & Purchase Links")
+                .font(.headline)
+
+            Text("""
+Card prices come from public market data; requests contain card identifiers, not personal data. "Buy" buttons are affiliate links to third-party marketplaces (e.g. TCGplayer, Cardmarket) with their own privacy policies; the app may earn a commission at no cost to you and receives no information about your purchases.
+""")
+            .font(.body)
+        }
+    }
+
+    private var neverDoSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("What We Never Do")
+                .font(.headline)
+
+            Text("""
+• No ads, no ad tracking, no selling or sharing of data
+• No accounts — nothing to sign up for
+• No collection of names, emails, contacts, or location
+""")
+            .font(.body)
+        }
+    }
+
+    private var childrenSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Children")
+                .font(.headline)
+
+            Text("""
+The app is rated 4+ and does not knowingly collect personal information from children.
 """)
             .font(.body)
         }
@@ -769,9 +782,9 @@ Since all data is stored locally on your device, you have complete control:
             Text("""
 If you have questions about this Privacy Policy, contact us at:
 
-Email: brevbot2@gmail.com
+Email: support@inkwellkeeper.app
 
-Changes to this policy will be posted in the app and reflected in the "Last Updated" date above.
+Material changes will be posted in the app and at inkwellkeeper.app/privacy, and reflected in the "Last Updated" date above.
 """)
             .font(.body)
         }

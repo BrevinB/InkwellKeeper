@@ -449,7 +449,14 @@ struct SetDetailView: View {
     }
 
     private func quickAddCard(_ card: LorcanaCard, asFoil: Bool = false) {
-        let variant: CardVariant = asFoil ? .foil : .normal
+        let isSpecialVariant = card.variant == .enchanted || card.variant == .promo ||
+                               card.variant == .epic || card.variant == .iconic
+
+        // Special variants (Enchanted/Epic/Iconic/Promo) are unique printings with no
+        // separate Normal/Foil treatment — forcing one would swap in that card's own
+        // uniqueId under the wrong variant, corrupting the collected record so it
+        // matches the base card's "owned" check instead of its own.
+        let variant: CardVariant = isSpecialVariant ? card.variant : (asFoil ? .foil : .normal)
         let cardToAdd = card.variant == variant ? card : card.withVariant(variant)
         collectionManager.addCard(cardToAdd, quantity: 1)
         quickAddCardName = "\(card.name) (\(variant.displayName))"
@@ -580,6 +587,11 @@ struct SetCardView: View {
     var onQuickAdd: (() -> Void)? = nil
     var onQuickAddFoil: (() -> Void)? = nil
 
+    private var isSpecialVariant: Bool {
+        card.variant == .enchanted || card.variant == .promo ||
+        card.variant == .epic || card.variant == .iconic
+    }
+
     var body: some View {
         VStack(spacing: 8) {
             ZStack {
@@ -684,21 +696,24 @@ struct SetCardView: View {
                         HStack {
                             Spacer()
                             VStack(spacing: 4) {
-                                // Foil quick add
-                                Button(action: {
-                                    onQuickAddFoil?()
-                                }) {
-                                    ZStack {
-                                        Circle()
-                                            .fill(Color.lorcanaGold)
-                                            .frame(width: 28, height: 28)
-                                        Image(systemName: "sparkles")
-                                            .font(.system(size: 11))
-                                            .fontWeight(.bold)
-                                            .foregroundColor(.lorcanaDark)
+                                // Foil quick add — special variants (Enchanted/Epic/Iconic/Promo)
+                                // have no separate foil printing, so this button doesn't apply.
+                                if !isSpecialVariant {
+                                    Button(action: {
+                                        onQuickAddFoil?()
+                                    }) {
+                                        ZStack {
+                                            Circle()
+                                                .fill(Color.lorcanaGold)
+                                                .frame(width: 28, height: 28)
+                                            Image(systemName: "sparkles")
+                                                .font(.system(size: 11))
+                                                .fontWeight(.bold)
+                                                .foregroundColor(.lorcanaDark)
+                                        }
                                     }
+                                    .buttonStyle(.plain)
                                 }
-                                .buttonStyle(.plain)
 
                                 // Normal quick add
                                 Button(action: {

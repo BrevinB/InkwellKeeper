@@ -4,6 +4,7 @@ import SwiftData
 struct ContentView: View {
     @StateObject private var collectionManager = CollectionManager()
     @StateObject private var deckManager = DeckManager()
+    @State private var syncMonitor = CloudSyncMonitor.shared
     @Environment(\.modelContext) private var modelContext
     @State private var router = DeepLinkRouter()
     @State private var selectedTab = 0
@@ -93,6 +94,14 @@ struct ContentView: View {
         }
         .accentColor(.lorcanaGold)
         .preferredColorScheme(.dark)
+        .overlay(alignment: .top) {
+            if syncMonitor.isReceivingFromCloud {
+                CloudSyncBanner()
+                    .padding(.top, 8)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .animation(.smooth, value: syncMonitor.isReceivingFromCloud)
         .onAppear {
             collectionManager.setModelContext(modelContext)
             deckManager.loadDecks(context: modelContext)

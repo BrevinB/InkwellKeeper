@@ -296,6 +296,8 @@ extension CardRarity {
             return .legendary
         case "enchanted":
             return .enchanted
+        case "iconic":
+            return .iconic
         default:
             return .common
         }

@@ -14,11 +14,12 @@ enum CardRarity: String, CaseIterable, Codable {
     case superRare = "Super Rare"
     case legendary = "Legendary"
     case enchanted = "Enchanted"
-    
+    case iconic = "Iconic"
+
     var displayName: String {
         return rawValue
     }
-    
+
     var color: Color {
         switch self {
         case .common: return .gray
@@ -27,9 +28,10 @@ enum CardRarity: String, CaseIterable, Codable {
         case .superRare: return .purple
         case .legendary: return .orange
         case .enchanted: return .lorcanaGold
+        case .iconic: return .lorcanaGold
         }
     }
-    
+
     var sortOrder: Int {
         switch self {
         case .common: return 0
@@ -38,6 +40,7 @@ enum CardRarity: String, CaseIterable, Codable {
         case .superRare: return 3
         case .legendary: return 4
         case .enchanted: return 5
+        case .iconic: return 6
         }
     }
 }

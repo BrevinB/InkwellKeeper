@@ -8,10 +8,6 @@
 			<key>INAlternativeAppName</key>
 			<string>Lorcana</string>
 		</dict>
-		<dict>
-			<key>INAlternativeAppName</key>
-			<string>Dreamborn</string>
-		</dict>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
