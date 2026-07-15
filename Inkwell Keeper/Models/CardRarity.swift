@@ -15,6 +15,7 @@ enum CardRarity: String, CaseIterable, Codable {
     case legendary = "Legendary"
     case enchanted = "Enchanted"
     case iconic = "Iconic"
+    case promo = "Promo"
 
     var displayName: String {
         return rawValue
@@ -29,6 +30,7 @@ enum CardRarity: String, CaseIterable, Codable {
         case .legendary: return .orange
         case .enchanted: return .lorcanaGold
         case .iconic: return .lorcanaGold
+        case .promo: return .pink
         }
     }
 
@@ -41,6 +43,7 @@ enum CardRarity: String, CaseIterable, Codable {
         case .legendary: return 4
         case .enchanted: return 5
         case .iconic: return 6
+        case .promo: return 7
         }
     }
 }

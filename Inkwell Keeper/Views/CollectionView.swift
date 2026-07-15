@@ -23,7 +23,6 @@ struct CollectionView: View {
     @State private var showingSupportThanks = false
     @State private var supportThanksMessage = ""
     @State private var filteredCards: [LorcanaCard] = []
-    @State private var syncMonitor = CloudSyncMonitor.shared
 
     var body: some View {
         NavigationStack {
@@ -42,22 +41,16 @@ struct CollectionView: View {
                 .background(Color.lorcanaDark.opacity(0.3))
                 
                 if filteredCards.isEmpty {
-                    if syncMonitor.isReceivingFromCloud
-                        && collectionManager.collectedCards.isEmpty
-                        && searchText.isEmpty {
-                        // Fresh install still pulling the collection down from iCloud —
-                        // show a syncing state instead of "add your first card".
-                        CloudSyncingPlaceholderView()
-                    } else {
-                        EmptyCollectionView(
-                            showingManualAdd: $showingManualAdd,
-                            showingBulkImport: $showingBulkImport,
-                            onScanTapped: {
-                                selectedTab = 1 // Switch to Scanner tab
-                            },
-                            searchQuery: searchText
-                        )
-                    }
+                    CollectionEmptyStateContent(
+                        collectionIsEmpty: collectionManager.collectedCards.isEmpty,
+                        searchIsEmpty: searchText.isEmpty,
+                        showingManualAdd: $showingManualAdd,
+                        showingBulkImport: $showingBulkImport,
+                        onScanTapped: {
+                            selectedTab = 1 // Switch to Scanner tab
+                        },
+                        searchQuery: searchText
+                    )
                 } else {
                     CardGridView(cards: filteredCards, isWishlist: false)
                 }

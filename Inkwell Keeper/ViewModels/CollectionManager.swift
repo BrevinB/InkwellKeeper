@@ -17,6 +17,8 @@ class CollectionManager: ObservableObject {
 
     /// Observer token for CloudKit remote-change notifications.
     private var remoteChangeObserver: NSObjectProtocol?
+    /// Pending coalesced reload scheduled by `scheduleRemoteChangeReload()`.
+    private var remoteChangeReloadTask: Task<Void, Never>?
 
     @Published var collectedCards: [LorcanaCard] = []
     @Published var wishlistCards: [LorcanaCard] = []
@@ -78,6 +80,7 @@ class CollectionManager: ObservableObject {
         self.modelContext = context
         wipeStaleEstimatedPricesIfNeeded(context: context)
         repairBulkAddVariantCorruptionIfNeeded(context: context)
+        repairPromoRarityCorruptionIfNeeded(context: context)
         mergeDuplicateCollectedCards()
         loadCollection()
         startObservingRemoteChanges()
@@ -87,11 +90,12 @@ class CollectionManager: ObservableObject {
         if let remoteChangeObserver {
             NotificationCenter.default.removeObserver(remoteChangeObserver)
         }
+        remoteChangeReloadTask?.cancel()
     }
 
     /// CloudKit imports changes on a background context and posts
     /// `.NSPersistentStoreRemoteChange`. Our @Published arrays are populated by manual
-    /// fetches, so we re-merge + reload whenever synced data lands.
+    /// fetches, so we reload whenever synced data lands.
     private func startObservingRemoteChanges() {
         guard remoteChangeObserver == nil else { return }
         remoteChangeObserver = NotificationCenter.default.addObserver(
@@ -99,11 +103,27 @@ class CollectionManager: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in
-                guard let self else { return }
-                self.mergeDuplicateCollectedCards()
-                self.loadCollection()
-            }
+            self?.scheduleRemoteChangeReload()
+        }
+    }
+
+    /// CloudKit can post several remote-change notifications in quick succession while a
+    /// single import batch lands. Coalesce them into one reload — each restart of this
+    /// debounce cancels the previous pending run — instead of re-running a full fetch per
+    /// notification, which stalled the UI during large syncs.
+    ///
+    /// Deliberately skips `mergeDuplicateCollectedCards()` here: duplicate rows only arise
+    /// when two devices create the same card offline before either syncs, which for this
+    /// app's sequential (not simultaneous) multi-device usage is rare mid-session. That pass
+    /// already runs once at launch via `setModelContext`, which is when a device actually
+    /// picks up whatever changed elsewhere — running its full fetch/group/sort again on
+    /// every mid-session notification isn't worth the cost for how rarely it finds anything.
+    private func scheduleRemoteChangeReload() {
+        remoteChangeReloadTask?.cancel()
+        remoteChangeReloadTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .milliseconds(400))
+            guard let self, !Task.isCancelled else { return }
+            self.loadCollection()
         }
     }
 
@@ -239,6 +259,60 @@ class CollectionManager: ObservableObject {
         } catch {
             // Non-fatal — the underlying bug is already fixed in code, so new bulk-adds
             // won't reintroduce the corruption.
+        }
+    }
+
+    /// One-time repair for a data bug where the bundled promo set JSON stores `"Promo"`
+    /// in the `rarity` field. Prior to `CardRarity` gaining a `.promo` case, that string
+    /// didn't match any case and `CardRarity.fromString` silently fell back to `.common`,
+    /// so promo cards were scanned/added with the wrong rarity baked into `CollectedCard`.
+    private func repairPromoRarityCorruptionIfNeeded(context: ModelContext) {
+        let defaultsKey = "didRepairPromoRarity_v1"
+        guard !UserDefaults.standard.bool(forKey: defaultsKey) else { return }
+
+        Task { @MainActor in
+            // Poll until SetsDataManager has loaded its bundled JSON, up to ~30s.
+            var attempts = 0
+            while SetsDataManager.shared.getAllCards().isEmpty && attempts < 60 {
+                try? await Task.sleep(for: .milliseconds(500))
+                attempts += 1
+            }
+            guard !SetsDataManager.shared.getAllCards().isEmpty else { return }
+
+            performPromoRarityRepair(context: context)
+            UserDefaults.standard.set(true, forKey: defaultsKey)
+        }
+    }
+
+    @MainActor
+    private func performPromoRarityRepair(context: ModelContext) {
+        // Some promo cards lack a `uniqueId` in the bundled JSON, so fall back to
+        // name||setName — the same identity strategy `mergeDuplicateCollectedCards` uses.
+        var promoIdentities: Set<String> = []
+        for card in SetsDataManager.shared.getAllCards() where card.rarity == .promo {
+            let identity = (card.uniqueId?.isEmpty == false) ? card.uniqueId! : "\(card.name)||\(card.setName)"
+            promoIdentities.insert(identity)
+        }
+        guard !promoIdentities.isEmpty else { return }
+
+        do {
+            let allCards = try context.fetch(FetchDescriptor<CollectedCard>())
+            var changed = 0
+            for record in allCards {
+                guard record.cardRarity != .promo else { continue }
+                let identity = (record.uniqueId?.isEmpty == false) ? record.uniqueId! : "\(record.name)||\(record.setName)"
+                guard promoIdentities.contains(identity) else { continue }
+                record.cardRarity = .promo
+                changed += 1
+            }
+
+            if changed > 0 {
+                try context.save()
+                updateCollectedCardsInPlace()
+            }
+        } catch {
+            // Non-fatal — the underlying bug is already fixed in code, so new promo
+            // adds/scans won't reintroduce the corruption.
         }
     }
 

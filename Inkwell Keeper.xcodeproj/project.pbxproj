@@ -109,10 +109,12 @@
 		4A606643A1D9335E7A70120B /* ShareImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA7F430112A28FB4022621C /* ShareImageRenderer.swift */; };
 		50597E11048AF006F8F845F8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 93242F4A5019C1D04A3502E5 /* PrivacyInfo.xcprivacy */; };
 		53F307B176D5D34B253D3526 /* ReviewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B0A43E08D93192BD18673C /* ReviewManager.swift */; };
+		59F3877E7AB0B16A94EC71FE /* CollectionEmptyStateContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCD7B7D3D53A754F91108715 /* CollectionEmptyStateContent.swift */; };
 		6C8C6444F34A271966DF81EA /* CardFlexShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C98BE20946FE8394E530FD /* CardFlexShareView.swift */; };
 		724DBFC751281A16EE9C0D3F /* AppLinks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 986264D1FC458204909C9BFB /* AppLinks.swift */; };
 		80C0A7DBBA05FCA036421B83 /* ShareMilestoneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E624D8ABE9C6EC90741C35EC /* ShareMilestoneTests.swift */; };
 		8FFB5E5A73AFBE9B4EF1C7E0 /* attack_of_the_vine.json in Resources */ = {isa = PBXBuildFile; fileRef = D3F932B4B946EA58B9D03BB8 /* attack_of_the_vine.json */; };
+		980FFB8901722D3AA2161984 /* CloudSyncOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62B893B8E6EECDC960A44D4D /* CloudSyncOverlay.swift */; };
 		A107F06F96BBA4E1AF0DB402 /* StatsSummaryShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7604DCFB6FA45F47A3674BC6 /* StatsSummaryShareCardView.swift */; };
 		A1A1A1A1000000020000A002 /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1000000010000A001 /* Analytics.swift */; };
 		A1B2C3D4E5F6789012345679 /* winterspell.json in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345678 /* winterspell.json */; };
@@ -259,6 +261,7 @@
 		53FCC9D910C812A33485BFD9 /* MilestoneShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MilestoneShareCardView.swift; sourceTree = "<group>"; };
 		5CA7F430112A28FB4022621C /* ShareImageRenderer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareImageRenderer.swift; sourceTree = "<group>"; };
 		5E761EA81FCE34454D43AFF1 /* HaulShareView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HaulShareView.swift; sourceTree = "<group>"; };
+		62B893B8E6EECDC960A44D4D /* CloudSyncOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncOverlay.swift; sourceTree = "<group>"; };
 		6AA815C9650049DB84CB04F7 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		6B694B966E1368E8FACC186E /* DeckShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckShareCardView.swift; sourceTree = "<group>"; };
 		725A18D9BE0D05A991CB6FD8 /* CloudSyncMonitor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncMonitor.swift; sourceTree = "<group>"; };
@@ -284,6 +287,7 @@
 		B8B0A43E08D93192BD18673C /* ReviewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewManager.swift; sourceTree = "<group>"; };
 		BBF2768C59BF899E8F824C35 /* DeepLinkRouter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
 		BC0C40ABB4DEDF6D9008F0E1 /* ShareMilestone.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareMilestone.swift; sourceTree = "<group>"; };
+		BCD7B7D3D53A754F91108715 /* CollectionEmptyStateContent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CollectionEmptyStateContent.swift; sourceTree = "<group>"; };
 		C1D2E3F4A5B6C7D8E9F0A1B1 /* MotionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionManager.swift; sourceTree = "<group>"; };
 		C1D2E3F4A5B6C7D8E9F0A1B3 /* InteractiveHolographicEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractiveHolographicEffect.swift; sourceTree = "<group>"; };
 		C1D2E3F4A5B6C7D8E9F0A1B5 /* InteractiveCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractiveCardView.swift; sourceTree = "<group>"; };
@@ -513,6 +517,8 @@
 				23E8DB0D2FE8871D00BF5EB4 /* ManualAddCardView.swift */,
 				E9BB03867D8A4F4D71320AF8 /* CloudSyncBanner.swift */,
 				78E531191161FBB262195AB8 /* CloudSyncingPlaceholderView.swift */,
+				62B893B8E6EECDC960A44D4D /* CloudSyncOverlay.swift */,
+				BCD7B7D3D53A754F91108715 /* CollectionEmptyStateContent.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -841,6 +847,8 @@
 				0DED8C4A16449418D1EB2DC4 /* CloudSyncMonitor.swift in Sources */,
 				27B72DD6CD3BB181CA40330D /* CloudSyncBanner.swift in Sources */,
 				27A345B145C2F65F518680C5 /* CloudSyncingPlaceholderView.swift in Sources */,
+				980FFB8901722D3AA2161984 /* CloudSyncOverlay.swift in Sources */,
+				59F3877E7AB0B16A94EC71FE /* CollectionEmptyStateContent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1012,7 +1020,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0.0;
+				MARKETING_VERSION = 3.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1050,7 +1058,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0.0;
+				MARKETING_VERSION = 3.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
