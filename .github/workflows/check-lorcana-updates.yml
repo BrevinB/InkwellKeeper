@@ -150,11 +150,21 @@ jobs:
         continue-on-error: true
         run: |
           set -o pipefail
-          xcodebuild test \
-            -scheme "Inkwell Keeper" \
-            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.device }}" \
-            CODE_SIGNING_ALLOWED=NO \
-            | xcbeautify
+          # Xcode 26.5+ actool randomly crashes distilling Icon Composer .icon
+          # bundles on CI VMs (FB20183399). Retry only that failure; real build
+          # or test failures exit immediately.
+          for attempt in 1 2 3 4; do
+            xcodebuild test \
+              -scheme "Inkwell Keeper" \
+              -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.device }}" \
+              CODE_SIGNING_ALLOWED=NO \
+              2>&1 | tee xcodebuild.log | xcbeautify && exit 0
+            if ! grep -q "Distill failed" xcodebuild.log; then
+              exit 1
+            fi
+            echo "actool distill bug (FB20183399) — retrying ($attempt/4)"
+          done
+          exit 1
 
       - name: Report result on PR
         env:
