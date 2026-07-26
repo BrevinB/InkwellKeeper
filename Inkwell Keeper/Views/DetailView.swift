@@ -52,6 +52,9 @@ struct CardDetailView: View {
                     }
                     .padding()
 
+                    PriceHistoryChartView(card: card)
+                        .padding(.horizontal)
+
                     Button(action: {
                         collectionManager.addCard(card)
                         isPresented = false
@@ -272,6 +275,9 @@ struct CollectionCardDetailView: View {
                         RoundedRectangle(cornerRadius: 16)
                             .fill(Color.lorcanaDark.opacity(0.8))
                     )
+
+                    PriceHistoryChartView(card: card)
+                        .padding(.horizontal)
 
                     // My Card Photos section - only show for owned cards
                     if collectedCard != nil || foilCollectedCard != nil {
@@ -560,7 +566,7 @@ struct CollectionCardDetailView: View {
             } else {
                 collectedCard = collectionManager.getCollectedCardData(for: card)
             }
-            tempQuantity = collectedCard?.quantity ?? 1
+            tempQuantity = collectedCard?.quantity ?? 0
         }
 
         // Load image attachments from the primary collected card
@@ -678,10 +684,13 @@ struct WishlistCardDetailView: View {
                                 .fill(Color.lorcanaDark.opacity(0.8))
                         )
                         
+                        PriceHistoryChartView(card: card)
+                            .padding(.horizontal)
+
                         // Check Prices section
                         BuyCardOptionsView(card: card)
                             .padding(.horizontal)
-                        
+
                         // Action buttons
                         VStack(spacing: 12) {
                             Button(action: {
@@ -1125,12 +1134,7 @@ private struct CardGroupInfoHeader: View {
                 HStack {
                     RarityBadge(rarity: displayCard.rarity)
                     Spacer()
-                    if let price = displayCard.price {
-                        Text(price, format: .currency(code: "USD"))
-                            .font(.caption)
-                            .bold()
-                            .foregroundStyle(.lorcanaGold)
-                    }
+                    AsyncPriceWithConfidenceView(card: displayCard, style: .inline)
                 }
             }
             
@@ -1153,13 +1157,14 @@ struct AddCardGroupModal: View {
     
     @EnvironmentObject var collectionManager: CollectionManager
     
-    // For regular cards (Normal/Foil), use multi-quantity mode
-    @State private var normalQuantity: Int = 1
+    // For regular cards (Normal/Foil), use multi-quantity mode.
+    // Quantities start at 0 — a pre-filled 1 reads as owned quantity, not intent.
+    @State private var normalQuantity: Int = 0
     @State private var foilQuantity: Int = 0
-    
+
     // For special variants, use single selection mode
     @State private var selectedSpecialVariant: CardVariant = .enchanted
-    @State private var specialQuantity: Int = 1
+    @State private var specialQuantity: Int = 0
     
     @State private var showingSuccessBanner = false
     @State private var isImageExpanded = false
@@ -1185,6 +1190,18 @@ struct AddCardGroupModal: View {
             return specialQuantity
         }
     }
+
+    /// Copies of this card (any variant) already in the collection — shown so the
+    /// add-quantity steppers can't be mistaken for owned quantity.
+    private var ownedTotal: Int {
+        CardVariant.allCases.reduce(0) {
+            $0 + collectionManager.getCollectedQuantityByName(
+                displayCard.name,
+                setName: displayCard.setName,
+                variant: $1
+            )
+        }
+    }
     
     var body: some View {
         NavigationView {
@@ -1192,7 +1209,21 @@ struct AddCardGroupModal: View {
                 VStack(spacing: 20) {
                     // Card image and basic info
                     CardGroupInfoHeader(displayCard: displayCard, isImageExpanded: $isImageExpanded)
-                    
+
+                    // Ownership status — the add steppers below default to 1, which
+                    // otherwise reads as "you own 1" for cards not yet collected
+                    HStack(spacing: 6) {
+                        Image(systemName: ownedTotal > 0 ? "checkmark.circle.fill" : "circle.dashed")
+                            .foregroundStyle(ownedTotal > 0 ? .green : .gray)
+                        Text(ownedTotal > 0
+                             ? "In your collection: \(ownedTotal)"
+                             : "Not in your collection yet")
+                            .font(.subheadline)
+                            .foregroundStyle(ownedTotal > 0 ? .white : .gray)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 4)
+
                     // Reprint info (if card appears in multiple sets)
                     if cardGroup.isReprint {
                         VStack(alignment: .leading, spacing: 12) {
@@ -1302,21 +1333,21 @@ struct AddCardGroupModal: View {
                         
                         // Quantity selection for special variants
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Quantity")
+                            Text("Quantity to Add")
                                 .font(.headline)
                                 .foregroundColor(.lorcanaGold)
                             
                             HStack {
                                 Button(action: {
-                                    if specialQuantity > 1 {
+                                    if specialQuantity > 0 {
                                         specialQuantity -= 1
                                     }
                                 }) {
                                     Image(systemName: "minus.circle.fill")
                                         .font(.title2)
-                                        .foregroundColor(specialQuantity > 1 ? .lorcanaGold : .gray)
+                                        .foregroundColor(specialQuantity > 0 ? .lorcanaGold : .gray)
                                 }
-                                .disabled(specialQuantity <= 1)
+                                .disabled(specialQuantity <= 0)
                                 
                                 Text("\(specialQuantity)")
                                     .font(.title2)
@@ -1340,6 +1371,8 @@ struct AddCardGroupModal: View {
                         )
                     }
                     
+                    PriceHistoryChartView(card: displayCard)
+
                     // Photo attachment (only for collection, not wishlist)
                     if !isWishlist {
                         CompactPhotoAttachmentView(imageAttachments: $photoAttachments)

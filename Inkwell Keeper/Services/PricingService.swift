@@ -127,6 +127,40 @@ class PricingService: ObservableObject {
         return nil
     }
     
+    /// Keep only the rows that price this card's printing. The backend returns
+    /// separate normal and foil rows under one unique id ("Lorcast (USD)" vs
+    /// "Lorcast (USD Foil)") — averaging across both misprices every card that
+    /// has a foil market.
+    static func pricesMatching(variant: CardVariant, in prices: [PriceData]) -> [PriceData] {
+        let foilRows = prices.filter { $0.marketplace.localizedCaseInsensitiveContains("foil") }
+
+        switch variant {
+        case .normal:
+            let normalRows = prices.filter { !$0.marketplace.localizedCaseInsensitiveContains("foil") }
+            return normalRows.isEmpty ? prices : normalRows
+        default:
+            // Foils — and special printings (Enchanted/Epic/Iconic/Promo), which
+            // have their own unique id and only exist foiled — prefer the foil market.
+            return foilRows.isEmpty ? prices : foilRows
+        }
+    }
+
+    /// Market-price rows for this printing — excludes lowest-listing rows
+    /// ("TCGplayer (USD Low)"), which would otherwise drag the average down.
+    static func marketRows(variant: CardVariant, in prices: [PriceData]) -> [PriceData] {
+        let rows = pricesMatching(variant: variant, in: prices)
+            .filter { !$0.marketplace.localizedCaseInsensitiveContains("low") }
+        return rows.isEmpty ? pricesMatching(variant: variant, in: prices) : rows
+    }
+
+    /// Lowest-listing price for this printing, when the backend has one.
+    static func lowestListing(variant: CardVariant, in prices: [PriceData]) -> Double? {
+        pricesMatching(variant: variant, in: prices)
+            .filter { $0.marketplace.localizedCaseInsensitiveContains("low") }
+            .map(\.price)
+            .min()
+    }
+
     /// Fetch the market average price for a card. Returns nil when no provider has data.
     func getMarketPrice(for card: LorcanaCard, condition: CardCondition = .nearMint) async -> Double? {
         do {
@@ -135,18 +169,19 @@ class PricingService: ObservableObject {
                 return nil
             }
 
+            let variantPrices = Self.marketRows(variant: card.variant, in: pricing.prices)
             let preferred = PricingService.preferredCurrency
-            let preferredPrices = pricing.prices.filter { $0.currency == preferred && $0.condition == condition }
+            let preferredPrices = variantPrices.filter { $0.currency == preferred && $0.condition == condition }
             let relevantPrices: [PriceData]
             if !preferredPrices.isEmpty {
                 relevantPrices = preferredPrices
             } else {
-                let conditionPrices = pricing.prices.filter { $0.condition == condition }
+                let conditionPrices = variantPrices.filter { $0.condition == condition }
                 if !conditionPrices.isEmpty {
                     relevantPrices = conditionPrices
                 } else {
-                    let allPreferred = pricing.prices.filter { $0.currency == preferred }
-                    relevantPrices = allPreferred.isEmpty ? pricing.prices : allPreferred
+                    let allPreferred = variantPrices.filter { $0.currency == preferred }
+                    relevantPrices = allPreferred.isEmpty ? variantPrices : allPreferred
                 }
             }
 
@@ -167,10 +202,11 @@ class PricingService: ObservableObject {
                 return nil
             }
 
+            let variantPrices = Self.marketRows(variant: card.variant, in: pricing.prices)
             let preferred = PricingService.preferredCurrency
-            let preferredConditionPrices = pricing.prices.filter { $0.currency == preferred && $0.condition == condition }
-            let conditionPrices = pricing.prices.filter { $0.condition == condition }
-            let preferredAllPrices = pricing.prices.filter { $0.currency == preferred }
+            let preferredConditionPrices = variantPrices.filter { $0.currency == preferred && $0.condition == condition }
+            let conditionPrices = variantPrices.filter { $0.condition == condition }
+            let preferredAllPrices = variantPrices.filter { $0.currency == preferred }
             let allPrices: [PriceData]
             if !preferredConditionPrices.isEmpty {
                 allPrices = preferredConditionPrices
@@ -179,7 +215,7 @@ class PricingService: ObservableObject {
             } else if !preferredAllPrices.isEmpty {
                 allPrices = preferredAllPrices
             } else {
-                allPrices = pricing.prices
+                allPrices = variantPrices
             }
 
             guard !allPrices.isEmpty else { return nil }
@@ -197,6 +233,15 @@ class PricingService: ObservableObject {
         } catch {
             return nil
         }
+    }
+
+    /// TCGplayer's lowest listing for this printing, when the backend has one.
+    /// Reuses the cached pricing payload — no extra network beyond getPricing.
+    func getLowPrice(for card: LorcanaCard, condition: CardCondition = .nearMint) async -> Double? {
+        guard let pricing = try? await getPricing(for: card, condition: condition) else {
+            return nil
+        }
+        return Self.lowestListing(variant: card.variant, in: pricing.prices)
     }
 
     enum PriceConfidence: String, CaseIterable {
@@ -318,6 +363,74 @@ class PricingService: ObservableObject {
             return "\(code)-\(num)"
         }
         return "\(code)-\(card.id)"
+    }
+
+    // MARK: - Price History (backend)
+
+    /// One daily market price point for a card's printing.
+    struct RemotePricePoint: Identifiable {
+        let id = UUID()
+        let date: Date
+        let price: Double
+    }
+
+    private struct HistoryResponse: Codable {
+        let points: [Point]
+
+        struct Point: Codable {
+            let recordedAt: String
+            let priceUsd: Double?
+            let marketplace: String
+
+            enum CodingKeys: String, CodingKey {
+                case recordedAt = "recorded_at"
+                case priceUsd = "price_usd"
+                case marketplace
+            }
+        }
+    }
+
+    /// Daily price points for this card's printing from the backend's history
+    /// table. Rows for the other printing (normal vs foil marketplace) are
+    /// filtered out, and multiple same-day rows collapse to the latest.
+    /// Returns an empty array when the backend has no history yet.
+    func fetchPriceHistory(for card: LorcanaCard, days: Int = 90) async -> [RemotePricePoint] {
+        let uniqueId = buildUniqueId(for: card)
+        guard let url = URL(string: "\(inkwellAPIBaseURL)/prices/\(uniqueId)/history?days=\(days)") else {
+            return []
+        }
+
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 10
+
+        guard let (data, response) = try? await session.data(for: request),
+              (response as? HTTPURLResponse)?.statusCode == 200,
+              let decoded = try? JSONDecoder().decode(HistoryResponse.self, from: data) else {
+            return []
+        }
+
+        let wantFoil = card.variant != .normal
+        let marketPoints = decoded.points.filter { !$0.marketplace.localizedCaseInsensitiveContains("low") }
+        var rows = marketPoints.filter { wantFoil == $0.marketplace.localizedCaseInsensitiveContains("foil") }
+        if rows.isEmpty {
+            rows = marketPoints  // printing has only one market row
+        }
+
+        let fractional = ISO8601DateFormatter()
+        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let plain = ISO8601DateFormatter()
+
+        let calendar = Calendar.current
+        var byDay: [Date: RemotePricePoint] = [:]
+        for point in rows {
+            guard let price = point.priceUsd,
+                  let date = fractional.date(from: point.recordedAt) ?? plain.date(from: point.recordedAt) else {
+                continue
+            }
+            let day = calendar.startOfDay(for: date)
+            byDay[day] = RemotePricePoint(date: day, price: price)
+        }
+        return byDay.values.sorted { $0.date < $1.date }
     }
 
     private func fetchInkwellAPIPricing(for card: LorcanaCard, condition: CardCondition) async throws -> CardPricing {
