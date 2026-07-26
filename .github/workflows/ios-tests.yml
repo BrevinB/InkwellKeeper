@@ -46,18 +46,13 @@ jobs:
       - name: Build and test
         run: |
           set -o pipefail
-          # Xcode 26.5+ actool randomly crashes distilling Icon Composer .icon
-          # bundles on CI VMs (FB20183399). Retry only that failure; real build
-          # or test failures exit immediately.
-          for attempt in 1 2 3 4; do
-            xcodebuild test \
-              -scheme "Inkwell Keeper" \
-              -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.device }}" \
-              CODE_SIGNING_ALLOWED=NO \
-              2>&1 | tee xcodebuild.log | xcbeautify && exit 0
-            if ! grep -q "Distill failed" xcodebuild.log; then
-              exit 1
-            fi
-            echo "actool distill bug (FB20183399) — retrying ($attempt/4)"
-          done
-          exit 1
+          # actool crashes distilling Icon Composer .icon bundles on CI VMs
+          # (FB20183399, consistent on this runner) — tests don't need the
+          # marketing icon, so skip it and blank the setting that requires it.
+          xcodebuild test \
+            -scheme "Inkwell Keeper" \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.device }}" \
+            CODE_SIGNING_ALLOWED=NO \
+            EXCLUDED_SOURCE_FILE_NAMES="ink.icon" \
+            ASSETCATALOG_COMPILER_APPICON_NAME="" \
+            | xcbeautify
