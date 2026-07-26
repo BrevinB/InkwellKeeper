@@ -2103,7 +2103,7 @@ struct ImportDeckView: View {
                         )
                 }
 
-                if let clipboardString = UIPasteboard.general.string, clipboardString.hasPrefix("IWK:") && shareCode.isEmpty {
+                if let clipboardString = UIPasteboard.general.string, clipboardString.hasPrefix("IWK") && shareCode.isEmpty {
                     Button(action: {
                         shareCode = clipboardString
                     }) {
@@ -2147,7 +2147,7 @@ struct ImportDeckView: View {
             .alert("Import Failed", isPresented: $importError) {
                 Button("OK", role: .cancel) { }
             } message: {
-                Text("The deck code is invalid. Make sure you copied the full code starting with \"IWK:\".")
+                Text("The deck code is invalid. Make sure you copied the full code starting with \"IWK2:\" or \"IWK:\".")
             }
             .alert("Deck Imported!", isPresented: $importSuccess) {
                 Button("OK") {

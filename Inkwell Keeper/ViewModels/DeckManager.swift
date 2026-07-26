@@ -352,6 +352,9 @@ class DeckManager: ObservableObject {
     }
 
     // MARK: - Share Deck Code
+
+    /// Legacy (`IWK:`) share payload: every card carries a full snapshot. Kept so codes shared
+    /// from older versions still import; new codes are always the compact `IWK2:` format.
     struct ShareableDeck: Codable {
         let name: String
         let description: String
@@ -375,26 +378,71 @@ class DeckManager: ObservableObject {
         let variant: String
     }
 
+    /// Compact (`IWK2:`) share payload: cards travel as id + variant + quantity only and are
+    /// resolved against the bundled card database on import. Card ids are deterministic across
+    /// installs, so this stays small enough to fit in a scannable QR code — the legacy format's
+    /// full snapshots overflowed `AppLinks.maxDeckCodeLengthForQR` for any realistic deck.
+    struct CompactShareableDeck: Codable {
+        let name: String
+        let description: String
+        let format: String
+        let inkColors: [String]
+        let archetype: String?
+        let cards: [CompactShareableCard]
+
+        // Single-letter wire keys keep the encoded payload small.
+        enum CodingKeys: String, CodingKey {
+            case name = "n"
+            case description = "d"
+            case format = "f"
+            case inkColors = "i"
+            case archetype = "a"
+            case cards = "c"
+        }
+    }
+
+    struct CompactShareableCard: Codable {
+        let id: String
+        /// Variant rawValue; `nil` means normal.
+        let variant: String?
+        let quantity: Int
+
+        enum CodingKeys: String, CodingKey {
+            case id
+            case variant = "v"
+            case quantity = "q"
+        }
+    }
+
+    private static let sharePrefixV2 = "IWK2:"
+    private static let sharePrefixV1 = "IWK:"
+
+    /// A share code decoded to the point where it can be previewed or imported, regardless of
+    /// which on-the-wire format it arrived in.
+    private struct DecodedSharedDeck {
+        let name: String
+        let description: String
+        let format: String
+        let inkColors: [String]
+        let archetype: String?
+        /// Fully resolved cards ready to become `DeckCard`s.
+        let cards: [(card: LorcanaCard, quantity: Int)]
+        /// Total including cards that couldn't be resolved locally (used for previews).
+        let totalCards: Int
+    }
+
     func generateShareCode(for deck: Deck) -> String? {
-        let shareable = ShareableDeck(
+        let shareable = CompactShareableDeck(
             name: deck.name,
             description: deck.deckDescription,
             format: deck.format,
             inkColors: deck.inkColors,
             archetype: deck.archetype,
             cards: (deck.cards ?? []).map { card in
-                ShareableCard(
-                    cardId: card.cardId,
-                    name: card.name,
-                    cost: card.cost,
-                    type: card.type,
-                    rarity: card.rarity,
-                    setName: card.setName,
-                    imageUrl: card.imageUrl,
-                    inkColor: card.inkColor,
-                    inkwell: card.inkwell,
-                    quantity: card.quantity,
-                    variant: card.variant
+                CompactShareableCard(
+                    id: card.cardId,
+                    variant: card.cardVariant == .normal ? nil : card.variant,
+                    quantity: card.quantity
                 )
             }
         )
@@ -404,46 +452,27 @@ class DeckManager: ObservableObject {
             return nil
         }
 
-        return "IWK:" + (compressed as Data).base64EncodedString()
+        return Self.sharePrefixV2 + Self.base64URLEncode(compressed as Data)
     }
 
     /// Decodes a share code just far enough to preview it (name + card count) without importing.
-    /// Returns `nil` if the code is missing the `IWK:` prefix or can't be decoded.
+    /// Returns `nil` if the code has no recognized prefix or can't be decoded.
     func previewShareCode(_ shareCode: String) -> (name: String, totalCards: Int)? {
-        let code = shareCode.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard code.hasPrefix("IWK:") else { return nil }
-
-        let base64 = String(code.dropFirst(4))
-        guard let compressedData = Data(base64Encoded: base64),
-              let decompressed = try? (compressedData as NSData).decompressed(using: .lzfse),
-              let shareable = try? JSONDecoder().decode(ShareableDeck.self, from: decompressed as Data) else {
-            return nil
-        }
-
-        let total = shareable.cards.reduce(0) { $0 + $1.quantity }
-        return (shareable.name, total)
+        guard let decoded = decodeShareCode(shareCode) else { return nil }
+        return (decoded.name, decoded.totalCards)
     }
 
     func importDeck(from shareCode: String) -> Deck? {
         guard let context = modelContext else { return nil }
+        guard let decoded = decodeShareCode(shareCode) else { return nil }
 
-        let code = shareCode.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard code.hasPrefix("IWK:") else { return nil }
-
-        let base64 = String(code.dropFirst(4))
-        guard let compressedData = Data(base64Encoded: base64),
-              let decompressed = try? (compressedData as NSData).decompressed(using: .lzfse),
-              let shareable = try? JSONDecoder().decode(ShareableDeck.self, from: decompressed as Data) else {
-            return nil
-        }
-
-        let format = DeckFormat(rawValue: shareable.format) ?? .infinityConstructed
-        let inkColors = shareable.inkColors.compactMap { InkColor.fromString($0) }
-        let archetype = shareable.archetype.flatMap { DeckArchetype(rawValue: $0) }
+        let format = DeckFormat(rawValue: decoded.format) ?? .infinityConstructed
+        let inkColors = decoded.inkColors.compactMap { InkColor.fromString($0) }
+        let archetype = decoded.archetype.flatMap { DeckArchetype(rawValue: $0) }
 
         let deck = Deck(
-            name: shareable.name,
-            description: shareable.description,
+            name: decoded.name,
+            description: decoded.description,
             format: format,
             inkColors: inkColors,
             archetype: archetype
@@ -451,22 +480,8 @@ class DeckManager: ObservableObject {
 
         context.insert(deck)
 
-        for cardData in shareable.cards {
-            let deckCard = DeckCard(
-                from: LorcanaCard(
-                    id: cardData.cardId,
-                    name: cardData.name,
-                    cost: cardData.cost,
-                    type: cardData.type,
-                    rarity: CardRarity(rawValue: cardData.rarity) ?? .common,
-                    setName: cardData.setName,
-                    imageUrl: cardData.imageUrl,
-                    variant: CardVariant(rawValue: cardData.variant) ?? .normal,
-                    inkwell: cardData.inkwell,
-                    inkColor: cardData.inkColor
-                ),
-                quantity: cardData.quantity
-            )
+        for entry in decoded.cards {
+            let deckCard = DeckCard(from: entry.card, quantity: entry.quantity)
             if deck.cards == nil { deck.cards = [] }
             deck.cards?.append(deckCard)
             context.insert(deckCard)
@@ -480,6 +495,123 @@ class DeckManager: ObservableObject {
         } catch {
             return nil
         }
+    }
+
+    /// Parses either share-code format into a resolved intermediate. Compact codes are looked up
+    /// in the bundled card database; cards this app version doesn't know (e.g. a set it predates)
+    /// are dropped from the import but still counted in `totalCards`.
+    private func decodeShareCode(_ shareCode: String) -> DecodedSharedDeck? {
+        let code = shareCode.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if code.hasPrefix(Self.sharePrefixV2) {
+            guard let data = Self.base64URLDecode(String(code.dropFirst(Self.sharePrefixV2.count))),
+                  let decompressed = try? (data as NSData).decompressed(using: .lzfse),
+                  let shareable = try? JSONDecoder().decode(CompactShareableDeck.self, from: decompressed as Data) else {
+                return nil
+            }
+
+            let cardsById = Dictionary(
+                SetsDataManager.shared.getAllCards().map { ($0.id, $0) },
+                uniquingKeysWith: { first, _ in first }
+            )
+
+            var resolved: [(card: LorcanaCard, quantity: Int)] = []
+            for compact in shareable.cards {
+                guard let dbCard = cardsById[compact.id] else { continue }
+                let variant = compact.variant.flatMap { CardVariant(rawValue: $0) } ?? .normal
+                let card = variant == dbCard.variant ? dbCard : LorcanaCard(
+                    id: dbCard.id,
+                    name: dbCard.name,
+                    cost: dbCard.cost,
+                    type: dbCard.type,
+                    rarity: dbCard.rarity,
+                    setName: dbCard.setName,
+                    cardText: dbCard.cardText,
+                    imageUrl: dbCard.imageUrl,
+                    price: dbCard.price,
+                    variant: variant,
+                    cardNumber: dbCard.cardNumber,
+                    uniqueId: dbCard.uniqueId,
+                    inkwell: dbCard.inkwell,
+                    strength: dbCard.strength,
+                    willpower: dbCard.willpower,
+                    lore: dbCard.lore,
+                    franchise: dbCard.franchise,
+                    inkColor: dbCard.inkColor
+                )
+                resolved.append((card, compact.quantity))
+            }
+
+            return DecodedSharedDeck(
+                name: shareable.name,
+                description: shareable.description,
+                format: shareable.format,
+                inkColors: shareable.inkColors,
+                archetype: shareable.archetype,
+                cards: resolved,
+                totalCards: shareable.cards.reduce(0) { $0 + $1.quantity }
+            )
+        }
+
+        if code.hasPrefix(Self.sharePrefixV1) {
+            let base64 = String(code.dropFirst(Self.sharePrefixV1.count))
+            guard let compressedData = Data(base64Encoded: base64),
+                  let decompressed = try? (compressedData as NSData).decompressed(using: .lzfse),
+                  let shareable = try? JSONDecoder().decode(ShareableDeck.self, from: decompressed as Data) else {
+                return nil
+            }
+
+            let cards = shareable.cards.map { cardData in
+                (
+                    card: LorcanaCard(
+                        id: cardData.cardId,
+                        name: cardData.name,
+                        cost: cardData.cost,
+                        type: cardData.type,
+                        rarity: CardRarity(rawValue: cardData.rarity) ?? .common,
+                        setName: cardData.setName,
+                        imageUrl: cardData.imageUrl,
+                        variant: CardVariant(rawValue: cardData.variant) ?? .normal,
+                        inkwell: cardData.inkwell,
+                        inkColor: cardData.inkColor
+                    ),
+                    quantity: cardData.quantity
+                )
+            }
+
+            return DecodedSharedDeck(
+                name: shareable.name,
+                description: shareable.description,
+                format: shareable.format,
+                inkColors: shareable.inkColors,
+                archetype: shareable.archetype,
+                cards: cards,
+                totalCards: shareable.cards.reduce(0) { $0 + $1.quantity }
+            )
+        }
+
+        return nil
+    }
+
+    // MARK: - Base64URL
+
+    /// URL-safe base64 (RFC 4648 §5, unpadded) so share codes survive being embedded in a
+    /// `?code=` query without percent-encoding — `+` and `/` are unsafe there.
+    private static func base64URLEncode(_ data: Data) -> String {
+        data.base64EncodedString()
+            .replacing("+", with: "-")
+            .replacing("/", with: "_")
+            .replacing("=", with: "")
+    }
+
+    private static func base64URLDecode(_ string: String) -> Data? {
+        var base64 = string
+            .replacing("-", with: "+")
+            .replacing("_", with: "/")
+        if base64.count % 4 != 0 {
+            base64.append(String(repeating: "=", count: 4 - base64.count % 4))
+        }
+        return Data(base64Encoded: base64)
     }
 
     // MARK: - Update Deck Colors from Cards

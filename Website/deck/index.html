@@ -4,9 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Inkwell Keeper</title>
-  <!-- If the app is installed, iOS opens it directly via the Universal Link and never loads
-       this page. This is the fallback for visitors WITHOUT the app: send them to the App Store. -->
-  <meta http-equiv="refresh" content="0; url=https://apps.apple.com/us/app/ink-well-keeper/id6754206379">
+  <!-- If the app is installed, iOS normally opens it directly via the Universal Link and never
+       loads this page. This fallback runs when the link opened in a browser anyway (no app, or
+       an in-app browser that doesn't fire Universal Links). When a deck code is present we try
+       the custom scheme first so installed users still get their import, then offer the App
+       Store; without a code we go straight to the App Store. -->
   <style>
     html, body { height: 100%; margin: 0; }
     body {
@@ -22,7 +24,8 @@
       box-sizing: border-box;
     }
     h1 { font-size: 1.4rem; font-weight: 600; margin: 0 0 8px; }
-    p { opacity: 0.7; margin: 0 0 24px; }
+    p { opacity: 0.7; margin: 0 0 24px; max-width: 26rem; }
+    .buttons { display: flex; flex-direction: column; gap: 12px; }
     a {
       color: #fff;
       background: rgba(255,255,255,0.12);
@@ -31,11 +34,34 @@
       text-decoration: none;
       font-weight: 600;
     }
+    a.primary { background: #c9a227; color: #151421; }
   </style>
 </head>
 <body>
   <h1>Inkwell Keeper</h1>
-  <p>Opening the App Store…</p>
-  <a href="https://apps.apple.com/us/app/ink-well-keeper/id6754206379">Get Inkwell Keeper</a>
+  <p id="message">Opening the App Store…</p>
+  <div class="buttons">
+    <a id="open-app" class="primary" href="#" hidden>Open in Ink&nbsp;Well&nbsp;Keeper</a>
+    <a href="https://apps.apple.com/us/app/ink-well-keeper/id6754206379">Get Inkwell Keeper</a>
+  </div>
+  <script>
+    (function () {
+      var appStore = "https://apps.apple.com/us/app/ink-well-keeper/id6754206379";
+      var code = new URLSearchParams(window.location.search).get("code");
+      if (code) {
+        var deepLink = "inkwellkeeper://deck?code=" + encodeURIComponent(code);
+        var openApp = document.getElementById("open-app");
+        openApp.href = deepLink;
+        openApp.hidden = false;
+        document.getElementById("message").textContent =
+          "A deck was shared with you. If you have Ink Well Keeper installed, open it below — otherwise grab it from the App Store.";
+        // Nudge the app open; if nothing handles the scheme the page just stays put
+        // with both buttons visible.
+        window.location.href = deepLink;
+      } else {
+        window.location.replace(appStore);
+      }
+    })();
+  </script>
 </body>
 </html>
