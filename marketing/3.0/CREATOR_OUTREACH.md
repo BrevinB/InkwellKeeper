@@ -303,6 +303,55 @@ Thanks for the work you put into the community hub!
 
 ---
 
+## Canned TikTok DM (post-launch, any creator)
+
+No brackets to fill — safe to send as-is the moment a Lorcana creator crosses
+the FYP. The "came across my FYP" opener is honest (that's literally why
+you're messaging) and explains the cold DM without faking familiarity.
+
+**Main version (~5 sec read):**
+
+```
+Hey! Your Lorcana content came across my FYP — I'm Brevin, solo dev of Ink
+Well Keeper, a free iOS app for Lorcana. Scan a whole stack of cards with
+your camera, track set completion + collection value with live prices, build
+decks with format checking, and even import your collection straight from
+the official app's backup. Everything Lorcana is free, no ads. Might make a
+fun clip — happy to send a free Pro code (AI deck builder + rules assistant)
+if you want to mess with it. Zero strings either way!
+https://apps.apple.com/us/app/ink-well-keeper/id6754206379
+```
+
+**Ultra-short version** (for creators who clearly don't read long DMs, or as
+a comment-section opener when DMs are closed to non-mutuals):
+
+```
+Hey! Solo dev here — built a free iOS app that scans whole stacks of Lorcana
+cards to track your collection (and imports from the official app). Figured
+your audience would dig it. Happy to send a free Pro code, zero strings:
+https://apps.apple.com/us/app/ink-well-keeper/id6754206379
+```
+
+**When they reply** (promo-code handoff):
+
+```
+Awesome! Here's your Pro code: [CODE] — redeem via App Store → profile icon →
+Redeem Gift Card or Code. Unlocks the AI deck builder + rules assistant. If
+anything feels off or missing while you use it, tell me — creator feedback
+jumps the queue. And if you ever post about it, tag me so I can reshare!
+```
+
+**Practical notes:**
+- TikTok blocks DMs from non-mutuals for many accounts — when the DM won't
+  send, leave the ultra-short version as a pinned-worthy comment on a recent
+  video instead, or check their bio for a Linktree/email.
+- Follow + a genuine comment before the DM measurably improves reply rates
+  and takes 20 seconds.
+- Log who you sent to in the same tracker as the email outreach so nobody
+  gets double-pitched a week later with the long version.
+
+---
+
 ## Sending checklist
 
 - [ ] Confirm each creator's actual current contact method (About page email,
