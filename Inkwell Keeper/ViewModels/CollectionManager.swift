@@ -412,7 +412,11 @@ class CollectionManager: ObservableObject {
         }
     }
     
-    func addCard(_ card: LorcanaCard, quantity: Int = 1, imageAttachments: [Data]? = nil) {
+    /// - Parameter bulkImport: when true, skips the per-card save, UI refresh, price
+    ///   fetch, and analytics — the caller must invoke `finalizeBulkImport()` once at
+    ///   the end. Importing thousands of rows with a CloudKit-backed save plus a
+    ///   network price lookup per card is what made large imports take 20+ minutes.
+    func addCard(_ card: LorcanaCard, quantity: Int = 1, imageAttachments: [Data]? = nil, bulkImport: Bool = false) {
         guard let context = modelContext else {
             return
         }
@@ -477,6 +481,8 @@ class CollectionManager: ObservableObject {
                 context.insert(newCard)
             }
 
+            if bulkImport { return }
+
             try context.save()
 
             Analytics.send(.collectionCardAdded(
@@ -498,6 +504,14 @@ class CollectionManager: ObservableObject {
         Task { @MainActor in
             await updateCardPrice(card)
         }
+    }
+
+    /// Persist and refresh once after a run of `addCard(..., bulkImport: true)` calls.
+    /// Prices for imported cards are filled in lazily as they're viewed/refreshed.
+    func finalizeBulkImport() {
+        saveContext()
+        updateCollectedCardsInPlace()
+        ReviewManager.shared.recordCardAdded(totalCardCount: collectedCards.count)
     }
     
     /// Attach images to an existing collected card
@@ -1120,4 +1134,3 @@ class CollectionManager: ObservableObject {
         }
     }
 }
-

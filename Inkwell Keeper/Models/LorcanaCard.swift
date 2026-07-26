@@ -56,6 +56,11 @@ enum CardVariant: String, Codable, CaseIterable, Hashable {
 
 struct LorcanaCard: Identifiable, Codable, Hashable {
     let id: String
+
+    /// Identity for SwiftUI lists that stays unique when a normal card and its foil
+    /// share the same `id` (foils saved by older app versions reused the base card's id,
+    /// which made grids skip rendering tiles until scrolled).
+    var variantAwareId: String { "\(id)|\(variant.rawValue)" }
     let name: String
     let cost: Int
     let type: String

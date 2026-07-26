@@ -21,9 +21,17 @@ struct BulkImportView: View {
     @State private var importStats = ImportService.ImportProgress()
     @State private var importResult: ImportService.ImportResult?
     @State private var showFailedDetails = false
+    /// Result held while the completion overlay is up, before the user taps Done.
+    @State private var pendingResult: ImportService.ImportResult?
+    @State private var showingShareCard = false
+    /// Format implied by the import-method button the user tapped. Header detection
+    /// still wins when it's unambiguous; this breaks ties when it isn't.
+    @State private var preferredFormat: ImportService.ImportFormat?
+    @State private var showingOfficialAppSheet = false
+    @State private var importErrorMessage: String?
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
                     if let result = importResult, !result.failed.isEmpty {
@@ -61,12 +69,34 @@ struct BulkImportView: View {
                         .animation(.easeInOut(duration: 0.3), value: isImporting)
                 }
             }
+            .alert(
+                "Couldn't Import",
+                isPresented: Binding(
+                    get: { importErrorMessage != nil },
+                    set: { if !$0 { importErrorMessage = nil } }
+                )
+            ) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(importErrorMessage ?? "")
+            }
             .fileImporter(
                 isPresented: $showingFilePicker,
-                allowedContentTypes: [.commaSeparatedText, .text, .plainText],
+                allowedContentTypes: [.commaSeparatedText, .text, .plainText, .json],
                 allowsMultipleSelection: false
             ) { result in
                 handleFileImport(result)
+            }
+            .sheet(isPresented: $showingShareCard) {
+                ShareCardPresenter(
+                    analyticsType: "import",
+                    qrPayload: AppLinks.appStoreURLString,
+                    fileName: "InkwellKeeper-Import"
+                ) { _ in
+                    MilestoneShareCardView(
+                        milestone: .cardsImported(count: pendingResult?.totalCardsCount ?? importStats.totalCards)
+                    )
+                }
             }
         }
     }
@@ -165,7 +195,33 @@ struct BulkImportView: View {
                         .font(.caption)
                         .foregroundStyle(.orange)
                 }
+
+                if importDone {
+                    HStack(spacing: 12) {
+                        Button("Share", systemImage: "square.and.arrow.up") {
+                            showingShareCard = true
+                        }
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .foregroundStyle(.lorcanaGold)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .strokeBorder(Color.lorcanaGold, lineWidth: 1.5)
+                        )
+                        .buttonStyle(.plain)
+
+                        Button("Done", systemImage: "checkmark") {
+                            finishImport()
+                        }
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .buttonStyle(LorcanaButtonStyle())
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+                }
             }
+            .animation(.easeInOut(duration: 0.3), value: importDone)
             .padding(32)
             .background(
                 RoundedRectangle(cornerRadius: 20)
@@ -270,6 +326,14 @@ struct BulkImportView: View {
                     .font(.caption2)
                     .foregroundStyle(.gray)
 
+                Text("• Collectr CSV export (automatic)")
+                    .font(.caption2)
+                    .foregroundStyle(.gray)
+
+                Text("• Official Lorcana app backup file (automatic)")
+                    .font(.caption2)
+                    .foregroundStyle(.gray)
+
                 Text("• Text list: One card per line")
                     .font(.caption2)
                     .foregroundStyle(.gray)
@@ -295,41 +359,67 @@ struct BulkImportView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             HStack(spacing: 12) {
-                Button("Dreamborn CSV", systemImage: "arrow.down.doc.fill") {
+                ImportMethodButton(title: "Dreamborn CSV", systemImage: "arrow.down.doc.fill") {
+                    preferredFormat = .dreamborn
                     showingFilePicker = true
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
-                .padding(.horizontal, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.lorcanaGold.opacity(0.2))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.lorcanaGold.opacity(0.4), lineWidth: 1)
-                        )
-                )
-                .foregroundStyle(Color.lorcanaGold)
 
-                Button("Text List", systemImage: "doc.text.fill") {
-                    if let clipboardText = UIPasteboard.general.string {
-                        importText = clipboardText
-                        isFileImport = false
-                        fileName = nil
-                    }
+                ImportMethodButton(title: "Collectr CSV", systemImage: "arrow.down.doc.fill") {
+                    preferredFormat = .collectr
+                    showingFilePicker = true
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
-                .padding(.horizontal, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.lorcanaGold.opacity(0.2))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.lorcanaGold.opacity(0.4), lineWidth: 1)
-                        )
-                )
-                .foregroundStyle(Color.lorcanaGold)
+            }
+
+            ImportMethodButton(title: "Official Lorcana App", systemImage: "arrow.down.app.fill") {
+                showingOfficialAppSheet = true
+            }
+
+            ImportMethodButton(title: "Paste Text List", systemImage: "doc.text.fill") {
+                preferredFormat = nil
+                if let clipboardText = UIPasteboard.general.string {
+                    importText = clipboardText
+                    isFileImport = false
+                    fileName = nil
+                }
+            }
+        }
+        .sheet(isPresented: $showingOfficialAppSheet) {
+            OfficialAppImportSheet(
+                onPasteLink: { link in
+                    showingOfficialAppSheet = false
+                    importFromBackupLink(link)
+                },
+                onChooseFile: {
+                    showingOfficialAppSheet = false
+                    preferredFormat = nil
+                    showingFilePicker = true
+                }
+            )
+            .presentationDetents([.medium, .large])
+        }
+    }
+
+    /// Download the backup JSON behind an official-app share link, then run the
+    /// normal import pipeline on it.
+    private func importFromBackupLink(_ link: String) {
+        isImporting = true
+        importDone = false
+        importStats = ImportService.ImportProgress()
+
+        Task {
+            do {
+                let backupText = try await ImportService.shared.fetchOfficialBackup(fromShareLink: link)
+                await MainActor.run {
+                    importText = backupText
+                    isFileImport = true
+                    fileName = "Official app backup"
+                    processImport()
+                }
+            } catch {
+                await MainActor.run {
+                    isImporting = false
+                    importErrorMessage = error.localizedDescription
+                }
             }
         }
     }
@@ -436,20 +526,49 @@ struct BulkImportView: View {
 
     // MARK: - Logic
 
+    /// Header detection wins when it's unambiguous; the button the user tapped
+    /// breaks ties when a file has no recognizable header.
+    private func resolveFormat(from text: String) -> ImportService.ImportFormat {
+        let detected = detectFormat(from: text)
+        guard detected == .textList, let preferredFormat else { return detected }
+
+        // Collectr parsing needs a usable header row — if one can't be built,
+        // honoring the button tap would silently import nothing.
+        if preferredFormat == .collectr {
+            let firstLine = text.components(separatedBy: .newlines).first ?? ""
+            guard ImportService.HeaderColumnMap(headerLine: firstLine) != nil else { return detected }
+        }
+
+        return preferredFormat
+    }
+
     private func detectFormat(from text: String) -> ImportService.ImportFormat {
+        if ImportService.isOfficialBackup(text) {
+            return .officialBackup
+        }
+
         let firstLine = text.components(separatedBy: .newlines).first?.lowercased() ?? ""
 
-        if firstLine.contains("set number") && firstLine.contains("variant") && firstLine.contains("name") {
+        // Covers both the 7-column Dreamborn export and the nameless 4-column
+        // Inklore.gg/LorcanaExporter variant
+        if firstLine.contains("set number") && firstLine.contains("variant") {
             return .dreamborn
         }
 
+        // Lorcana.gg-style dual-count export: "Normal,Foil,Name,Set,Number"
         if firstLine.contains("normal") && firstLine.contains("foil") && firstLine.contains("name") {
-            return .dreamborn
+            return .collectr
+        }
+
+        // Collectr (and similar header-mapped exports): named columns in any order
+        if firstLine.contains("product name") ||
+           (firstLine.contains("name") && (firstLine.contains("variance") || firstLine.contains("printing") || firstLine.contains("market price") || firstLine.contains("price paid"))) {
+            return .collectr
         }
 
         let earlyLines = text.components(separatedBy: .newlines).prefix(5)
         for line in earlyLines where !line.isEmpty {
-            if line.range(of: #"^\d+,\d+[a-e]?,(normal|foil),\d+,"#, options: .regularExpression) != nil {
+            if line.range(of: #"^\d+,\d+[a-e]?,(normal|foil),\d+(,|$)"#, options: .regularExpression) != nil {
                 return .dreamborn
             }
         }
@@ -490,18 +609,32 @@ struct BulkImportView: View {
         importStats = ImportService.ImportProgress()
 
         Task {
-            let detectedFormat = detectFormat(from: importText)
+            let detectedFormat = resolveFormat(from: importText)
 
             let result = await ImportService.shared.importAndAdd(
                 importText,
                 format: detectedFormat,
                 onCardMatched: { card, quantity in
-                    collectionManager.addCard(card, quantity: quantity)
+                    collectionManager.addCard(card, quantity: quantity, bulkImport: true)
                 },
                 progressCallback: { stats in
                     self.importStats = stats
                 }
             )
+
+            // Nothing recognized at all (wrong file, unreadable header) must not
+            // present as a successful import.
+            guard result.totalProcessed > 0 else {
+                await MainActor.run {
+                    isImporting = false
+                    importErrorMessage = "No Lorcana cards could be read from this file. Double-check that you picked a collection export (CSV) or an official app backup file."
+                }
+                return
+            }
+
+            await MainActor.run {
+                collectionManager.finalizeBulkImport()
+            }
 
             Analytics.send(.importCompleted(
                 source: String(describing: detectedFormat),
@@ -511,25 +644,157 @@ struct BulkImportView: View {
             await MainActor.run {
                 importStats.progress = 1.0
                 importStats.totalCards = result.totalCardsCount
+                pendingResult = result
                 importDone = true
             }
+        }
+    }
 
-            try? await Task.sleep(for: .seconds(1.5))
+    /// Dismiss the completion overlay: straight out on success, or on to the
+    /// failure summary when some lines couldn't be matched.
+    private func finishImport() {
+        guard let result = pendingResult else {
+            dismiss()
+            return
+        }
 
-            await MainActor.run {
-                isImporting = false
-                importResult = result
+        isImporting = false
 
-                if result.failed.isEmpty {
-                    NotificationCenter.default.post(
-                        name: NSNotification.Name("ImportCompleted"),
-                        object: nil,
-                        userInfo: ["cardsCount": result.totalCardsCount]
-                    )
-                    dismiss()
+        if result.failed.isEmpty {
+            NotificationCenter.default.post(
+                name: NSNotification.Name("ImportCompleted"),
+                object: nil,
+                userInfo: ["cardsCount": result.totalCardsCount]
+            )
+            dismiss()
+        } else {
+            importResult = result
+        }
+    }
+}
+
+/// Walks the user through getting their collection out of the official Disney Lorcana
+/// app: its backup share link points at a hosted JSON we can download and import
+/// directly. A file picker remains as a fallback for saved backup files.
+struct OfficialAppImportSheet: View {
+    /// Called with the clipboard's backup link when the user taps the paste button.
+    let onPasteLink: (String) -> Void
+    /// Called when the user prefers to pick an already-saved backup file.
+    let onChooseFile: () -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var clipboardEmpty = false
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("Your official app collection imports straight from its backup link — no conversion needed.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    VStack(alignment: .leading, spacing: 14) {
+                        OfficialAppStep(number: 1, text: "In the official Lorcana app, go to Home → ⋯ → Collection backup → Backup now.")
+                        OfficialAppStep(number: 2, text: "Copy the backup link the app creates.")
+                        OfficialAppStep(number: 3, text: "Come back here and tap Paste Backup Link.")
+                    }
+
+                    Button("Paste Backup Link", systemImage: "link", action: pasteLink)
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .buttonStyle(LorcanaButtonStyle())
+
+                    if clipboardEmpty {
+                        Text("No link on the clipboard — copy the backup link from the official app first.")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    }
+
+                    Button("Choose Backup File Instead", systemImage: "arrow.down.doc.fill", action: onChooseFile)
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .foregroundStyle(Color.lorcanaGold)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .strokeBorder(Color.lorcanaGold.opacity(0.6), lineWidth: 1)
+                        )
+                        .buttonStyle(.plain)
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("You can also view your backup or convert it for other collection sites with the community-built LorcanaExporter tool — it inspired this feature.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        Link("Open LorcanaExporter", destination: URL(string: "https://vladimir-aubrecht.github.io/LorcanaExporter/")!)
+                            .font(.caption)
+                            .bold()
+                            .foregroundStyle(Color.lorcanaGold)
+                    }
+                }
+                .padding()
+            }
+            .background(LorcanaBackground())
+            .navigationTitle("Official App Import")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
                 }
             }
         }
+    }
+
+    private func pasteLink() {
+        guard let link = UIPasteboard.general.string, !link.isEmpty else {
+            clipboardEmpty = true
+            return
+        }
+        onPasteLink(link)
+    }
+}
+
+/// A numbered instruction row in `OfficialAppImportSheet`.
+struct OfficialAppStep: View {
+    let number: Int
+    let text: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text("\(number)")
+                .font(.subheadline)
+                .bold()
+                .foregroundStyle(Color.lorcanaDark)
+                .frame(width: 24, height: 24)
+                .background(.lorcanaGold, in: .circle)
+
+            Text(text)
+                .font(.subheadline)
+                .foregroundStyle(.primary)
+        }
+    }
+}
+
+/// Gold-outlined tile used for the import-method choices.
+struct ImportMethodButton: View {
+    let title: String
+    let systemImage: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(title, systemImage: systemImage, action: action)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 20)
+            .padding(.horizontal, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.lorcanaGold.opacity(0.2))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.lorcanaGold.opacity(0.4), lineWidth: 1)
+                    )
+            )
+            .foregroundStyle(Color.lorcanaGold)
     }
 }
 

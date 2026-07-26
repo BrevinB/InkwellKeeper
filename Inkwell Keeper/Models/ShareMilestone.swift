@@ -18,6 +18,8 @@ enum ShareMilestone: Equatable {
     case collectionValue(amount: Double, currencyCode: String)
     /// A scanning haul — number of cards added in a session.
     case cardsScanned(count: Int)
+    /// A bulk import haul — number of cards brought in from a CSV or list.
+    case cardsImported(count: Int)
     /// Total unique cards in the collection.
     case uniqueCards(count: Int)
 
@@ -28,6 +30,7 @@ enum ShareMilestone: Equatable {
         case .setProgress: "chart.pie.fill"
         case .collectionValue: "dollarsign.circle.fill"
         case .cardsScanned: "viewfinder.circle.fill"
+        case .cardsImported: "square.and.arrow.down.fill"
         case .uniqueCards: "square.grid.3x3.fill"
         }
     }
@@ -42,6 +45,8 @@ enum ShareMilestone: Equatable {
         case let .collectionValue(amount, currencyCode):
             amount.formatted(.currency(code: currencyCode).precision(.fractionLength(0)))
         case let .cardsScanned(count):
+            count.formatted(.number)
+        case let .cardsImported(count):
             count.formatted(.number)
         case let .uniqueCards(count):
             count.formatted(.number)
@@ -59,6 +64,8 @@ enum ShareMilestone: Equatable {
             "Collection Value"
         case .cardsScanned:
             "Cards Scanned"
+        case .cardsImported:
+            "Cards Imported"
         case .uniqueCards:
             "Unique Cards Collected"
         }
@@ -75,6 +82,8 @@ enum ShareMilestone: Equatable {
             "My Lorcana collection so far."
         case let .cardsScanned(count):
             count == 1 ? "Just added a new card." : "Added in one scanning session."
+        case let .cardsImported(count):
+            count == 1 ? "Just added a new card." : "My collection, all in one place."
         case .uniqueCards:
             "Different cards and counting."
         }
@@ -87,6 +96,7 @@ enum ShareMilestone: Equatable {
         case .setProgress: "setProgress"
         case .collectionValue: "collectionValue"
         case .cardsScanned: "cardsScanned"
+        case .cardsImported: "cardsImported"
         case .uniqueCards: "uniqueCards"
         }
     }

@@ -27,12 +27,20 @@ struct ShareMilestoneTests {
         #expect(ShareMilestone.cardsScanned(count: 5).subtitle == "Added in one scanning session.")
     }
 
+    @Test func cardsImportedFormatsCountAndCopy() {
+        let milestone = ShareMilestone.cardsImported(count: 2276)
+        #expect(milestone.heroValue == 2276.formatted(.number))
+        #expect(milestone.headline == "Cards Imported")
+        #expect(ShareMilestone.cardsImported(count: 1).subtitle == "Just added a new card.")
+    }
+
     @Test func everyMilestoneHasNonEmptyCopy() {
         let milestones: [ShareMilestone] = [
             .setCompleted(name: "X"),
             .setProgress(name: "X", percentage: 0.5),
             .collectionValue(amount: 1234, currencyCode: "USD"),
             .cardsScanned(count: 3),
+            .cardsImported(count: 250),
             .uniqueCards(count: 99)
         ]
         for milestone in milestones {
