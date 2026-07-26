@@ -20,7 +20,9 @@ from typing import Dict, List, Tuple, Optional
 
 # Configuration
 DATA_DIR = Path(__file__).parent.parent / "Inkwell Keeper" / "Data"
+PRICING_SERVICE_SWIFT = Path(__file__).parent.parent / "Inkwell Keeper" / "Services" / "PricingService.swift"
 LORCAST_API_BASE = "https://api.lorcast.com/v0"
+PRICING_API_BASE = "https://29kwvipys3.execute-api.us-east-2.amazonaws.com"
 TIMEOUT = 30
 
 # Set ID mapping: local filename -> LorCast API code
@@ -259,10 +261,64 @@ def check_for_updates(github_action: bool = False) -> Tuple[bool, str]:
     return has_updates, report
 
 
+def check_pricing_coverage() -> Tuple[bool, str]:
+    """Probe the pricing backend for card 1 of every main set the app prices.
+
+    Uses the set codes the iOS app actually requests (PricingService.setCodeMap)
+    — this is exactly the mismatch that made Attack of the Vine appear unpriced
+    while its prices sat in the database under a different code.
+    """
+    import re
+
+    lines = ["## Pricing Backend Coverage", ""]
+    gaps = False
+
+    try:
+        swift = PRICING_SERVICE_SWIFT.read_text(encoding="utf-8")
+    except OSError as e:
+        return False, f"## Pricing Backend Coverage\n\nCould not read PricingService.swift: {e}"
+
+    map_block = re.search(r"setCodeMap:\s*\[String:\s*String\]\s*=\s*\[(.*?)\]", swift, re.DOTALL)
+    if not map_block:
+        return False, "## Pricing Backend Coverage\n\nCould not locate setCodeMap in PricingService.swift"
+
+    entries = re.findall(r'"([^"]+)":\s*"([^"]+)"', map_block.group(1))
+    # Promo/special sets are intentionally not in the backend (RapidAPI fallback covers them)
+    main_sets = [(name, code) for name, code in entries
+                 if not re.match(r"^(P\d|CP|D23|EFA|C\d)$", code)]
+
+    lines.append("| Set | Code | Backend |")
+    lines.append("|-----|------|---------|")
+    for name, code in main_sets:
+        url = f"{PRICING_API_BASE}/prices/{code}-1"
+        data = fetch_json(url)
+        priced = bool(data and data.get("best_price_usd") is not None)
+        if priced:
+            lines.append(f"| {name} | {code} | ok |")
+        else:
+            gaps = True
+            lines.append(f"| {name} | {code} | **MISSING** |")
+
+    lines.append("")
+    if gaps:
+        lines.append("**Action:** a set the app prices has no backend data — usually a missing "
+                     "`_SET_CODES` entry in lorcana-pricing-api/cron/update_prices.py. "
+                     "Add it, `sam deploy`, then invoke the cron Lambda once.")
+    else:
+        lines.append("All main sets priced.")
+
+    return gaps, "\n".join(lines)
+
+
 def main():
     github_action = "--github-action" in sys.argv
 
     has_updates, report = check_for_updates(github_action)
+
+    if "--check-pricing" in sys.argv:
+        pricing_gaps, pricing_report = check_pricing_coverage()
+        report = report + "\n\n" + pricing_report
+        has_updates = has_updates or pricing_gaps
 
     print(report)
 

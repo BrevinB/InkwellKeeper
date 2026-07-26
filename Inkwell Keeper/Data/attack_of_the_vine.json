@@ -1,7 +1,7 @@
 {
   "setName": "Attack of the Vine!",
   "setCode": "AOV",
-  "cardCount": 242,
+  "cardCount": 245,
   "cards": [
     {
       "id": "Attack_of_the_Vine!_1_Woody___Helping_a_Friend",
@@ -3956,13 +3956,32 @@
       "inkColor": "Amber"
     },
     {
+      "id": "Attack_of_the_Vine!_209_Boo___In_Disguise_Epic",
+      "name": "Boo - In Disguise",
+      "cost": 2,
+      "type": "Character",
+      "rarity": "Epic",
+      "setName": "Attack of the Vine!",
+      "cardText": "YOU'RE SAFE NOW While you have an exerted character named Sulley in play, this character can't be challenged.\n\n\"Sullivan's cousin's sister's daughter is a real go-getter. Lots of potential.\"\n—Henry J. Waternoose III",
+      "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_f93119f5a78844d3ab1141cf8a94582b.avif?1783858275",
+      "variant": "Epic",
+      "cardNumber": 209,
+      "uniqueId": "AOV-209",
+      "inkwell": true,
+      "strength": 1,
+      "willpower": 2,
+      "lore": 2,
+      "franchise": "",
+      "inkColor": "Amber"
+    },
+    {
       "id": "Attack_of_the_Vine!_210_Meilin_Lee___Losing_Control_Enchanted",
       "name": "Meilin Lee - Losing Control",
       "cost": 3,
       "type": "Character",
       "rarity": "Enchanted",
       "setName": "Attack of the Vine!",
-      "cardText": "RED PANDA POWER When you play this character, look at the top 4 cards of your deck. You may reveal a Red Panda character card or a song card and put it into your hand. Put the rest on the bottom of your deck in any order.",
+      "cardText": "RED PANDA POWER When you play this character, look at the top 4 cards of your deck. You may reveal a Red Panda character card or a song card and put it into your hand. Put the rest on the bottom of your deck in any o`rder.",
       "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_23040e61b60249f5b87587befb367d10.avif?1783189905",
       "variant": "Enchanted",
       "cardNumber": 210,
@@ -4201,6 +4220,25 @@
       "lore": 1,
       "franchise": "",
       "inkColor": "Sapphire"
+    },
+    {
+      "id": "Attack_of_the_Vine!_223_Kronk___Meat_Hut_Cook_Epic",
+      "name": "Kronk - Meat Hut Cook",
+      "cost": 2,
+      "type": "Character",
+      "rarity": "Epic",
+      "setName": "Attack of the Vine!",
+      "cardText": "Resist +1 (Damage dealt to this character is reduced by 1.)\nPICKUP! Once during your turn, you may pay 1 {I} to draw a card, then choose and discard a card.\n\n\"You want that extra crispy?\"",
+      "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_3307cd46596847d09d0e439814734a25.avif?1783858344",
+      "variant": "Epic",
+      "cardNumber": 223,
+      "uniqueId": "AOV-223",
+      "inkwell": true,
+      "strength": 1,
+      "willpower": 3,
+      "lore": 1,
+      "franchise": "",
+      "inkColor": "Steel"
     },
     {
       "id": "Attack_of_the_Vine!_224_Mulan___Created_by_the_Vine_Enchanted",
@@ -4467,6 +4505,25 @@
       "lore": 2,
       "franchise": "",
       "inkColor": "Amethyst"
+    },
+    {
+      "id": "Attack_of_the_Vine!_238_Mickey_Mouse_&_Minnie_Mouse___Adventuring_Duo_Enchanted",
+      "name": "Mickey Mouse & Minnie Mouse - Adventuring Duo",
+      "cost": 7,
+      "type": "Character",
+      "rarity": "Enchanted",
+      "setName": "Attack of the Vine!",
+      "cardText": "Duo Shift 0 {I}\nTHINKING OF YOU If this character would be banished, put them into your inkwell facedown and exerted instead.",
+      "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_9da69a8f49044384b91e145fdb0a4846.avif?1783858426",
+      "variant": "Enchanted",
+      "cardNumber": 238,
+      "uniqueId": "AOV-238",
+      "inkwell": true,
+      "strength": 5,
+      "willpower": 5,
+      "lore": 5,
+      "franchise": "",
+      "inkColor": "Emerald"
     },
     {
       "id": "Attack_of_the_Vine!_239_Rapunzel_&_Flynn_Rider___Unequal_Pair",

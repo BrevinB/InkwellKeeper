@@ -1,0 +1,46 @@
+name: iOS Tests
+
+on:
+  pull_request:
+    paths-ignore:
+      - "Website/**"
+      - "marketing/**"
+      - "**.md"
+  push:
+    branches: [main]
+    paths-ignore:
+      - "Website/**"
+      - "marketing/**"
+      - "**.md"
+
+concurrency:
+  group: ios-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: macos-26
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pick a simulator
+        id: sim
+        run: |
+          DEVICE=$(xcrun simctl list devices available | grep -oE 'iPhone [0-9][^(]*' | head -1 | xargs)
+          if [ -z "$DEVICE" ]; then
+            echo "No iPhone simulator found"; xcrun simctl list devices; exit 1
+          fi
+          echo "device=$DEVICE" >> "$GITHUB_OUTPUT"
+          echo "Using simulator: $DEVICE"
+
+      - name: Build and test
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -scheme "Inkwell Keeper" \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.device }}" \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcbeautify

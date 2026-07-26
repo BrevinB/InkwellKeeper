@@ -8,11 +8,15 @@ on:
 
 permissions:
   issues: write
-  contents: read
+  contents: write
+  pull-requests: write
 
 jobs:
-  check-updates:
+  check-and-sync:
     runs-on: ubuntu-latest
+    outputs:
+      has_updates: ${{ steps.check.outputs.has_updates }}
+      pr_number: ${{ steps.cpr.outputs.pull-request-number }}
 
     steps:
       - name: Checkout repository
@@ -26,8 +30,41 @@ jobs:
       - name: Run update check
         id: check
         run: |
-          python Scripts/check_for_updates.py --github-action
+          python Scripts/check_for_updates.py --github-action --check-pricing
         continue-on-error: true
+
+      # New cards in already-known sets are safe to sync automatically —
+      # appends to Data/*.json, downloads their bundled images, and regenerates
+      # official_card_ids.json (no pbxproj or backend changes in --ci mode).
+      - name: Sync new cards into known sets
+        if: steps.check.outputs.has_updates == 'true'
+        run: |
+          python Scripts/sync_new_cards.py --ci
+        continue-on-error: true
+
+      - name: Open PR with synced card data
+        id: cpr
+        if: steps.check.outputs.has_updates == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "Sync new Lorcana cards from LorCast"
+          title: "Auto-sync: new Lorcana card data"
+          body: |
+            Automated card-data sync. New cards detected by the weekly checker
+            and pulled into the bundled set JSONs, with their AVIF images and a
+            refreshed `official_card_ids.json`.
+
+            A follow-up job runs the full test suite against this branch and
+            comments the result below.
+
+            **Review before merging:**
+            - Card data looks sane (names, rarities, variants)
+            - If the checker report mentions a **new set** or a **pricing
+              backend gap**, those still need manual steps — see the issue
+              this run created/updated.
+          branch: auto/lorcana-card-sync
+          delete-branch: true
+          labels: lorcana-updates
 
       - name: Create issue if updates found
         if: steps.check.outputs.has_updates == 'true'
@@ -51,7 +88,10 @@ jobs:
             const body = `${{ steps.check.outputs.report }}
 
             ---
-            *This issue was automatically created by the Lorcana update checker.*
+            *This issue was automatically created by the Lorcana update checker.
+            Known-set card additions are handled by the auto-sync PR — review and
+            merge it. New sets and pricing-backend gaps need the manual steps:
+            \`Scripts/sync_new_cards.py --new-set\` plus the pricing repo deploy.*
             `;
 
             if (existingIssue) {
@@ -74,3 +114,52 @@ jobs:
               });
               console.log('Created new issue');
             }
+
+  # Bot-created PRs don't trigger the pull_request test workflow (GITHUB_TOKEN
+  # limitation), so validate the sync branch here and report on the PR.
+  validate-sync-pr:
+    needs: check-and-sync
+    if: needs.check-and-sync.outputs.pr_number != ''
+    runs-on: macos-26
+    timeout-minutes: 45
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Checkout sync branch
+        uses: actions/checkout@v4
+        with:
+          ref: auto/lorcana-card-sync
+
+      - name: Pick a simulator
+        id: sim
+        run: |
+          DEVICE=$(xcrun simctl list devices available | grep -oE 'iPhone [0-9][^(]*' | head -1 | xargs)
+          echo "device=$DEVICE" >> "$GITHUB_OUTPUT"
+
+      - name: Build and test
+        id: tests
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -scheme "Inkwell Keeper" \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.device }}" \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcbeautify
+
+      - name: Report result on PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ steps.tests.outcome }}" = "success" ]; then
+            gh pr comment "${{ needs.check-and-sync.outputs.pr_number }}" \
+              --repo "${{ github.repository }}" \
+              --body "✅ Full test suite passed against this card-data sync."
+          else
+            gh pr comment "${{ needs.check-and-sync.outputs.pr_number }}" \
+              --repo "${{ github.repository }}" \
+              --body "❌ Tests failed against this card-data sync — check the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) before merging."
+            exit 1
+          fi
