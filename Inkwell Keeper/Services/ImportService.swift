@@ -216,6 +216,17 @@ class ImportService {
         var failedCards: Int = 0
     }
 
+    /// The card database loads asynchronously at launch. An import started
+    /// before it finishes (the fresh-install flow: open app, import collection)
+    /// would match against an empty catalog and fail every row — wait for it.
+    private func waitForCardDatabase() async {
+        var attempts = 0
+        while dataManager.getAllCards().isEmpty && attempts < 60 {
+            try? await Task.sleep(for: .milliseconds(500))
+            attempts += 1
+        }
+    }
+
     /// Process and import in a single pass — calls `onCardMatched` for each successfully matched card
     /// so the caller can add it to the collection immediately without a second pass.
     func importAndAdd(
@@ -227,6 +238,7 @@ class ImportService {
         var successful: [ImportedCard] = []
         var failed: [FailedImport] = []
         var stats = ImportProgress()
+        await waitForCardDatabase()
         let cardIndex = CardIndex(cards: dataManager.getAllCards())
 
         if format == .officialBackup {
@@ -404,6 +416,7 @@ class ImportService {
     func importFromText(_ text: String, format: ImportFormat = .textList, progressCallback: ((Double) -> Void)? = nil) async -> ImportResult {
         var successful: [ImportedCard] = []
         var failed: [FailedImport] = []
+        await waitForCardDatabase()
         let cardIndex = CardIndex(cards: dataManager.getAllCards())
 
         if format == .officialBackup {
