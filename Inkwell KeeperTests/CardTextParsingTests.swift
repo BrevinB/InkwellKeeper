@@ -7,6 +7,7 @@
 //
 
 import Testing
+import UIKit
 @testable import Inkwell_Keeper
 
 struct CardTextParsingTests {
@@ -55,5 +56,16 @@ struct CardTextParsingTests {
     @Test func spokenTextReplacesTokensWithNames() {
         let spoken = CardTextParser.spokenText("{E}, {2} {I} - draw a card with {IW}.")
         #expect(spoken == "exert, 2 ink ink - draw a card with inkwell.")
+    }
+
+    /// The bundled custom symbols must compile as real symbol images — a template
+    /// SVG that actool rejects or downgrades would render at fixed size instead
+    /// of scaling with the text.
+    @Test func allSymbolAssetsCompileAsSymbolImages() {
+        for symbol in CardTextSymbol.allCases {
+            let image = UIImage(named: symbol.assetName)
+            #expect(image != nil, "missing asset \(symbol.assetName)")
+            #expect(image?.isSymbolImage == true, "\(symbol.assetName) is not a symbol image")
+        }
     }
 }

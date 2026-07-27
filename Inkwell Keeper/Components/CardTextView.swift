@@ -17,14 +17,16 @@ enum CardTextSymbol: String, CaseIterable {
     case lore = "L"
     case inkwell = "IW"
 
-    var systemImage: String {
+    /// Custom symbol asset name (bundled from the MIT-licensed
+    /// glimmerdb/lorcana-icons set, drawn by Nate of the Cards).
+    var assetName: String {
         switch self {
-        case .exert: "arrow.clockwise"
-        case .ink: "drop.fill"
-        case .strength: "bolt.fill"
-        case .willpower: "shield.fill"
-        case .lore: "diamond.fill"
-        case .inkwell: "drop.circle"
+        case .exert: "lorcana.exert"
+        case .ink: "lorcana.ink"
+        case .strength: "lorcana.strength"
+        case .willpower: "lorcana.willpower"
+        case .lore: "lorcana.lore"
+        case .inkwell: "lorcana.inkwell"
         }
     }
 
@@ -118,9 +120,9 @@ struct CardTextView: View {
         case .text(let literal):
             Text(literal)
         case .symbol(let symbol):
-            Text("\(Image(systemName: symbol.systemImage))")
+            Text("\(Image(symbol.assetName))")
         case .inkCost(let number):
-            Text("\(number)\(Image(systemName: CardTextSymbol.ink.systemImage))")
+            Text("\(number)\(Image(CardTextSymbol.ink.assetName))")
         }
     }
 }
