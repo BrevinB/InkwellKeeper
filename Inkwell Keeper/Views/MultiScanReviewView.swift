@@ -62,6 +62,14 @@ struct MultiScanReviewView: View {
                     cameraManager.replaceScannedCard(at: target.index, with: newCard)
                 }
             }
+            .onDisappear {
+                // A swipe-dismiss after adding must clear the batch just like the
+                // Done button — the cards are already in the collection, and a
+                // lingering "review" tray invites adding them a second time.
+                if addedAll {
+                    cameraManager.clearScannedCards()
+                }
+            }
         }
     }
 
