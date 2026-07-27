@@ -156,7 +156,6 @@ jobs:
           xcodebuild test \
             -scheme "Inkwell Keeper" \
             -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.device }}" \
-            CODE_SIGNING_ALLOWED=NO \
             EXCLUDED_SOURCE_FILE_NAMES="ink.icon" \
             ASSETCATALOG_COMPILER_APPICON_NAME="" \
             | xcbeautify
