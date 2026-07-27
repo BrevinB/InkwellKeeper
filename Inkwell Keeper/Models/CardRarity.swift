@@ -13,8 +13,8 @@ enum CardRarity: String, CaseIterable, Codable {
     case rare = "Rare"
     case superRare = "Super Rare"
     case legendary = "Legendary"
-    case enchanted = "Enchanted"
     case epic = "Epic"
+    case enchanted = "Enchanted"
     case iconic = "Iconic"
     case promo = "Promo"
 
@@ -43,8 +43,8 @@ enum CardRarity: String, CaseIterable, Codable {
         case .rare: return 2
         case .superRare: return 3
         case .legendary: return 4
-        case .enchanted: return 5
-        case .epic: return 6
+        case .epic: return 5
+        case .enchanted: return 6
         case .iconic: return 7
         case .promo: return 8
         }

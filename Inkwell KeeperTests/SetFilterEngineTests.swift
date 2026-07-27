@@ -112,4 +112,22 @@ struct SetFilterEngineTests {
         let sorted = SetCardFilterEngine.sort(sampleCards, by: .rarity, prices: [:]).map(\.id)
         #expect(sorted == ["d", "b", "c", "a"])
     }
+
+    /// Rarity hierarchy, rarest first: Iconic > Enchanted > Epic > Legendary >
+    /// Super Rare > Rare > Uncommon > Common. Epic sits BELOW Enchanted.
+    @Test func rarityHierarchyOrder() {
+        let ascending: [CardRarity] = [.common, .uncommon, .rare, .superRare, .legendary, .epic, .enchanted, .iconic]
+        let orders = ascending.map(\.sortOrder)
+        #expect(orders == orders.sorted(), "sortOrder must ascend through the hierarchy")
+        #expect(CardRarity.enchanted.sortOrder > CardRarity.epic.sortOrder)
+        #expect(CardRarity.iconic.sortOrder > CardRarity.enchanted.sortOrder)
+
+        let cards = [
+            card(id: "epic", rarity: .epic, number: 1),
+            card(id: "iconic", rarity: .iconic, number: 2),
+            card(id: "enchanted", rarity: .enchanted, number: 3)
+        ]
+        let sorted = SetCardFilterEngine.sort(cards, by: .rarity, prices: [:]).map(\.id)
+        #expect(sorted == ["iconic", "enchanted", "epic"])
+    }
 }
