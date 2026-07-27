@@ -152,6 +152,32 @@ struct ChangelogEntry {
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
     ChangelogEntry(
+        version: "3.1.0",
+        date: "July 2026",
+        features: [
+            "Import your collection straight from the official Disney Lorcana app — just paste your backup link",
+            "Collectr CSV import, plus support for LorcanaExporter files",
+            "Price history charts on every card — see how values trend over time",
+            "See both Market and TCGplayer Low prices for every card",
+            "Filter sets by ink color, rarity, variant, and price — and sort by price or rarity",
+            "Card text now shows real Lorcana symbols instead of {E} and {S} codes"
+        ],
+        improvements: [
+            "Bulk imports now finish in seconds instead of minutes",
+            "Enchanted, Epic, and Iconic printings import correctly from Dreamborn files",
+            "Every set's card images are now bundled for faster, offline browsing",
+            "Adding cards is clearer — quantity starts at zero and shows what you already own"
+        ],
+        bugFixes: [
+            "Foil cards now show their real foil market price",
+            "Attack of the Vine Epic, Enchanted, and Iconic rarities corrected",
+            "Epic cards no longer display as Common rarity",
+            "Rapid scanning now shows the correct price for each card",
+            "Swipe-dismissing the scan review after adding no longer leaves cards pending",
+            "Fixed cards occasionally not rendering in the collection grid until scrolled"
+        ],
+        inProgress: []),
+    ChangelogEntry(
         version: "3.0.0",
         date: "June 2026",
         features: ["Added Set 13 Attack of the Vine!", "Added a share feature to share your pulls with your friends and community!", "Added iCloud sync so you can view your collection on all your devices."],
