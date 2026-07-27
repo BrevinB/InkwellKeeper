@@ -432,6 +432,37 @@ class CollectionManager: ObservableObject {
         }
     }
 
+    /// Identity used by `collectedRowsByIdentity()` — uniqueId when present
+    /// (variant-qualified), name||set||variant otherwise.
+    static func identityKey(for card: LorcanaCard) -> String {
+        if let uniqueId = card.uniqueId, !uniqueId.isEmpty {
+            return "\(uniqueId)|\(card.variant.rawValue)"
+        }
+        return "\(card.name)|\(card.setName)|\(card.variant.rawValue)"
+    }
+
+    /// All non-wishlist collected rows in one fetch, keyed for O(1) lookup.
+    /// Exports previously ran a SwiftData fetch per card for condition/notes.
+    func collectedRowsByIdentity() -> [String: CollectedCard] {
+        guard let context = modelContext else { return [:] }
+        var result: [String: CollectedCard] = [:]
+        do {
+            let descriptor = FetchDescriptor<CollectedCard>(
+                predicate: #Predicate { $0.isWishlisted == false }
+            )
+            for row in try context.fetch(descriptor) {
+                let variant = row.variant ?? "Normal"
+                if let uniqueId = row.uniqueId, !uniqueId.isEmpty {
+                    result["\(uniqueId)|\(variant)"] = row
+                }
+                result["\(row.name)|\(row.setName)|\(variant)"] = row
+            }
+        } catch {
+            // Non-fatal — callers degrade to missing condition/notes fields
+        }
+        return result
+    }
+
     /// Save any pending changes to the model context
     func saveContext() {
         guard let context = modelContext else { return }

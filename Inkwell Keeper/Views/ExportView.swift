@@ -899,7 +899,10 @@ struct ExportView: View {
         let headerColumns = orderedFields.map { $0.rawValue }
         csv += headerColumns.joined(separator: ",") + "\n"
 
-        // Group cards by name+set+variant and count quantities
+        // Group cards by name+set+variant and count quantities.
+        // One prefetch instead of a SwiftData fetch per card — large exports
+        // were paying ~1 fetch per unique card just for condition/notes fields.
+        let collectedRows = collectionManager.collectedRowsByIdentity()
         var cardGroups: [String: (card: LorcanaCard, quantity: Int, collectedCard: CollectedCard?)] = [:]
 
         for card in cards {
@@ -909,8 +912,7 @@ struct ExportView: View {
                 cardGroups[key] = (card, existing.quantity + 1, existing.collectedCard)
             } else {
                 let qty = collectionManager.getCollectedQuantityByName(card.name, setName: card.setName, variant: card.variant)
-                // Find the CollectedCard for additional fields like condition, notes
-                let collectedCard = collectionManager.getCollectedCardData(for: card)
+                let collectedCard = collectedRows[CollectionManager.identityKey(for: card)]
                 cardGroups[key] = (card, qty > 0 ? qty : 1, collectedCard)
             }
         }
@@ -1014,95 +1016,21 @@ struct ExportView: View {
     }
 
     private func generateDreambornBulkCSV(from cards: [LorcanaCard]) -> String {
-        var csv = "Set Number,Card Number,Variant,Count\n"
-
-        // Group cards by set+card number+variant and count quantities
-        var cardGroups: [String: (card: LorcanaCard, quantity: Int, cardNumber: Int)] = [:]
+        // Group by set + number + variant; quantity from the ownership index
+        var seen: Set<String> = []
+        var entries: [(card: LorcanaCard, quantity: Int)] = []
 
         for card in cards {
-            // Try to get card number from cardNumber field first, then parse from uniqueId
-            var cardNumber: Int? = card.cardNumber
+            guard card.cardNumber != nil || card.uniqueId?.isEmpty == false else { continue }
+            let key = "\(card.setName)|\(card.cardNumber ?? -1)|\(card.variant.rawValue)"
+            guard !seen.contains(key) else { continue }
+            seen.insert(key)
 
-            if cardNumber == nil, let uniqueId = card.uniqueId, !uniqueId.isEmpty {
-                // Parse card number from uniqueId (format: "ROJ-001", "TFC-123", etc.)
-                let components = uniqueId.split(separator: "-")
-                if components.count == 2, let num = Int(components[1]) {
-                    cardNumber = num
-                }
-            }
-
-            // Skip cards without a valid card number
-            guard let validCardNumber = cardNumber else {
-                continue
-            }
-
-            let key = "\(card.setName)|\(validCardNumber)|\(card.variant.rawValue)"
-
-            if let existing = cardGroups[key] {
-                cardGroups[key] = (card, existing.quantity + 1, validCardNumber)
-            } else {
-                let qty = collectionManager.getCollectedQuantityByName(card.name, setName: card.setName, variant: card.variant)
-                cardGroups[key] = (card, qty > 0 ? qty : 1, validCardNumber)
-            }
+            let qty = collectionManager.getCollectedQuantityByName(card.name, setName: card.setName, variant: card.variant)
+            entries.append((card, qty > 0 ? qty : 1))
         }
 
-        // Sort by set number then card number
-        let sortedGroups = cardGroups.values.sorted { first, second in
-            let setNum1 = getSetNumber(for: first.card.setName)
-            let setNum2 = getSetNumber(for: second.card.setName)
-
-            if setNum1 != setNum2 {
-                return setNum1 < setNum2
-            }
-            return first.cardNumber < second.cardNumber
-        }
-
-        // Generate rows
-        for group in sortedGroups {
-            let setNumber = getSetNumber(for: group.card.setName)
-
-            // Map variants to Dreamborn format
-            let variant: String
-            switch group.card.variant {
-            case .foil:
-                variant = "foil"
-            case .enchanted:
-                variant = "enchanted"
-            case .epic, .iconic:
-                // Dreamborn might use different names for these - using "normal" as fallback
-                variant = "normal"
-            case .promo:
-                variant = "promo"
-            case .normal:
-                variant = "normal"
-            case .borderless:
-                variant = "borderless"
-            }
-
-            let quantity = group.quantity
-
-            csv += "\(setNumber),\(group.cardNumber),\(variant),\(quantity)\n"
-        }
-
-        return csv
-    }
-
-    private func getSetNumber(for setName: String) -> Int {
-        switch setName {
-        case "The First Chapter": return 1
-        case "Rise of the Floodborn": return 2
-        case "Into the Inklands": return 3
-        case "Ursula's Return": return 4
-        case "Shimmering Skies": return 5
-        case "Azurite Sea": return 6
-        case "Archazia's Island": return 7
-        case "Reign of Jafar": return 8
-        case "Fabled": return 9
-        case "Whispers in the Well": return 10
-        case "Winterspell": return 11
-        case "Wilds Unknown": return 12
-        default: return 999
-        }
+        return ImportService.shared.exportDreambornCSV(entries)
     }
 
     // MARK: - Lorcana HQ Export
@@ -1183,7 +1111,8 @@ struct ExportView: View {
             let cards: [ExportCard]
         }
 
-        // Group cards
+        // Group cards (rows prefetched once — no per-card SwiftData fetches)
+        let collectedRows = collectionManager.collectedRowsByIdentity()
         var cardGroups: [String: (card: LorcanaCard, quantity: Int, collectedCard: CollectedCard?)] = [:]
 
         for card in cards {
@@ -1193,7 +1122,7 @@ struct ExportView: View {
                 cardGroups[key] = (card, existing.quantity + 1, existing.collectedCard)
             } else {
                 let qty = collectionManager.getCollectedQuantityByName(card.name, setName: card.setName, variant: card.variant)
-                let collectedCard = collectionManager.getCollectedCardData(for: card)
+                let collectedCard = collectedRows[CollectionManager.identityKey(for: card)]
                 cardGroups[key] = (card, qty > 0 ? qty : 1, collectedCard)
             }
         }

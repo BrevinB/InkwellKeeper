@@ -123,6 +123,45 @@ struct ImportServiceTests {
         #expect(parsed.set == "The First Chapter")
     }
 
+    // MARK: - Export round-trip
+
+    /// Export in Dreamborn format, then import our own output — every card must
+    /// come back as the same printing with the same quantity. Covers the AOV
+    /// set-number gap (old export wrote set 999) and special printings, which
+    /// must export as foil rows at their own numbers.
+    @Test func dreambornExportRoundTrips() async throws {
+        try await waitForCardData()
+
+        let all = SetsDataManager.shared.getAllCards()
+        let tfcNormal = try #require(all.first { $0.uniqueId == "TFC-001" })
+        let aovEnchanted = try #require(all.first { $0.uniqueId == "AOV-238" })
+        let aovEpic = try #require(all.first { $0.uniqueId == "AOV-219" })
+        let winLegendary = try #require(all.first { $0.uniqueId == "11-093" || ($0.setName == "Winterspell" && $0.cardNumber == 93) })
+
+        let entries: [(card: LorcanaCard, quantity: Int)] = [
+            (tfcNormal, 3),
+            (aovEnchanted, 1),
+            (aovEpic, 2),
+            (winLegendary, 4)
+        ]
+
+        let csv = ImportService.shared.exportDreambornCSV(entries)
+        #expect(csv.hasPrefix("Set Number,Card Number,Variant,Count,Name,Color,Rarity"))
+        #expect(!csv.contains(",999,") && !csv.hasPrefix("999"))
+
+        let result = await ImportService.shared.importFromText(csv, format: .dreamborn)
+        #expect(result.failed.isEmpty)
+        #expect(result.successful.count == 4)
+
+        for entry in entries {
+            let match = result.successful.first {
+                $0.card.uniqueId == entry.card.uniqueId && $0.card.variant == entry.card.variant
+            }
+            #expect(match != nil, "\(entry.card.uniqueId ?? "?") did not round-trip")
+            #expect(match?.quantity == entry.quantity)
+        }
+    }
+
     // MARK: - Set number mapping
 
     @Test func mapsAllMainSetNumbers() {

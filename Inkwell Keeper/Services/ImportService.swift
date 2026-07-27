@@ -1043,30 +1043,49 @@ class ImportService {
         return .normal
     }
 
-    // MARK: - Export (for future use)
+    // MARK: - Export
 
-    func exportToCSV(cards: [LorcanaCard]) -> String {
-        var csv = "Card Name,Set Name,Variant,Quantity\n"
-
-        // Group cards by name+set+variant and count quantities
-        var cardGroups: [String: (card: LorcanaCard, quantity: Int)] = [:]
-
-        for card in cards {
-            let key = "\(card.name)|\(card.setName)|\(card.variant.rawValue)"
-            if let existing = cardGroups[key] {
-                cardGroups[key] = (card, existing.quantity + 1)
-            } else {
-                cardGroups[key] = (card, 1)
+    /// Generate a canonical Dreamborn-format CSV (the 7-column layout Dreamborn
+    /// itself exports): `Set Number,Card Number,Variant,Count,Name,Color,Rarity`.
+    ///
+    /// Set numbers come from sets.json metadata — no hardcoded map to forget on
+    /// new-set day. Special printings (Enchanted/Epic/Iconic) are emitted as
+    /// `foil` rows at their own card numbers, matching real Dreamborn exports;
+    /// cards whose set has no number (or that lack a card number) are skipped.
+    func exportDreambornCSV(_ entries: [(card: LorcanaCard, quantity: Int)]) -> String {
+        var setNumbers: [String: String] = [:]
+        for set in SetsDataManager.shared.getAllSets() {
+            if let number = set.setNumber, !number.isEmpty {
+                setNumbers[set.name] = Int(number).map { String(format: "%03d", $0) } ?? number
             }
         }
 
-        for (_, group) in cardGroups {
-            let name = group.card.name.replacingOccurrences(of: "\"", with: "\"\"")
-            let set = group.card.setName.replacingOccurrences(of: "\"", with: "\"\"")
-            let variant = group.card.variant.displayName
-            csv += "\"\(name)\",\"\(set)\",\"\(variant)\",\(group.quantity)\n"
+        var rows: [(setNumber: String, cardNumber: Int, line: String)] = []
+        for entry in entries {
+            guard entry.quantity > 0,
+                  let setNumber = setNumbers[entry.card.setName],
+                  let cardNumber = entry.card.cardNumber else { continue }
+
+            let variant: String
+            switch entry.card.variant {
+            case .foil, .enchanted, .epic, .iconic:
+                // Special printings only exist foiled — Dreamborn marks them "foil"
+                variant = "foil"
+            case .normal, .promo, .borderless:
+                variant = "normal"
+            }
+
+            let color = entry.card.inkColor ?? ""
+            let line = "\(setNumber),\(cardNumber),\(variant),\(entry.quantity),\(entry.card.name),\(color),\(entry.card.rarity.rawValue)"
+            rows.append((setNumber, cardNumber, line))
         }
 
-        return csv
+        rows.sort {
+            $0.setNumber != $1.setNumber ? $0.setNumber < $1.setNumber : $0.cardNumber < $1.cardNumber
+        }
+
+        return "Set Number,Card Number,Variant,Count,Name,Color,Rarity\n"
+            + rows.map(\.line).joined(separator: "\n")
+            + (rows.isEmpty ? "" : "\n")
     }
 }
