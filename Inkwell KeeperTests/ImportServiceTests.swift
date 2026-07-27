@@ -392,6 +392,40 @@ struct ImportServiceTests {
         #expect(result.totalProcessed == 0)
     }
 
+    /// Byte-for-byte rows from a real Collectr export (July 2026) — 16 columns
+    /// including a dated "Market Price (As of ...)" header, "Holofoil"/"Cold Foil"
+    /// variance values, and "(Enchanted)" name suffixes on enchanted printings.
+    @Test func importsRealCollectrExport() async throws {
+        try await waitForCardData()
+
+        let export = """
+        Portfolio Name,Category,Set,Product Name,Card Number,Rarity,Variance,Grade,Card Condition,Average Cost Paid,Quantity,Market Price (As of 2026-07-27),Price Override,Watchlist,Date Added,Notes
+        Main,Lorcana,Wilds Unknown,Luisa Madrigal - Confident Climber (Enchanted),227/204,Enchanted,Holofoil,Ungraded,Near Mint,0.0000,1,94.73,0,false,2026-06-15,
+        Main,Lorcana,Winterspell,Donald Duck - Fred Honeywell,93/204,Legendary,Normal,Ungraded,Near Mint,0.0000,1,1.95,0,false,2026-06-15,
+        Main,Lorcana,Winterspell,Donald Duck - Fred Honeywell,93/204,Legendary,Cold Foil,Ungraded,Near Mint,0.0000,1,2.95,0,false,2026-06-15,
+        Main,Lorcana,Winterspell,Lilo - Rock Star (Enchanted),223/204,Enchanted,Holofoil,Ungraded,Near Mint,0.0000,1,160.48,0,false,2026-06-15,
+        """
+
+        let result = await ImportService.shared.importFromText(export, format: .collectr)
+
+        #expect(result.failed.isEmpty)
+        #expect(result.successful.count == 4)
+
+        let luisa = try #require(result.successful.first { $0.card.name.hasPrefix("Luisa") }?.card)
+        #expect(luisa.variant == .enchanted)
+        #expect(luisa.setName == "Wilds Unknown")
+        #expect(luisa.cardNumber == 227)
+
+        let donalds = result.successful.filter { $0.card.name.hasPrefix("Donald Duck") }
+        #expect(donalds.count == 2)
+        #expect(donalds.contains { $0.card.variant == .normal })
+        #expect(donalds.contains { $0.card.variant == .foil })  // "Cold Foil"
+
+        let lilo = try #require(result.successful.first { $0.card.name.hasPrefix("Lilo") }?.card)
+        #expect(lilo.variant == .enchanted)
+        #expect(lilo.cardNumber == 223)
+    }
+
     @Test func importsCollectrExportEndToEnd() async throws {
         try await waitForCardData()
 
