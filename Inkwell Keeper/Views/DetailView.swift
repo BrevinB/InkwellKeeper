@@ -43,7 +43,7 @@ struct CardDetailView: View {
                         }
 
                         if !card.cardText.isEmpty {
-                            Text(card.cardText)
+                            CardTextView(text: card.cardText)
                                 .font(.body)
                                 .foregroundColor(.secondary)
                         }
@@ -262,7 +262,7 @@ struct CollectionCardDetailView: View {
                                 Text("Card Text:")
                                     .font(.headline)
                                     .foregroundColor(.lorcanaGold)
-                                Text(card.cardText)
+                                CardTextView(text: card.cardText)
                                     .font(.body)
                                     .foregroundColor(.white)
                             }
@@ -655,7 +655,7 @@ struct WishlistCardDetailView: View {
                                     Text("Card Text:")
                                         .font(.headline)
                                         .foregroundColor(.lorcanaGold)
-                                    Text(card.cardText)
+                                    CardTextView(text: card.cardText)
                                         .font(.body)
                                         .foregroundColor(.white)
                                 }
