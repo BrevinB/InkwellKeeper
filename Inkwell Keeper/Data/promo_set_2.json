@@ -258,11 +258,11 @@
       "rarity": "Promo",
       "setName": "Promo Set 2",
       "cardText": "TEETH AND AMBITIONS When you play this character, deal 2 damage to chosen character of yours to deal 2 damage to another chosen character.",
-      "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_8f083e7044764c369fd81b4ab60c3054.avif?1745500372",
+      "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_8f083e7044764c369fd81b4ab60c3054.avif?1775865387",
       "variant": "Promo",
       "cardNumber": 14,
       "uniqueId": "P2-014",
-      "inkwell": true,
+      "inkwell": false,
       "strength": 4,
       "willpower": 2,
       "lore": 3,
@@ -277,7 +277,7 @@
       "rarity": "Promo",
       "setName": "Promo Set 2",
       "cardText": "",
-      "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_d90411afb17e4ed3b6788da7f15c9c4e.avif?1745500395",
+      "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_d90411afb17e4ed3b6788da7f15c9c4e.avif?1775865391",
       "variant": "Promo",
       "cardNumber": 15,
       "uniqueId": "P2-015",
@@ -343,7 +343,7 @@
       "willpower": 3,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Sapphire"
     },
     {
       "id": "Promo_Set_2_20_Kronk___Laid_Back_Promo",
@@ -362,7 +362,7 @@
       "willpower": 4,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Emerald"
     },
     {
       "id": "Promo_Set_2_21_Perdita___Playful_Mother_Promo",
@@ -381,7 +381,7 @@
       "willpower": 4,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Sapphire"
     },
     {
       "id": "Promo_Set_2_22_Li_Shang___Newly_Promoted_Promo",
@@ -400,7 +400,7 @@
       "willpower": 3,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Ruby-Steel"
     },
     {
       "id": "Promo_Set_2_23_Snow_White___Fairest_in_the_Land_Promo",
@@ -438,7 +438,7 @@
       "willpower": 6,
       "lore": 3,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Emerald-Sapphire"
     },
     {
       "id": "Promo_Set_2_25_Lilo___Escape_Artist_Promo",
@@ -495,7 +495,7 @@
       "willpower": 7,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Steel"
     },
     {
       "id": "Promo_Set_2_28_Lady___Decisive_Dog_Promo",
@@ -514,7 +514,7 @@
       "willpower": 3,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Emerald"
     },
     {
       "id": "Promo_Set_2_29_Aladdin___Vigilant_Guard_Promo",
@@ -533,7 +533,7 @@
       "willpower": 9,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Sapphire-Steel"
     },
     {
       "id": "Promo_Set_2_30_Patch___Playful_Pup_Promo",
@@ -552,7 +552,7 @@
       "willpower": 2,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Sapphire"
     },
     {
       "id": "Promo_Set_2_31_Pull_the_Lever!_Promo",
@@ -571,7 +571,7 @@
       "willpower": null,
       "lore": null,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Emerald"
     },
     {
       "id": "Promo_Set_2_32_Jafar___High_Sultan_of_Lorcana_Promo",
@@ -590,7 +590,7 @@
       "willpower": 4,
       "lore": 3,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Steel"
     },
     {
       "id": "Promo_Set_2_33_Jafar___High_Sultan_of_Lorcana_Enchanted",
@@ -609,7 +609,7 @@
       "willpower": 4,
       "lore": 3,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Steel"
     },
     {
       "id": "Promo_Set_2_34_Archimedes___Resourceful_Owl_Promo",
@@ -647,7 +647,7 @@
       "willpower": 8,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Ruby"
     },
     {
       "id": "Promo_Set_2_36_Mickey_Mouse___True_Friend_Promo",

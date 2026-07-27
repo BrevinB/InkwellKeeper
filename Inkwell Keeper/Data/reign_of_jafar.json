@@ -96,7 +96,7 @@
       "willpower": 2,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Amethyst"
     },
     {
       "id": "Reign_of_Jafar_6_Minnie_Mouse___Daring_Defender",
@@ -115,7 +115,7 @@
       "willpower": 8,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Ruby"
     },
     {
       "id": "Reign_of_Jafar_7_Ludwig_Von_Drake___All_Around_Expert",
@@ -134,7 +134,7 @@
       "willpower": 1,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Sapphire"
     },
     {
       "id": "Reign_of_Jafar_8_Charlotte_La_Bouff___Mardi_Gras_Princess",
@@ -362,7 +362,7 @@
       "willpower": 2,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Amethyst"
     },
     {
       "id": "Reign_of_Jafar_20_Bruno_Madrigal___Singing_Seer",
@@ -381,7 +381,7 @@
       "willpower": 7,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Amethyst"
     },
     {
       "id": "Reign_of_Jafar_21_Kaa___Hypnotizing_Python",
@@ -400,7 +400,7 @@
       "willpower": 3,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Emerald"
     },
     {
       "id": "Reign_of_Jafar_22_Tramp___Dapper_Rascal",
@@ -419,7 +419,7 @@
       "willpower": 8,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Emerald"
     },
     {
       "id": "Reign_of_Jafar_23_King_Candy___Sugar_Rush_Nightmare",
@@ -438,7 +438,7 @@
       "willpower": 2,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Ruby"
     },
     {
       "id": "Reign_of_Jafar_24_Wreck_It_Ralph___Big_Lug",
@@ -457,7 +457,7 @@
       "willpower": 5,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Ruby"
     },
     {
       "id": "Reign_of_Jafar_25_Patch___Playful_Pup",
@@ -476,7 +476,7 @@
       "willpower": 2,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Sapphire"
     },
     {
       "id": "Reign_of_Jafar_26_Rolly___Chubby_Puppy",
@@ -495,7 +495,7 @@
       "willpower": 3,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Sapphire"
     },
     {
       "id": "Reign_of_Jafar_27_Perdita___Determined_Mother",
@@ -514,7 +514,7 @@
       "willpower": 6,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Sapphire"
     },
     {
       "id": "Reign_of_Jafar_28_Pluto___Tried_and_True",
@@ -533,7 +533,7 @@
       "willpower": 7,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Steel"
     },
     {
       "id": "Reign_of_Jafar_29_Bolt___Down_but_Not_Out",
@@ -552,7 +552,7 @@
       "willpower": 4,
       "lore": 4,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Steel"
     },
     {
       "id": "Reign_of_Jafar_30_Rhino___Power_Hamster",
@@ -571,7 +571,7 @@
       "willpower": 3,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Steel"
     },
     {
       "id": "Reign_of_Jafar_31_Antonios_Jaguar___Faithful_Companion",
@@ -628,7 +628,7 @@
       "willpower": 3,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Emerald"
     },
     {
       "id": "Reign_of_Jafar_34_Alma_Madrigal___Accepting_Grandmother",
@@ -742,7 +742,7 @@
       "willpower": null,
       "lore": null,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Ruby"
     },
     {
       "id": "Reign_of_Jafar_40_Shes_Your_Person",
@@ -761,7 +761,7 @@
       "willpower": null,
       "lore": null,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Steel"
     },
     {
       "id": "Reign_of_Jafar_41_Only_So_Much_Room",
@@ -780,7 +780,7 @@
       "willpower": null,
       "lore": null,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Emerald"
     },
     {
       "id": "Reign_of_Jafar_42_It_Means_No_Worries",
@@ -894,7 +894,7 @@
       "willpower": 3,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Ruby"
     },
     {
       "id": "Reign_of_Jafar_48_Hades___Ruthless_Tyrant",
@@ -932,7 +932,7 @@
       "willpower": 3,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Steel"
     },
     {
       "id": "Reign_of_Jafar_50_Abu___Illusory_Pachyderm",
@@ -951,7 +951,7 @@
       "willpower": 7,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Steel"
     },
     {
       "id": "Reign_of_Jafar_51_Bruno_Madrigal___Single_Minded",
@@ -1255,7 +1255,7 @@
       "willpower": 3,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Emerald"
     },
     {
       "id": "Reign_of_Jafar_67_Kuzco___Impulsive_Llama",
@@ -1274,7 +1274,7 @@
       "willpower": 5,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Emerald"
     },
     {
       "id": "Reign_of_Jafar_68_Yzma___On_Edge",
@@ -1293,7 +1293,7 @@
       "willpower": 6,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Emerald"
     },
     {
       "id": "Reign_of_Jafar_69_Madam_Mim___Rhino",
@@ -1312,7 +1312,7 @@
       "willpower": 5,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Ruby"
     },
     {
       "id": "Reign_of_Jafar_70_Mother_Gothel___Knows_Whats_Best",
@@ -1331,7 +1331,7 @@
       "willpower": 3,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Ruby"
     },
     {
       "id": "Reign_of_Jafar_71_Blue_Fairy___Guiding_Light",
@@ -1350,7 +1350,7 @@
       "willpower": 2,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Sapphire"
     },
     {
       "id": "Reign_of_Jafar_72_Anna___Magical_Mission",
@@ -1369,7 +1369,7 @@
       "willpower": 6,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Sapphire"
     },
     {
       "id": "Reign_of_Jafar_73_The_Sultan___Royal_Apparition",
@@ -1388,7 +1388,7 @@
       "willpower": 5,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Steel"
     },
     {
       "id": "Reign_of_Jafar_74_Jafar___High_Sultan_of_Lorcana",
@@ -1407,7 +1407,7 @@
       "willpower": 4,
       "lore": 3,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Steel"
     },
     {
       "id": "Reign_of_Jafar_75_Camilo_Madrigal___Center_Stage",
@@ -1521,7 +1521,7 @@
       "willpower": null,
       "lore": null,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Emerald"
     },
     {
       "id": "Reign_of_Jafar_81_Into_the_Unknown",
@@ -1540,7 +1540,7 @@
       "willpower": null,
       "lore": null,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Sapphire"
     },
     {
       "id": "Reign_of_Jafar_82_Everybodys_Got_a_Weakness",
@@ -1597,7 +1597,7 @@
       "willpower": null,
       "lore": null,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Sapphire"
     },
     {
       "id": "Reign_of_Jafar_85_Wilhelmina_Packard___The_Radio_Operator",
@@ -1958,7 +1958,7 @@
       "willpower": 2,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Emerald-Ruby"
     },
     {
       "id": "Reign_of_Jafar_104_Alice___Clumsy_as_Can_Be",
@@ -1977,7 +1977,7 @@
       "willpower": 6,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Emerald-Ruby"
     },
     {
       "id": "Reign_of_Jafar_105_Queen_of_Hearts___Haughty_Monarch",
@@ -1996,7 +1996,7 @@
       "willpower": 3,
       "lore": 3,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Emerald-Ruby"
     },
     {
       "id": "Reign_of_Jafar_106_Hiro_Hamada___Intuitive_Thinker",
@@ -2015,7 +2015,7 @@
       "willpower": 3,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Emerald-Sapphire"
     },
     {
       "id": "Reign_of_Jafar_107_Go_Go_Tomago___Cutting_Edge",
@@ -2034,7 +2034,7 @@
       "willpower": 3,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Emerald-Sapphire"
     },
     {
       "id": "Reign_of_Jafar_108_Don_Karnage___Air_Pirate_Leader",
@@ -2053,7 +2053,7 @@
       "willpower": 2,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Emerald-Steel"
     },
     {
       "id": "Reign_of_Jafar_109_Captain_Hook___The_Pirate_King",
@@ -2072,7 +2072,7 @@
       "willpower": 5,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Emerald-Steel"
     },
     {
       "id": "Reign_of_Jafar_110_Maui___Stubborn_Trickster",
@@ -2091,7 +2091,7 @@
       "willpower": 4,
       "lore": 3,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Emerald-Steel"
     },
     {
       "id": "Reign_of_Jafar_111_Honey_Lemon___Costumed_Catalyst",
@@ -2110,7 +2110,7 @@
       "willpower": 3,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Emerald-Sapphire"
     },
     {
       "id": "Reign_of_Jafar_112_Jock___Attentive_Uncle",
@@ -2224,7 +2224,7 @@
       "willpower": null,
       "lore": null,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Emerald-Ruby"
     },
     {
       "id": "Reign_of_Jafar_118_Walk_the_Plank!",
@@ -2243,7 +2243,7 @@
       "willpower": null,
       "lore": null,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Emerald-Steel"
     },
     {
       "id": "Reign_of_Jafar_119_Chem_Purse",
@@ -2338,7 +2338,7 @@
       "willpower": 3,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Ruby-Sapphire"
     },
     {
       "id": "Reign_of_Jafar_124_Vanellope_Von_Schweetz___Spunky_Speedster",
@@ -2623,7 +2623,7 @@
       "willpower": 2,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Ruby-Sapphire"
     },
     {
       "id": "Reign_of_Jafar_139_Lumiere___Fired_Up",
@@ -2642,7 +2642,7 @@
       "willpower": 3,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Ruby-Sapphire"
     },
     {
       "id": "Reign_of_Jafar_140_The_Coachman___Greedy_Deceiver",
@@ -2661,7 +2661,7 @@
       "willpower": 2,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Ruby-Steel"
     },
     {
       "id": "Reign_of_Jafar_141_Mulan___Charging_Ahead",
@@ -2680,7 +2680,7 @@
       "willpower": 3,
       "lore": 0,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Ruby-Steel"
     },
     {
       "id": "Reign_of_Jafar_142_Mushu___Your_Worst_Nightmare",
@@ -2699,7 +2699,7 @@
       "willpower": 6,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Ruby-Steel"
     },
     {
       "id": "Reign_of_Jafar_143_Mr._Snoops___Betrayed_Partner",
@@ -2813,7 +2813,7 @@
       "willpower": null,
       "lore": null,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Ruby-Sapphire"
     },
     {
       "id": "Reign_of_Jafar_149_Light_the_Fuse",
@@ -2832,7 +2832,7 @@
       "willpower": null,
       "lore": null,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Ruby-Steel"
     },
     {
       "id": "Reign_of_Jafar_150_Twitterpated",
@@ -3193,7 +3193,7 @@
       "willpower": 6,
       "lore": 3,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Sapphire-Steel"
     },
     {
       "id": "Reign_of_Jafar_169_Bernard___Over_Prepared",
@@ -3212,7 +3212,7 @@
       "willpower": 2,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Sapphire-Steel"
     },
     {
       "id": "Reign_of_Jafar_170_Aladdin___Vigilant_Guard",
@@ -3231,7 +3231,7 @@
       "willpower": 9,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Sapphire-Steel"
     },
     {
       "id": "Reign_of_Jafar_171_Jasmine___Steady_Strategist",
@@ -3250,7 +3250,7 @@
       "willpower": 5,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Sapphire-Steel"
     },
     {
       "id": "Reign_of_Jafar_172_Roquefort___Lock_Expert",
@@ -3896,7 +3896,7 @@
       "willpower": 3,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Emerald"
     },
     {
       "id": "Reign_of_Jafar_206_Wreck_It_Ralph___Big_Lug_Enchanted",
@@ -3915,7 +3915,7 @@
       "willpower": 5,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Ruby"
     },
     {
       "id": "Reign_of_Jafar_207_Perdita___Determined_Mother_Enchanted",
@@ -3934,7 +3934,7 @@
       "willpower": 6,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amber-Sapphire"
     },
     {
       "id": "Reign_of_Jafar_208_It_Means_No_Worries_Enchanted",
@@ -3991,7 +3991,7 @@
       "willpower": 5,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Emerald"
     },
     {
       "id": "Reign_of_Jafar_211_Mother_Gothel___Knows_Whats_Best_Enchanted",
@@ -4010,7 +4010,7 @@
       "willpower": 3,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Ruby"
     },
     {
       "id": "Reign_of_Jafar_212_Fantastical_and_Magical_Enchanted",
@@ -4048,7 +4048,7 @@
       "willpower": null,
       "lore": null,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Amethyst-Sapphire"
     },
     {
       "id": "Reign_of_Jafar_214_Rapunzel___High_Climber_Enchanted",
@@ -4086,7 +4086,7 @@
       "willpower": 5,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Emerald-Steel"
     },
     {
       "id": "Reign_of_Jafar_216_Wrong_Lever!_Enchanted",
@@ -4143,7 +4143,7 @@
       "willpower": 6,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Ruby-Steel"
     },
     {
       "id": "Reign_of_Jafar_219_The_Sword_of_Shan_Yu_Enchanted",
@@ -4200,7 +4200,7 @@
       "willpower": 5,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Sapphire-Steel"
     },
     {
       "id": "Reign_of_Jafar_222_Desperate_Plan_Enchanted",

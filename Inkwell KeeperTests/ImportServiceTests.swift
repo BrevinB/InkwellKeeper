@@ -173,6 +173,25 @@ struct ImportServiceTests {
         #expect(card.setName == "Azurite Sea")
     }
 
+    /// Attack of the Vine shipped with spoiler-season labels (Epics as Enchanted,
+    /// wrong Iconics). Pin the corrected distribution so a stale re-sync can't
+    /// silently reintroduce it.
+    @Test func attackOfTheVineRaritiesAreCorrected() async throws {
+        try await waitForCardData()
+
+        let aov = SetsDataManager.shared.getCardsForSet("Attack of the Vine!")
+        try #require(!aov.isEmpty)
+
+        func rarity(of number: Int) -> CardRarity? {
+            aov.first { $0.cardNumber == number }?.rarity
+        }
+        #expect(rarity(of: 219) == .epic)       // Dash Parr - Dodgeball Dynamo
+        #expect(rarity(of: 229) == .enchanted)  // Sulley & Boo - Scare Buddies
+        #expect(rarity(of: 244) == .iconic)     // Lilo & Stitch - Fun-Loving Friends
+        #expect(aov.filter { $0.rarity == .epic }.count == 18)
+        #expect(aov.filter { $0.rarity == .iconic }.count == 2)
+    }
+
     @Test func importsSetThirteenCards() async throws {
         try await waitForCardData()
 

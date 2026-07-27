@@ -134,7 +134,8 @@ def to_app_card(card: dict, set_code: str, set_name: str) -> dict:
         "willpower": card.get("willpower"),
         "lore": card.get("lore"),
         "franchise": "",
-        "inkColor": card.get("ink") or "",
+        # Dual-ink cards carry an `inks` array with `ink` null
+        "inkColor": card.get("ink") or "-".join(card.get("inks") or []),
     }
 
 

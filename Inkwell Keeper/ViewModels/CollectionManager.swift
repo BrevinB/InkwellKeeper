@@ -81,6 +81,7 @@ class CollectionManager: ObservableObject {
         wipeStaleEstimatedPricesIfNeeded(context: context)
         repairBulkAddVariantCorruptionIfNeeded(context: context)
         repairPromoRarityCorruptionIfNeeded(context: context)
+        repairSpecialPrintingMetadataIfNeeded(context: context)
         mergeDuplicateCollectedCards()
         loadCollection()
         startObservingRemoteChanges()
@@ -313,6 +314,68 @@ class CollectionManager: ObservableObject {
         } catch {
             // Non-fatal — the underlying bug is already fixed in code, so new promo
             // adds/scans won't reintroduce the corruption.
+        }
+    }
+
+    /// One-time realignment of stored special-printing metadata with the bundled
+    /// catalog. Attack of the Vine shipped with spoiler-season labels — 15 Epics
+    /// stored as Enchanted, two Enchanteds as Iconic, one Enchanted as a normal
+    /// Super Rare — so rows added before the data correction carry the wrong
+    /// variant/rarity and stop matching ownership checks. Catalog rows with a
+    /// special variant are the source of truth for their uniqueId; Normal/Foil
+    /// uniqueIds are never touched.
+    private func repairSpecialPrintingMetadataIfNeeded(context: ModelContext) {
+        let defaultsKey = "didRepairSpecialPrintingMetadata_v1"
+        guard !UserDefaults.standard.bool(forKey: defaultsKey) else { return }
+
+        Task { @MainActor in
+            var attempts = 0
+            while SetsDataManager.shared.getAllCards().isEmpty && attempts < 60 {
+                try? await Task.sleep(for: .milliseconds(500))
+                attempts += 1
+            }
+            guard !SetsDataManager.shared.getAllCards().isEmpty else { return }
+
+            performSpecialPrintingRepair(context: context)
+            UserDefaults.standard.set(true, forKey: defaultsKey)
+        }
+    }
+
+    @MainActor
+    private func performSpecialPrintingRepair(context: ModelContext) {
+        let specialVariants: Set<CardVariant> = [.enchanted, .epic, .iconic]
+        var catalogByUniqueId: [String: LorcanaCard] = [:]
+        for card in SetsDataManager.shared.getAllCards() {
+            if let uniqueId = card.uniqueId, !uniqueId.isEmpty, specialVariants.contains(card.variant) {
+                catalogByUniqueId[uniqueId] = card
+            }
+        }
+        guard !catalogByUniqueId.isEmpty else { return }
+
+        do {
+            let allCards = try context.fetch(FetchDescriptor<CollectedCard>())
+            var changed = 0
+            for record in allCards {
+                guard let uniqueId = record.uniqueId, let catalog = catalogByUniqueId[uniqueId] else { continue }
+                let needsVariant = record.variant != catalog.variant.rawValue
+                let needsRarity = record.cardRarity != catalog.rarity
+                let needsName = record.name != catalog.name
+                guard needsVariant || needsRarity || needsName else { continue }
+
+                record.variant = catalog.variant.rawValue
+                record.cardRarity = catalog.rarity
+                record.name = catalog.name
+                record.cardId = catalog.id
+                changed += 1
+            }
+
+            if changed > 0 {
+                try context.save()
+                updateCollectedCardsInPlace()
+                print("[Repair] Realigned \(changed) special-printing rows with catalog")
+            }
+        } catch {
+            // Non-fatal — set browsing reads the corrected catalog either way.
         }
     }
 

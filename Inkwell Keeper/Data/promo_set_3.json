@@ -343,7 +343,7 @@
       "willpower": 3,
       "lore": 2,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Steel"
     },
     {
       "id": "Promo_Set_3_19_The_Great_Illuminary___Abandoned_Laboratory_Promo",
@@ -656,7 +656,7 @@
       "type": "Character",
       "rarity": "Promo",
       "setName": "Promo Set 3",
-      "cardText": "AMPED UP While you have a character named Lilo in play, this character gains Challenger +3. (They get +3 {S} while challenging.)\n\n\"No more caffeine for you.\"\n–Lilo",
+      "cardText": "AMPED UP While you have a character named Lilo in play, this character gains Challenger +3. (They get +3 {S} while challenging.)\n\n\"No more caffeine for you.\"\n—Lilo",
       "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_4c09dc7e3fdc48aab378abc5e84546a4.avif?1773508893",
       "variant": "Promo",
       "cardNumber": 35,
@@ -666,7 +666,7 @@
       "willpower": 2,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Steel"
     },
     {
       "id": "Promo_Set_3_36_Scrooge_McDuck___S.H.U.S.H._Agent_Promo",
@@ -723,7 +723,7 @@
       "willpower": 1,
       "lore": 1,
       "franchise": "",
-      "inkColor": null
+      "inkColor": "Steel"
     },
     {
       "id": "Promo_Set_3_39_Goofy___Set_for_Adventure_Promo",
@@ -835,7 +835,7 @@
       "inkwell": true,
       "strength": 3,
       "willpower": 5,
-      "lore": 1,
+      "lore": 2,
       "franchise": "",
       "inkColor": "Amethyst"
     },
@@ -854,18 +854,18 @@
       "inkwell": true,
       "strength": 4,
       "willpower": 4,
-      "lore": 3,
+      "lore": 4,
       "franchise": "",
       "inkColor": "Emerald"
     },
     {
-      "id": "Promo_Set_3_46_Queen_Of_Hearts___Impatient_Traveler_Promo",
-      "name": "Queen Of Hearts - Impatient Traveler",
+      "id": "Promo_Set_3_46_Queen_of_Hearts___Impatient_Traveler_Promo",
+      "name": "Queen of Hearts - Impatient Traveler",
       "cost": 4,
       "type": "Character",
       "rarity": "Promo",
       "setName": "Promo Set 3",
-      "cardText": "ROYAL COMMAND Whenever this character quests, if you played another character this turn, chosen character gains Rush this turn. (They can challenge the turn they’re played.)\n\nHours of walking in the heat had not improved her rosy disposition.",
+      "cardText": "ROYAL COMMAND Whenever this character quests, if you played another character this turn, chosen character gains Rush this turn. (They can challenge the turn they're played.)\n\nHours of walking in the heat had not improved her rosy disposition.",
       "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_b2eea1c89b5d48689e3fe6209acaae46.avif?1773508992",
       "variant": "Promo",
       "cardNumber": 46,
@@ -911,7 +911,7 @@
       "inkwell": true,
       "strength": 4,
       "willpower": 5,
-      "lore": null,
+      "lore": 1,
       "franchise": "",
       "inkColor": "Steel"
     },

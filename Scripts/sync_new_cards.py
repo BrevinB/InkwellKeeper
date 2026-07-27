@@ -95,6 +95,53 @@ def build_targets(sets_doc: dict) -> list:
     return targets
 
 
+REFRESHABLE_FIELDS = [
+    "name", "cost", "type", "rarity", "cardText", "imageUrl", "variant",
+    "inkwell", "strength", "willpower", "lore", "inkColor", "id",
+]
+
+
+def refresh_target(target: dict, dry_run: bool) -> int:
+    """Update existing cards in place from LorCast — rarities, names, and text
+    get corrected upstream after spoiler season, and plain syncing only appends.
+    Cards are matched by uniqueId; ids/variants are refreshed too (they embed
+    name and variant). Returns the number of cards changed."""
+    path = DATA_DIR / target["filename"]
+    if not path.exists():
+        return 0
+
+    remote = ucd.fetch_set_prints(target["query"])
+    if not remote:
+        return 0
+    converted = {c["uniqueId"]: c for c in
+                 (ucd.to_app_card(r, target["set_code"], target["set_name"]) for r in remote)
+                 if c.get("uniqueId")}
+
+    with open(path, encoding="utf-8") as f:
+        doc = json.load(f)
+
+    changed = 0
+    for card in doc.get("cards", []):
+        fresh = converted.get(card.get("uniqueId"))
+        if not fresh:
+            continue
+        diffs = {f: (card.get(f), fresh.get(f)) for f in REFRESHABLE_FIELDS
+                 if card.get(f) != fresh.get(f) and fresh.get(f) is not None}
+        if not diffs:
+            continue
+        changed += 1
+        summary = ", ".join(f"{k}: {old!r}→{new!r}" for k, (old, new) in diffs.items()
+                            if k in ("name", "rarity", "variant"))
+        print(f"  ~ {card.get('uniqueId')}: {summary or ', '.join(diffs)}")
+        if not dry_run:
+            for field, (_, new) in diffs.items():
+                card[field] = new
+
+    if changed and not dry_run:
+        path.write_text(json.dumps(doc, indent=2, ensure_ascii=False), encoding="utf-8")
+    return changed
+
+
 def sync_target(target: dict, dry_run: bool) -> int:
     """Merge missing LorCast prints into one local set file. Returns cards added."""
     path = DATA_DIR / target["filename"]
@@ -161,16 +208,14 @@ def regen_official_ids(dry_run: bool) -> bool:
     if len(out) < old_count:
         print(f"  ! LorcanaJSON returned fewer ids ({len(out)}) than local ({old_count}) — not overwriting")
         return False
-    if len(out) == old_count:
+    new_payload = json.dumps({"cards": out}, separators=(",", ":"), ensure_ascii=False)
+    if path.exists() and path.read_text(encoding="utf-8") == new_payload:
         print(f"  official_card_ids.json: up to date ({old_count} ids)")
         return False
 
-    print(f"  official_card_ids.json: {old_count} → {len(out)} ids")
+    print(f"  official_card_ids.json: {old_count} → {len(out)} ids (content updated)")
     if not dry_run:
-        path.write_text(
-            json.dumps({"cards": out}, separators=(",", ":"), ensure_ascii=False),
-            encoding="utf-8",
-        )
+        path.write_text(new_payload, encoding="utf-8")
     return True
 
 
@@ -408,6 +453,7 @@ def main():
     parser.add_argument("--name", help="exact set name for --new-set (match LorCast, incl. punctuation)")
     parser.add_argument("--backend-repo", type=Path, default=DEFAULT_BACKEND_REPO)
     parser.add_argument("--skip-images", action="store_true", help="don't download missing bundled card images")
+    parser.add_argument("--refresh", action="store_true", help="also update existing cards in place (upstream rarity/name corrections)")
     args = parser.parse_args()
 
     if args.new_set and not (args.code and args.name):
@@ -417,14 +463,19 @@ def main():
 
     print("=== Syncing known sets ===")
     total_added = 0
+    total_refreshed = 0
     for target in build_targets(sets_doc):
         try:
             total_added += sync_target(target, args.dry_run)
+            if args.refresh:
+                total_refreshed += refresh_target(target, args.dry_run)
         except Exception as e:
             print(f"  ! {target['set_name']}: sync failed: {e}")
         time.sleep(0.4)
-    if total_added == 0:
+    if total_added == 0 and total_refreshed == 0:
         print("  all known sets up to date")
+    elif total_refreshed:
+        print(f"  refreshed {total_refreshed} existing cards")
 
     print("\n=== Official app backup id map ===")
     ids_changed = regen_official_ids(args.dry_run)
@@ -444,7 +495,7 @@ def main():
                 print(f"  {s.get('code')}: {s.get('name')} — rerun with:")
                 print(f"    python3 Scripts/sync_new_cards.py --new-set {s.get('code')} --code <CODE> --name \"{s.get('name')}\"")
 
-    changed = total_added > 0 or ids_changed or images_added > 0
+    changed = total_added > 0 or total_refreshed > 0 or ids_changed or images_added > 0
     print(f"\n{'DRY RUN — nothing written. ' if args.dry_run else ''}"
           f"{'Changes made.' if changed else 'Everything up to date.'}")
     sys.exit(0)
