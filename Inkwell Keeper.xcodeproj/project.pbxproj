@@ -102,9 +102,11 @@
 		23E099232F6CF6DC0063C758 /* CompactPhotoAttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23E099222F6CF6DC0063C758 /* CompactPhotoAttachmentView.swift */; };
 		23E8DB0E2FE8871D00BF5EB4 /* ManualAddCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23E8DB0D2FE8871D00BF5EB4 /* ManualAddCardView.swift */; };
 		23E8DB102FE8883400BF5EB4 /* SimpleCardSearchRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23E8DB0F2FE8883400BF5EB4 /* SimpleCardSearchRow.swift */; };
+		2425F543699122367174B73F /* SetFilterEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E0416C4BA7D5BEB997B4DC5 /* SetFilterEngineTests.swift */; };
 		24F006AF660D446BAA2A4898 /* PricingInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F6FB2C58AC4849856F7DB2 /* PricingInfoView.swift */; };
 		27A345B145C2F65F518680C5 /* CloudSyncingPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78E531191161FBB262195AB8 /* CloudSyncingPlaceholderView.swift */; };
 		27B72DD6CD3BB181CA40330D /* CloudSyncBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9BB03867D8A4F4D71320AF8 /* CloudSyncBanner.swift */; };
+		2D8953874A7404C59278820B /* SetFilterModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C17FA3D6A4FC54BFE2CBC6 /* SetFilterModels.swift */; };
 		2E8C230A7C7346CDB8139B7D /* StatsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF2A26313064CEB985D1463 /* StatsViewModel.swift */; };
 		33BC6BA59BCB415FB26BED1B /* TypeBreakdownCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFF6B0A02D74D5DBDDBD4B1 /* TypeBreakdownCard.swift */; };
 		3FDC3C18E5754BB18B3D3CA6 /* StatsOverviewCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3E270541E24B3288B8E542 /* StatsOverviewCard.swift */; };
@@ -148,6 +150,7 @@
 		D713553E04644B5A986AC5C2 /* TopValuableCardsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C326BEDCB4F436483894B4D /* TopValuableCardsCard.swift */; };
 		DBC03F974A434FEAA071F27B /* CostCurveCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3744E1396FD647F29C30135B /* CostCurveCard.swift */; };
 		DBF26E31CEBF6320A28F7321 /* HaulShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E761EA81FCE34454D43AFF1 /* HaulShareView.swift */; };
+		DDAEFBFF2FF04EF2DCFB815B /* SetFilterBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F281DF5C7B88E62FEDF540C /* SetFilterBar.swift */; };
 		E2F3A4B5C6D7E8F9A0B1C3D5 /* MultiScanReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F3A4B5C6D7E8F9A0B1C3D4 /* MultiScanReviewView.swift */; };
 		EC289C46CFDECD9AF1BA235D /* ShareMilestone.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0C40ABB4DEDF6D9008F0E1 /* ShareMilestone.swift */; };
 		F1CARD5EB6A63F /* CardSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1CARD5EA3181D /* CardSearchView.swift */; };
@@ -265,9 +268,11 @@
 		2F1B8FB605BA4901A05BB709 /* InkColorChartCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkColorChartCard.swift; sourceTree = "<group>"; };
 		3744E1396FD647F29C30135B /* CostCurveCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CostCurveCard.swift; sourceTree = "<group>"; };
 		3C3E270541E24B3288B8E542 /* StatsOverviewCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsOverviewCard.swift; sourceTree = "<group>"; };
+		3E0416C4BA7D5BEB997B4DC5 /* SetFilterEngineTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetFilterEngineTests.swift; sourceTree = "<group>"; };
 		40A1198A827C589B87EBB410 /* PricingSelectionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PricingSelectionTests.swift; sourceTree = "<group>"; };
 		41F904F6589D32CF7AE1C322 /* ImportServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ImportServiceTests.swift; sourceTree = "<group>"; };
 		4443B3280ED4450783544968 /* StatsCardContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsCardContainer.swift; sourceTree = "<group>"; };
+		49C17FA3D6A4FC54BFE2CBC6 /* SetFilterModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetFilterModels.swift; sourceTree = "<group>"; };
 		51F6FB2C58AC4849856F7DB2 /* PricingInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PricingInfoView.swift; sourceTree = "<group>"; };
 		53FCC9D910C812A33485BFD9 /* MilestoneShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MilestoneShareCardView.swift; sourceTree = "<group>"; };
 		540D1DF38A5CB4BFAB840E60 /* DeckShareCodeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckShareCodeTests.swift; sourceTree = "<group>"; };
@@ -277,6 +282,7 @@
 		62B893B8E6EECDC960A44D4D /* CloudSyncOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncOverlay.swift; sourceTree = "<group>"; };
 		6AA815C9650049DB84CB04F7 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		6B694B966E1368E8FACC186E /* DeckShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckShareCardView.swift; sourceTree = "<group>"; };
+		6F281DF5C7B88E62FEDF540C /* SetFilterBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetFilterBar.swift; sourceTree = "<group>"; };
 		6F563B3E0A2A73C9FA17CEDD /* CardTextParsingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardTextParsingTests.swift; sourceTree = "<group>"; };
 		725A18D9BE0D05A991CB6FD8 /* CloudSyncMonitor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncMonitor.swift; sourceTree = "<group>"; };
 		7604DCFB6FA45F47A3674BC6 /* StatsSummaryShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StatsSummaryShareCardView.swift; sourceTree = "<group>"; };
@@ -459,6 +465,7 @@
 				23B90B322E66337A00214C40 /* SwiftDataModels.swift */,
 				23B90B302E66337500214C40 /* FilterModels.swift */,
 				BC0C40ABB4DEDF6D9008F0E1 /* ShareMilestone.swift */,
+				49C17FA3D6A4FC54BFE2CBC6 /* SetFilterModels.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -578,6 +585,7 @@
 				23E8DB0F2FE8883400BF5EB4 /* SimpleCardSearchRow.swift */,
 				562E6A8A28051109039D43EB /* PriceHistoryChartView.swift */,
 				1DA4228D6C3310035BB99ACE /* CardTextView.swift */,
+				6F281DF5C7B88E62FEDF540C /* SetFilterBar.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -609,6 +617,7 @@
 				41F904F6589D32CF7AE1C322 /* ImportServiceTests.swift */,
 				40A1198A827C589B87EBB410 /* PricingSelectionTests.swift */,
 				6F563B3E0A2A73C9FA17CEDD /* CardTextParsingTests.swift */,
+				3E0416C4BA7D5BEB997B4DC5 /* SetFilterEngineTests.swift */,
 			);
 			path = "Inkwell KeeperTests";
 			sourceTree = "<group>";
@@ -875,6 +884,8 @@
 				59F3877E7AB0B16A94EC71FE /* CollectionEmptyStateContent.swift in Sources */,
 				8156D2B786BA1B2EC53B6DE8 /* PriceHistoryChartView.swift in Sources */,
 				09E7CCED7FB465A17BAA2526 /* CardTextView.swift in Sources */,
+				2D8953874A7404C59278820B /* SetFilterModels.swift in Sources */,
+				DDAEFBFF2FF04EF2DCFB815B /* SetFilterBar.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -888,6 +899,7 @@
 				BD0907CB8EF4B414BDE45F1D /* ImportServiceTests.swift in Sources */,
 				21B089C1E42CC3E9A0094048 /* PricingSelectionTests.swift in Sources */,
 				FDDB7B89E7151EA98551BF2C /* CardTextParsingTests.swift in Sources */,
+				2425F543699122367174B73F /* SetFilterEngineTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

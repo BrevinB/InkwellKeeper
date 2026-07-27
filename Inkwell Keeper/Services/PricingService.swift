@@ -365,6 +365,61 @@ class PricingService: ObservableObject {
         return "\(code)-\(card.id)"
     }
 
+    // MARK: - Bulk Prices (backend)
+
+    private struct BulkPriceResponse: Codable {
+        let prices: [Item]
+
+        struct Item: Codable {
+            let uniqueId: String
+            let bestPriceUsd: Double?
+
+            enum CodingKeys: String, CodingKey {
+                case uniqueId = "unique_id"
+                case bestPriceUsd = "best_price_usd"
+            }
+        }
+    }
+
+    /// Fetch prices for many cards in one request (e.g. a whole set for
+    /// price filtering). Returns a map keyed by each card's `id`.
+    func fetchBulkPrices(for cards: [LorcanaCard]) async -> [String: Double] {
+        guard !cards.isEmpty else { return [:] }
+
+        let idPairs = cards.map { (cardId: $0.id, uniqueId: buildUniqueId(for: $0)) }
+        var priceByUniqueId: [String: Double] = [:]
+
+        // Backend caps bulk lookups at 500 ids per request
+        let uniqueIds = Array(Set(idPairs.map(\.uniqueId)))
+        for chunk in stride(from: 0, to: uniqueIds.count, by: 400).map({ Array(uniqueIds[$0..<min($0 + 400, uniqueIds.count)]) }) {
+            guard let url = URL(string: "\(inkwellAPIBaseURL)/prices/bulk") else { continue }
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.timeoutInterval = 15
+            request.httpBody = try? JSONEncoder().encode(["unique_ids": chunk])
+
+            guard let (data, response) = try? await session.data(for: request),
+                  (response as? HTTPURLResponse)?.statusCode == 200,
+                  let decoded = try? JSONDecoder().decode(BulkPriceResponse.self, from: data) else {
+                continue
+            }
+            for item in decoded.prices {
+                if let price = item.bestPriceUsd {
+                    priceByUniqueId[item.uniqueId] = price
+                }
+            }
+        }
+
+        var result: [String: Double] = [:]
+        for pair in idPairs {
+            if let price = priceByUniqueId[pair.uniqueId] {
+                result[pair.cardId] = price
+            }
+        }
+        return result
+    }
+
     // MARK: - Price History (backend)
 
     /// One daily market price point for a card's printing.

@@ -14,8 +14,13 @@ struct SetDetailView: View {
     @State private var cards: [LorcanaCard] = []
     @State private var selectedCard: LorcanaCard?
     @State private var selectedCardGroupForAdd: CardGroup?
-    @State private var showFilterOptions = false
-    @State private var filterOption: FilterOption = .all
+    @State private var filterOption: SetOwnershipFilter = .all
+    @State private var selectedInkColor: InkColorFilter = .all
+    @State private var selectedRarity: CardRarity?
+    @State private var selectedVariant: VariantFilter = .all
+    @State private var priceFilter: PriceFilter = .all
+    @State private var sortOption: SetSortOption = .cardNumber
+    @State private var setPrices: [String: Double] = [:]
     @State private var searchText = ""
     @State private var isBulkSelectMode = false
     @State private var selectedCardIds: Set<String> = []
@@ -37,20 +42,6 @@ struct SetDetailView: View {
         cards.filter { selectedCardIds.contains($0.id) }
     }
     
-    enum FilterOption: String, CaseIterable {
-        case all = "All Cards"
-        case owned = "Owned"
-        case missing = "Missing"
-        
-        var systemImage: String {
-            switch self {
-            case .all: return "rectangle.grid.3x2"
-            case .owned: return "checkmark.circle"
-            case .missing: return "xmark.circle"
-            }
-        }
-    }
-    
     @State private var filteredCards: [LorcanaCard] = []
     
     private var progress: (collected: Int, total: Int, percentage: Double) {
@@ -59,110 +50,100 @@ struct SetDetailView: View {
         return collectionManager.getSetProgress(set.name, totalCardsInSet: totalCards)
     }
     
-    var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                // Progress header
-                VStack(spacing: 12) {
+
+    private var progressHeader: some View {
+            // Progress header
+            VStack(spacing: 12) {
+                HStack {
+                    Text(set.name)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+
+                    Spacer()
+
+                    Text("\(Int(progress.percentage))% Complete")
+                        .font(.headline)
+                        .foregroundColor(.lorcanaGold)
+                }
+
+                HStack {
+                    Text("\(progress.collected) of \(progress.total) cards collected")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+
+                    Spacer()
+                }
+
+                SetFilterBar(
+                    ownership: $filterOption,
+                    inkColor: $selectedInkColor,
+                    rarity: $selectedRarity,
+                    variant: $selectedVariant,
+                    price: $priceFilter,
+                    sortOption: $sortOption
+                )
+
+                // Bulk select controls
+                if isBulkSelectMode {
                     HStack {
-                        Text(set.name)
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-
-                        Spacer()
-
-                        Text("\(Int(progress.percentage))% Complete")
-                            .font(.headline)
-                            .foregroundColor(.lorcanaGold)
-                    }
-
-                    HStack {
-                        Text("\(progress.collected) of \(progress.total) cards collected")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-
-                        Spacer()
-
-                        // Filter button
-                        Button(action: { showFilterOptions = true }) {
+                        Button(action: {
+                            if selectedCardIds.count == missingCards.count {
+                                selectedCardIds.removeAll()
+                            } else {
+                                selectedCardIds = Set(missingCards.map { $0.id })
+                            }
+                        }) {
                             HStack(spacing: 4) {
-                                Image(systemName: filterOption.systemImage)
-                                Text(filterOption.rawValue)
+                                Image(systemName: selectedCardIds.count == missingCards.count ? "checkmark.circle.fill" : "circle")
+                                Text(selectedCardIds.count == missingCards.count ? "Deselect All" : "Select All Missing")
                             }
                             .font(.caption)
                             .foregroundColor(.lorcanaGold)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(Color.lorcanaGold.opacity(0.2))
-                            )
                         }
-                        .confirmationDialog("Filter Cards", isPresented: $showFilterOptions) {
-                            ForEach(FilterOption.allCases, id: \.self) { option in
-                                Button(option.rawValue) {
-                                    filterOption = option
-                                }
-                            }
-                            Button("Cancel", role: .cancel) { }
-                        }
+
+                        Spacer()
+
+                        Text("\(selectedCardIds.count) selected")
+                            .font(.caption)
+                            .foregroundColor(.gray)
                     }
-
-                    // Bulk select controls
-                    if isBulkSelectMode {
-                        HStack {
-                            Button(action: {
-                                if selectedCardIds.count == missingCards.count {
-                                    selectedCardIds.removeAll()
-                                } else {
-                                    selectedCardIds = Set(missingCards.map { $0.id })
-                                }
-                            }) {
-                                HStack(spacing: 4) {
-                                    Image(systemName: selectedCardIds.count == missingCards.count ? "checkmark.circle.fill" : "circle")
-                                    Text(selectedCardIds.count == missingCards.count ? "Deselect All" : "Select All Missing")
-                                }
-                                .font(.caption)
-                                .foregroundColor(.lorcanaGold)
-                            }
-
-                            Spacer()
-
-                            Text("\(selectedCardIds.count) selected")
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                        }
-                    }
-
-                    // Search bar
-                    SearchBar(text: $searchText)
-                    
-                    // Progress bar
-                    GeometryReader { geometry in
-                        ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.gray.opacity(0.3))
-                                .frame(height: 6)
-                            
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(
-                                    LinearGradient(
-                                        colors: [.lorcanaGold, .lorcanaGold.opacity(0.7)],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
-                                .frame(
-                                    width: geometry.size.width * (progress.percentage / 100),
-                                    height: 6
-                                )
-                        }
-                    }
-                    .frame(height: 6)
                 }
-                .padding()
-                .background(Color.lorcanaDark.opacity(0.3))
+
+                // Search bar
+                SearchBar(text: $searchText)
+                
+                // Progress bar
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(height: 6)
+                        
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(
+                                LinearGradient(
+                                    colors: [.lorcanaGold, .lorcanaGold.opacity(0.7)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .frame(
+                                width: geometry.size.width * (progress.percentage / 100),
+                                height: 6
+                            )
+                    }
+                }
+                .frame(height: 6)
+            }
+            .padding()
+            .background(Color.lorcanaDark.opacity(0.3))
+    }
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 0) {
+                progressHeader
                 
                 // Cards grid
                 if cards.isEmpty && dataManager.hasLocalCards(for: set.name) {
@@ -331,7 +312,11 @@ struct SetDetailView: View {
             loadCards()
             recomputeFilteredCards()
         }
-        .onChange(of: filterOption) { recomputeFilteredCards() }
+        .onChange(of: filterStateKey) { recomputeFilteredCards() }
+        .task(id: set.name) {
+            setPrices = await PricingService.shared.fetchBulkPrices(for: cards)
+            recomputeFilteredCards()
+        }
         .onChange(of: searchText) { recomputeFilteredCards() }
         .onChange(of: cards.count) { recomputeFilteredCards() }
         .onChange(of: collectionManager.collectedCards.count) { recomputeFilteredCards() }
@@ -357,7 +342,7 @@ struct SetDetailView: View {
             .environmentObject(collectionManager)
         }
         .confirmationDialog(
-            "Add \(selectedCardIds.count) card\(selectedCardIds.count == 1 ? "" : "s") to collection?",
+            bulkAddConfirmationTitle,
             isPresented: $showBulkAddConfirmation,
             titleVisibility: .visible
         ) {
@@ -479,27 +464,29 @@ struct SetDetailView: View {
     }
 
     // Helper function to check if a specific card is collected
+    /// Composite of every filter/sort selection — one onChange target instead of
+    /// six, which also keeps the body's modifier chain type-checkable.
+    private var filterStateKey: String {
+        "\(filterOption.rawValue)|\(selectedInkColor.rawValue)|\(selectedRarity?.rawValue ?? "-")|\(selectedVariant.rawValue)|\(priceFilter.rawValue)|\(sortOption.rawValue)"
+    }
+
+    private var bulkAddConfirmationTitle: String {
+        "Add \(selectedCardIds.count) card\(selectedCardIds.count == 1 ? "" : "s") to collection?"
+    }
+
     private func recomputeFilteredCards() {
-        var filtered: [LorcanaCard]
-
-        switch filterOption {
-        case .all:
-            filtered = cards
-        case .owned:
-            filtered = cards.filter { isCardCollectedInSet($0) }
-        case .missing:
-            filtered = cards.filter { !isCardCollectedInSet($0) }
-        }
-
-        if !searchText.isEmpty {
-            filtered = filtered.filter { card in
-                card.name.localizedStandardContains(searchText) ||
-                card.cardText.localizedStandardContains(searchText) ||
-                card.cardNumber.map { String($0).localizedStandardContains(searchText) } ?? false
-            }
-        }
-
-        filteredCards = filtered
+        let filtered = SetCardFilterEngine.apply(
+            to: cards,
+            ownership: filterOption,
+            inkColor: selectedInkColor,
+            rarity: selectedRarity,
+            variant: selectedVariant,
+            price: priceFilter,
+            searchText: searchText,
+            prices: setPrices,
+            isOwned: isCardCollectedInSet
+        )
+        filteredCards = SetCardFilterEngine.sort(filtered, by: sortOption, prices: setPrices)
     }
 
     private func isCardCollectedInSet(_ card: LorcanaCard) -> Bool {
