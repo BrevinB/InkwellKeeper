@@ -393,8 +393,13 @@ struct RulesChatView: View {
                     proxy.scrollTo("bottom", anchor: .bottom)
                 }
             }
-            .onChange(of: service.currentStreamingContent) {
-                proxy.scrollTo("bottom", anchor: .bottom)
+            .onChange(of: service.currentStreamingContent) { oldValue, newValue in
+                // Scroll roughly every couple of rendered lines (~80 chars) rather than on
+                // every token — chunk-frequency scrolls fight the still-settling layout
+                // and read as jitter.
+                if oldValue.isEmpty || newValue.isEmpty || newValue.count / 80 != oldValue.count / 80 {
+                    proxy.scrollTo("bottom", anchor: .bottom)
+                }
             }
             .sheet(item: $rulingToShare) { ruling in
                 ShareCardPresenter(
@@ -1103,7 +1108,10 @@ struct MarkdownContentView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            ForEach(blocks) { block in
+            // Position-based identity keeps existing blocks stable while streaming appends
+            // text — fresh UUIDs here made SwiftUI rebuild every block on every chunk,
+            // which visibly jittered the transcript.
+            ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
                 block.view
             }
         }
@@ -1117,8 +1125,7 @@ struct MarkdownContentView: View {
     }
 }
 
-private struct MarkdownBlock: Identifiable {
-    let id = UUID()
+private struct MarkdownBlock {
     let line: String
 
     var isBlank: Bool { line.trimmingCharacters(in: .whitespaces).isEmpty }
