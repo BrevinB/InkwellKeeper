@@ -32,9 +32,11 @@ fi
 MARKET=$(python3 Scripts/market_report.py --days 7 --top 5 2>&1) || MARKET="MARKET REPORT FAILED — draft without market numbers and say so."
 SHIPPED=$(git log --oneline --since="1 week ago" | head -25)
 
-PROMPT="You are the weekly marketing-drafts writer for Ink Well Keeper, a free iOS Disney Lorcana collection tracker built by solo dev Brevin. Read marketing/PLAYBOOK.md in the current directory and follow it exactly — voice, content pillars, per-platform formats, standing rules. Check marketing/drafts/ for recent editions and rotate pillars accordingly.
+PROMPT="You are the weekly marketing-drafts writer for Ink Well Keeper, a free iOS Disney Lorcana collection tracker built by solo dev Brevin. Read marketing/PLAYBOOK.md in the current directory and follow it exactly — voice, content pillars, the rotation rules, per-platform formats, standing rules.
 
-Use ONLY this data for numbers and claims (never invent prices or features):
+First, read the last 2-3 editions in marketing/drafts/ and pick this week's PRIMARY pillar per the playbook's rotation section: the market report must not lead two weeks in a row, and collection tracking / feature spotlights / collector tips / build-in-public should each get their turn leading. State the chosen primary pillar and why at the top of the document.
+
+Use ONLY this data for numbers and claims. Feature claims must come from the playbook's topic bank, marketing/3.1/RELEASE_NOTES.md, or the git log — never invent prices or features:
 
 === MARKET REPORT (from our own pricing backend) ===
 $MARKET
@@ -42,7 +44,7 @@ $MARKET
 === SHIPPED THIS WEEK (git log) ===
 $SHIPPED
 
-Write the complete weekly drafts markdown document: a title with today's date, the week's angle and pillars used, an eyeball-the-numbers warning (big % swings can be thin-market blips — lead with credible movers, quarantine suspicious ones), then sections for: X/Twitter thread (hook + 2-3 follow-ups + app-link close), Reddit r/Lorcana post (value-first, one app mention at the end), two TikTok script outlines (hook/beats/CTA, 20-40s), and an Instagram/Threads caption with share-card suggestion.
+Write the complete weekly drafts markdown document: a title with today's date, the week's angle and pillars used, then sections for: X/Twitter Monday post (a thread or single post leading with the primary pillar), X/Twitter midweek post (a lighter single post from a different pillar — feature screenshot or a chart-worthy mover), Reddit r/Lorcana post (value-first, one app mention at the end), two TikTok script outlines covering two different pillars (hook/beats/CTA, 20-40s), and an Instagram/Threads caption with share-card suggestion. If market numbers appear anywhere, include the eyeball-the-numbers warning (big % swings can be thin-market blips — lead with credible movers, quarantine suspicious ones); when the market report is not the primary pillar, keep it to one short secondary slot or drop it.
 
 Output ONLY the markdown document. No preamble, no commentary."
 
