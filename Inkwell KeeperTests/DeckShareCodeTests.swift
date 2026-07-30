@@ -112,4 +112,51 @@ struct DeckShareCodeTests {
         #expect(manager.previewShareCode("IWK2:not-base64!!!") == nil)
         #expect(manager.previewShareCode("hello world") == nil)
     }
+
+    // MARK: - Share links (URLs carrying a code)
+
+    @Test func extractsCodeFromUniversalLink() {
+        let manager = DeckManager()
+        let code = manager.generateShareCode(for: makeDeck())!
+        let link = AppLinks.deckShareLink(code: code)!.absoluteString
+
+        #expect(DeckManager.extractShareCode(from: link) == code)
+    }
+
+    @Test func extractsCodeFromCustomSchemeLink() {
+        let manager = DeckManager()
+        let code = manager.generateShareCode(for: makeDeck())!
+        let link = AppLinks.deckDeepLink(code: code)!.absoluteString
+
+        #expect(DeckManager.extractShareCode(from: code) == code)
+        #expect(DeckManager.extractShareCode(from: link) == code)
+    }
+
+    @Test func extractRejectsNonCodeInput() {
+        #expect(DeckManager.extractShareCode(from: "4 Elsa - Snow Queen") == nil)
+        #expect(DeckManager.extractShareCode(from: "https://inkwellkeeper.app/deck") == nil)
+        #expect(DeckManager.extractShareCode(from: "https://example.com/?code=evil") == nil)
+        #expect(DeckManager.extractShareCode(from: "") == nil)
+    }
+
+    @Test func pastedShareLinkPreviewsLikeItsCode() {
+        let manager = DeckManager()
+        let code = manager.generateShareCode(for: makeDeck())!
+        let link = "  " + AppLinks.deckShareLink(code: code)!.absoluteString + "\n"
+
+        let preview = manager.previewShareCode(link)
+        #expect(preview?.name == "Test Deck")
+        #expect(preview?.totalCards == 60)
+    }
+
+    @Test func shareLinkHasNoQRLengthCap() {
+        // A deck big enough to overflow the QR cap must still get a share link.
+        let manager = DeckManager()
+        let code = manager.generateShareCode(for: makeDeck(uniqueCards: 200, copiesEach: 4))!
+
+        if code.count > AppLinks.maxDeckCodeLengthForQR {
+            #expect(AppLinks.deckUniversalLink(code: code) == nil)
+        }
+        #expect(AppLinks.deckShareLink(code: code) != nil)
+    }
 }

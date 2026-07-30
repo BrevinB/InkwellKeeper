@@ -351,6 +351,43 @@ class DeckManager: ObservableObject {
         return missing.sorted { $0.card.name < $1.card.name }
     }
 
+    // MARK: - Community Text Deck List
+
+    /// The deck as community-format text (`4 Elsa - Snow Queen` per line) — the format
+    /// Dreamborn and other Lorcana sites exchange, so lists paste cleanly between apps.
+    func exportCommunityDeckList(_ deck: Deck) -> String {
+        DeckListTextCodec.export(deck)
+    }
+
+    /// Imports a community-format text deck list as a new deck. Returns `nil` when no line
+    /// resolves to a known card; otherwise the deck plus any lines that couldn't be matched.
+    func importDeck(fromText text: String, name: String) -> (deck: Deck, unmatched: [DeckListTextCodec.UnmatchedLine])? {
+        guard let context = modelContext else { return nil }
+
+        let result = DeckListTextCodec.parse(text, cards: SetsDataManager.shared.getAllCards())
+        guard !result.entries.isEmpty else { return nil }
+
+        let deck = Deck(name: name, format: .infinityConstructed)
+        context.insert(deck)
+
+        for entry in result.entries {
+            let deckCard = DeckCard(from: entry.card, quantity: entry.quantity)
+            if deck.cards == nil { deck.cards = [] }
+            deck.cards?.append(deckCard)
+            context.insert(deckCard)
+        }
+
+        do {
+            try context.save()
+            Analytics.send(.deckImported)
+            updateDeckColorsFromCards(deck)
+            loadDecks(context: context)
+            return (deck, result.unmatched)
+        } catch {
+            return nil
+        }
+    }
+
     // MARK: - Share Deck Code
 
     /// Legacy (`IWK:`) share payload: every card carries a full snapshot. Kept so codes shared
@@ -497,11 +534,32 @@ class DeckManager: ObservableObject {
         }
     }
 
+    /// Pulls a share code out of whatever the user pasted: a raw `IWK2:`/`IWK:` code, a
+    /// `https://inkwellkeeper.app/deck?code=…` link, or an `inkwellkeeper://deck?code=…` deep
+    /// link. Returns `nil` when the text is none of those (e.g. a text deck list).
+    static func extractShareCode(from text: String) -> String? {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if trimmed.hasPrefix(sharePrefixV2) || trimmed.hasPrefix(sharePrefixV1) {
+            return trimmed
+        }
+
+        if trimmed.lowercased().hasPrefix("http") || trimmed.lowercased().hasPrefix("\(AppLinks.scheme)://"),
+           let components = URLComponents(string: trimmed),
+           let code = components.queryItems?.first(where: { $0.name == "code" })?.value,
+           code.hasPrefix(sharePrefixV2) || code.hasPrefix(sharePrefixV1) {
+            return code
+        }
+
+        return nil
+    }
+
     /// Parses either share-code format into a resolved intermediate. Compact codes are looked up
     /// in the bundled card database; cards this app version doesn't know (e.g. a set it predates)
-    /// are dropped from the import but still counted in `totalCards`.
+    /// are dropped from the import but still counted in `totalCards`. Accepts a raw code or a
+    /// share link containing one.
     private func decodeShareCode(_ shareCode: String) -> DecodedSharedDeck? {
-        let code = shareCode.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let code = Self.extractShareCode(from: shareCode) else { return nil }
 
         if code.hasPrefix(Self.sharePrefixV2) {
             guard let data = Self.base64URLDecode(String(code.dropFirst(Self.sharePrefixV2.count))),

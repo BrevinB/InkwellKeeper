@@ -75,6 +75,12 @@ enum AppLinks {
         return universalLink(verb: "deck", query: "code", value: code)
     }
 
+    /// The deck link to put in a share sheet or message. Unlike the QR variant this has no
+    /// length cap — messaging apps handle long URLs fine, only QR codes can't.
+    static func deckShareLink(code: String) -> URL? {
+        universalLink(verb: "deck", query: "code", value: code)
+    }
+
     /// Universal Link to a specific card by its stable id.
     static func cardUniversalLink(id: String) -> URL? {
         universalLink(verb: "card", query: "id", value: id)

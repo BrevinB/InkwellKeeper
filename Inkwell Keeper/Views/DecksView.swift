@@ -1152,15 +1152,46 @@ struct DeckCardDetailView: View {
 }
 
 // MARK: - Export Deck View
+
+/// How a deck list is rendered for export. Standard is the community `4 Elsa - Snow Queen`
+/// format understood by Dreamborn and friends; Detailed is our annotated, human-first layout.
+enum DeckExportStyle: String, CaseIterable {
+    case standard = "Standard"
+    case detailed = "Detailed"
+}
+
 struct ExportDeckView: View {
-    let deckText: String
+    let standardText: String
+    let detailedText: String
     let deckName: String
     @Environment(\.dismiss) private var dismiss
     @State private var didCopy = false
+    @State private var style: DeckExportStyle = .standard
+
+    private var deckText: String {
+        style == .standard ? standardText : detailedText
+    }
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
+                Picker("Export Style", selection: $style) {
+                    ForEach(DeckExportStyle.allCases, id: \.self) { style in
+                        Text(style.rawValue).tag(style)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .onChange(of: style) {
+                    didCopy = false
+                }
+
+                if style == .standard {
+                    Text("Pastes directly into Dreamborn, inkdecks, and other deck sites.")
+                        .font(.caption)
+                        .foregroundStyle(.gray)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+
                 ScrollView {
                     Text(deckText)
                         .font(.system(.body, design: .monospaced))
@@ -1375,9 +1406,9 @@ struct DeckWorkspaceView: View {
     @State private var showingAIStrategy = false
     @State private var showingShareSheet = false
     @State private var showingShareImage = false
+    @State private var pendingImageShare = false
     @State private var showingRename = false
     @State private var renameText = ""
-    @State private var exportedText = ""
     @State private var shareCode = ""
 
     private var gridHelper: AdaptiveGridHelper {
@@ -1498,10 +1529,7 @@ struct DeckWorkspaceView: View {
                     Button(action: { showingEditDeck = true }) {
                         Label("Edit Deck Info", systemImage: "pencil")
                     }
-                    Button(action: {
-                        exportedText = deckManager.exportDeckList(deck)
-                        showingExport = true
-                    }) {
+                    Button(action: { showingExport = true }) {
                         Label("Export Deck List", systemImage: "square.and.arrow.up")
                     }
                     Button(action: {
@@ -1511,9 +1539,6 @@ struct DeckWorkspaceView: View {
                         }
                     }) {
                         Label("Share Deck", systemImage: "paperplane")
-                    }
-                    Button(action: { showingShareImage = true }) {
-                        Label("Share as Image", systemImage: "photo")
                     }
                     Button(action: {
                         _ = deckManager.duplicateDeck(deck)
@@ -1547,10 +1572,28 @@ struct DeckWorkspaceView: View {
             AIDeckStrategyView(deck: deck)
         }
         .sheet(isPresented: $showingExport) {
-            ExportDeckView(deckText: exportedText, deckName: deck.name)
+            ExportDeckView(
+                standardText: deckManager.exportCommunityDeckList(deck),
+                detailedText: deckManager.exportDeckList(deck),
+                deckName: deck.name
+            )
         }
-        .sheet(isPresented: $showingShareSheet) {
-            ShareDeckView(shareCode: shareCode, deckName: deck.name)
+        .sheet(isPresented: $showingShareSheet, onDismiss: {
+            // Presenting the image flow from inside the share sheet would stack sheets;
+            // instead it flags the hand-off and we present once this sheet is fully gone.
+            if pendingImageShare {
+                pendingImageShare = false
+                showingShareImage = true
+            }
+        }) {
+            if let shareURL = AppLinks.deckShareLink(code: shareCode) {
+                DeckShareSheet(
+                    deckName: deck.name,
+                    shareURL: shareURL,
+                    deckListText: deckManager.exportCommunityDeckList(deck),
+                    onShareImage: { pendingImageShare = true }
+                )
+            }
         }
         .sheet(isPresented: $showingShareImage) {
             let data = makeDeckShareData()
@@ -1974,94 +2017,25 @@ struct BuilderCardView: View {
     }
 }
 
-// MARK: - Share Deck View
-struct ShareDeckView: View {
-    let shareCode: String
-    let deckName: String
-    @Environment(\.dismiss) private var dismiss
-    @State private var copied = false
-
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: 20) {
-                VStack(spacing: 8) {
-                    Image(systemName: "paperplane.fill")
-                        .font(.system(size: 48))
-                        .foregroundStyle(.lorcanaGold)
-
-                    Text("Share \"\(deckName)\"")
-                        .font(.title3)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.white)
-
-                    Text("Send this code to a friend so they can import your deck into Ink Well Keeper.")
-                        .font(.subheadline)
-                        .foregroundStyle(.gray)
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.top)
-
-                ScrollView {
-                    Text(shareCode)
-                        .font(.system(.caption2, design: .monospaced))
-                        .foregroundStyle(.white.opacity(0.8))
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.lorcanaDark.opacity(0.8))
-                        )
-                }
-                .frame(maxHeight: 200)
-
-                VStack(spacing: 12) {
-                    Button(action: {
-                        UIPasteboard.general.string = shareCode
-                        copied = true
-                    }) {
-                        Label(copied ? "Copied!" : "Copy Code", systemImage: copied ? "checkmark" : "doc.on.clipboard")
-                            .foregroundStyle(.lorcanaDark)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.lorcanaGold)
-                            .clipShape(.rect(cornerRadius: 10))
-                    }
-
-                    ShareLink(item: shareCode) {
-                        Label("Share via...", systemImage: "square.and.arrow.up")
-                            .foregroundStyle(.lorcanaGold)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.lorcanaGold, lineWidth: 2)
-                            )
-                    }
-                }
-            }
-            .padding()
-            .background(LorcanaBackground())
-            .navigationTitle("Share Deck")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-}
-
 // MARK: - Import Deck View
 struct ImportDeckView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var deckManager: DeckManager
-    @State private var shareCode = ""
+    @State private var pastedText = ""
+    @State private var deckName = ""
     @State private var importError = false
     @State private var importSuccess = false
     @State private var importedDeckName = ""
+    @State private var unmatchedSummary = ""
+
+    /// Share codes and deck links are self-describing; anything else is treated as a text deck list.
+    private var isShareCode: Bool {
+        DeckManager.extractShareCode(from: pastedText) != nil
+    }
+
+    private var isTextList: Bool {
+        !pastedText.isEmpty && !isShareCode
+    }
 
     var body: some View {
         NavigationStack {
@@ -2076,7 +2050,7 @@ struct ImportDeckView: View {
                         .fontWeight(.bold)
                         .foregroundStyle(.white)
 
-                    Text("Paste a deck share code from another Ink Well Keeper user to import their deck.")
+                    Text("Paste a deck link or share code from Ink Well Keeper, or a text deck list from Dreamborn or anywhere else — one card per line, like \"4 Elsa - Snow Queen\".")
                         .font(.subheadline)
                         .foregroundStyle(.gray)
                         .multilineTextAlignment(.center)
@@ -2084,11 +2058,11 @@ struct ImportDeckView: View {
                 .padding(.top)
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Deck Code")
+                    Text("Deck Link, Code, or Card List")
                         .font(.caption)
                         .foregroundStyle(.gray)
 
-                    TextEditor(text: $shareCode)
+                    TextEditor(text: $pastedText)
                         .font(.system(.caption2, design: .monospaced))
                         .frame(minHeight: 120)
                         .scrollContentBackground(.hidden)
@@ -2103,9 +2077,29 @@ struct ImportDeckView: View {
                         )
                 }
 
-                if let clipboardString = UIPasteboard.general.string, clipboardString.hasPrefix("IWK") && shareCode.isEmpty {
+                if isTextList {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Deck Name")
+                            .font(.caption)
+                            .foregroundStyle(.gray)
+
+                        TextField("Imported Deck", text: $deckName)
+                            .textFieldStyle(.plain)
+                            .foregroundStyle(.white)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.lorcanaDark.opacity(0.8))
+                            )
+                    }
+                }
+
+                if pastedText.isEmpty,
+                   let clipboardString = UIPasteboard.general.string,
+                   DeckManager.extractShareCode(from: clipboardString) != nil
+                       || DeckListTextCodec.looksLikeDeckList(clipboardString) {
                     Button(action: {
-                        shareCode = clipboardString
+                        pastedText = clipboardString
                     }) {
                         Label("Paste from Clipboard", systemImage: "doc.on.clipboard")
                             .font(.subheadline)
@@ -2113,23 +2107,16 @@ struct ImportDeckView: View {
                     }
                 }
 
-                Button(action: {
-                    if let deck = deckManager.importDeck(from: shareCode) {
-                        importedDeckName = deck.name
-                        importSuccess = true
-                    } else {
-                        importError = true
-                    }
-                }) {
+                Button(action: importDeck) {
                     Text("Import Deck")
                         .fontWeight(.semibold)
                         .foregroundStyle(.lorcanaDark)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(shareCode.isEmpty ? Color.gray : Color.lorcanaGold)
+                        .background(pastedText.isEmpty ? Color.gray : Color.lorcanaGold)
                         .clipShape(.rect(cornerRadius: 10))
                 }
-                .disabled(shareCode.isEmpty)
+                .disabled(pastedText.isEmpty)
 
                 Spacer()
             }
@@ -2147,15 +2134,49 @@ struct ImportDeckView: View {
             .alert("Import Failed", isPresented: $importError) {
                 Button("OK", role: .cancel) { }
             } message: {
-                Text("The deck code is invalid. Make sure you copied the full code starting with \"IWK2:\" or \"IWK:\".")
+                Text(isShareCode
+                     ? "The deck link or code is invalid. Make sure you copied the whole thing — codes start with \"IWK2:\" or \"IWK:\"."
+                     : "No cards were recognized. Each line should look like \"4 Elsa - Snow Queen\".")
             }
             .alert("Deck Imported!", isPresented: $importSuccess) {
                 Button("OK") {
                     dismiss()
                 }
             } message: {
-                Text("\"\(importedDeckName)\" has been added to your decks.")
+                Text(unmatchedSummary.isEmpty
+                     ? "\"\(importedDeckName)\" has been added to your decks."
+                     : "\"\(importedDeckName)\" has been added to your decks.\n\nCouldn't find:\n\(unmatchedSummary)")
             }
         }
+    }
+
+    private func importDeck() {
+        if isShareCode {
+            if let deck = deckManager.importDeck(from: pastedText) {
+                importedDeckName = deck.name
+                unmatchedSummary = ""
+                importSuccess = true
+            } else {
+                importError = true
+            }
+            return
+        }
+
+        let name = deckName.trimmingCharacters(in: .whitespaces)
+        if let result = deckManager.importDeck(fromText: pastedText, name: name.isEmpty ? "Imported Deck" : name) {
+            importedDeckName = result.deck.name
+            unmatchedSummary = Self.summarizeUnmatched(result.unmatched)
+            importSuccess = true
+        } else {
+            importError = true
+        }
+    }
+
+    /// Caps the unmatched-lines list so the alert stays readable for badly mangled pastes.
+    private static func summarizeUnmatched(_ unmatched: [DeckListTextCodec.UnmatchedLine]) -> String {
+        guard !unmatched.isEmpty else { return "" }
+        let shown = unmatched.prefix(6).map { "• \($0.text)" }
+        let remainder = unmatched.count - shown.count
+        return shown.joined(separator: "\n") + (remainder > 0 ? "\n…and \(remainder) more" : "")
     }
 }
