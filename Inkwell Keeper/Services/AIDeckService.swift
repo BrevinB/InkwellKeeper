@@ -176,6 +176,7 @@ class AIDeckService {
         inkColors: [InkColor],
         archetype: DeckArchetype?,
         targetCount: Int = 60,
+        notes: String = "",
         collectionOnly: Bool = false,
         ownedCardQuantities: [String: Int] = [:]
     ) async {
@@ -212,6 +213,11 @@ class AIDeckService {
         prompt += "Format: \(format.rawValue)\n"
         prompt += "Ink Colors: \(effectiveColors.map { $0.rawValue }.joined(separator: " / "))\n"
         prompt += "IMPORTANT: Only suggest cards that match these ink colors (\(effectiveColors.map { $0.rawValue }.joined(separator: " / "))). Do NOT add cards from other colors.\n"
+
+        let trimmedNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedNotes.isEmpty {
+            prompt += "Guidance from the user: \(trimmedNotes)\n"
+        }
 
         if let archetype = archetype {
             prompt += "Archetype: \(archetype.rawValue)\n"

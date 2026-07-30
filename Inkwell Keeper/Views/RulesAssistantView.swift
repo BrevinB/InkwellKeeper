@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct RulesAssistantView: View {
     @State private var service = RulesAssistantService.shared
@@ -16,6 +17,9 @@ struct RulesAssistantView: View {
     @State private var showingCardSearch = false
     @State private var chatTitleInput = ""
     @State private var attachedCards: [LorcanaCard] = []
+    /// Set when opened via "Ask About This Card" and the question hasn't fired yet —
+    /// it may have to wait for the subscription check or the availability probe.
+    @State private var pendingCardAsk = false
     @FocusState private var isInputFocused: Bool
 
     var initialCard: LorcanaCard?
@@ -88,10 +92,35 @@ struct RulesAssistantView: View {
         }
         .onAppear {
             subscriptionManager.checkSubscriptionStatus()
-            if let card = initialCard, service.messages.isEmpty, subscriptionManager.isSubscribed {
-                service.send("Tell me about the rules for this card and how to use it effectively.", cardContexts: [card])
+            if initialCard != nil {
+                pendingCardAsk = true
+                fireCardAskIfReady()
             }
         }
+        .onChange(of: service.availability) {
+            fireCardAskIfReady()
+        }
+        .onChange(of: subscriptionManager.isSubscribed) {
+            fireCardAskIfReady()
+        }
+    }
+
+    /// Runs the "Ask About This Card" question once the service and subscription are ready.
+    /// Always starts a fresh conversation (saving the previous one) so the card actually
+    /// lands in context — the service is a singleton and an old chat would otherwise
+    /// swallow the tap.
+    private func fireCardAskIfReady() {
+        guard pendingCardAsk,
+              let card = initialCard,
+              subscriptionManager.isSubscribed,
+              service.availability == .available,
+              !service.isLoading else { return }
+
+        pendingCardAsk = false
+        if !service.messages.isEmpty {
+            service.startNewChat()
+        }
+        service.send("Tell me about the rules for this card and how to use it effectively.", cardContexts: [card])
     }
 }
 
@@ -108,7 +137,11 @@ struct RulesAvailableView: View {
     var body: some View {
         VStack(spacing: 0) {
             if service.messages.isEmpty && service.currentStreamingContent.isEmpty {
-                RulesWelcomeView(service: service, showingHistory: $showingHistory)
+                RulesWelcomeView(
+                    service: service,
+                    showingHistory: $showingHistory,
+                    showingCardSearch: $showingCardSearch
+                )
             } else {
                 RulesChatView(service: service)
             }
@@ -129,6 +162,7 @@ struct RulesAvailableView: View {
 struct RulesWelcomeView: View {
     let service: RulesAssistantService
     @Binding var showingHistory: Bool
+    @Binding var showingCardSearch: Bool
 
     var body: some View {
         ScrollView {
@@ -151,6 +185,42 @@ struct RulesWelcomeView: View {
                         .foregroundStyle(.gray)
                         .multilineTextAlignment(.center)
                 }
+
+                Button {
+                    showingCardSearch = true
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "rectangle.stack.badge.plus")
+                            .font(.title3)
+                            .foregroundStyle(.lorcanaGold)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Ask about specific cards")
+                                .font(.subheadline)
+                                .bold()
+                                .foregroundStyle(.white)
+                            Text("Attach up to 4 cards from your collection or search")
+                                .font(.caption)
+                                .foregroundStyle(.gray)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.lorcanaGold.opacity(0.6))
+                    }
+                    .padding(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.lorcanaDark.opacity(0.8))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.lorcanaGold.opacity(0.4), lineWidth: 1)
+                            )
+                    )
+                }
+                .padding(.horizontal)
 
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Try asking:")
@@ -841,7 +911,7 @@ struct MessageBubble: View {
                         .padding(.vertical, 10)
                         .background(
                             RoundedRectangle(cornerRadius: 18)
-                                .fill(Color.lorcanaDark.opacity(0.85))
+                                .fill(message.isError ? Color.red.opacity(0.22) : Color.lorcanaDark.opacity(0.85))
                         )
                         .textSelection(.enabled)
                 }
@@ -945,10 +1015,26 @@ struct CardSearchSheet: View {
     @State private var searchResults: [LorcanaCard] = []
     @State private var searchTask: Task<Void, Never>?
 
+    /// The user's collection, newest first, so cards can be attached without typing.
+    @Query(sort: \CollectedCard.dateAdded, order: .reverse) private var collectedCards: [CollectedCard]
+
     private let maxAttachedCards = 4
 
     private func isCardAttached(_ card: LorcanaCard) -> Bool {
         attachedCards.contains { $0.id == card.id }
+    }
+
+    /// Recently collected cards, deduplicated across variants (a foil and normal of the
+    /// same card read as one entry for rules purposes).
+    private var recentCollectionCards: [LorcanaCard] {
+        var seen = Set<String>()
+        var cards: [LorcanaCard] = []
+        for collected in collectedCards where !collected.isWishlisted {
+            guard seen.insert(collected.name).inserted else { continue }
+            cards.append(collected.toLorcanaCard)
+            if cards.count >= 30 { break }
+        }
+        return cards
     }
 
     var body: some View {
@@ -963,12 +1049,14 @@ struct CardSearchSheet: View {
 
                     searchField
 
-                    if searchText.isEmpty {
-                        emptyState
-                    } else if searchResults.isEmpty {
+                    if !searchText.isEmpty && searchResults.isEmpty {
                         noResults
-                    } else {
+                    } else if !searchText.isEmpty {
                         resultsList
+                    } else if !recentCollectionCards.isEmpty {
+                        collectionList
+                    } else {
+                        emptyState
                     }
                 }
             }
@@ -1114,71 +1202,91 @@ struct CardSearchSheet: View {
 
     private var resultsList: some View {
         List(searchResults, id: \.id) { card in
-            let alreadyAttached = isCardAttached(card)
-            Button {
-                if alreadyAttached {
-                    attachedCards.removeAll { $0.id == card.id }
-                } else if attachedCards.count < maxAttachedCards {
-                    attachedCards.append(card)
-                }
-            } label: {
-                HStack(spacing: 12) {
-                    AsyncImage(url: card.bestImageUrl()) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                    } placeholder: {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.gray.opacity(0.3))
-                    }
-                    .frame(width: 40, height: 56)
-                    .clipShape(.rect(cornerRadius: 4))
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(card.name)
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                            .lineLimit(1)
-
-                        HStack(spacing: 8) {
-                            Text(card.type)
-                                .font(.caption)
-                                .foregroundStyle(.gray)
-
-                            Text("•")
-                                .foregroundStyle(.gray)
-
-                            Text("\(card.cost) ink")
-                                .font(.caption)
-                                .foregroundStyle(.lorcanaGold)
-                        }
-                    }
-
-                    Spacer()
-
-                    if alreadyAttached {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.lorcanaGold)
-                    } else if attachedCards.count >= maxAttachedCards {
-                        Image(systemName: "circle")
-                            .foregroundStyle(.gray.opacity(0.3))
-                    } else {
-                        Image(systemName: "plus.circle")
-                            .foregroundStyle(.lorcanaGold)
-                    }
-                }
-                .padding(.vertical, 4)
-                .opacity((!alreadyAttached && attachedCards.count >= maxAttachedCards) ? 0.5 : 1.0)
-            }
-            .disabled(!alreadyAttached && attachedCards.count >= maxAttachedCards)
-            .listRowBackground(
-                alreadyAttached
-                    ? Color.lorcanaGold.opacity(0.1)
-                    : Color.lorcanaDark.opacity(0.6)
-            )
+            cardRow(card)
         }
         .scrollContentBackground(.hidden)
         .listStyle(.plain)
+    }
+
+    private var collectionList: some View {
+        List {
+            Section {
+                ForEach(recentCollectionCards, id: \.id) { card in
+                    cardRow(card)
+                }
+            } header: {
+                Text("From Your Collection")
+                    .foregroundStyle(.lorcanaGold)
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .listStyle(.plain)
+    }
+
+    @ViewBuilder
+    private func cardRow(_ card: LorcanaCard) -> some View {
+        let alreadyAttached = isCardAttached(card)
+        Button {
+            if alreadyAttached {
+                attachedCards.removeAll { $0.id == card.id }
+            } else if attachedCards.count < maxAttachedCards {
+                attachedCards.append(card)
+            }
+        } label: {
+            HStack(spacing: 12) {
+                AsyncImage(url: card.bestImageUrl()) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                } placeholder: {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.gray.opacity(0.3))
+                }
+                .frame(width: 40, height: 56)
+                .clipShape(.rect(cornerRadius: 4))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(card.name)
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+
+                    HStack(spacing: 8) {
+                        Text(card.type)
+                            .font(.caption)
+                            .foregroundStyle(.gray)
+
+                        Text("•")
+                            .foregroundStyle(.gray)
+
+                        Text("\(card.cost) ink")
+                            .font(.caption)
+                            .foregroundStyle(.lorcanaGold)
+                    }
+                }
+
+                Spacer()
+
+                if alreadyAttached {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.lorcanaGold)
+                } else if attachedCards.count >= maxAttachedCards {
+                    Image(systemName: "circle")
+                        .foregroundStyle(.gray.opacity(0.3))
+                } else {
+                    Image(systemName: "plus.circle")
+                        .foregroundStyle(.lorcanaGold)
+                }
+            }
+            .padding(.vertical, 4)
+            .opacity((!alreadyAttached && attachedCards.count >= maxAttachedCards) ? 0.5 : 1.0)
+        }
+        .disabled(!alreadyAttached && attachedCards.count >= maxAttachedCards)
+        .listRowBackground(
+            alreadyAttached
+                ? Color.lorcanaGold.opacity(0.1)
+                : Color.lorcanaDark.opacity(0.6)
+        )
     }
 
     private func performSearch(query: String) {

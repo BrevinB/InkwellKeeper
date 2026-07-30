@@ -368,6 +368,12 @@ struct AIDeckBuilderView: View {
     private var resultsContent: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if let error = aiService.errorMessage, !aiService.isLoading {
+                    AIDeckErrorBanner(message: error) {
+                        generate()
+                    }
+                }
+
                 // Streaming indicator
                 if aiService.isLoading {
                     VStack(spacing: 12) {
@@ -765,7 +771,7 @@ struct AIDeckCompleterView: View {
                         HStack(spacing: 6) {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundStyle(.green)
-                            Text("Your deck already has 60 cards. AI will suggest improvements and swaps instead.")
+                            Text("Your deck already has \(deck.totalCards) cards — remove a few to open up slots for AI suggestions.")
                                 .font(.caption)
                                 .foregroundStyle(.gray)
                         }
@@ -883,7 +889,8 @@ struct AIDeckCompleterView: View {
                 }
                 .padding(.horizontal)
 
-                // Generate Button
+                // Generate Button. Full decks are disabled honestly: the completion flow
+                // can only fill empty slots, so a 60-card deck has nothing to generate.
                 Button(action: generateCompletion) {
                     HStack {
                         if aiService.isLoading {
@@ -891,19 +898,19 @@ struct AIDeckCompleterView: View {
                                 .tint(.black)
                         } else {
                             Image(systemName: "wand.and.stars")
-                            Text(deck.totalCards >= 60 ? "Get Suggestions" : "Complete Deck")
-                                .fontWeight(.bold)
+                            Text("Complete Deck")
+                                .bold()
                         }
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 14)
-                            .fill(!aiService.isLoading ? Color.lorcanaGold : Color.gray.opacity(0.4))
+                            .fill(!aiService.isLoading && deck.totalCards < 60 ? Color.lorcanaGold : Color.gray.opacity(0.4))
                     )
-                    .foregroundStyle(!aiService.isLoading ? .black : .gray)
+                    .foregroundStyle(!aiService.isLoading && deck.totalCards < 60 ? .black : .gray)
                 }
-                .disabled(aiService.isLoading)
+                .disabled(aiService.isLoading || deck.totalCards >= 60)
                 .padding(.horizontal)
                 .padding(.bottom, 20)
             }
@@ -914,6 +921,12 @@ struct AIDeckCompleterView: View {
     private var resultsContent: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if let error = aiService.errorMessage, !aiService.isLoading {
+                    AIDeckErrorBanner(message: error) {
+                        generateCompletion()
+                    }
+                }
+
                 if aiService.isLoading {
                     VStack(spacing: 12) {
                         ProgressView()
@@ -1137,16 +1150,12 @@ struct AIDeckCompleterView: View {
         hasGenerated = true
         let ownedQuantities = useCollectionOnly ? collectionManager.collectedCardQuantities : [:]
         Task {
-            var description = additionalNotes
-            if deck.totalCards >= 60 {
-                description = "My deck already has 60 cards. Please suggest improvements - which cards to swap out and what to replace them with. " + description
-            }
             await aiService.completeDeck(
                 existingCards: deck.cards ?? [],
                 format: deck.deckFormat,
                 inkColors: deck.deckInkColors,
                 archetype: deck.deckArchetype,
-                targetCount: max(60, deck.totalCards),
+                notes: additionalNotes,
                 collectionOnly: useCollectionOnly,
                 ownedCardQuantities: ownedQuantities
             )
@@ -1340,9 +1349,9 @@ struct CardSelectionView: View {
         guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return []
         }
-        let query = searchText.lowercased()
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         return allNormalCards
-            .filter { $0.name.lowercased().contains(query) || $0.type.lowercased().contains(query) }
+            .filter { $0.name.localizedStandardContains(query) || $0.type.localizedStandardContains(query) }
             .sorted { $0.name < $1.name }
     }
 
@@ -1841,4 +1850,45 @@ private func markdownText(_ string: String) -> Text {
         return Text(attributed)
     }
     return Text(string)
+}
+
+// MARK: - Error Banner
+
+/// Failure state for AI deck generation, with a retry action. Without it a failed
+/// generation dead-ends on an empty results screen.
+struct AIDeckErrorBanner: View {
+    let message: String
+    let onRetry: () -> Void
+
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 10) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+
+                Text(message)
+                    .font(.subheadline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            Button("Try Again", systemImage: "arrow.clockwise", action: onRetry)
+                .font(.subheadline)
+                .bold()
+                .foregroundStyle(.black)
+                .padding(.vertical, 8)
+                .padding(.horizontal, 16)
+                .background(Capsule().fill(Color.lorcanaGold))
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.lorcanaDark.opacity(0.8))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.orange.opacity(0.5), lineWidth: 1)
+                )
+        )
+        .padding(.horizontal)
+    }
 }

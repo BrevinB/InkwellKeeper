@@ -18,13 +18,28 @@ struct RulesMessage: Identifiable, Equatable, Codable {
     /// follow-up questions retain the card context across turns. Optional for backward
     /// compatibility with chats saved before this field existed.
     let cardContext: String?
+    /// App-generated error bubbles ("Sorry, I encountered an error…"). Shown in the UI but
+    /// excluded from the API conversation so the model never sees them as its own replies.
+    let isError: Bool
 
-    init(content: String, isUser: Bool, cardContext: String? = nil) {
+    init(content: String, isUser: Bool, cardContext: String? = nil, isError: Bool = false) {
         self.id = UUID()
         self.content = content
         self.isUser = isUser
         self.timestamp = Date()
         self.cardContext = cardContext
+        self.isError = isError
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        content = try container.decode(String.self, forKey: .content)
+        isUser = try container.decode(Bool.self, forKey: .isUser)
+        timestamp = try container.decode(Date.self, forKey: .timestamp)
+        cardContext = try container.decodeIfPresent(String.self, forKey: .cardContext)
+        // Chats saved before this field existed decode as non-error messages.
+        isError = try container.decodeIfPresent(Bool.self, forKey: .isError) ?? false
     }
 }
 
@@ -123,6 +138,9 @@ class RulesAssistantService {
 
     // Lightweight client-side abuse guard for the shared API key.
     let dailyMessageLimit = 50
+    /// Most recent conversation messages replayed to the API each turn; older turns age out
+    /// so long chats don't grow token cost without bound.
+    private static let maxReplayedMessages = 16
     private let dailyCountKey = "RulesAssistantDailyCount"
     private let dailyDateKey = "RulesAssistantDailyDate"
 
@@ -541,12 +559,6 @@ class RulesAssistantService {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, !isLoading else { return }
 
-        guard consumeDailyAllowance() else {
-            messages.append(RulesMessage(content: trimmed, isUser: true))
-            appendErrorResponse("You've reached today's limit of \(dailyMessageLimit) questions. Please try again tomorrow.")
-            return
-        }
-
         // Explicit attachments win; otherwise auto-detect card names mentioned in the question.
         let cards = cardContexts.isEmpty ? detectCards(in: trimmed) : cardContexts
         let context = cards.isEmpty ? nil : buildCardContext(for: cards)
@@ -571,6 +583,14 @@ class RulesAssistantService {
     }
 
     private func startGeneration() {
+        // The daily allowance is only consumed when a reply actually arrives
+        // (`commitStreamedReply`), so failed sends never burn quota. This check also
+        // covers retries, which bypass `send`.
+        guard remainingMessagesToday > 0 else {
+            appendErrorResponse("You've reached today's limit of \(dailyMessageLimit) questions. Please try again tomorrow.")
+            return
+        }
+
         lastSendFailed = false
         isLoading = true
         currentStreamingContent = ""
@@ -589,10 +609,13 @@ class RulesAssistantService {
             return
         }
 
+        // Replay only recent, real conversation turns: error bubbles are UI-only, and long
+        // chats are trimmed so cost doesn't grow without bound. Card context lives on the
+        // user messages inside the window, so recent attachments always survive the trim.
         var openAIMessages: [OpenAIChatMessage] = [
             OpenAIChatMessage(role: "system", content: systemInstructions)
         ]
-        for message in messages {
+        for message in messages.filter({ !$0.isError }).suffix(Self.maxReplayedMessages) {
             openAIMessages.append(OpenAIChatMessage(
                 role: message.isUser ? "user" : "assistant",
                 content: apiContent(for: message)
@@ -613,8 +636,12 @@ class RulesAssistantService {
             }
 
             if currentStreamingContent.isEmpty {
-                // Empty with no cancellation means the request produced nothing useful.
-                if !Task.isCancelled {
+                if Task.isCancelled {
+                    // Stopped before the first chunk: no reply to keep, but surface the
+                    // Retry affordance so the question isn't left dangling.
+                    lastSendFailed = true
+                } else {
+                    // Empty with no cancellation means the request produced nothing useful.
                     appendErrorResponse("Sorry, I encountered an error. Please try again.")
                     lastSendFailed = true
                 }
@@ -636,6 +663,7 @@ class RulesAssistantService {
         messages.append(RulesMessage(content: currentStreamingContent, isUser: false))
         currentStreamingContent = ""
         lastSendFailed = false
+        consumeDailyAllowance()
         // Auto-persist so an app termination doesn't lose the conversation.
         saveCurrentChat()
     }
@@ -696,6 +724,7 @@ class RulesAssistantService {
     // MARK: - Daily Allowance
 
     /// Returns true and records a use if the user is under today's limit.
+    @discardableResult
     private func consumeDailyAllowance() -> Bool {
         let defaults = UserDefaults.standard
         let today = Calendar.current.startOfDay(for: Date())
@@ -721,7 +750,7 @@ class RulesAssistantService {
     }
 
     private func appendErrorResponse(_ message: String) {
-        messages.append(RulesMessage(content: message, isUser: false))
+        messages.append(RulesMessage(content: message, isUser: false, isError: true))
         currentStreamingContent = ""
     }
 
