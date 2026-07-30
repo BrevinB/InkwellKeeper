@@ -216,10 +216,13 @@ struct MultiScanReviewView: View {
     private func addAllToCollection() {
         scannedCount = cameraManager.totalScannedCount
 
+        // Bulk path: one save + one refresh for the whole batch, instead of a
+        // CloudKit-backed save and price fetch per card.
         for entry in cameraManager.scannedCards {
             let card = entry.card.withVariant(entry.variant)
-            collectionManager.addCard(card, quantity: entry.quantity)
+            collectionManager.addCard(card, quantity: entry.quantity, bulkImport: true, source: "scan")
         }
+        collectionManager.finalizeBulkImport()
 
         withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
             addedAll = true

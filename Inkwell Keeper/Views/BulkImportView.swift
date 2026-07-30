@@ -615,7 +615,7 @@ struct BulkImportView: View {
                 importText,
                 format: detectedFormat,
                 onCardMatched: { card, quantity in
-                    collectionManager.addCard(card, quantity: quantity, bulkImport: true)
+                    collectionManager.addCard(card, quantity: quantity, bulkImport: true, source: "import")
                 },
                 progressCallback: { stats in
                     self.importStats = stats

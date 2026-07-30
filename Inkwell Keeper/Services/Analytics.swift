@@ -24,7 +24,7 @@ enum Analytics {
         case screenViewed(name: String)
 
         // MARK: Collection
-        case collectionCardAdded(rarity: String, set: String, foil: Bool)
+        case collectionCardAdded(rarity: String, set: String, foil: Bool, source: String)
         case collectionCardRemoved
         case collectionQuantityChanged
         case wishlistAdded
@@ -63,6 +63,7 @@ enum Analytics {
         case deepLinkOpened(type: String)
 
         // MARK: Lifecycle
+        case onboardingStarted
         case onboardingCompleted
         case loreCounterGameStarted(players: Int)
 
@@ -95,6 +96,7 @@ enum Analytics {
             case .shareCompleted: "share.completed"
             case .shareDeckLinkCreated: "share.deckLinkCreated"
             case .deepLinkOpened: "deepLink.opened"
+            case .onboardingStarted: "onboarding.started"
             case .onboardingCompleted: "onboarding.completed"
             case .loreCounterGameStarted: "loreCounter.gameStarted"
             }
@@ -105,8 +107,8 @@ enum Analytics {
             switch self {
             case let .screenViewed(name):
                 ["name": name]
-            case let .collectionCardAdded(rarity, set, foil):
-                ["rarity": rarity, "set": set, "foil": String(foil)]
+            case let .collectionCardAdded(rarity, set, foil, source):
+                ["rarity": rarity, "set": set, "foil": String(foil), "source": source]
             case let .scanStarted(mode):
                 ["mode": mode]
             case let .scanMultiConfirmed(count):
@@ -125,12 +127,14 @@ enum Analytics {
                 ["source": source, "count": String(count)]
             case let .exportCompleted(format):
                 ["format": format]
+            // "type" is a reserved TelemetryDeck signal field and gets dropped
+            // at ingestion, so these keys must not be named "type".
             case let .shareCardPresented(type):
-                ["type": type]
+                ["shareType": type]
             case let .shareCompleted(type):
-                ["type": type]
+                ["shareType": type]
             case let .deepLinkOpened(type):
-                ["type": type]
+                ["linkType": type]
             case let .loreCounterGameStarted(players):
                 ["players": String(players)]
             default:

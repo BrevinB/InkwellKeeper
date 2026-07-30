@@ -52,6 +52,9 @@ struct OnboardingView: View {
                     .padding(.bottom, 32)
             }
         }
+        .onAppear {
+            Analytics.send(.onboardingStarted)
+        }
     }
 
     // MARK: - Pages

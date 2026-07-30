@@ -84,7 +84,7 @@ class StarterDeckManager: ObservableObject {
 
                 // Optionally add to collection
                 if addToCollection, let collectionManager = collectionManager {
-                    collectionManager.addCard(matchedCard, quantity: entry.quantity)
+                    collectionManager.addCard(matchedCard, quantity: entry.quantity, source: "starterDeck")
                     addedToCollectionCount += entry.quantity
                 }
             } else {
@@ -115,7 +115,7 @@ class StarterDeckManager: ObservableObject {
             let matchingCards = dataManager.searchCards(query: entry.name)
 
             if let matchedCard = matchingCards.first(where: { $0.name == entry.name }) {
-                collectionManager.addCard(matchedCard, quantity: entry.quantity)
+                collectionManager.addCard(matchedCard, quantity: entry.quantity, source: "starterDeck")
                 addedCount += entry.quantity
             } else {
                 // Card not found - add to unmatched list

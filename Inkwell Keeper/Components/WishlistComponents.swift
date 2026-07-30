@@ -73,7 +73,7 @@ struct WishlistCardRow: View {
             
             VStack(spacing: 8) {
                 Button(action: {
-                    collectionManager.addCard(card, quantity: 1)
+                    collectionManager.addCard(card, quantity: 1, source: "wishlist")
                     collectionManager.removeFromWishlist(card)
                 }) {
                     Image(systemName: "plus.circle.fill")
