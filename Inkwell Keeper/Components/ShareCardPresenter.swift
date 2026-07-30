@@ -20,6 +20,9 @@ struct ShareCardPresenter<Card: View>: View {
     var tagline: String = "Track your Lorcana collection"
     /// File-name stem for the exported PNG.
     var fileName: String = "InkwellKeeper-Share"
+    /// Canvas height forwarded to the chrome; `nil` renders a flexible-height card that
+    /// grows with its content instead of clipping it.
+    var canvasHeight: CGFloat? = ShareCardLayout.size.height
     /// Card artwork to preload before rendering, keyed by an id the template understands.
     var preloadURLs: [String: URL] = [:]
     /// Builds the template's inner content given the preloaded images.
@@ -75,12 +78,17 @@ struct ShareCardPresenter<Card: View>: View {
     @ViewBuilder
     private func preview(_ image: UIImage) -> some View {
         VStack(spacing: 24) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFit()
-                .clipShape(.rect(cornerRadius: 20))
-                .shadow(radius: 12, y: 6)
-                .padding(.horizontal, 32)
+            // Scrollable so flexible-height cards (long rulings) stay readable
+            // instead of scaling down to fit.
+            ScrollView {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(.rect(cornerRadius: 20))
+                    .shadow(radius: 12, y: 6)
+                    .padding(.horizontal, 32)
+            }
+            .scrollIndicators(.hidden)
 
             Button("Share", systemImage: "square.and.arrow.up") {
                 showShareSheet = true
@@ -96,7 +104,7 @@ struct ShareCardPresenter<Card: View>: View {
     private func prepare() async {
         Analytics.send(.shareCardPresented(type: analyticsType))
         let images = preloadURLs.isEmpty ? [:] : await ShareImageRenderer.preload(preloadURLs)
-        let composed = ShareCardChrome(qrPayload: qrPayload, tagline: tagline) {
+        let composed = ShareCardChrome(qrPayload: qrPayload, tagline: tagline, height: canvasHeight) {
             card(images)
         }
         let image = ShareImageRenderer.render(composed)

@@ -402,6 +402,7 @@ struct RulesChatView: View {
                     qrPayload: AppLinks.appStoreURLString,
                     tagline: "Ask the Lorcana Rules Assistant",
                     fileName: "InkwellKeeper-Ruling",
+                    canvasHeight: nil,
                     preloadURLs: ruling.preloadURLs
                 ) { images in
                     RulingShareCardView(ruling: ruling, images: images)

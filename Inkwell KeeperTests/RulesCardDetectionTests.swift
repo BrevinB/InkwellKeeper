@@ -79,4 +79,36 @@ struct RulesCardDetectionTests {
     @Test func emptyTextMatchesNothing() {
         #expect(RulesAssistantService.fuzzyCardSuggestion(in: "   ", from: catalog) == nil)
     }
+
+    // MARK: - Ruling share card
+
+    @Test func longRulingRendersTallerThanFixedCanvas() {
+        let sentence = "The challenging character deals damage equal to its Strength to the challenged character. "
+        let ruling = RulingShareData(
+            question: "How exactly does challenging work?",
+            answer: String(repeating: sentence, count: 30),
+            cards: []
+        )
+        let chrome = ShareCardChrome(qrPayload: "test", height: nil) {
+            RulingShareCardView(ruling: ruling, images: [:])
+        }
+
+        let image = ShareImageRenderer.render(chrome, scale: 1)
+
+        #expect(image != nil)
+        // The flexible canvas must grow beyond the fixed 4:5 height instead of clipping.
+        #expect((image?.size.height ?? 0) > ShareCardLayout.size.height)
+        #expect(image?.size.width == ShareCardLayout.size.width)
+    }
+
+    @Test func shortRulingKeepsMinimumCanvasHeight() {
+        let ruling = RulingShareData(question: "Can I quest twice?", answer: "No — questing exerts the character.", cards: [])
+        let chrome = ShareCardChrome(qrPayload: "test", height: nil) {
+            RulingShareCardView(ruling: ruling, images: [:])
+        }
+
+        let image = ShareImageRenderer.render(chrome, scale: 1)
+
+        #expect(image?.size.height == ShareCardLayout.size.height)
+    }
 }

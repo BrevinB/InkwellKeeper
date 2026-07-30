@@ -24,6 +24,9 @@ struct ShareCardChrome<Content: View>: View {
     let qrPayload: String
     /// Short call-to-action shown next to the wordmark.
     var tagline: String = "Track your Lorcana collection"
+    /// Canvas height. The default is the 4:5 social canvas; pass `nil` for a flexible-height
+    /// card that grows with its content (e.g. long rulings), never shorter than the default.
+    var height: CGFloat? = ShareCardLayout.size.height
     @ViewBuilder var content: Content
 
     var body: some View {
@@ -34,7 +37,8 @@ struct ShareCardChrome<Content: View>: View {
             ShareCardFooter(qrPayload: qrPayload, tagline: tagline)
         }
         .padding(ShareCardLayout.contentPadding)
-        .frame(width: ShareCardLayout.size.width, height: ShareCardLayout.size.height)
+        .frame(width: ShareCardLayout.size.width, height: height)
+        .frame(minHeight: height == nil ? ShareCardLayout.size.height : nil)
         .background {
             // The real app background (gradient + gold sparkles), captured as a still frame
             // by ImageRenderer. Clipped to the card's rounded rect below.

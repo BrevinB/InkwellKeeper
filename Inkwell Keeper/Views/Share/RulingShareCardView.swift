@@ -78,16 +78,16 @@ struct RulingShareCardView: View {
                 .fill(Color.lorcanaGold.opacity(0.4))
                 .frame(height: 1)
 
+            // The canvas grows with the answer (flexible-height chrome); the generous line
+            // cap only bounds pathological responses.
             Text(answerExcerpt)
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.92))
-                .lineLimit(11)
+                .lineLimit(60)
                 .lineSpacing(2)
                 .frame(maxWidth: .infinity, alignment: .topLeading)
-
-            Spacer(minLength: 0)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
     private var cardImages: [(String, UIImage)] {
