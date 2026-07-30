@@ -8,13 +8,13 @@
 //
 
 import SwiftUI
-import Charts
 
 struct PriceHistoryChartView: View {
     let card: LorcanaCard
 
     @State private var points: [PricingService.RemotePricePoint] = []
     @State private var isLoading = true
+    @State private var showingShare = false
 
     private var change: Double? {
         guard let first = points.first?.price, let last = points.last?.price, first > 0 else { return nil }
@@ -32,6 +32,14 @@ struct PriceHistoryChartView: View {
 
                 if let change, points.count >= 2 {
                     PriceChangeBadge(change: change)
+                }
+
+                if points.count >= 2 {
+                    Button("Share Trend", systemImage: "square.and.arrow.up") {
+                        showingShare = true
+                    }
+                    .labelStyle(.iconOnly)
+                    .foregroundStyle(Color.lorcanaGold)
                 }
             }
 
@@ -61,59 +69,14 @@ struct PriceHistoryChartView: View {
             points = fetched
             isLoading = false
         }
+        .sheet(isPresented: $showingShare) {
+            PriceTrendShareView(card: card, points: points)
+        }
     }
 
     private var historyChart: some View {
-        Chart(points) { point in
-            AreaMark(
-                x: .value("Date", point.date),
-                y: .value("Price", point.price)
-            )
-            .foregroundStyle(
-                .linearGradient(
-                    colors: [Color.lorcanaGold.opacity(0.35), .clear],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
-            .interpolationMethod(.monotone)
-
-            LineMark(
-                x: .value("Date", point.date),
-                y: .value("Price", point.price)
-            )
-            .foregroundStyle(Color.lorcanaGold)
-            .interpolationMethod(.monotone)
-            .accessibilityLabel(point.date.formatted(date: .abbreviated, time: .omitted))
-            .accessibilityValue(point.price.formatted(.currency(code: "USD")))
-        }
-        .chartYScale(domain: yDomain)
-        .chartYAxis {
-            AxisMarks(position: .trailing) { _ in
-                AxisGridLine()
-                    .foregroundStyle(Color.gray.opacity(0.2))
-                AxisValueLabel(format: .currency(code: "USD").precision(.fractionLength(0)))
-                    .foregroundStyle(.gray)
-            }
-        }
-        .chartXAxis {
-            AxisMarks(values: .automatic(desiredCount: 4)) { _ in
-                AxisValueLabel(format: .dateTime.month(.abbreviated).day())
-                    .foregroundStyle(.gray)
-            }
-        }
-        .frame(minHeight: 140, maxHeight: 200)
-    }
-
-    /// Pad the price range so the line doesn't hug the chart edges. Market
-    /// trends don't need a zero baseline; the padded domain keeps small
-    /// movements visible without exaggerating them.
-    private var yDomain: ClosedRange<Double> {
-        let prices = points.map(\.price)
-        let low = prices.min() ?? 0
-        let high = prices.max() ?? 1
-        let pad = Swift.max((high - low) * 0.15, high * 0.05, 0.05)
-        return Swift.max(0, low - pad)...(high + pad)
+        PriceTrendChart(points: points)
+            .frame(minHeight: 140, maxHeight: 200)
     }
 }
 
