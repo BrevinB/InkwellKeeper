@@ -1182,12 +1182,21 @@ private struct MarkdownBlock: Identifiable {
 struct UserQuestionView: View {
     let message: RulesMessage
 
+    /// Card being viewed fullscreen — tapping a thumbnail opens the full card so the user
+    /// can fact-check the assistant against the actual card text.
+    @State private var viewingCard: LorcanaCard?
+
     var body: some View {
         VStack(alignment: .trailing, spacing: 8) {
             if let cards = message.attachedCards, !cards.isEmpty {
                 HStack(spacing: 8) {
                     ForEach(cards, id: \.id) { card in
-                        AttachedCardThumbnail(card: card)
+                        Button {
+                            viewingCard = resolve(card)
+                        } label: {
+                            AttachedCardThumbnail(card: card)
+                        }
+                        .accessibilityLabel("View \(card.name) full size")
                     }
                 }
             }
@@ -1205,6 +1214,27 @@ struct UserQuestionView: View {
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
         .padding(.leading, 48)
+        .fullScreenCover(item: $viewingCard) { card in
+            FullscreenCardViewer(card: card)
+        }
+    }
+
+    /// Resolves the stored summary back to a full card via the local database; falls back to
+    /// a minimal card built from the summary (still shows the image) for cards this app
+    /// version doesn't know.
+    private func resolve(_ card: RulesMessage.AttachedCard) -> LorcanaCard {
+        if let known = SetsDataManager.shared.getAllCards().first(where: { $0.id == card.id }) {
+            return known
+        }
+        return LorcanaCard(
+            id: card.id,
+            name: card.name,
+            cost: 0,
+            type: "",
+            rarity: .common,
+            setName: "",
+            imageUrl: card.imageUrl
+        )
     }
 }
 
