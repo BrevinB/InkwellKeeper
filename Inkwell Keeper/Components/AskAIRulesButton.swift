@@ -26,7 +26,7 @@ struct AskAIRulesButton: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
-                        Text("Ask AI About This Card")
+                        Text("Ask About This Card")
                             .font(.subheadline)
                             .bold()
                             .foregroundStyle(.white)
@@ -36,7 +36,7 @@ struct AskAIRulesButton: View {
                         }
                     }
 
-                    Text("Rulings, interactions, and how to play it")
+                    Text("Instant AI answers — rulings, interactions, strategy")
                         .font(.caption)
                         .foregroundStyle(.gray)
                 }
@@ -65,7 +65,7 @@ struct AskAIRulesButton: View {
                     )
             )
         }
-        .accessibilityLabel("Ask AI about \(card.name)")
+        .accessibilityLabel("Ask about \(card.name)")
         .sheet(isPresented: $showingRulesAssistant) {
             RulesAssistantView(initialCard: card)
         }
