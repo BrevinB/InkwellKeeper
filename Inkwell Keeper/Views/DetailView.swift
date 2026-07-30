@@ -90,7 +90,6 @@ struct CollectionCardDetailView: View {
     @State private var foilQuantity: Int = 0
     @State private var showingDeleteConfirmation = false
     @State private var showingFullscreenViewer = false
-    @State private var showingRulesAssistant = false
     @State private var deckAllocations: [CollectionManager.DeckAllocation] = []
     @State private var showFoilArt = false
     @State private var imageAttachments: [Data] = []
@@ -276,6 +275,9 @@ struct CollectionCardDetailView: View {
                             .fill(Color.lorcanaDark.opacity(0.8))
                     )
 
+                    AskAIRulesButton(card: card, source: "collectionDetail")
+                        .padding(.horizontal)
+
                     PriceHistoryChartView(card: card)
                         .padding(.horizontal)
 
@@ -291,19 +293,6 @@ struct CollectionCardDetailView: View {
                     // Check Prices section
                     BuyCardOptionsView(card: card)
                         .padding(.horizontal)
-
-                    // Ask About Rules button
-                    Button(action: {
-                        showingRulesAssistant = true
-                    }) {
-                        HStack {
-                            Image(systemName: "book.circle")
-                            Text("Ask About Rules")
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(LorcanaButtonStyle(style: .secondary))
-                    .padding(.horizontal)
 
                     // Action buttons - show different buttons based on ownership
                     VStack(spacing: 12) {
@@ -384,9 +373,6 @@ struct CollectionCardDetailView: View {
         }
         .fullScreenCover(isPresented: $showingFullscreenViewer) {
             FullscreenCardViewer(card: displayCard)
-        }
-        .sheet(isPresented: $showingRulesAssistant) {
-            RulesAssistantView(initialCard: card)
         }
     }
 
@@ -684,6 +670,9 @@ struct WishlistCardDetailView: View {
                                 .fill(Color.lorcanaDark.opacity(0.8))
                         )
                         
+                        AskAIRulesButton(card: card, source: "wishlistDetail")
+                            .padding(.horizontal)
+
                         PriceHistoryChartView(card: card)
                             .padding(.horizontal)
 

@@ -34,6 +34,7 @@ struct AnalyticsEventTests {
         .starterDeckImported(name: "Amber & Amethyst"),
         .aiDeckGenerated(ink: "Ruby"),
         .aiRulesQuestionAsked,
+        .rulesAssistantOpened(source: "collectionDetail"),
         .paywallShown(source: "scanLimit"),
         .subscriptionPurchased(product: "pro.monthly"),
         .tipPurchased(product: "tip.small"),

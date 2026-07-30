@@ -1111,6 +1111,8 @@ struct DeckCardDetailView: View {
                         .fill(Color.lorcanaDark.opacity(0.8))
                 )
 
+                AskAIRulesButton(card: card.toLorcanaCard, source: "deckDetail")
+
                 Button(role: .destructive, action: {
                     showingRemoveConfirm = true
                 }) {
