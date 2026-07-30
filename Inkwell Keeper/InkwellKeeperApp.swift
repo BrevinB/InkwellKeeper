@@ -29,6 +29,9 @@ struct InkwellKeeperApp: App {
         // Refresh deck-construction rules (rotation + banned lists) from CloudKit
         DeckRulesService.shared.refresh()
 
+        // Refresh the AI Rules Assistant's rules digest from CloudKit
+        RulesDigestService.shared.refresh()
+
         container = Self.makeContainer()
     }
 

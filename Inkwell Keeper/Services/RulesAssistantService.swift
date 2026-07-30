@@ -259,9 +259,17 @@ class RulesAssistantService {
     }
 
     // MARK: - System Instructions
-    // Based on Disney Lorcana Comprehensive Rules (Effective May 27, 2025)
+
+    /// The digest actually sent as the system prompt — remotely updated when a newer copy
+    /// has been fetched from CloudKit, otherwise the bundled snapshot below.
+    private var systemInstructions: String {
+        RulesDigestService.shared.currentDigest
+    }
+
+    // Bundled fallback digest. Based on Disney Lorcana Comprehensive Rules (Effective May 27, 2025)
     // Source: files.disneylorcana.com/Disney-Lorcana-Comprehensive-Rules-052725-EN.pdf
-    private let systemInstructions = """
+    // Newer rules ship via the CloudKit `RulesDigest` record (see RulesDigestService).
+    static let bundledRulesDigest = """
     You are a Disney Lorcana rules assistant. Answer rules questions accurately, citing section numbers from the Comprehensive Rules when relevant.
 
     CRITICAL: CARD TEXT IS AUTHORITATIVE
@@ -730,21 +738,46 @@ class RulesAssistantService {
         """
     }
 
-    /// Scans the question for full card names that appear verbatim so their text can be
-    /// auto-attached. Deliberately conservative — only matches full "Name - Subtitle" names to
-    /// avoid false positives on common first names like "Belle" or "Stitch".
+    /// Scans the question for full card names so their text can be auto-attached. Matching is
+    /// dash/case/punctuation-insensitive ("elsa snow queen" matches "Elsa - Snow Queen") but
+    /// still requires the full name + subtitle, to avoid false positives on common first names
+    /// like "Belle" or "Stitch".
     private func detectCards(in text: String) -> [LorcanaCard] {
-        let haystack = text.lowercased()
+        let haystack = Self.matchableText(text)
         var matches: [LorcanaCard] = []
         var seenNames = Set<String>()
         for card in SetsDataManager.shared.getAllCards() where card.variant == .normal {
             guard card.name.contains(" - ") else { continue }
-            if haystack.contains(card.name.lowercased()), seenNames.insert(card.name).inserted {
+            if haystack.contains(Self.matchableText(card.name)), seenNames.insert(card.name).inserted {
                 matches.append(card)
                 if matches.count >= 4 { break }
             }
         }
         return matches
+    }
+
+    /// The single best full-name card mention in `text`, for the "Did you mean…?" attach chip.
+    /// Prefers the longest matching name so "Mickey Mouse - Brave Little Tailor" wins over any
+    /// shorter name it happens to contain. Returns `nil` when nothing matches.
+    static func fuzzyCardSuggestion(in text: String, from cards: [LorcanaCard]) -> LorcanaCard? {
+        let haystack = matchableText(text)
+        guard !haystack.isEmpty else { return nil }
+
+        var best: (card: LorcanaCard, matchLength: Int)?
+        for card in cards where card.variant == .normal {
+            guard card.name.contains(" - ") else { continue }
+            let needle = matchableText(card.name)
+            if haystack.contains(needle), needle.count > (best?.matchLength ?? 0) {
+                best = (card, needle.count)
+            }
+        }
+        return best?.card
+    }
+
+    /// Normalizes text for card-name matching: dash/case/diacritic-insensitive with the
+    /// name's " - " separator collapsed, so spoken-style names line up with card names.
+    private static func matchableText(_ text: String) -> String {
+        DeckListTextCodec.normalize(text).replacing(" - ", with: " ")
     }
 
     // MARK: - Daily Allowance

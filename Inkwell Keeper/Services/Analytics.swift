@@ -47,6 +47,7 @@ enum Analytics {
         case aiDeckGenerated(ink: String)
         case aiRulesQuestionAsked
         case rulesAssistantOpened(source: String)
+        case rulesAnswerRated(helpful: Bool)
 
         // MARK: Monetization
         case paywallShown(source: String)
@@ -89,6 +90,7 @@ enum Analytics {
             case .aiDeckGenerated: "ai.deckGenerated"
             case .aiRulesQuestionAsked: "ai.rulesQuestionAsked"
             case .rulesAssistantOpened: "ai.rulesAssistantOpened"
+            case .rulesAnswerRated: "ai.rulesAnswerRated"
             case .paywallShown: "paywall.shown"
             case .subscriptionPurchased: "subscription.purchased"
             case .tipPurchased: "tipJar.tipPurchased"
@@ -121,6 +123,8 @@ enum Analytics {
                 ["ink": ink]
             case let .rulesAssistantOpened(source):
                 ["source": source]
+            case let .rulesAnswerRated(helpful):
+                ["helpful": String(helpful)]
             case let .paywallShown(source):
                 ["source": source]
             case let .subscriptionPurchased(product):

@@ -15,6 +15,7 @@ struct RulesAssistantView: View {
     @State private var showingHistory = false
     @State private var showingSaveAlert = false
     @State private var showingCardSearch = false
+    @State private var showingGlossary = false
     @State private var chatTitleInput = ""
     @State private var attachedCards: [LorcanaCard] = []
     /// Set when opened via "Ask About This Card" and the question hasn't fired yet —
@@ -51,7 +52,14 @@ struct RulesAssistantView: View {
             .navigationTitle("Rules Assistant")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItemGroup(placement: .navigationBarLeading) {
+                    // The glossary is free and offline — visible to everyone, including
+                    // visitors who land on the paywall.
+                    Button("Glossary", systemImage: "character.book.closed") {
+                        showingGlossary = true
+                    }
+                    .foregroundStyle(.lorcanaGold)
+
                     if subscriptionManager.isSubscribed && service.availability == .available {
                         Button("History", systemImage: "clock.arrow.circlepath") {
                             showingHistory = true
@@ -76,6 +84,15 @@ struct RulesAssistantView: View {
             }
             .sheet(isPresented: $showingHistory) {
                 ChatHistoryView(service: service, isPresented: $showingHistory)
+            }
+            .sheet(isPresented: $showingGlossary) {
+                KeywordGlossaryView { question in
+                    // Pre-fill for subscribers; free users return to the paywall funnel.
+                    if subscriptionManager.isSubscribed {
+                        inputText = question
+                        isInputFocused = true
+                    }
+                }
             }
             .alert("Save Chat", isPresented: $showingSaveAlert) {
                 TextField("Chat title", text: $chatTitleInput)
@@ -331,13 +348,23 @@ struct RulesWelcomeView: View {
 struct RulesChatView: View {
     let service: RulesAssistantService
 
+    /// Message id → whether the user marked the answer helpful (session-local).
+    @State private var ratedMessages: [UUID: Bool] = [:]
+    @State private var rulingToShare: RulingShareData?
+
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 12) {
-                    ForEach(service.messages) { message in
-                        MessageBubble(message: message)
+                    ForEach(Array(service.messages.enumerated()), id: \.element.id) { index, message in
+                        messageView(message, at: index)
                             .id(message.id)
+                    }
+
+                    if let chips = followUpSuggestions, !service.isLoading {
+                        FollowUpChipsView(suggestions: chips) { question in
+                            service.send(question)
+                        }
                     }
 
                     if !service.currentStreamingContent.isEmpty {
@@ -369,7 +396,107 @@ struct RulesChatView: View {
             .onChange(of: service.currentStreamingContent) {
                 proxy.scrollTo("bottom", anchor: .bottom)
             }
+            .sheet(item: $rulingToShare) { ruling in
+                ShareCardPresenter(
+                    analyticsType: "ruling",
+                    qrPayload: AppLinks.appStoreURLString,
+                    tagline: "Ask the Lorcana Rules Assistant",
+                    fileName: "InkwellKeeper-Ruling",
+                    preloadURLs: ruling.preloadURLs
+                ) { images in
+                    RulingShareCardView(ruling: ruling, images: images)
+                }
+            }
         }
+    }
+
+    @ViewBuilder
+    private func messageView(_ message: RulesMessage, at index: Int) -> some View {
+        if message.isUser {
+            UserQuestionView(message: message)
+        } else {
+            VStack(alignment: .leading, spacing: 6) {
+                AssistantAnswerView(content: message.content, isError: message.isError)
+                    .contextMenu {
+                        if !message.isError {
+                            Button("Share Ruling", systemImage: "square.and.arrow.up") {
+                                rulingToShare = makeShareData(forAnswerAt: index)
+                            }
+                            Button("Copy Answer", systemImage: "doc.on.doc") {
+                                UIPasteboard.general.string = message.content
+                            }
+                        }
+                    }
+
+                if !message.isError, index == lastAssistantIndex {
+                    answerActions(for: message, at: index)
+                }
+            }
+        }
+    }
+
+    /// Share + thumbs row shown under the most recent answer.
+    private func answerActions(for message: RulesMessage, at index: Int) -> some View {
+        HStack(spacing: 14) {
+            Button("Share", systemImage: "square.and.arrow.up") {
+                rulingToShare = makeShareData(forAnswerAt: index)
+            }
+            .font(.caption)
+            .foregroundStyle(.lorcanaGold.opacity(0.9))
+
+            Spacer()
+
+            if let rating = ratedMessages[message.id] {
+                Label(rating ? "Glad it helped!" : "Thanks for the feedback",
+                      systemImage: rating ? "hand.thumbsup.fill" : "hand.thumbsdown.fill")
+                    .font(.caption)
+                    .foregroundStyle(.gray)
+            } else {
+                Button("Helpful", systemImage: "hand.thumbsup") {
+                    rate(message, helpful: true)
+                }
+                .labelStyle(.iconOnly)
+                .font(.subheadline)
+                .foregroundStyle(.gray)
+
+                Button("Not helpful", systemImage: "hand.thumbsdown") {
+                    rate(message, helpful: false)
+                }
+                .labelStyle(.iconOnly)
+                .font(.subheadline)
+                .foregroundStyle(.gray)
+            }
+        }
+        .padding(.horizontal, 4)
+    }
+
+    private func rate(_ message: RulesMessage, helpful: Bool) {
+        withAnimation { ratedMessages[message.id] = helpful }
+        Analytics.send(.rulesAnswerRated(helpful: helpful))
+    }
+
+    private var lastAssistantIndex: Int? {
+        service.messages.lastIndex { !$0.isUser && !$0.isError }
+    }
+
+    /// The question and attached cards belonging to the answer at `index`.
+    private func makeShareData(forAnswerAt index: Int) -> RulingShareData {
+        let priorUser = service.messages[..<index].last { $0.isUser }
+        return RulingShareData(
+            question: priorUser?.content ?? "Lorcana rules question",
+            answer: service.messages[index].content,
+            cards: priorUser?.attachedCards ?? []
+        )
+    }
+
+    /// Deterministic follow-up prompts for the cards in play — only when the conversation
+    /// is resting on an answer.
+    private var followUpSuggestions: [String]? {
+        guard let last = service.messages.last, !last.isUser, !last.isError else { return nil }
+        guard let cards = service.messages.last(where: { $0.isUser })?.attachedCards,
+              !cards.isEmpty else { return nil }
+        let suggestions = RulesFollowUps.suggestions(for: cards)
+        return suggestions.isEmpty ? nil : suggestions
     }
 
     private var retryButton: some View {
@@ -387,6 +514,90 @@ struct RulesChatView: View {
     }
 }
 
+// MARK: - Follow-up Chips
+
+/// Horizontally scrolling suggested follow-up questions, generated locally (no API cost)
+/// from the attached cards' text.
+struct FollowUpChipsView: View {
+    let suggestions: [String]
+    let onTap: (String) -> Void
+
+    var body: some View {
+        ScrollView(.horizontal) {
+            HStack(spacing: 8) {
+                ForEach(suggestions, id: \.self) { suggestion in
+                    Button {
+                        onTap(suggestion)
+                    } label: {
+                        HStack(spacing: 5) {
+                            Image(systemName: "sparkles")
+                                .font(.caption2)
+                            Text(suggestion)
+                                .font(.caption)
+                        }
+                        .foregroundStyle(.lorcanaGold)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 7)
+                        .background(
+                            Capsule()
+                                .fill(Color.lorcanaDark.opacity(0.8))
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color.lorcanaGold.opacity(0.4), lineWidth: 1)
+                                )
+                        )
+                    }
+                }
+            }
+        }
+        .scrollIndicators(.hidden)
+    }
+}
+
+/// Builds card-aware follow-up questions by matching keywords in the attached cards' text.
+enum RulesFollowUps {
+    private static let keywordPrompts: [(keyword: String, prompt: String)] = [
+        ("Shift", "How does Shift timing work here?"),
+        ("Singer", "How does Singer interact with song costs?"),
+        ("Sing Together", "How does Sing Together add up?"),
+        ("Bodyguard", "How does Bodyguard affect challenges here?"),
+        ("Ward", "What can still affect this card through Ward?"),
+        ("Evasive", "Who can challenge this Evasive character?"),
+        ("Challenger", "When does the Challenger bonus apply?"),
+        ("Resist", "How does Resist reduce this damage?"),
+        ("Rush", "Can this character challenge the turn it's played?"),
+        ("Reckless", "What does Reckless force this character to do?"),
+        ("Support", "How does Support work when this character quests?"),
+        ("Vanish", "When exactly does Vanish trigger?")
+    ]
+
+    /// Card text resolved once per card id — this runs from view bodies, and
+    /// `getAllCards()` is far too expensive per render.
+    @MainActor private static var cardTextCache: [String: String] = [:]
+
+    @MainActor
+    static func suggestions(for cards: [RulesMessage.AttachedCard]) -> [String] {
+        let combinedText = cards.map { cardText(forId: $0.id) }.joined(separator: "\n")
+
+        var prompts = keywordPrompts
+            .filter { combinedText.localizedStandardContains($0.keyword) }
+            .map { $0.prompt }
+
+        if prompts.isEmpty {
+            prompts = ["What are good combos with this card?", "How would an opponent play around it?"]
+        }
+        return Array(prompts.prefix(3))
+    }
+
+    @MainActor
+    private static func cardText(forId id: String) -> String {
+        if let cached = cardTextCache[id] { return cached }
+        let text = SetsDataManager.shared.getAllCards().first { $0.id == id }?.cardText ?? ""
+        cardTextCache[id] = text
+        return text
+    }
+}
+
 // MARK: - Input Bar
 
 struct RulesInputBar: View {
@@ -396,6 +607,12 @@ struct RulesInputBar: View {
     @Binding var showingCardSearch: Bool
     @FocusState.Binding var isInputFocused: Bool
 
+    /// Card the typed text appears to mention, offered as a one-tap attach.
+    @State private var suggestedCard: LorcanaCard?
+    @State private var suggestionTask: Task<Void, Never>?
+    /// Normal-variant cards, loaded once — `getAllCards()` is too expensive per keystroke.
+    @State private var matchCandidates: [LorcanaCard] = []
+
     private var canSend: Bool {
         !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !service.isLoading
     }
@@ -404,6 +621,10 @@ struct RulesInputBar: View {
         VStack(spacing: 0) {
             if !attachedCards.isEmpty {
                 attachedCardsPreview
+            }
+
+            if let suggestion = suggestedCard {
+                suggestionChip(suggestion)
             }
 
             Divider()
@@ -477,6 +698,76 @@ struct RulesInputBar: View {
         .sheet(isPresented: $showingCardSearch) {
             CardSearchSheet(attachedCards: $attachedCards, isPresented: $showingCardSearch)
         }
+        .task {
+            if matchCandidates.isEmpty {
+                matchCandidates = SetsDataManager.shared.getAllCards().filter { $0.variant == .normal }
+            }
+        }
+        .onChange(of: inputText) { _, newValue in
+            suggestionTask?.cancel()
+            guard !newValue.isEmpty else {
+                suggestedCard = nil
+                return
+            }
+            suggestionTask = Task {
+                try? await Task.sleep(for: .milliseconds(350))
+                guard !Task.isCancelled else { return }
+                let match = RulesAssistantService.fuzzyCardSuggestion(in: newValue, from: matchCandidates)
+                if let match, !attachedCards.contains(where: { $0.id == match.id }) {
+                    suggestedCard = match
+                } else {
+                    suggestedCard = nil
+                }
+            }
+        }
+    }
+
+    /// "Did you mean …?" one-tap attach for a card name the user typed loosely.
+    private func suggestionChip(_ card: LorcanaCard) -> some View {
+        HStack(spacing: 8) {
+            AsyncImage(url: card.bestImageUrl()) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+            } placeholder: {
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(Color.gray.opacity(0.3))
+            }
+            .frame(width: 24, height: 34)
+            .clipShape(.rect(cornerRadius: 3))
+
+            Text("Talking about **\(card.name)**?")
+                .font(.caption)
+                .foregroundStyle(.white)
+                .lineLimit(1)
+
+            Spacer()
+
+            Button {
+                if attachedCards.count < 4 {
+                    attachedCards.append(card)
+                }
+                suggestedCard = nil
+            } label: {
+                Label("Attach", systemImage: "paperclip")
+                    .font(.caption)
+                    .bold()
+                    .foregroundStyle(.lorcanaDark)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Capsule().fill(Color.lorcanaGold))
+            }
+
+            Button("Dismiss", systemImage: "xmark.circle.fill") {
+                suggestedCard = nil
+            }
+            .labelStyle(.iconOnly)
+            .font(.caption)
+            .foregroundStyle(.gray)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(Color.lorcanaDark.opacity(0.95))
     }
 
     private var attachedCardsPreview: some View {
@@ -883,19 +1174,7 @@ private struct MarkdownBlock: Identifiable {
     }
 }
 
-// MARK: - Message Bubble
-
-struct MessageBubble: View {
-    let message: RulesMessage
-
-    var body: some View {
-        if message.isUser {
-            UserQuestionView(message: message)
-        } else {
-            AssistantAnswerView(content: message.content, isError: message.isError)
-        }
-    }
-}
+// MARK: - Transcript Views
 
 /// The user's question: a compact trailing bubble, with thumbnails of any attached cards
 /// above it so the transcript remembers which cards each question was about.

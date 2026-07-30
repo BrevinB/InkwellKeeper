@@ -35,6 +35,7 @@ struct AnalyticsEventTests {
         .aiDeckGenerated(ink: "Ruby"),
         .aiRulesQuestionAsked,
         .rulesAssistantOpened(source: "collectionDetail"),
+        .rulesAnswerRated(helpful: true),
         .paywallShown(source: "scanLimit"),
         .subscriptionPurchased(product: "pro.monthly"),
         .tipPurchased(product: "tip.small"),
