@@ -10,6 +10,14 @@ import SwiftUI
 
 // MARK: - Message Model
 struct RulesMessage: Identifiable, Equatable, Codable {
+    /// Just enough of an attached card to render it in the transcript — the full rules
+    /// text lives in `cardContext`.
+    struct AttachedCard: Codable, Equatable {
+        let id: String
+        let name: String
+        let imageUrl: String
+    }
+
     let id: UUID
     let content: String
     let isUser: Bool
@@ -18,16 +26,25 @@ struct RulesMessage: Identifiable, Equatable, Codable {
     /// follow-up questions retain the card context across turns. Optional for backward
     /// compatibility with chats saved before this field existed.
     let cardContext: String?
+    /// The cards attached to this message, shown as thumbnails in the transcript.
+    let attachedCards: [AttachedCard]?
     /// App-generated error bubbles ("Sorry, I encountered an error…"). Shown in the UI but
     /// excluded from the API conversation so the model never sees them as its own replies.
     let isError: Bool
 
-    init(content: String, isUser: Bool, cardContext: String? = nil, isError: Bool = false) {
+    init(
+        content: String,
+        isUser: Bool,
+        cardContext: String? = nil,
+        attachedCards: [AttachedCard]? = nil,
+        isError: Bool = false
+    ) {
         self.id = UUID()
         self.content = content
         self.isUser = isUser
         self.timestamp = Date()
         self.cardContext = cardContext
+        self.attachedCards = attachedCards
         self.isError = isError
     }
 
@@ -38,6 +55,7 @@ struct RulesMessage: Identifiable, Equatable, Codable {
         isUser = try container.decode(Bool.self, forKey: .isUser)
         timestamp = try container.decode(Date.self, forKey: .timestamp)
         cardContext = try container.decodeIfPresent(String.self, forKey: .cardContext)
+        attachedCards = try container.decodeIfPresent([AttachedCard].self, forKey: .attachedCards)
         // Chats saved before this field existed decode as non-error messages.
         isError = try container.decodeIfPresent(Bool.self, forKey: .isError) ?? false
     }
@@ -562,8 +580,16 @@ class RulesAssistantService {
         // Explicit attachments win; otherwise auto-detect card names mentioned in the question.
         let cards = cardContexts.isEmpty ? detectCards(in: trimmed) : cardContexts
         let context = cards.isEmpty ? nil : buildCardContext(for: cards)
+        let summaries = cards.map {
+            RulesMessage.AttachedCard(id: $0.id, name: $0.name, imageUrl: $0.imageUrl)
+        }
 
-        messages.append(RulesMessage(content: trimmed, isUser: true, cardContext: context))
+        messages.append(RulesMessage(
+            content: trimmed,
+            isUser: true,
+            cardContext: context,
+            attachedCards: summaries.isEmpty ? nil : summaries
+        ))
         startGeneration()
     }
 

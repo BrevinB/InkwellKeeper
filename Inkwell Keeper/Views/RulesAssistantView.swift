@@ -852,12 +852,15 @@ private struct MarkdownBlock: Identifiable {
     private func heading(for string: String) -> Text? {
         if string.hasPrefix("### ") {
             return Self.inline(String(string.dropFirst(4))).font(.subheadline).bold()
+                .foregroundStyle(.lorcanaGold)
         }
         if string.hasPrefix("## ") {
             return Self.inline(String(string.dropFirst(3))).font(.headline).bold()
+                .foregroundStyle(.lorcanaGold)
         }
         if string.hasPrefix("# ") {
             return Self.inline(String(string.dropFirst(2))).font(.title3).bold()
+                .foregroundStyle(.lorcanaGold)
         }
         return nil
     }
@@ -886,46 +889,108 @@ struct MessageBubble: View {
     let message: RulesMessage
 
     var body: some View {
-        HStack {
-            if message.isUser {
-                Spacer(minLength: 60)
-            }
-
-            VStack(alignment: message.isUser ? .trailing : .leading, spacing: 4) {
-                if message.isUser {
-                    Text(message.content)
-                        .font(.body)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
-                        .background(
-                            RoundedRectangle(cornerRadius: 18)
-                                .fill(Color.lorcanaGold.opacity(0.35))
-                        )
-                        .textSelection(.enabled)
-                } else {
-                    MarkdownContentView(text: message.content)
-                        .font(.body)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
-                        .background(
-                            RoundedRectangle(cornerRadius: 18)
-                                .fill(message.isError ? Color.red.opacity(0.22) : Color.lorcanaDark.opacity(0.85))
-                        )
-                        .textSelection(.enabled)
-                }
-
-                Text(message.timestamp, style: .time)
-                    .font(.caption2)
-                    .foregroundStyle(.gray.opacity(0.8))
-                    .padding(.horizontal, 4)
-            }
-
-            if !message.isUser {
-                Spacer(minLength: 60)
-            }
+        if message.isUser {
+            UserQuestionView(message: message)
+        } else {
+            AssistantAnswerView(content: message.content, isError: message.isError)
         }
+    }
+}
+
+/// The user's question: a compact trailing bubble, with thumbnails of any attached cards
+/// above it so the transcript remembers which cards each question was about.
+struct UserQuestionView: View {
+    let message: RulesMessage
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 8) {
+            if let cards = message.attachedCards, !cards.isEmpty {
+                HStack(spacing: 8) {
+                    ForEach(cards, id: \.id) { card in
+                        AttachedCardThumbnail(card: card)
+                    }
+                }
+            }
+
+            Text(message.content)
+                .font(.body)
+                .foregroundStyle(.white)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 18)
+                        .fill(Color.lorcanaGold.opacity(0.35))
+                )
+                .textSelection(.enabled)
+        }
+        .frame(maxWidth: .infinity, alignment: .trailing)
+        .padding(.leading, 48)
+    }
+}
+
+/// A small framed card image identifying an attached card in the transcript.
+struct AttachedCardThumbnail: View {
+    let card: RulesMessage.AttachedCard
+
+    var body: some View {
+        VStack(spacing: 3) {
+            AsyncImage(url: URL(string: card.imageUrl)) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+            } placeholder: {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(Color.gray.opacity(0.3))
+            }
+            .frame(width: 56, height: 78)
+            .clipShape(.rect(cornerRadius: 6))
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(Color.lorcanaGold.opacity(0.5), lineWidth: 1)
+            )
+
+            Text(card.name.components(separatedBy: " - ").first ?? card.name)
+                .font(.caption2)
+                .foregroundStyle(.gray)
+                .lineLimit(1)
+                .frame(width: 60)
+        }
+    }
+}
+
+/// An assistant answer: a full-width panel with a gold accent rule, styled like app
+/// content rather than a chat bubble.
+struct AssistantAnswerView: View {
+    let content: String
+    var isError: Bool = false
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            RoundedRectangle(cornerRadius: 2)
+                .fill(
+                    LinearGradient(
+                        colors: isError
+                            ? [.red.opacity(0.8), .red.opacity(0.2)]
+                            : [.lorcanaGold, .lorcanaGold.opacity(0.15)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .frame(width: 3)
+
+            MarkdownContentView(text: content)
+                .font(.body)
+                .foregroundStyle(.white)
+                .textSelection(.enabled)
+
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(isError ? Color.red.opacity(0.12) : Color.lorcanaDark.opacity(0.6))
+        )
     }
 }
 
@@ -935,30 +1000,18 @@ struct StreamingBubble: View {
     let content: String
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                MarkdownContentView(text: content)
-                    .font(.body)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-                    .background(
-                        RoundedRectangle(cornerRadius: 18)
-                            .fill(Color.lorcanaDark.opacity(0.85))
-                    )
+        VStack(alignment: .leading, spacing: 6) {
+            AssistantAnswerView(content: content)
 
-                HStack(spacing: 4) {
-                    ProgressView()
-                        .scaleEffect(0.6)
-                        .tint(.lorcanaGold)
-                    Text("Thinking...")
-                        .font(.caption2)
-                        .foregroundStyle(.gray)
-                }
-                .padding(.horizontal, 4)
+            HStack(spacing: 6) {
+                ProgressView()
+                    .scaleEffect(0.6)
+                    .tint(.lorcanaGold)
+                Text("Consulting the rules…")
+                    .font(.caption2)
+                    .foregroundStyle(.gray)
             }
-
-            Spacer(minLength: 60)
+            .padding(.horizontal, 4)
         }
     }
 }
@@ -969,37 +1022,45 @@ struct TypingIndicator: View {
     @State private var dotOpacities: [Double] = [0.3, 0.3, 0.3]
 
     var body: some View {
-        HStack {
-            HStack(spacing: 5) {
+        HStack(spacing: 10) {
+            Image(systemName: "book.pages")
+                .font(.subheadline)
+                .foregroundStyle(.lorcanaGold)
+
+            Text("Consulting the rules")
+                .font(.subheadline)
+                .foregroundStyle(.gray)
+
+            HStack(spacing: 4) {
                 ForEach(0..<3, id: \.self) { index in
                     Circle()
                         .fill(Color.lorcanaGold)
-                        .frame(width: 8, height: 8)
+                        .frame(width: 6, height: 6)
                         .opacity(dotOpacities[index])
                 }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
-            .background(
-                RoundedRectangle(cornerRadius: 18)
-                    .fill(Color.lorcanaDark.opacity(0.85))
-            )
-            .onAppear {
-                animateDots()
             }
 
             Spacer()
         }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color.lorcanaDark.opacity(0.6))
+        )
+        .onAppear {
+            animateDots()
+        }
     }
 
     private func animateDots() {
-        for i in 0..<3 {
+        for index in 0..<3 {
             withAnimation(
                 .easeInOut(duration: 0.4)
                 .repeatForever(autoreverses: true)
-                .delay(Double(i) * 0.15)
+                .delay(Double(index) * 0.15)
             ) {
-                dotOpacities[i] = 1.0
+                dotOpacities[index] = 1.0
             }
         }
     }
