@@ -355,7 +355,10 @@ struct RulesChatView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 12) {
+                // Plain VStack on purpose: LazyVStack estimates offscreen row heights and
+                // corrects them as they materialize, which bounces the scroll position
+                // while an answer streams. Chats are short; laziness buys nothing here.
+                VStack(spacing: 12) {
                     ForEach(Array(service.messages.enumerated()), id: \.element.id) { index, message in
                         messageView(message, at: index)
                             .id(message.id)
@@ -369,12 +372,10 @@ struct RulesChatView: View {
 
                     if !service.currentStreamingContent.isEmpty {
                         StreamingBubble(content: service.currentStreamingContent)
-                            .id("streaming")
                     }
 
                     if service.isLoading && service.currentStreamingContent.isEmpty {
                         TypingIndicator()
-                            .id("typing")
                     }
 
                     if service.lastSendFailed && !service.isLoading {
@@ -387,17 +388,13 @@ struct RulesChatView: View {
                 .padding(.horizontal)
                 .padding(.top, 12)
             }
+            // Keeps the view pinned to the bottom as streamed content grows — the
+            // system-provided behavior for transcripts, replacing per-chunk scrollTo
+            // calls that fought the settling layout.
+            .defaultScrollAnchor(.bottom)
             .scrollDismissesKeyboard(.interactively)
             .onChange(of: service.messages.count) {
                 withAnimation(.easeOut(duration: 0.2)) {
-                    proxy.scrollTo("bottom", anchor: .bottom)
-                }
-            }
-            .onChange(of: service.currentStreamingContent) { oldValue, newValue in
-                // Scroll roughly every couple of rendered lines (~80 chars) rather than on
-                // every token — chunk-frequency scrolls fight the still-settling layout
-                // and read as jitter.
-                if oldValue.isEmpty || newValue.isEmpty || newValue.count / 80 != oldValue.count / 80 {
                     proxy.scrollTo("bottom", anchor: .bottom)
                 }
             }
@@ -1280,6 +1277,9 @@ struct AttachedCardThumbnail: View {
 struct AssistantAnswerView: View {
     let content: String
     var isError: Bool = false
+    /// Disabled while streaming — live selection machinery on rapidly changing text
+    /// causes re-layout churn.
+    var selectable: Bool = true
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -1295,10 +1295,12 @@ struct AssistantAnswerView: View {
                 )
                 .frame(width: 3)
 
-            MarkdownContentView(text: content)
-                .font(.body)
-                .foregroundStyle(.white)
-                .textSelection(.enabled)
+            if selectable {
+                markdownContent
+                    .textSelection(.enabled)
+            } else {
+                markdownContent
+            }
 
             Spacer(minLength: 0)
         }
@@ -1309,6 +1311,12 @@ struct AssistantAnswerView: View {
                 .fill(isError ? Color.red.opacity(0.12) : Color.lorcanaDark.opacity(0.6))
         )
     }
+
+    private var markdownContent: some View {
+        MarkdownContentView(text: content)
+            .font(.body)
+            .foregroundStyle(.white)
+    }
 }
 
 // MARK: - Streaming Bubble
@@ -1318,7 +1326,7 @@ struct StreamingBubble: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            AssistantAnswerView(content: content)
+            AssistantAnswerView(content: content, selectable: false)
 
             HStack(spacing: 6) {
                 ProgressView()
