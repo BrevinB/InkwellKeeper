@@ -24,8 +24,12 @@ struct GlossaryEntry: Identifiable {
 
 enum LorcanaGlossary {
     static let keywords: [GlossaryEntry] = [
+        GlossaryEntry("Alert", systemImage: "eye.fill",
+                      definition: "This character can challenge Evasive characters as if it had Evasive. Alert doesn't grant Evasive — it doesn't protect this character from being challenged."),
         GlossaryEntry("Bodyguard", systemImage: "shield.fill",
                       definition: "This character may enter play exerted. While a Bodyguard character is exerted, opposing characters must challenge a Bodyguard character if they challenge at all."),
+        GlossaryEntry("Boost N", systemImage: "square.stack.3d.up.fill",
+                      definition: "Once during your turn, you may pay N ink to put the top card of your deck facedown under this card. Nobody may look at facedown cards underneath, and they're not in play — the card's other abilities say what the stack is for."),
         GlossaryEntry("Challenger +N", systemImage: "bolt.fill",
                       definition: "This character gets +N Strength while challenging. The bonus applies only when it challenges — not when it's being challenged."),
         GlossaryEntry("Evasive", systemImage: "wind",
@@ -37,7 +41,7 @@ enum LorcanaGlossary {
         GlossaryEntry("Rush", systemImage: "hare.fill",
                       definition: "This character can challenge the turn it's played. Rush doesn't allow questing that turn — its ink is still drying for everything else."),
         GlossaryEntry("Shift N", systemImage: "arrow.triangle.2.circlepath",
-                      definition: "You may pay N ink to play this character on top of one of your characters with the specified name. The shifted character keeps damage, its ready/exerted state, and can act as if it were the character beneath."),
+                      definition: "You may pay N ink to play this character on top of one of your characters with the specified name. The shifted character keeps damage, its ready/exerted state, and can act as if it were the character beneath. Newer sets add variants — classification Shift, Universal, Duo, Combo, Temporary, and Potato Shift — that change what you may shift onto; the card spells out which."),
         GlossaryEntry("Singer N", systemImage: "music.note",
                       definition: "This character counts as costing N for the purpose of singing songs, letting them sing songs of cost N or less."),
         GlossaryEntry("Sing Together N", systemImage: "music.note.list",
