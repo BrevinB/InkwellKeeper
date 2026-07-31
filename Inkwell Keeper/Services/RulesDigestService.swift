@@ -12,19 +12,20 @@ import CloudKit
 
 /// Loads the AI rules digest from the public CloudKit database.
 ///
-/// Expected record (public database):
+/// Expected records (public database), published by `Scripts/publish_rules_digest.sh`:
 /// - Record Type: `RulesDigest`
-/// - Record Name (ID): `rulesDigest`
 /// - Fields:
 ///   - `digest` (`String`) — the full system-prompt rules text
-///   - `version` (`String`, optional) — human-readable version for logging (e.g. "2026-07-30")
+///   - `version` (`String`) — human-readable version for logging (e.g. "2026-07-30")
 ///
-/// Until the record exists, the bundled digest is used — same behavior as `DeckRulesService`.
+/// The newest record wins, so publishing an update is just creating a new record (cktool
+/// can't edit records in place). Until any record exists, the bundled digest is used —
+/// same behavior as `DeckRulesService`.
 @MainActor
 final class RulesDigestService {
     static let shared = RulesDigestService()
 
-    private let recordName = "rulesDigest"
+    private let recordType = "RulesDigest"
     private let cacheKey = "RulesDigestCachedText"
     private let cacheVersionKey = "RulesDigestCachedVersion"
 
@@ -47,16 +48,22 @@ final class RulesDigestService {
 
     func refreshAsync() async {
         let database = CKContainer.default().publicCloudDatabase
-        let recordID = CKRecord.ID(recordName: recordName)
+        let query = CKQuery(recordType: recordType, predicate: NSPredicate(value: true))
 
         do {
-            let record = try await database.record(for: recordID)
-            guard let digest = record["digest"] as? String, !digest.isEmpty else {
-                print("[RulesDigest] Record found but no digest field; using cached/bundled.")
+            // A handful of records at most; pick the newest client-side so publishing
+            // never has to delete or edit old ones.
+            let (results, _) = try await database.records(matching: query, resultsLimit: 25)
+            let records = results.compactMap { try? $0.1.get() }
+            guard let newest = records.max(by: {
+                ($0.modificationDate ?? .distantPast) < ($1.modificationDate ?? .distantPast)
+            }), let digest = newest["digest"] as? String, !digest.isEmpty else {
+                print("[RulesDigest] No usable record; using cached/bundled digest.")
                 return
             }
+
             UserDefaults.standard.set(digest, forKey: cacheKey)
-            let version = record["version"] as? String ?? "unversioned"
+            let version = newest["version"] as? String ?? "unversioned"
             UserDefaults.standard.set(version, forKey: cacheVersionKey)
             print("[RulesDigest] Applied remote digest (\(version)).")
         } catch {
