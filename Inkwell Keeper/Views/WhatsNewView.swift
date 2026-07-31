@@ -152,6 +152,33 @@ struct ChangelogEntry {
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
     ChangelogEntry(
+        version: "3.2.0",
+        date: "August 2026",
+        features: [
+            "Share decks as links — friends open them right in the app, or view the full deck in any web browser, no app needed",
+            "Import decks by pasting a deck list from Dreamborn, Discord, or anywhere (\"4 Elsa - Snow Queen\" style) — and export yours the same way",
+            "Ask About This Card on every card — instant AI answers on rulings, interactions, and strategy (Pro)",
+            "Free Keyword Glossary — every Lorcana keyword explained, works offline, in the Rules tab",
+            "Share AI rulings as images — settle rules debates in your group chat",
+            "Attach cards to rules questions straight from your collection, and tap any card in the chat to view it full size",
+            "Price trend charts now have a beautiful share card"
+        ],
+        improvements: [
+            "Rules Assistant fully updated to the July 2026 Comprehensive Rules — Attack of the Vine keywords, all six Shift variants, dual-ink cards, and current formats. Rules now update automatically between app releases",
+            "Redesigned rules chat — answers read like a rules reference, questions remember which cards they were about, and smart follow-up suggestions keep the conversation going",
+            "One streamlined deck share menu — link, image, and text list in one place",
+            "Multi-scan review adds your whole stack in one quick save",
+            "AI deck builder now tells you when something goes wrong and lets you retry"
+        ],
+        bugFixes: [
+            "Ask About This Card now works every time, not just the first",
+            "Rules answers stream in smoothly without the screen jumping",
+            "Long shared rulings no longer get cut off in the image",
+            "Failed rules questions no longer count against your daily limit",
+            "Completing an already-full deck now explains itself instead of silently failing"
+        ],
+        inProgress: []),
+    ChangelogEntry(
         version: "3.1.0",
         date: "July 2026",
         features: [

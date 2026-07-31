@@ -283,7 +283,7 @@
 		40A1198A827C589B87EBB410 /* PricingSelectionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PricingSelectionTests.swift; sourceTree = "<group>"; };
 		41F904F6589D32CF7AE1C322 /* ImportServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ImportServiceTests.swift; sourceTree = "<group>"; };
 		4443B3280ED4450783544968 /* StatsCardContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsCardContainer.swift; sourceTree = "<group>"; };
-		451422815F2CFF03E10ECAEF /* PriceTrendShareView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PriceTrendShareView.swift; path = PriceTrendShareView.swift; sourceTree = "<group>"; };
+		451422815F2CFF03E10ECAEF /* PriceTrendShareView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceTrendShareView.swift; sourceTree = "<group>"; };
 		49C17FA3D6A4FC54BFE2CBC6 /* SetFilterModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetFilterModels.swift; sourceTree = "<group>"; };
 		51F6FB2C58AC4849856F7DB2 /* PricingInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PricingInfoView.swift; sourceTree = "<group>"; };
 		53FCC9D910C812A33485BFD9 /* MilestoneShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MilestoneShareCardView.swift; sourceTree = "<group>"; };
@@ -343,7 +343,7 @@
 		E2F3A4B5C6D7E8F9A0B1C3D4 /* MultiScanReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiScanReviewView.swift; sourceTree = "<group>"; };
 		E624D8ABE9C6EC90741C35EC /* ShareMilestoneTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareMilestoneTests.swift; sourceTree = "<group>"; };
 		E9BB03867D8A4F4D71320AF8 /* CloudSyncBanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncBanner.swift; sourceTree = "<group>"; };
-		EA6C6843F930C81EC46FE103 /* PriceTrendChart.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PriceTrendChart.swift; path = PriceTrendChart.swift; sourceTree = "<group>"; };
+		EA6C6843F930C81EC46FE103 /* PriceTrendChart.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceTrendChart.swift; sourceTree = "<group>"; };
 		ECB3857A2307770C22BB78A0 /* DeckListTextCodec.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckListTextCodec.swift; sourceTree = "<group>"; };
 		F1CARD5EA3181D /* CardSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSearchView.swift; sourceTree = "<group>"; };
 		F6502D77B1F14DFEA73094B1 /* ValueBySetCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValueBySetCard.swift; sourceTree = "<group>"; };
@@ -352,8 +352,6 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		23CAEDD92ECEE796006786F7 /* CardImages */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = CardImages;
 			sourceTree = "<group>";
 		};
@@ -1106,7 +1104,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.0;
+				MARKETING_VERSION = 3.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1144,7 +1142,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.0;
+				MARKETING_VERSION = 3.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

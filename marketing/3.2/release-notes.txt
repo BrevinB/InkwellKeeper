@@ -1,0 +1,22 @@
+App Store Connect "What's New" — version 3.2.0
+
+Deck sharing just got a major upgrade — plus a smarter, sharper Rules Assistant.
+
+SHARE DECKS AS LINKS
+Send a deck to anyone. Friends with the app open it instantly; everyone else sees the full deck — card art, curve, and all — right in their browser.
+
+DECK LISTS THAT WORK EVERYWHERE
+Paste a deck list from Dreamborn or Discord to import it ("4 Elsa - Snow Queen" style), and export yours the same way.
+
+ASK ABOUT ANY CARD
+A new button on every card gives you instant AI answers on rulings, interactions, and strategy (Pro). Attach cards straight from your collection, tap them in chat to re-read the card text, and share rulings as images to settle debates.
+
+RULES, CURRENT AND FREE
+The AI is fully updated to the July 2026 Comprehensive Rules — Attack of the Vine keywords, all six Shift variants, dual-ink cards, and current formats — and now updates automatically between releases. Plus a free offline Keyword Glossary for everyone.
+
+ALSO IN THIS RELEASE
+• Redesigned rules chat with follow-up suggestions
+• One streamlined deck share menu
+• Faster multi-scan saving
+• Price trend share cards
+• Smoother streaming answers and lots of fixes
