@@ -16,7 +16,6 @@ struct AIDeckBuilderView: View {
     @StateObject private var subscriptionManager = SubscriptionManager.shared
 
     @State private var deckName = ""
-    @State private var deckDescription = ""
     @State private var selectedFormat: DeckFormat = .casual
     @State private var selectedColors: Set<InkColor> = []
     @State private var selectedArchetype: DeckArchetype? = nil
@@ -143,7 +142,7 @@ struct AIDeckBuilderView: View {
 
                             Spacer()
 
-                            Text("optional - max \(selectedFormat.maxInkColors)")
+                            Text("pick 1-\(selectedFormat.maxInkColors)")
                                 .font(.caption2)
                                 .foregroundStyle(.gray)
                         }
@@ -359,6 +358,16 @@ struct AIDeckBuilderView: View {
                 }
                 .disabled(!canGenerate)
                 .padding(.horizontal)
+
+                Group {
+                    if selectedColors.isEmpty {
+                        Text("Choose at least one ink color to generate")
+                    } else if aiService.remainingGenerationsToday <= 5 {
+                        Text("\(aiService.remainingGenerationsToday) AI generation\(aiService.remainingGenerationsToday == 1 ? "" : "s") left today")
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.gray)
                 .padding(.bottom, 20)
             }
         }
@@ -601,7 +610,9 @@ struct AIDeckBuilderView: View {
 
     // MARK: - Helpers
     private var canGenerate: Bool {
-        !userPrompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !aiService.isLoading
+        !userPrompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !selectedColors.isEmpty
+            && !aiService.isLoading
     }
 
     private func generate() {
@@ -633,7 +644,7 @@ struct AIDeckBuilderView: View {
         let name = deckName.isEmpty ? "AI Deck" : deckName
         let deck = deckManager.createDeck(
             name: name,
-            description: deckDescription.isEmpty ? userPrompt : deckDescription,
+            description: userPrompt,
             format: selectedFormat,
             inkColors: Array(selectedColors),
             archetype: selectedArchetype
@@ -1613,6 +1624,7 @@ struct AIDeckStrategyView: View {
     @StateObject private var subscriptionManager = SubscriptionManager.shared
 
     @State private var hasStarted = false
+    @State private var strategyTask: Task<Void, Never>?
 
     var body: some View {
         NavigationStack {
@@ -1621,7 +1633,7 @@ struct AIDeckStrategyView: View {
 
                 if !subscriptionManager.isSubscribed {
                     RulesPaywallView(source: "deckStrategy")
-                } else if aiService.availability != .available && !aiService.isLoading && aiService.rawResponse.isEmpty {
+                } else if aiService.availability != .available && !aiService.strategyIsLoading && aiService.strategyResponse.isEmpty {
                     unavailableContent
                 } else {
                     strategyContent
@@ -1632,7 +1644,7 @@ struct AIDeckStrategyView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Done") {
-                        aiService.reset()
+                        strategyTask?.cancel()
                         dismiss()
                     }
                     .foregroundStyle(.lorcanaGold)
@@ -1643,10 +1655,13 @@ struct AIDeckStrategyView: View {
             subscriptionManager.checkSubscriptionStatus()
             if !hasStarted {
                 hasStarted = true
-                Task {
+                strategyTask = Task {
                     await aiService.generateStrategy(for: deck)
                 }
             }
+        }
+        .onDisappear {
+            strategyTask?.cancel()
         }
     }
 
@@ -1686,7 +1701,7 @@ struct AIDeckStrategyView: View {
                 }
                 .padding(.top, 8)
 
-                if aiService.isLoading {
+                if aiService.strategyIsLoading {
                     VStack(spacing: 12) {
                         ProgressView()
                             .tint(.lorcanaGold)
@@ -1696,8 +1711,8 @@ struct AIDeckStrategyView: View {
                             .font(.headline)
                             .foregroundStyle(.white)
 
-                        if !aiService.currentStreamingContent.isEmpty {
-                            markdownText(aiService.currentStreamingContent)
+                        if !aiService.strategyStreamingContent.isEmpty {
+                            markdownText(aiService.strategyStreamingContent)
                                 .font(.body)
                                 .foregroundStyle(.white)
                                 .tint(.lorcanaGold)
@@ -1715,8 +1730,8 @@ struct AIDeckStrategyView: View {
                         }
                     }
                     .padding()
-                } else if !aiService.rawResponse.isEmpty {
-                    markdownText(aiService.rawResponse)
+                } else if !aiService.strategyResponse.isEmpty {
+                    markdownText(aiService.strategyResponse)
                         .font(.body)
                         .foregroundStyle(.white)
                         .tint(.lorcanaGold)
@@ -1746,7 +1761,7 @@ struct AIDeckStrategyView: View {
                         .foregroundStyle(.lorcanaGold)
                     }
                     .padding(.bottom, 20)
-                } else if let error = aiService.errorMessage {
+                } else if let error = aiService.strategyError {
                     VStack(spacing: 12) {
                         Image(systemName: "exclamationmark.triangle")
                             .font(.title)

@@ -9,18 +9,29 @@ import Foundation
 import SwiftUI
 
 // MARK: - AI Deck Suggestion Model
-struct AIDeckSuggestion: Identifiable, Hashable {
-    let id = UUID()
+struct AIDeckSuggestion: Identifiable, Hashable, Sendable {
+    let id: UUID
     let cardName: String
     let quantity: Int
-    let reasoning: String?
     var matchedCard: LorcanaCard?
+
+    init(id: UUID = UUID(), cardName: String, quantity: Int, matchedCard: LorcanaCard? = nil) {
+        self.id = id
+        self.cardName = cardName
+        self.quantity = quantity
+        self.matchedCard = matchedCard
+    }
+
+    /// A copy with a different quantity, preserving identity so SwiftUI rows stay stable.
+    func withQuantity(_ newQuantity: Int) -> Self {
+        Self(id: id, cardName: cardName, quantity: newQuantity, matchedCard: matchedCard)
+    }
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
 
-    static func == (lhs: AIDeckSuggestion, rhs: AIDeckSuggestion) -> Bool {
+    static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.id == rhs.id
     }
 }
@@ -39,6 +50,13 @@ class AIDeckService {
     var colorConstraintNote: String?
     var availability: RulesAssistantAvailability = .checking
 
+    // Strategy guide keeps its own state so opening it never wipes builder/completer results
+    // (all three views share this singleton).
+    var strategyIsLoading = false
+    var strategyStreamingContent: String = ""
+    var strategyResponse: String = ""
+    var strategyError: String?
+
     private var apiKey: String?
     private let dataManager = SetsDataManager.shared
     private var currentCollectionOnly = false
@@ -47,6 +65,41 @@ class AIDeckService {
     private var currentMaxInkColors = 2
     /// How many cards the suggestions should total — 60 for a new deck, fewer for completion
     private var targetSuggestionCount = 60
+    /// Normal-variant card snapshot for the current generation, fetched once per run —
+    /// `getAllCards()` re-maps prices on every call and used to be hit 4+ times per generation.
+    private var currentNormalCards: [LorcanaCard] = []
+
+    // Client-side daily cap shared across deck build, completion, and strategy — these are
+    // the most expensive prompts in the app and had no limit at all. Remotely configurable.
+    var dailyGenerationLimit: Int { AIConfigService.shared.deckDailyLimit }
+    private let dailyCountKey = "AIDeckDailyCount"
+    private let dailyDateKey = "AIDeckDailyDate"
+
+    /// How many deck/strategy generations the user can still run today.
+    var remainingGenerationsToday: Int {
+        let defaults = UserDefaults.standard
+        let today = Calendar.current.startOfDay(for: Date())
+        let storedDay = (defaults.object(forKey: dailyDateKey) as? Date).map { Calendar.current.startOfDay(for: $0) }
+        if storedDay != today { return dailyGenerationLimit }
+        return max(0, dailyGenerationLimit - defaults.integer(forKey: dailyCountKey))
+    }
+
+    /// Records one successful generation against today's allowance.
+    private func consumeDailyAllowance() {
+        let defaults = UserDefaults.standard
+        let today = Calendar.current.startOfDay(for: Date())
+        let storedDay = (defaults.object(forKey: dailyDateKey) as? Date).map { Calendar.current.startOfDay(for: $0) }
+        var count = defaults.integer(forKey: dailyCountKey)
+        if storedDay != today {
+            count = 0
+            defaults.set(today, forKey: dailyDateKey)
+        }
+        defaults.set(count + 1, forKey: dailyCountKey)
+    }
+
+    private var dailyLimitMessage: String {
+        "You've reached today's limit of \(dailyGenerationLimit) AI generations. Please try again tomorrow."
+    }
 
     private init() {
         checkAvailability()
@@ -145,6 +198,14 @@ class AIDeckService {
             return
         }
 
+        guard remainingGenerationsToday > 0 else {
+            errorMessage = dailyLimitMessage
+            isLoading = false
+            return
+        }
+
+        currentNormalCards = dataManager.getAllCards().filter { $0.variant == .normal }
+
         var prompt = "Create a 60-card Disney Lorcana deck with the following requirements:\n"
         prompt += "- Format: \(format.rawValue)\n"
 
@@ -191,6 +252,12 @@ class AIDeckService {
             return
         }
 
+        guard remainingGenerationsToday > 0 else {
+            errorMessage = dailyLimitMessage
+            isLoading = false
+            return
+        }
+
         let currentCount = existingCards.reduce(0) { $0 + $1.quantity }
         let remaining = targetCount - currentCount
 
@@ -208,6 +275,16 @@ class AIDeckService {
             let detectedColors = Set(existingCards.compactMap { $0.inkColor })
             effectiveColors = detectedColors.compactMap { InkColor.fromString($0) }
         }
+
+        // Without any color signal the catalog would have to include the entire card
+        // database (~20K+ tokens) — require colors instead.
+        guard !effectiveColors.isEmpty else {
+            errorMessage = "Add a few cards or set the deck's ink colors first, so suggestions match your deck."
+            isLoading = false
+            return
+        }
+
+        currentNormalCards = dataManager.getAllCards().filter { $0.variant == .normal }
 
         var prompt = "I have a partial Disney Lorcana deck and need help completing it.\n\n"
         prompt += "Format: \(format.rawValue)\n"
@@ -244,13 +321,19 @@ class AIDeckService {
 
     // MARK: - Generate Strategy for Existing Deck
     func generateStrategy(for deck: Deck) async {
-        reset()
-        isLoading = true
-        errorMessage = nil
+        strategyResponse = ""
+        strategyStreamingContent = ""
+        strategyError = nil
+        strategyIsLoading = true
+        defer { strategyIsLoading = false }
 
         guard let apiKey = apiKey else {
-            errorMessage = "Service not available. Please try again later."
-            isLoading = false
+            strategyError = "Service not available. Please try again later."
+            return
+        }
+
+        guard remainingGenerationsToday > 0 else {
+            strategyError = dailyLimitMessage
             return
         }
 
@@ -290,34 +373,43 @@ class AIDeckService {
         do {
             let stream = OpenAIService.shared.streamChatCompletion(
                 apiKey: apiKey,
-                messages: messages
+                messages: messages,
+                model: AIConfigService.shared.deckModel
             )
 
             for try await chunk in stream {
-                currentStreamingContent += chunk
+                if Task.isCancelled { break }
+                strategyStreamingContent += chunk
             }
 
-            rawResponse = currentStreamingContent
-            currentStreamingContent = ""
+            strategyResponse = strategyStreamingContent
+            strategyStreamingContent = ""
+            if !strategyResponse.isEmpty {
+                consumeDailyAllowance()
+            }
         } catch {
-            if currentStreamingContent.isEmpty {
-                errorMessage = "Failed to generate strategy. Please try again."
+            if strategyStreamingContent.isEmpty {
+                strategyError = "Failed to generate strategy. Please try again."
             } else {
-                rawResponse = currentStreamingContent
-                currentStreamingContent = ""
+                strategyResponse = strategyStreamingContent
+                strategyStreamingContent = ""
+                consumeDailyAllowance()
             }
         }
-
-        isLoading = false
     }
 
     // MARK: - Build Card Catalog for AI Prompt
+
+    /// Cap on catalog entries per ink color, keeping worst-case prompt size bounded
+    /// (a 6-ink Infinity catalog used to reach ~20-25K tokens).
+    private static let catalogPerColorLimit = 130
+
     private func buildCardCatalog(format: DeckFormat, inkColors: [InkColor], collectionOnly: Bool = false, ownedCardQuantities: [String: Int] = [:], description: String = "") -> String {
-        let allCards = dataManager.getAllCards()
+        let allCards = currentNormalCards
         let legalSetNames = format.legalSets ?? Set(allCards.map { $0.setName })
 
         var filteredCards = allCards.filter {
-            $0.variant == .normal && legalSetNames.contains($0.setName)
+            legalSetNames.contains($0.setName)
         }
 
         // Exclude cards banned in this format so the AI never suggests them
@@ -344,12 +436,14 @@ class AIDeckService {
         let themeKeywords = extractThemeKeywords(from: description)
 
         if !inkColors.isEmpty {
-            // Colors specified: filter to only those colors
+            // Colors specified: filter to only those colors, capped per color so a
+            // many-ink Infinity request can't balloon the prompt
             let colorNames = Set(inkColors.map { $0.rawValue })
             filteredCards = filteredCards.filter { card in
                 guard let inkColor = card.inkColor else { return false }
                 return colorNames.contains(inkColor)
             }
+            filteredCards = Self.capPerColor(filteredCards, limit: Self.catalogPerColorLimit)
             guard !filteredCards.isEmpty else { return "" }
 
             var catalog = "\n\nCRITICAL: ONLY use card names from the list below. Copy each name EXACTLY as written — do not modify, shorten, or invent names. Every card in your [DECKLIST] MUST appear in this list.\n"
@@ -396,14 +490,37 @@ class AIDeckService {
 
             catalog += "\nCHOOSE UP TO \(maxInks) COLORS AND USE ONLY THOSE:\n"
 
-            let byColor = Dictionary(grouping: filteredCards) { $0.inkColor ?? "Unknown" }
+            let capped = Self.capPerColor(filteredCards, limit: Self.catalogPerColorLimit)
+            let byColor = Dictionary(grouping: capped) { $0.inkColor ?? "Unknown" }
             for colorName in byColor.keys.sorted() {
-                let cards = byColor[colorName]!.sorted { $0.name < $1.name }
+                guard let cards = byColor[colorName]?.sorted(by: { $0.name < $1.name }) else { continue }
                 catalog += "\n=== \(colorName.uppercased()) ===\n"
                 catalog += formatCardList(cards, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities)
             }
             return catalog
         }
+    }
+
+    /// Caps cards per ink color while preserving the cost curve: within each color, cards are
+    /// ordered by cost and stride-sampled so every cost bracket stays represented.
+    private static func capPerColor(_ cards: [LorcanaCard], limit: Int) -> [LorcanaCard] {
+        let byColor = Dictionary(grouping: cards) { $0.inkColor ?? "Unknown" }
+        var result: [LorcanaCard] = []
+        for (_, colorCards) in byColor {
+            if colorCards.count <= limit {
+                result.append(contentsOf: colorCards)
+                continue
+            }
+            let sorted = colorCards.sorted { ($0.cost, $0.name) < ($1.cost, $1.name) }
+            let stride = Double(sorted.count) / Double(limit)
+            var picked: [LorcanaCard] = []
+            picked.reserveCapacity(limit)
+            for slot in 0..<limit {
+                picked.append(sorted[Int(Double(slot) * stride)])
+            }
+            result.append(contentsOf: picked)
+        }
+        return result
     }
 
     // MARK: - Stream Completion
@@ -418,85 +535,65 @@ class AIDeckService {
         do {
             let stream = OpenAIService.shared.streamChatCompletion(
                 apiKey: apiKey,
-                messages: messages
+                messages: messages,
+                model: AIConfigService.shared.deckModel
             )
 
             for try await chunk in stream {
+                if Task.isCancelled { break }
                 currentStreamingContent += chunk
             }
 
             rawResponse = currentStreamingContent
             currentStreamingContent = ""
-            parseSuggestions()
         } catch {
             if currentStreamingContent.isEmpty {
                 errorMessage = "Failed to generate deck. Please try again."
-            } else {
-                rawResponse = currentStreamingContent
-                currentStreamingContent = ""
-                parseSuggestions()
+                isLoading = false
+                return
             }
+            rawResponse = currentStreamingContent
+            currentStreamingContent = ""
         }
 
-        // Final enforcement after all parsing
-        normalizeTo60Cards()
-        enforceCostCurve()
-        normalizeTo60Cards()
+        suggestions = Self.parseSuggestions(from: rawResponse)
+        if !rawResponse.isEmpty {
+            consumeDailyAllowance()
+        }
+        await postProcessSuggestions()
 
         isLoading = false
     }
 
     // MARK: - Parse Suggestions
-    private func parseSuggestions() {
-        suggestions = []
 
-        // Extract decklist block
-        guard let startRange = rawResponse.range(of: "[DECKLIST]"),
-              let endRange = rawResponse.range(of: "[/DECKLIST]") else {
-            // Try to parse without markers as fallback
-            parseFallbackSuggestions()
-            return
+    /// Parses the response into raw suggestions — the `[DECKLIST]` block when present,
+    /// otherwise any `"4x Name (Set)"`-shaped lines in the whole response.
+    private static func parseSuggestions(from response: String) -> [AIDeckSuggestion] {
+        let content: String
+        if let startRange = response.range(of: "[DECKLIST]"),
+           let endRange = response.range(of: "[/DECKLIST]") {
+            content = String(response[startRange.upperBound..<endRange.lowerBound])
+        } else {
+            content = response
         }
 
-        let decklistContent = String(rawResponse[startRange.upperBound..<endRange.lowerBound])
-        parseCardLines(decklistContent)
+        return content
+            .components(separatedBy: "\n")
+            .compactMap { parseCardLine($0.trimmingCharacters(in: .whitespaces)) }
     }
 
-    private func parseFallbackSuggestions() {
-        // Try to find lines that look like "4x Card Name (Set)"
-        let lines = rawResponse.components(separatedBy: "\n")
-        var foundCards = false
+    /// One pass of cleanup over freshly parsed suggestions: database matching (off the main
+    /// actor — the fuzzy fallbacks are heavy), then color/ownership/curve/count enforcement.
+    private func postProcessSuggestions() async {
+        guard !suggestions.isEmpty else { return }
 
-        for line in lines {
-            let trimmed = line.trimmingCharacters(in: .whitespaces)
-            if let suggestion = parseCardLine(trimmed) {
-                suggestions.append(suggestion)
-                foundCards = true
-            }
-        }
+        let snapshot = suggestions
+        let cards = currentNormalCards
+        suggestions = await Task.detached(priority: .userInitiated) {
+            Self.matchSuggestions(snapshot, against: cards)
+        }.value
 
-        if foundCards {
-            matchCardsToDatabase()
-            enforceColorConstraint()
-            autoFixUnmatched()
-            enforceOwnedQuantities()
-            normalizeTo60Cards()
-            enforceCostCurve()
-            normalizeTo60Cards()
-        }
-    }
-
-    private func parseCardLines(_ content: String) {
-        let lines = content.components(separatedBy: "\n")
-
-        for line in lines {
-            let trimmed = line.trimmingCharacters(in: .whitespaces)
-            if let suggestion = parseCardLine(trimmed) {
-                suggestions.append(suggestion)
-            }
-        }
-
-        matchCardsToDatabase()
         enforceColorConstraint()
         autoFixUnmatched()
         enforceOwnedQuantities()
@@ -504,7 +601,7 @@ class AIDeckService {
         normalizeTo60Cards()
     }
 
-    private func parseCardLine(_ line: String) -> AIDeckSuggestion? {
+    private static func parseCardLine(_ line: String) -> AIDeckSuggestion? {
         // Match patterns like "4x Card Name (Set Name)" or "4x Card Name - Subtitle (Set Name)"
         let pattern = #"^(\d+)x\s+(.+?)(?:\s+\((.+?)\))?\s*$"#
 
@@ -523,18 +620,19 @@ class AIDeckService {
 
         guard quantity > 0 && !cardName.isEmpty else { return nil }
 
-        return AIDeckSuggestion(
-            cardName: cardName,
-            quantity: quantity,
-            reasoning: nil,
-            matchedCard: nil
-        )
+        return AIDeckSuggestion(cardName: cardName, quantity: quantity)
     }
 
     // MARK: - Match Cards to Database
-    private func matchCardsToDatabase() {
-        let allCards = dataManager.getAllCards()
-        let normalCards = allCards.filter { $0.variant == .normal }
+
+    /// Matches suggestion names against the card database through a series of increasingly
+    /// fuzzy tiers. Pure and `nonisolated` — the edit-distance fallbacks sweep the whole
+    /// card list and used to hitch the UI when run on the main actor.
+    nonisolated private static func matchSuggestions(
+        _ input: [AIDeckSuggestion],
+        against normalCards: [LorcanaCard]
+    ) -> [AIDeckSuggestion] {
+        var suggestions = input
 
         // Pre-build a lookup for fast exact matching
         let normalizedLookup: [String: LorcanaCard] = {
@@ -546,13 +644,13 @@ class AIDeckService {
             return dict
         }()
 
-        for i in suggestions.indices {
-            let rawName = suggestions[i].cardName
+        for index in suggestions.indices {
+            let rawName = suggestions[index].cardName
             let suggestionName = normalizeName(rawName)
 
             // 1. Exact match (normalized)
             if let match = normalizedLookup[suggestionName] {
-                suggestions[i].matchedCard = match
+                suggestions[index].matchedCard = match
                 continue
             }
 
@@ -561,7 +659,7 @@ class AIDeckService {
                 let cardName = normalizeName($0.name)
                 return cardName.contains(suggestionName) || suggestionName.contains(cardName)
             }) {
-                suggestions[i].matchedCard = match
+                suggestions[index].matchedCard = match
                 continue
             }
 
@@ -575,7 +673,7 @@ class AIDeckService {
                     let cardName = normalizeName($0.name)
                     return cardName.contains(firstName) && cardName.contains(subtitle)
                 }) {
-                    suggestions[i].matchedCard = match
+                    suggestions[index].matchedCard = match
                     continue
                 }
 
@@ -588,7 +686,7 @@ class AIDeckService {
                     let maxDist = max(1, min(2, firstName.count / 4))
                     return levenshteinDistance(firstName, cardFirst) <= maxDist && cardSubtitle == subtitle
                 }) {
-                    suggestions[i].matchedCard = match
+                    suggestions[index].matchedCard = match
                     continue
                 }
 
@@ -601,7 +699,7 @@ class AIDeckService {
                     let maxDist = max(1, min(2, subtitle.count / 3))
                     return cardFirst == firstName && levenshteinDistance(subtitle, cardSubtitle) <= maxDist
                 }) {
-                    suggestions[i].matchedCard = match
+                    suggestions[index].matchedCard = match
                     continue
                 }
             }
@@ -609,7 +707,7 @@ class AIDeckService {
             // 6. Word-overlap matching — find the card sharing the most words
             let suggestionWords = Set(suggestionName.components(separatedBy: .alphanumerics.inverted).filter { !$0.isEmpty })
             if suggestionWords.count >= 2 {
-                var bestMatch: LorcanaCard? = nil
+                var bestMatch: LorcanaCard?
                 var bestOverlap = 0.0
                 for card in normalCards {
                     let cardWords = Set(normalizeName(card.name).components(separatedBy: .alphanumerics.inverted).filter { !$0.isEmpty })
@@ -623,14 +721,14 @@ class AIDeckService {
                 }
                 // Require at least 60% word overlap
                 if bestOverlap >= 0.6, let match = bestMatch {
-                    suggestions[i].matchedCard = match
+                    suggestions[index].matchedCard = match
                     continue
                 }
             }
 
             // 7. Full-name edit distance fallback — find the closest card within a threshold
             let maxFullDist = max(3, suggestionName.count / 4)
-            var bestEditMatch: LorcanaCard? = nil
+            var bestEditMatch: LorcanaCard?
             var bestDist = Int.max
             for card in normalCards {
                 let dist = levenshteinDistance(suggestionName, normalizeName(card.name))
@@ -641,28 +739,30 @@ class AIDeckService {
                 if dist == 0 { break }
             }
             if bestDist <= maxFullDist, let match = bestEditMatch {
-                suggestions[i].matchedCard = match
+                suggestions[index].matchedCard = match
             }
         }
+
+        return suggestions
     }
 
     /// Levenshtein edit distance between two strings.
-    private func levenshteinDistance(_ a: String, _ b: String) -> Int {
-        if a == b { return 0 }
-        let a = Array(a), b = Array(b)
-        let m = a.count, n = b.count
-        if m == 0 { return n }
-        if n == 0 { return m }
-        var dp = Array(repeating: Array(0...n), count: m + 1)
-        for i in 1...m {
-            dp[i][0] = i
-            for j in 1...n {
-                dp[i][j] = a[i-1] == b[j-1]
-                    ? dp[i-1][j-1]
-                    : 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])
+    nonisolated private static func levenshteinDistance(_ lhs: String, _ rhs: String) -> Int {
+        if lhs == rhs { return 0 }
+        let source = Array(lhs), target = Array(rhs)
+        let rows = source.count, cols = target.count
+        if rows == 0 { return cols }
+        if cols == 0 { return rows }
+        var dp = Array(repeating: Array(0...cols), count: rows + 1)
+        for row in 1...rows {
+            dp[row][0] = row
+            for col in 1...cols {
+                dp[row][col] = source[row - 1] == target[col - 1]
+                    ? dp[row - 1][col - 1]
+                    : 1 + min(dp[row - 1][col], dp[row][col - 1], dp[row - 1][col - 1])
             }
         }
-        return dp[m][n]
+        return dp[rows][cols]
     }
 
     // MARK: - Enforce Ink-Color Constraint
@@ -727,9 +827,8 @@ class AIDeckService {
         }
 
         // Build a pool of eligible replacement cards
-        var pool = dataManager.getAllCards().filter { card in
-            card.variant == .normal
-            && deckColors.contains(card.inkColor ?? "")
+        var pool = currentNormalCards.filter { card in
+            deckColors.contains(card.inkColor ?? "")
             && !usedNames.contains(card.name)
         }
 
@@ -744,8 +843,9 @@ class AIDeckService {
 
         for idx in unmatchedIndices {
             let originalQty = suggestions[idx].quantity
-            // Try to find a card at a similar cost (guess from name patterns or use mid-range 3)
-            let targetCost = suggestions[idx].matchedCard?.cost ?? 3
+            // Unmatched suggestions carry no cost information, so slot replacements at a
+            // mid-curve cost where most decks have room.
+            let targetCost = 3
             let candidates = poolByCost[targetCost]
                 ?? poolByCost[targetCost + 1]
                 ?? poolByCost[targetCost - 1]
@@ -757,7 +857,6 @@ class AIDeckService {
             suggestions[idx] = AIDeckSuggestion(
                 cardName: replacement.name,
                 quantity: originalQty,
-                reasoning: "Auto-replaced (original not found in database)",
                 matchedCard: replacement
             )
         }
@@ -769,17 +868,12 @@ class AIDeckService {
     private func enforceOwnedQuantities() {
         guard currentCollectionOnly && !currentOwnedCardQuantities.isEmpty else { return }
 
-        for i in suggestions.indices {
-            guard let card = suggestions[i].matchedCard else { continue }
+        for index in suggestions.indices {
+            guard let card = suggestions[index].matchedCard else { continue }
             let key = CollectionManager.cardKey(name: card.name, setName: card.setName)
             let owned = currentOwnedCardQuantities[key] ?? 0
-            if suggestions[i].quantity > owned {
-                suggestions[i] = AIDeckSuggestion(
-                    cardName: suggestions[i].cardName,
-                    quantity: max(owned, 1),
-                    reasoning: suggestions[i].reasoning,
-                    matchedCard: suggestions[i].matchedCard
-                )
+            if suggestions[index].quantity > owned {
+                suggestions[index] = suggestions[index].withQuantity(max(owned, 1))
             }
         }
 
@@ -791,10 +885,6 @@ class AIDeckService {
         }
     }
 
-    // MARK: - Normalize to 60 Cards
-    /// Adjusts the suggestion list so the total card count is exactly 60.
-    /// If over 60, trims quantities starting from the highest-quantity suggestions.
-    /// If under 60, increases existing quantities (up to 4 max) or adds new cards.
     // MARK: - Enforce Cost Curve
     /// Clamps quantities for high-cost cards to prevent top-heavy decks.
     /// Freed slots will be filled by normalizeTo60Cards().
@@ -815,12 +905,7 @@ class AIDeckService {
             }
 
             if current > maxForCost {
-                suggestions[idx] = AIDeckSuggestion(
-                    cardName: suggestions[idx].cardName,
-                    quantity: maxForCost,
-                    reasoning: suggestions[idx].reasoning,
-                    matchedCard: suggestions[idx].matchedCard
-                )
+                suggestions[idx] = suggestions[idx].withQuantity(maxForCost)
             }
         }
 
@@ -847,12 +932,7 @@ class AIDeckService {
                 let current = suggestions[idx].quantity
                 let reduction = min(current - 1, bracketTotal - bracket.maxTotal)
                 if reduction > 0 {
-                    suggestions[idx] = AIDeckSuggestion(
-                        cardName: suggestions[idx].cardName,
-                        quantity: current - reduction,
-                        reasoning: suggestions[idx].reasoning,
-                        matchedCard: suggestions[idx].matchedCard
-                    )
+                    suggestions[idx] = suggestions[idx].withQuantity(current - reduction)
                     bracketTotal -= reduction
                 }
             }
@@ -882,12 +962,7 @@ class AIDeckService {
                 let current = suggestions[idx].quantity
                 let reduction = min(current - 1, excess) // keep at least 1 copy
                 if reduction > 0 {
-                    suggestions[idx] = AIDeckSuggestion(
-                        cardName: suggestions[idx].cardName,
-                        quantity: current - reduction,
-                        reasoning: suggestions[idx].reasoning,
-                        matchedCard: suggestions[idx].matchedCard
-                    )
+                    suggestions[idx] = suggestions[idx].withQuantity(current - reduction)
                     excess -= reduction
                 }
             }
@@ -901,12 +976,7 @@ class AIDeckService {
                         excess -= qty
                         suggestions.removeLast()
                     } else {
-                        suggestions[last] = AIDeckSuggestion(
-                            cardName: suggestions[last].cardName,
-                            quantity: qty - excess,
-                            reasoning: suggestions[last].reasoning,
-                            matchedCard: suggestions[last].matchedCard
-                        )
+                        suggestions[last] = suggestions[last].withQuantity(qty - excess)
                         excess = 0
                     }
                 }
@@ -922,9 +992,13 @@ class AIDeckService {
                 guard let matched = suggestions[idx].matchedCard else { continue }
                 let current = suggestions[idx].quantity
                 let costMax: Int
-                if matched.cost >= 8 { costMax = 2 }
-                else if matched.cost >= 6 { costMax = 3 }
-                else { costMax = 4 }
+                if matched.cost >= 8 {
+                    costMax = 2
+                } else if matched.cost >= 6 {
+                    costMax = 3
+                } else {
+                    costMax = 4
+                }
                 var maxAllowed = costMax
                 if currentCollectionOnly && !currentOwnedCardQuantities.isEmpty {
                     let key = CollectionManager.cardKey(name: matched.name, setName: matched.setName)
@@ -932,12 +1006,7 @@ class AIDeckService {
                 }
                 let increase = min(maxAllowed - current, deficit)
                 if increase > 0 {
-                    suggestions[idx] = AIDeckSuggestion(
-                        cardName: suggestions[idx].cardName,
-                        quantity: current + increase,
-                        reasoning: suggestions[idx].reasoning,
-                        matchedCard: suggestions[idx].matchedCard
-                    )
+                    suggestions[idx] = suggestions[idx].withQuantity(current + increase)
                     deficit -= increase
                 }
             }
@@ -956,9 +1025,8 @@ class AIDeckService {
                     usedNames.insert(suggestion.matchedCard!.name)
                 }
 
-                var pool = dataManager.getAllCards().filter { card in
-                    card.variant == .normal
-                    && deckColors.contains(card.inkColor ?? "")
+                var pool = currentNormalCards.filter { card in
+                    deckColors.contains(card.inkColor ?? "")
                     && !usedNames.contains(card.name)
                 }
 
@@ -977,12 +1045,7 @@ class AIDeckService {
                         : 4
                     let qty = min(maxAllowed, deficit)
                     if qty > 0 {
-                        suggestions.append(AIDeckSuggestion(
-                            cardName: card.name,
-                            quantity: qty,
-                            reasoning: "Added to reach 60 cards",
-                            matchedCard: card
-                        ))
+                        suggestions.append(AIDeckSuggestion(cardName: card.name, quantity: qty, matchedCard: card))
                         usedNames.insert(card.name)
                         deficit -= qty
                     }
@@ -1122,7 +1185,7 @@ class AIDeckService {
         return result
     }
 
-    private func normalizeName(_ name: String) -> String {
+    nonisolated private static func normalizeName(_ name: String) -> String {
         return name
             .replacingOccurrences(of: "\u{2013}", with: "-") // en dash → hyphen
             .replacingOccurrences(of: "\u{2014}", with: "-") // em dash → hyphen
@@ -1137,12 +1200,7 @@ class AIDeckService {
     // MARK: - Replace Suggestion
     func replaceSuggestion(id: UUID, with card: LorcanaCard, quantity: Int) {
         guard let index = suggestions.firstIndex(where: { $0.id == id }) else { return }
-        suggestions[index] = AIDeckSuggestion(
-            cardName: card.name,
-            quantity: quantity,
-            reasoning: suggestions[index].reasoning,
-            matchedCard: card
-        )
+        suggestions[index] = AIDeckSuggestion(cardName: card.name, quantity: quantity, matchedCard: card)
     }
 
     // MARK: - Remove Suggestion
@@ -1152,12 +1210,7 @@ class AIDeckService {
 
     // MARK: - Add Suggestion
     func addSuggestion(card: LorcanaCard, quantity: Int) {
-        let suggestion = AIDeckSuggestion(
-            cardName: card.name,
-            quantity: quantity,
-            reasoning: "Manually added",
-            matchedCard: card
-        )
+        let suggestion = AIDeckSuggestion(cardName: card.name, quantity: quantity, matchedCard: card)
         suggestions.append(suggestion)
     }
 

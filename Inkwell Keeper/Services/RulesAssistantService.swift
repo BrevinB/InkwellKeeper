@@ -150,12 +150,12 @@ class RulesAssistantService {
     private let savedChatsKey = "RulesAssistantSavedChats"
 
     // Rules answers are reasoning-heavy, so use a stronger model than the deck builder and a
-    // low temperature for deterministic, factual rulings.
-    private let rulesModel = "gpt-4o"
+    // low temperature for deterministic, factual rulings. The model is remotely configurable.
+    private var rulesModel: String { AIConfigService.shared.rulesModel }
     private let rulesTemperature = 0.3
 
-    // Lightweight client-side abuse guard for the shared API key.
-    let dailyMessageLimit = 50
+    // Lightweight client-side abuse guard for the shared API key. Remotely configurable.
+    var dailyMessageLimit: Int { AIConfigService.shared.rulesDailyLimit }
     /// Most recent conversation messages replayed to the API each turn; older turns age out
     /// so long chats don't grow token cost without bound.
     private static let maxReplayedMessages = 16

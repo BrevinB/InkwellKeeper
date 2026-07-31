@@ -32,6 +32,9 @@ struct InkwellKeeperApp: App {
         // Refresh the AI Rules Assistant's rules digest from CloudKit
         RulesDigestService.shared.refresh()
 
+        // Refresh AI model names and daily limits from CloudKit
+        AIConfigService.shared.refresh()
+
         container = Self.makeContainer()
     }
 

@@ -109,6 +109,7 @@
 		2D8953874A7404C59278820B /* SetFilterModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C17FA3D6A4FC54BFE2CBC6 /* SetFilterModels.swift */; };
 		2E8C230A7C7346CDB8139B7D /* StatsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF2A26313064CEB985D1463 /* StatsViewModel.swift */; };
 		33BC6BA59BCB415FB26BED1B /* TypeBreakdownCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFF6B0A02D74D5DBDDBD4B1 /* TypeBreakdownCard.swift */; };
+		3B4C0CDA2EEC18AE775B8913 /* AIConfigService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDAA2A981A2AB40DE2E0CE43 /* AIConfigService.swift */; };
 		3FDC3C18E5754BB18B3D3CA6 /* StatsOverviewCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3E270541E24B3288B8E542 /* StatsOverviewCard.swift */; };
 		455B13B88603FCCDA1776DB8 /* KeywordGlossaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EE48EA871367379E4A82D6F /* KeywordGlossaryView.swift */; };
 		4A606643A1D9335E7A70120B /* ShareImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA7F430112A28FB4022621C /* ShareImageRenderer.swift */; };
@@ -347,11 +348,14 @@
 		ECB3857A2307770C22BB78A0 /* DeckListTextCodec.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckListTextCodec.swift; sourceTree = "<group>"; };
 		F1CARD5EA3181D /* CardSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSearchView.swift; sourceTree = "<group>"; };
 		F6502D77B1F14DFEA73094B1 /* ValueBySetCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValueBySetCard.swift; sourceTree = "<group>"; };
+		FDAA2A981A2AB40DE2E0CE43 /* AIConfigService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIConfigService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		23CAEDD92ECEE796006786F7 /* CardImages */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = CardImages;
 			sourceTree = "<group>";
 		};
@@ -530,6 +534,7 @@
 				BBF2768C59BF899E8F824C35 /* DeepLinkRouter.swift */,
 				ECB3857A2307770C22BB78A0 /* DeckListTextCodec.swift */,
 				7EA333A30F84D7A69E490050 /* RulesDigestService.swift */,
+				FDAA2A981A2AB40DE2E0CE43 /* AIConfigService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -925,6 +930,7 @@
 				73A22599ABA5468E8C7CEBBA /* RulesDigestService.swift in Sources */,
 				455B13B88603FCCDA1776DB8 /* KeywordGlossaryView.swift in Sources */,
 				6A41A0E6E7833D29CC197B1E /* RulingShareCardView.swift in Sources */,
+				3B4C0CDA2EEC18AE775B8913 /* AIConfigService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
