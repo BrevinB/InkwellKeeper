@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct RulesAssistantView: View {
+    @Environment(\.dismiss) private var dismiss
     @State private var service = RulesAssistantService.shared
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var inputText = ""
@@ -24,6 +25,10 @@ struct RulesAssistantView: View {
     @FocusState private var isInputFocused: Bool
 
     var initialCard: LorcanaCard?
+    /// True when shown as a sheet (card detail, lore counter) rather than as the Rules tab —
+    /// modal presentations get an explicit Done button, which matters most for free users
+    /// who land on the paywall with no other way out but a swipe.
+    var presentedModally: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -31,7 +36,7 @@ struct RulesAssistantView: View {
                 LorcanaBackground()
 
                 if !subscriptionManager.isSubscribed {
-                    RulesPaywallView()
+                    RulesPaywallView(source: initialCard != nil ? "cardAsk" : "rulesTab")
                 } else if service.availability == .available {
                     RulesAvailableView(
                         service: service,
@@ -77,6 +82,13 @@ struct RulesAssistantView: View {
 
                         Button("New chat", systemImage: "plus.bubble") {
                             service.startNewChat()
+                        }
+                        .foregroundStyle(.lorcanaGold)
+                    }
+
+                    if presentedModally {
+                        Button("Done") {
+                            dismiss()
                         }
                         .foregroundStyle(.lorcanaGold)
                     }

@@ -67,7 +67,7 @@ struct AskAIRulesButton: View {
         }
         .accessibilityLabel("Ask about \(card.name)")
         .sheet(isPresented: $showingRulesAssistant) {
-            RulesAssistantView(initialCard: card)
+            RulesAssistantView(initialCard: card, presentedModally: true)
         }
     }
 

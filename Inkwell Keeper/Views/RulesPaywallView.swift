@@ -9,6 +9,10 @@ import SwiftUI
 import RevenueCat
 
 struct RulesPaywallView: View {
+    /// Which surface showed the paywall ("rulesTab", "cardAsk", "deckBuilder", …) so
+    /// conversion can be attributed per funnel.
+    var source: String = "rulesPro"
+
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var selectedPackage: Package?
     @State private var isPurchasing = false
@@ -32,7 +36,7 @@ struct RulesPaywallView: View {
                         .bold()
                         .foregroundStyle(.white)
 
-                    Text("Get instant, AI-powered answers to any Disney Lorcana rules question.")
+                    Text("Instant AI answers to any Lorcana rules question — plus AI deck building, completion, and strategy.")
                         .font(.body)
                         .foregroundStyle(.gray)
                         .multilineTextAlignment(.center)
@@ -44,8 +48,9 @@ struct RulesPaywallView: View {
                     featureRow(icon: "sparkles", title: "AI Rules Expert", description: "Ask any rules question and get accurate answers with rule citations")
                     featureRow(icon: "wand.and.stars", title: "AI Deck Builder", description: "Generate complete decks from a description or get AI suggestions to finish partial decks")
                     featureRow(icon: "rectangle.stack.badge.plus", title: "Card Analysis", description: "Attach up to 4 cards to ask about specific interactions")
+                    featureRow(icon: "map", title: "AI Strategy Guides", description: "Get a game plan for any deck — matchups, mulligans, and win conditions")
+                    featureRow(icon: "square.and.arrow.up", title: "Share Rulings", description: "Turn any answer into an image and settle the debate in your group chat")
                     featureRow(icon: "bubble.left.and.bubble.right", title: "Chat History", description: "Save, pin, and revisit your past conversations")
-                    featureRow(icon: "bolt.fill", title: "Streaming Responses", description: "See answers as they're generated in real time")
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 16)
@@ -138,7 +143,7 @@ struct RulesPaywallView: View {
         }
         .background(LorcanaBackground())
         .onAppear {
-            Analytics.send(.paywallShown(source: "rulesPro"))
+            Analytics.send(.paywallShown(source: source))
         }
         .task {
             await subscriptionManager.loadOfferings()

@@ -34,7 +34,7 @@ struct AIDeckBuilderView: View {
                 LorcanaBackground()
 
                 if !subscriptionManager.isSubscribed {
-                    RulesPaywallView()
+                    RulesPaywallView(source: "deckBuilder")
                 } else if aiService.availability != .available && !aiService.isLoading && aiService.rawResponse.isEmpty {
                     unavailableContent
                 } else if hasGenerated {
@@ -674,7 +674,7 @@ struct AIDeckCompleterView: View {
                 LorcanaBackground()
 
                 if !subscriptionManager.isSubscribed {
-                    RulesPaywallView()
+                    RulesPaywallView(source: "deckCompleter")
                 } else if aiService.availability != .available && !aiService.isLoading && aiService.rawResponse.isEmpty {
                     unavailableContent
                 } else if hasGenerated {
@@ -1620,7 +1620,7 @@ struct AIDeckStrategyView: View {
                 LorcanaBackground()
 
                 if !subscriptionManager.isSubscribed {
-                    RulesPaywallView()
+                    RulesPaywallView(source: "deckStrategy")
                 } else if aiService.availability != .available && !aiService.isLoading && aiService.rawResponse.isEmpty {
                     unavailableContent
                 } else {

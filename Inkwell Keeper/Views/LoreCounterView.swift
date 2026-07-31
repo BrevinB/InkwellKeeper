@@ -320,7 +320,7 @@ private struct LoreGameView: View {
             historySheet
         }
         .sheet(isPresented: $showRulesAssistant) {
-            RulesAssistantView()
+            RulesAssistantView(presentedModally: true)
         }
         .onAppear {
             if players.isEmpty {
