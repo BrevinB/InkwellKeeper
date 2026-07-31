@@ -60,8 +60,8 @@ python3 - "$WORK_DIR/digest.txt" "$VERSION" > "$WORK_DIR/fields.json" << 'PYEOF'
 import json, sys
 digest = open(sys.argv[1]).read()
 print(json.dumps({
-    "digest": {"type": "STRING", "value": digest},
-    "version": {"type": "STRING", "value": sys.argv[2]},
+    "digest": {"type": "stringType", "value": digest},
+    "version": {"type": "stringType", "value": sys.argv[2]},
 }))
 PYEOF
 echo "Built fields JSON."
