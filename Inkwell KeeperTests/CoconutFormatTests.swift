@@ -111,6 +111,19 @@ struct CoconutFormatTests {
         }
     }
 
+    // MARK: - Leader image matching
+
+    @Test func lorcastImagesMatchLeadersDashInsensitively() {
+        // The API uses hyphens; leader data uses en dashes.
+        let matched = CoconutLeaderImageService.matchImages(apiCards: [
+            (fullName: "Ariel - Spectacular Singer", imageUrl: "https://example.com/ariel.avif"),
+            (fullName: "Some Unrelated Card", imageUrl: "https://example.com/nope.avif")
+        ])
+
+        #expect(matched.count == 1)
+        #expect(matched["Ariel – Spectacular Singer"] == "https://example.com/ariel.avif")
+    }
+
     // MARK: - Share code wire format
 
     @Test func shareCodePayloadCarriesLeader() throws {

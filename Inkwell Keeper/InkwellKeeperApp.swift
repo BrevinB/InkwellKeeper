@@ -35,6 +35,9 @@ struct InkwellKeeperApp: App {
         // Refresh AI model names and daily limits from CloudKit
         AIConfigService.shared.refresh()
 
+        // Refresh Format Coconut leader card images from Lorcast
+        CoconutLeaderImageService.shared.refresh()
+
         container = Self.makeContainer()
     }
 

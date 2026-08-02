@@ -110,6 +110,7 @@
 		2E8C230A7C7346CDB8139B7D /* StatsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF2A26313064CEB985D1463 /* StatsViewModel.swift */; };
 		33BC6BA59BCB415FB26BED1B /* TypeBreakdownCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFF6B0A02D74D5DBDDBD4B1 /* TypeBreakdownCard.swift */; };
 		346DAC07477678DB8D6C9E12 /* CoconutLeaders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ACED7C31A38BCCA848C5847 /* CoconutLeaders.swift */; };
+		37F53A8D316BC6838A0EBEDC /* CoconutLeaderImageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C9167D9C7B02CC2C3A728DC /* CoconutLeaderImageService.swift */; };
 		3B4C0CDA2EEC18AE775B8913 /* AIConfigService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDAA2A981A2AB40DE2E0CE43 /* AIConfigService.swift */; };
 		3FDC3C18E5754BB18B3D3CA6 /* StatsOverviewCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3E270541E24B3288B8E542 /* StatsOverviewCard.swift */; };
 		455B13B88603FCCDA1776DB8 /* KeywordGlossaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EE48EA871367379E4A82D6F /* KeywordGlossaryView.swift */; };
@@ -303,6 +304,7 @@
 		65D42F1B409CF4A8D4EEA6CB /* AskAIRulesButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AskAIRulesButton.swift; sourceTree = "<group>"; };
 		6AA815C9650049DB84CB04F7 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		6B694B966E1368E8FACC186E /* DeckShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckShareCardView.swift; sourceTree = "<group>"; };
+		6C9167D9C7B02CC2C3A728DC /* CoconutLeaderImageService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoconutLeaderImageService.swift; sourceTree = "<group>"; };
 		6F281DF5C7B88E62FEDF540C /* SetFilterBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetFilterBar.swift; sourceTree = "<group>"; };
 		6F563B3E0A2A73C9FA17CEDD /* CardTextParsingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardTextParsingTests.swift; sourceTree = "<group>"; };
 		725A18D9BE0D05A991CB6FD8 /* CloudSyncMonitor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncMonitor.swift; sourceTree = "<group>"; };
@@ -542,6 +544,7 @@
 				ECB3857A2307770C22BB78A0 /* DeckListTextCodec.swift */,
 				7EA333A30F84D7A69E490050 /* RulesDigestService.swift */,
 				FDAA2A981A2AB40DE2E0CE43 /* AIConfigService.swift */,
+				6C9167D9C7B02CC2C3A728DC /* CoconutLeaderImageService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -942,6 +945,7 @@
 				3B4C0CDA2EEC18AE775B8913 /* AIConfigService.swift in Sources */,
 				346DAC07477678DB8D6C9E12 /* CoconutLeaders.swift in Sources */,
 				FDE2243E79C8654BD524FF4D /* CoconutLeaderPicker.swift in Sources */,
+				37F53A8D316BC6838A0EBEDC /* CoconutLeaderImageService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
