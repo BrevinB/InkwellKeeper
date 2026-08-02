@@ -258,6 +258,14 @@ class AIDeckService {
             return
         }
 
+        // The generation pipeline assumes 4-copy playsets; Coconut's singleton rules
+        // would produce illegal suggestions.
+        guard format != .coconut else {
+            errorMessage = "AI completion doesn't support the Coconut beta yet."
+            isLoading = false
+            return
+        }
+
         let currentCount = existingCards.reduce(0) { $0 + $1.quantity }
         let remaining = targetCount - currentCount
 

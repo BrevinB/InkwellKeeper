@@ -118,7 +118,7 @@ struct AIDeckBuilderView: View {
                             .foregroundStyle(.lorcanaGold)
 
                         Picker("Format", selection: $selectedFormat) {
-                            ForEach(DeckFormat.allCases.filter { $0 != .tripleDeck }, id: \.self) { format in
+                            ForEach(DeckFormat.allCases.filter { $0 != .tripleDeck && $0 != .coconut }, id: \.self) { format in
                                 Text(format.rawValue).tag(format)
                             }
                         }
@@ -778,7 +778,15 @@ struct AIDeckCompleterView: View {
                         }
                     }
 
-                    if deck.totalCards >= 60 {
+                    if deck.deckFormat == .coconut {
+                        HStack(spacing: 6) {
+                            Image(systemName: "leaf.fill")
+                                .foregroundStyle(.green)
+                            Text("Coconut beta decks aren't supported by AI completion yet — the singleton rules need special handling.")
+                                .font(.caption)
+                                .foregroundStyle(.gray)
+                        }
+                    } else if deck.totalCards >= 60 {
                         HStack(spacing: 6) {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundStyle(.green)
@@ -921,7 +929,7 @@ struct AIDeckCompleterView: View {
                     )
                     .foregroundStyle(!aiService.isLoading && deck.totalCards < 60 ? .black : .gray)
                 }
-                .disabled(aiService.isLoading || deck.totalCards >= 60)
+                .disabled(aiService.isLoading || deck.totalCards >= 60 || deck.deckFormat == .coconut)
                 .padding(.horizontal)
                 .padding(.bottom, 20)
             }

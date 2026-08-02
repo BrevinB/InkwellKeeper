@@ -87,13 +87,12 @@ class DeckManager: ObservableObject {
                     groups[key, default: []].append(card)
                 }
 
-                let maxCopies = deck.deckFormat.maxCopiesPerCard
                 for (_, rows) in groups where rows.count > 1 {
                     // Keep the earliest-added row; fold the rest into it.
                     let sorted = rows.sorted { $0.cardId < $1.cardId }
                     let survivor = sorted[0]
                     for dup in sorted.dropFirst() {
-                        survivor.quantity = min(max(survivor.quantity, dup.quantity), maxCopies)
+                        survivor.quantity = min(max(survivor.quantity, dup.quantity), deck.maxCopies(ofCardNamed: survivor.name))
                         if survivor.price == nil { survivor.price = dup.price }
                         deck.cards?.removeAll { $0 === dup }
                         context.delete(dup)
@@ -116,7 +115,8 @@ class DeckManager: ObservableObject {
         description: String = "",
         format: DeckFormat = .infinityConstructed,
         inkColors: [InkColor] = [],
-        archetype: DeckArchetype? = nil
+        archetype: DeckArchetype? = nil,
+        coconutLeader: String? = nil
     ) -> Deck {
         guard let context = modelContext else {
             return Deck(name: name)
@@ -127,7 +127,8 @@ class DeckManager: ObservableObject {
             description: description,
             format: format,
             inkColors: inkColors,
-            archetype: archetype
+            archetype: archetype,
+            coconutLeader: coconutLeader
         )
 
         context.insert(deck)
@@ -180,12 +181,12 @@ class DeckManager: ObservableObject {
         // Check if card already exists in deck
         if let existingCard = (deck.cards ?? []).first(where: { $0.cardId == card.id }) {
             // Increment quantity (respecting max copies)
-            let newQuantity = min(existingCard.quantity + quantity, deck.deckFormat.maxCopiesPerCard)
+            let newQuantity = min(existingCard.quantity + quantity, deck.maxCopies(ofCardNamed: existingCard.name))
             existingCard.quantity = newQuantity
             cardToUpdate = existingCard
         } else {
             // Add new card
-            let deckCard = DeckCard(from: card, quantity: min(quantity, deck.deckFormat.maxCopiesPerCard))
+            let deckCard = DeckCard(from: card, quantity: min(quantity, deck.maxCopies(ofCardNamed: card.name)))
             if deck.cards == nil { deck.cards = [] }
             deck.cards?.append(deckCard)
             context.insert(deckCard)
@@ -247,7 +248,7 @@ class DeckManager: ObservableObject {
     // MARK: - Update Card Quantity
     func updateCardQuantity(_ deckCard: DeckCard, in deck: Deck, quantity: Int) {
         guard let context = modelContext else { return }
-        let maxCopies = deck.deckFormat.maxCopiesPerCard
+        let maxCopies = deck.maxCopies(ofCardNamed: deckCard.name)
 
         if quantity <= 0 {
             removeCard(deckCard, from: deck)
@@ -270,7 +271,8 @@ class DeckManager: ObservableObject {
             description: deck.deckDescription,
             format: deck.deckFormat,
             inkColors: deck.deckInkColors,
-            archetype: deck.deckArchetype
+            archetype: deck.deckArchetype,
+            coconutLeader: deck.coconutLeader
         )
 
         // Copy all cards
@@ -425,6 +427,9 @@ class DeckManager: ObservableObject {
         let format: String
         let inkColors: [String]
         let archetype: String?
+        /// Format [Coconut] leader name; absent for other formats and in codes from older
+        /// app versions (older decoders ignore the unknown key harmlessly).
+        var coconutLeader: String?
         let cards: [CompactShareableCard]
 
         // Single-letter wire keys keep the encoded payload small.
@@ -434,6 +439,7 @@ class DeckManager: ObservableObject {
             case format = "f"
             case inkColors = "i"
             case archetype = "a"
+            case coconutLeader = "l"
             case cards = "c"
         }
     }
@@ -462,6 +468,7 @@ class DeckManager: ObservableObject {
         let format: String
         let inkColors: [String]
         let archetype: String?
+        let coconutLeader: String?
         /// Fully resolved cards ready to become `DeckCard`s.
         let cards: [(card: LorcanaCard, quantity: Int)]
         /// Total including cards that couldn't be resolved locally (used for previews).
@@ -475,6 +482,7 @@ class DeckManager: ObservableObject {
             format: deck.format,
             inkColors: deck.inkColors,
             archetype: deck.archetype,
+            coconutLeader: deck.coconutLeader,
             cards: (deck.cards ?? []).map { card in
                 CompactShareableCard(
                     id: card.cardId,
@@ -512,7 +520,8 @@ class DeckManager: ObservableObject {
             description: decoded.description,
             format: format,
             inkColors: inkColors,
-            archetype: archetype
+            archetype: archetype,
+            coconutLeader: decoded.coconutLeader
         )
 
         context.insert(deck)
@@ -606,6 +615,7 @@ class DeckManager: ObservableObject {
                 format: shareable.format,
                 inkColors: shareable.inkColors,
                 archetype: shareable.archetype,
+                coconutLeader: shareable.coconutLeader,
                 cards: resolved,
                 totalCards: shareable.cards.reduce(0) { $0 + $1.quantity }
             )
@@ -643,6 +653,7 @@ class DeckManager: ObservableObject {
                 format: shareable.format,
                 inkColors: shareable.inkColors,
                 archetype: shareable.archetype,
+                coconutLeader: nil,
                 cards: cards,
                 totalCards: shareable.cards.reduce(0) { $0 + $1.quantity }
             )

@@ -44,9 +44,24 @@ struct DeckValidation {
         errors.append(contentsOf: setLegalityErrors(deck, format: format))
         errors.append(contentsOf: bannedCardErrors(deck, format: format))
 
-        // Check for max copies per card
-        for card in deck.cards ?? [] where card.quantity > format.maxCopiesPerCard {
-            errors.append("\(card.name): \(card.quantity) copies (max \(format.maxCopiesPerCard))")
+        // Format [Coconut]: a leader must be chosen, and one deck ink must match the leader's
+        if format == .coconut {
+            if let leader = deck.coconutLeaderInfo {
+                if !deckInkColors.isEmpty && !deckInkColors.contains(leader.ink) {
+                    errors.append("Deck inks must include \(leader.ink.rawValue) to match your leader (\(leader.name)).")
+                }
+            } else {
+                errors.append("Choose a Coconut leader for this deck (Edit Deck Info).")
+            }
+        }
+
+        // Check for max copies per card (leader-aware: Coconut is singleton except the
+        // leader's associated cards)
+        for card in deck.cards ?? [] {
+            let maxCopies = deck.maxCopies(ofCardNamed: card.name)
+            if card.quantity > maxCopies {
+                errors.append("\(card.name): \(card.quantity) copies (max \(maxCopies))")
+            }
         }
 
         // Check ink color consistency

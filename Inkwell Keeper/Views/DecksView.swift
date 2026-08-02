@@ -369,6 +369,7 @@ struct EditDeckView: View {
     @State private var selectedFormat: DeckFormat
     @State private var selectedColors: Set<InkColor>
     @State private var selectedArchetype: DeckArchetype?
+    @State private var selectedLeader: String?
 
     init(deck: Deck) {
         self.deck = deck
@@ -377,6 +378,7 @@ struct EditDeckView: View {
         _selectedFormat = State(initialValue: deck.deckFormat)
         _selectedColors = State(initialValue: Set(deck.deckInkColors))
         _selectedArchetype = State(initialValue: deck.deckArchetype)
+        _selectedLeader = State(initialValue: deck.coconutLeader)
     }
 
     var canSave: Bool {
@@ -415,6 +417,23 @@ struct EditDeckView: View {
                     Text("Min \(selectedFormat.minimumCards) cards, max \(selectedFormat.maxInkColors) ink colors")
                         .font(.caption)
                         .foregroundStyle(.gray)
+                }
+
+                if selectedFormat == .coconut {
+                    Section(header: Text("Coconut Leader"),
+                            footer: Text("Singleton deck — only your leader's associated cards may run 4 copies, and one deck ink must match your leader.")) {
+                        CoconutLeaderPicker(selection: $selectedLeader)
+                            .onChange(of: selectedLeader) { _, newLeader in
+                                if let leader = newLeader.flatMap({ CoconutLeaders.leader(named: $0) }),
+                                   !selectedColors.contains(leader.ink) {
+                                    if selectedColors.count >= selectedFormat.maxInkColors,
+                                       let extra = selectedColors.first {
+                                        selectedColors.remove(extra)
+                                    }
+                                    selectedColors.insert(leader.ink)
+                                }
+                            }
+                    }
                 }
 
                 Section(header: Text("Ink Colors (max \(selectedFormat.maxInkColors))"),
@@ -482,6 +501,7 @@ struct EditDeckView: View {
         deck.deckFormat = selectedFormat
         deck.deckInkColors = Array(selectedColors)
         deck.deckArchetype = selectedArchetype
+        deck.coconutLeader = selectedFormat == .coconut ? selectedLeader : nil
         deck.lastModified = Date()
         dismiss()
     }
@@ -918,7 +938,7 @@ struct DeckCardRow: View {
         ownedQuantity >= card.quantity
     }
 
-    private var atMax: Bool { card.quantity >= deck.deckFormat.maxCopiesPerCard }
+    private var atMax: Bool { card.quantity >= deck.maxCopies(ofCardNamed: card.name) }
 
     private func addOne() {
         guard !atMax else { return }
@@ -1082,7 +1102,7 @@ struct DeckCardDetailView: View {
                                 Image(systemName: "plus.circle.fill")
                                     .foregroundStyle(.green)
                             }
-                            .disabled(card.quantity >= deck.deckFormat.maxCopiesPerCard)
+                            .disabled(card.quantity >= deck.maxCopies(ofCardNamed: card.name))
                             .accessibilityLabel("Increase quantity")
                         }
                     }
@@ -1245,6 +1265,7 @@ struct NewDeckSheet: View {
     @State private var name = ""
     @State private var format: DeckFormat = .casual
     @State private var colors: Set<InkColor> = []
+    @State private var coconutLeader: String?
 
     private var maxInks: Int { format.maxInkColors }
 
@@ -1276,8 +1297,8 @@ struct NewDeckSheet: View {
                                 .font(.caption)
                                 .foregroundStyle(.lorcanaGold)
                             Picker("Format", selection: $format) {
-                                ForEach([DeckFormat.casual, .coreConstructed, .infinityConstructed], id: \.self) { fmt in
-                                    Text(fmt.rawValue).tag(fmt)
+                                ForEach([DeckFormat.casual, .coreConstructed, .infinityConstructed, .coconut], id: \.self) { fmt in
+                                    Text(fmt.shortName).tag(fmt)
                                 }
                             }
                             .pickerStyle(.segmented)
@@ -1285,6 +1306,32 @@ struct NewDeckSheet: View {
                                 while colors.count > newFormat.maxInkColors {
                                     if let extra = colors.first { colors.remove(extra) }
                                 }
+                            }
+
+                            if format == .coconut {
+                                Text(DeckFormat.coconut.description)
+                                    .font(.caption2)
+                                    .foregroundStyle(.gray)
+                            }
+                        }
+
+                        // Coconut leader
+                        if format == .coconut {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("LEADER")
+                                    .font(.caption)
+                                    .foregroundStyle(.lorcanaGold)
+                                CoconutLeaderPicker(selection: $coconutLeader)
+                                    .onChange(of: coconutLeader) { _, newLeader in
+                                        // The deck must include the leader's ink
+                                        if let leader = newLeader.flatMap({ CoconutLeaders.leader(named: $0) }),
+                                           !colors.contains(leader.ink) {
+                                            if colors.count >= format.maxInkColors, let extra = colors.first {
+                                                colors.remove(extra)
+                                            }
+                                            colors.insert(leader.ink)
+                                        }
+                                    }
                             }
                         }
 
@@ -1372,7 +1419,8 @@ struct NewDeckSheet: View {
             description: "",
             format: format,
             inkColors: Array(colors).sorted { $0.rawValue < $1.rawValue },
-            archetype: nil
+            archetype: nil,
+            coconutLeader: format == .coconut ? coconutLeader : nil
         )
         onCreated(deck)
         dismiss()
@@ -1918,7 +1966,7 @@ struct BuilderCardView: View {
         inDeck?.quantity ?? 0
     }
 
-    private var maxCopies: Int { deck.deckFormat.maxCopiesPerCard }
+    private var maxCopies: Int { deck.maxCopies(ofCardNamed: card.name) }
     private var atMax: Bool { quantityInDeck >= maxCopies }
 
     private func addOne() {

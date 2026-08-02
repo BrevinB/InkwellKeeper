@@ -343,6 +343,7 @@ class RulesAssistantService {
     2.2 Constructed formats (as of July 2026 — verify current rotation at disneylorcana.com):
     - Core Constructed: rotating. Currently sets 9-13 only (Fabled, Whispers in the Well, Winterspell, Wilds Unknown, Attack of the Vine!). Any printing of a legal card is allowed. No banned cards currently.
     - Infinity Constructed: all sets legal, no rotation. Currently banned: Hiram Flaversham - Toymaker.
+    - Format [Coconut] (OPEN BETA since July 28, 2026 — rules may change): a multiplayer format (best with 3-4 players) played to 25 LORE instead of 20. Decks: at least 60 cards, SINGLETON (max 1 copy of each card), with one exception — you may run up to 4 copies of the character card associated with your chosen leader. Up to 3 ink colors, one of which must match your leader's ink. Leaders are digital-only "[Coconut] cards" chosen in the official companion app (18 in beta, 3 per ink), each granting an ongoing ability. Gameplay otherwise follows normal multiplayer Lorcana rules. Because this is a beta, advise players to check the official rules PDF for current details.
 
     SECTION 3: GAME SETUP
 

@@ -45,6 +45,18 @@ enum DeckFormat: String, Codable, CaseIterable {
     case coreConstructed = "Core Constructed"
     case infinityConstructed = "Infinity Constructed"
     case tripleDeck = "Triple Deck"
+    case coconut = "Coconut (Beta)"
+
+    /// Compact label for space-constrained pickers (segmented controls).
+    var shortName: String {
+        switch self {
+        case .casual: return "Casual"
+        case .coreConstructed: return "Core"
+        case .infinityConstructed: return "Infinity"
+        case .tripleDeck: return "Triple"
+        case .coconut: return "Coconut"
+        }
+    }
 
     var description: String {
         switch self {
@@ -56,6 +68,8 @@ enum DeckFormat: String, Codable, CaseIterable {
             return "All sets, all 6 inks"
         case .tripleDeck:
             return "3 decks, each a unique ink pair covering all 6 colors"
+        case .coconut:
+            return "Multiplayer beta — singleton with a leader, up to 3 inks, play to 25 lore"
         }
     }
 
@@ -71,11 +85,15 @@ enum DeckFormat: String, Codable, CaseIterable {
             return 6 // Infinity removes the two-ink limit
         case .tripleDeck:
             return 2 // Per deck, but all 6 total across 3 decks
+        case .coconut:
+            return 3 // One of them must match the leader's ink
         }
     }
 
+    /// Baseline copy limit. Coconut decks are singleton — the per-deck exception for the
+    /// leader's associated cards lives in `Deck.maxCopies(ofCardNamed:)`.
     var maxCopiesPerCard: Int {
-        return 4
+        self == .coconut ? 1 : 4
     }
 
     /// Sets legal for this format; `nil` means all sets are legal (no rotation).
@@ -83,7 +101,7 @@ enum DeckFormat: String, Codable, CaseIterable {
         switch self {
         case .coreConstructed:
             return LorcanaSetRegistry.coreLegalSets
-        case .casual, .infinityConstructed, .tripleDeck:
+        case .casual, .infinityConstructed, .tripleDeck, .coconut:
             return nil
         }
     }
@@ -95,7 +113,7 @@ enum DeckFormat: String, Codable, CaseIterable {
             return LorcanaSetRegistry.coreBannedCards
         case .infinityConstructed:
             return LorcanaSetRegistry.infinityBannedCards
-        case .casual, .tripleDeck:
+        case .casual, .tripleDeck, .coconut:
             return []
         }
     }
@@ -153,6 +171,8 @@ class Deck {
     var createdDate: Date = Date.now
     var lastModified: Date = Date.now
     var notes: String = ""
+    /// Chosen Format [Coconut] leader name; only meaningful when `deckFormat == .coconut`.
+    var coconutLeader: String?
 
     @Relationship(deleteRule: .cascade, inverse: \DeckCard.deck)
     var cards: [DeckCard]?
@@ -184,13 +204,33 @@ class Deck {
         (cards ?? []).count
     }
 
+    /// The resolved Coconut leader, when this is a Coconut deck with one chosen.
+    var coconutLeaderInfo: CoconutLeader? {
+        guard deckFormat == .coconut, let coconutLeader else { return nil }
+        return CoconutLeaders.leader(named: coconutLeader)
+    }
+
+    /// Copy limit for a specific card in THIS deck. Flat per-format limit everywhere except
+    /// Coconut, where decks are singleton but the leader's associated cards may run 4 copies.
+    /// Matching is dash/case-insensitive so card names from different sources line up.
+    func maxCopies(ofCardNamed cardName: String) -> Int {
+        guard deckFormat == .coconut else { return deckFormat.maxCopiesPerCard }
+        guard let leader = coconutLeaderInfo else { return 1 }
+        let normalized = DeckFormat.normalizeCardName(cardName)
+        let isFourOf = leader.fourOfCardNames.contains {
+            DeckFormat.normalizeCardName($0) == normalized
+        }
+        return isFourOf ? 4 : 1
+    }
+
     init(
         name: String,
         description: String = "",
         format: DeckFormat = .infinityConstructed,
         inkColors: [InkColor] = [],
         archetype: DeckArchetype? = nil,
-        notes: String = ""
+        notes: String = "",
+        coconutLeader: String? = nil
     ) {
         self.id = UUID()
         self.name = name
@@ -201,6 +241,7 @@ class Deck {
         self.createdDate = Date()
         self.lastModified = Date()
         self.notes = notes
+        self.coconutLeader = coconutLeader
         self.cards = []
     }
 }
