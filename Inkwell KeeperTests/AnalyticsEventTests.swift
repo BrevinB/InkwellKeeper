@@ -47,7 +47,7 @@ struct AnalyticsEventTests {
         .deepLinkOpened(type: "card"),
         .onboardingStarted,
         .onboardingCompleted,
-        .loreCounterGameStarted(players: 2)
+        .loreCounterGameStarted(players: 4, mode: "Coconut")
     ]
 
     @Test("No event uses a TelemetryDeck reserved parameter key")

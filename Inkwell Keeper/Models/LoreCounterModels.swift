@@ -9,6 +9,23 @@ import SwiftUI
 
 // Reuses InkColor from DeckModels.swift
 
+/// Which game the lore counter is tracking — determines the lore needed to win.
+enum LoreGameMode: String, CaseIterable {
+    case standard = "Standard"
+    case coconut = "Coconut"
+
+    var loreTarget: Int {
+        self == .coconut ? 25 : 20
+    }
+
+    var subtitle: String {
+        switch self {
+        case .standard: return "Play to 20 lore"
+        case .coconut: return "Multiplayer beta — play to 25 lore"
+        }
+    }
+}
+
 struct PlayerLore: Identifiable {
     let id: UUID
     var name: String

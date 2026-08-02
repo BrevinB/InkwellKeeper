@@ -14,6 +14,7 @@ struct LoreCounterView: View {
     @State private var showSetup = false
     @State private var showGame = false
     @State private var players: [PlayerLore] = []
+    @State private var gameMode: LoreGameMode = .standard
 
     private let playerOptions: [(count: Int, icon: String, label: String)] = [
         (2, "person.2.fill", "2 Players"),
@@ -36,7 +37,7 @@ struct LoreCounterView: View {
             }
         }
         .fullScreenCover(isPresented: $showGame) {
-            LoreGameView(initialPlayers: players)
+            LoreGameView(initialPlayers: players, loreTarget: gameMode.loreTarget)
         }
     }
 
@@ -75,7 +76,25 @@ struct LoreCounterView: View {
             }
 
             Spacer()
-                .frame(height: 48)
+                .frame(height: 32)
+
+            // Game mode (standard 20 lore vs Coconut beta 25)
+            VStack(spacing: 8) {
+                Picker("Game Mode", selection: $gameMode) {
+                    ForEach(LoreGameMode.allCases, id: \.self) { mode in
+                        Text(mode.rawValue).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+
+                Text(gameMode.subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+            .padding(.horizontal, 40)
+
+            Spacer()
+                .frame(height: 24)
 
             // Player count buttons
             VStack(spacing: 14) {
@@ -192,7 +211,7 @@ struct LoreCounterView: View {
 
             // Start Game button
             Button {
-                Analytics.send(.loreCounterGameStarted(players: playerCount))
+                Analytics.send(.loreCounterGameStarted(players: playerCount, mode: gameMode.rawValue))
                 showGame = true
             } label: {
                 HStack(spacing: 10) {
@@ -279,6 +298,7 @@ struct LoreCounterView: View {
 
 private struct LoreGameView: View {
     let initialPlayers: [PlayerLore]
+    var loreTarget: Int = 20
 
     @Environment(\.dismiss) private var dismiss
     @State private var players: [PlayerLore] = []
@@ -444,7 +464,7 @@ private struct LoreGameView: View {
     }
 
     private func playerCard(at index: Int) -> some View {
-        PlayerLoreCard(player: $players[index]) { oldVal, newVal in
+        PlayerLoreCard(player: $players[index], winThreshold: loreTarget) { oldVal, newVal in
             history.insert(
                 LoreHistoryEntry(
                     playerName: players[index].name,

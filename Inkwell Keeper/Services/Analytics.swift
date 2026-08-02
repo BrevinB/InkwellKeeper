@@ -67,7 +67,7 @@ enum Analytics {
         // MARK: Lifecycle
         case onboardingStarted
         case onboardingCompleted
-        case loreCounterGameStarted(players: Int)
+        case loreCounterGameStarted(players: Int, mode: String)
 
         /// The TelemetryDeck signal name.
         var signalName: String {
@@ -143,8 +143,8 @@ enum Analytics {
                 ["shareType": type]
             case let .deepLinkOpened(type):
                 ["linkType": type]
-            case let .loreCounterGameStarted(players):
-                ["players": String(players)]
+            case let .loreCounterGameStarted(players, mode):
+                ["players": String(players), "mode": mode]
             default:
                 [:]
             }

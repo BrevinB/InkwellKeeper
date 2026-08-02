@@ -9,6 +9,8 @@ import SwiftUI
 
 struct PlayerLoreCard: View {
     @Binding var player: PlayerLore
+    /// Lore needed to win — 20 in standard games, 25 in Format Coconut.
+    var winThreshold: Int = 20
     var onLoreChange: (Int, Int) -> Void // (oldValue, newValue)
 
     @State private var isEditingName = false
@@ -21,7 +23,6 @@ struct PlayerLoreCard: View {
     @State private var plusPressed = false
     @State private var minusPressed = false
 
-    private let winThreshold = 20
     private let dragThreshold: CGFloat = 40
 
     var body: some View {
