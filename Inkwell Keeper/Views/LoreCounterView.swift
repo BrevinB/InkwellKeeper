@@ -236,37 +236,43 @@ struct LoreCounterView: View {
     }
 
     private func playerSetupRow(at index: Int) -> some View {
-        HStack(spacing: 16) {
-            // Player name
-            Text(players[index].name)
-                .font(.headline)
-                .foregroundColor(.white)
-                .frame(width: 90, alignment: .leading)
+        VStack(spacing: 10) {
+            HStack(spacing: 16) {
+                // Player name
+                Text(players[index].name)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(width: 90, alignment: .leading)
 
-            Spacer()
+                Spacer()
 
-            // Color dots
-            HStack(spacing: 12) {
-                ForEach(InkColor.allCases, id: \.self) { ink in
-                    let isSelected = players[index].inkColor == ink
-                    ZStack {
-                        Circle()
-                            .fill(ink.color.opacity(isSelected ? 1.0 : 0.4))
-                            .frame(width: isSelected ? 28 : 22, height: isSelected ? 28 : 22)
-
-                        if isSelected {
+                // Color dots
+                HStack(spacing: 12) {
+                    ForEach(InkColor.allCases, id: \.self) { ink in
+                        let isSelected = players[index].inkColor == ink
+                        ZStack {
                             Circle()
-                                .stroke(Color.white.opacity(0.9), lineWidth: 2.5)
-                                .frame(width: 34, height: 34)
+                                .fill(ink.color.opacity(isSelected ? 1.0 : 0.4))
+                                .frame(width: isSelected ? 28 : 22, height: isSelected ? 28 : 22)
+
+                            if isSelected {
+                                Circle()
+                                    .stroke(Color.white.opacity(0.9), lineWidth: 2.5)
+                                    .frame(width: 34, height: 34)
+                            }
                         }
-                    }
-                    .animation(.easeInOut(duration: 0.2), value: isSelected)
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            players[index].inkColor = ink
+                        .animation(.easeInOut(duration: 0.2), value: isSelected)
+                        .onTapGesture {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                players[index].inkColor = ink
+                            }
                         }
                     }
                 }
+            }
+
+            if gameMode == .coconut {
+                leaderMenu(at: index)
             }
         }
         .padding(.horizontal, 20)
@@ -280,6 +286,50 @@ struct LoreCounterView: View {
                 )
         )
         .padding(.horizontal, 32)
+    }
+
+    /// Per-player Coconut leader choice; picking one also sets the player's ink to match.
+    private func leaderMenu(at index: Int) -> some View {
+        Menu {
+            ForEach(InkColor.allCases, id: \.self) { ink in
+                Section(ink.rawValue) {
+                    ForEach(CoconutLeaders.leaders(for: ink)) { leader in
+                        Button {
+                            players[index].coconutLeader = leader.name
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                players[index].inkColor = leader.ink
+                            }
+                        } label: {
+                            if players[index].coconutLeader == leader.name {
+                                Label(leader.name, systemImage: "checkmark")
+                            } else {
+                                Text(leader.name)
+                            }
+                        }
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "crown.fill")
+                    .font(.caption)
+                    .foregroundColor(.lorcanaGold)
+
+                Text(players[index].coconutLeader ?? "Choose a Coconut leader")
+                    .font(.caption)
+                    .foregroundColor(players[index].coconutLeader == nil ? .white.opacity(0.6) : .white)
+                    .lineLimit(1)
+
+                Spacer()
+
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption2)
+                    .foregroundColor(.white.opacity(0.4))
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
+        }
     }
 
     // MARK: - Helpers

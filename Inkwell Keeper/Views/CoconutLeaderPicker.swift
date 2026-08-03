@@ -125,3 +125,77 @@ struct CoconutLeaderPicker: View {
         )
     }
 }
+
+// MARK: - Leader Detail Sheet
+
+/// Mid-game reference for a player's leader: the official card (when available) and the
+/// ability text. Presented from the lore counter's player cards.
+struct CoconutLeaderDetailSheet: View {
+    let leader: CoconutLeader
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                LorcanaBackground()
+
+                ScrollView {
+                    VStack(spacing: 16) {
+                        if let imageURL = CoconutLeaderImageService.shared.imageURL(for: leader) {
+                            AsyncImage(url: imageURL) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                            } placeholder: {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.gray.opacity(0.3))
+                                    .aspectRatio(1468 / 2048, contentMode: .fit)
+                            }
+                            .frame(maxWidth: 280)
+                            .clipShape(.rect(cornerRadius: 12))
+                        } else {
+                            HStack(spacing: 8) {
+                                Circle()
+                                    .fill(leader.ink.color)
+                                    .frame(width: 16, height: 16)
+                                Image(systemName: "crown.fill")
+                                    .font(.title)
+                                    .foregroundStyle(.lorcanaGold)
+                            }
+                            .padding(.top, 20)
+                        }
+
+                        Text(leader.name)
+                            .font(.title3)
+                            .bold()
+                            .foregroundStyle(.white)
+                            .multilineTextAlignment(.center)
+
+                        Text(leader.abilityText)
+                            .font(.body)
+                            .foregroundStyle(.white.opacity(0.9))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+
+                        Text("Deck may run up to 4 copies of: \(leader.fourOfCardNames.joined(separator: ", "))")
+                            .font(.caption)
+                            .foregroundStyle(.lorcanaGold.opacity(0.8))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+                    .padding()
+                }
+            }
+            .navigationTitle("Coconut Leader")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .foregroundStyle(.lorcanaGold)
+                }
+            }
+        }
+    }
+}

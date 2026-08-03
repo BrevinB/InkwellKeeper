@@ -31,12 +31,15 @@ struct PlayerLore: Identifiable {
     var name: String
     var lore: Int
     var inkColor: InkColor
+    /// The player's chosen Format [Coconut] leader; nil in standard games.
+    var coconutLeader: String?
 
-    init(id: UUID = UUID(), name: String, lore: Int = 0, inkColor: InkColor = .amber) {
+    init(id: UUID = UUID(), name: String, lore: Int = 0, inkColor: InkColor = .amber, coconutLeader: String? = nil) {
         self.id = id
         self.name = name
         self.lore = lore
         self.inkColor = inkColor
+        self.coconutLeader = coconutLeader
     }
 }
 

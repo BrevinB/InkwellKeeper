@@ -14,6 +14,7 @@ struct PlayerLoreCard: View {
     var onLoreChange: (Int, Int) -> Void // (oldValue, newValue)
 
     @State private var isEditingName = false
+    @State private var showLeaderDetail = false
     @State private var showCustomValuePicker = false
     @State private var customValue: Int = 0
     @State private var dragOffset: CGFloat = 0
@@ -126,20 +127,47 @@ struct PlayerLoreCard: View {
                     .background(Color.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 10))
                     .onSubmit { isEditingName = false }
             } else {
-                HStack(spacing: 6) {
-                    Image(systemName: "person.fill")
-                        .font(.caption2)
-                        .foregroundColor(player.inkColor.color.opacity(0.8))
+                VStack(spacing: 4) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "person.fill")
+                            .font(.caption2)
+                            .foregroundColor(player.inkColor.color.opacity(0.8))
 
-                    Text(player.name)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white.opacity(0.9))
+                        Text(player.name)
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white.opacity(0.9))
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 5)
+                    .background(Color.white.opacity(0.06), in: Capsule())
+                    .onTapGesture { isEditingName = true }
+
+                    if let leaderName = player.coconutLeader {
+                        Button {
+                            showLeaderDetail = true
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "crown.fill")
+                                    .font(.system(size: 8))
+                                Text(leaderName.components(separatedBy: " – ").first ?? leaderName)
+                                    .font(.caption2)
+                                    .lineLimit(1)
+                            }
+                            .foregroundColor(.lorcanaGold.opacity(0.9))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Color.lorcanaGold.opacity(0.12), in: Capsule())
+                        }
+                        .accessibilityLabel("View \(leaderName) leader ability")
+                    }
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 5)
-                .background(Color.white.opacity(0.06), in: Capsule())
-                .onTapGesture { isEditingName = true }
+            }
+        }
+        .sheet(isPresented: $showLeaderDetail) {
+            if let leaderName = player.coconutLeader,
+               let leader = CoconutLeaders.leader(named: leaderName) {
+                CoconutLeaderDetailSheet(leader: leader)
             }
         }
     }
