@@ -624,7 +624,11 @@ struct DeckSummaryBar: View {
     let costDistribution: [Int: Int]
     let isValid: Bool
     let hasCards: Bool
+    /// The deck's Coconut leader, shown as a tappable crown chip when set.
+    var coconutLeader: CoconutLeader?
     let onTap: () -> Void
+
+    @State private var showingLeader = false
 
     var body: some View {
         Button(action: onTap) {
@@ -633,6 +637,25 @@ struct DeckSummaryBar: View {
                     .font(.headline)
                     .bold()
                     .foregroundStyle(count >= 60 ? .green : .lorcanaGold)
+
+                if let leader = coconutLeader {
+                    Button {
+                        showingLeader = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "crown.fill")
+                                .font(.system(size: 9))
+                            Text(leader.name.components(separatedBy: " – ").first ?? leader.name)
+                                .font(.caption2)
+                                .lineLimit(1)
+                        }
+                        .foregroundStyle(.lorcanaGold)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.lorcanaGold.opacity(0.15), in: Capsule())
+                    }
+                    .accessibilityLabel("Coconut leader \(leader.name). Tap for details.")
+                }
 
                 if !inkColors.isEmpty {
                     HStack(spacing: 3) {
@@ -663,6 +686,11 @@ struct DeckSummaryBar: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("\(count) of 60 cards. Tap to view deck.")
+        .sheet(isPresented: $showingLeader) {
+            if let leader = coconutLeader {
+                CoconutLeaderDetailSheet(leader: leader)
+            }
+        }
     }
 }
 
@@ -1457,6 +1485,7 @@ struct DeckWorkspaceView: View {
     @State private var showingShareSheet = false
     @State private var showingShareImage = false
     @State private var pendingImageShare = false
+    @State private var showingOpeningHand = false
     @State private var showingRename = false
     @State private var renameText = ""
     @State private var shareCode = ""
@@ -1524,6 +1553,7 @@ struct DeckWorkspaceView: View {
                 costDistribution: statistics.costDistribution,
                 isValid: validation.isValid,
                 hasCards: deckCardCount > 0,
+                coconutLeader: deck.coconutLeaderInfo,
                 onTap: { withAnimation { mode = .deck } }
             )
 
@@ -1589,6 +1619,9 @@ struct DeckWorkspaceView: View {
                         }
                     }) {
                         Label("Share Deck", systemImage: "paperplane")
+                    }
+                    Button(action: { showingOpeningHand = true }) {
+                        Label("Draw Opening Hand", systemImage: "hand.draw")
                     }
                     Button(action: {
                         _ = deckManager.duplicateDeck(deck)
@@ -1659,6 +1692,9 @@ struct DeckWorkspaceView: View {
         .sheet(isPresented: $showingEditDeck) {
             EditDeckView(deck: deck)
                 .environmentObject(deckManager)
+        }
+        .sheet(isPresented: $showingOpeningHand) {
+            OpeningHandView(deck: deck)
         }
         .alert("Rename Deck", isPresented: $showingRename) {
             TextField("Deck name", text: $renameText)

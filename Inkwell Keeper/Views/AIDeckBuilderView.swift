@@ -790,7 +790,7 @@ struct AIDeckCompleterView: View {
                         HStack(spacing: 6) {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundStyle(.green)
-                            Text("Your deck already has \(deck.totalCards) cards — remove a few to open up slots for AI suggestions.")
+                            Text("Your deck is full — AI will suggest swaps to strengthen it.")
                                 .font(.caption)
                                 .foregroundStyle(.gray)
                         }
@@ -917,7 +917,7 @@ struct AIDeckCompleterView: View {
                                 .tint(.black)
                         } else {
                             Image(systemName: "wand.and.stars")
-                            Text("Complete Deck")
+                            Text(deck.totalCards >= 60 ? "Suggest Improvements" : "Complete Deck")
                                 .bold()
                         }
                     }
@@ -925,11 +925,11 @@ struct AIDeckCompleterView: View {
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 14)
-                            .fill(!aiService.isLoading && deck.totalCards < 60 ? Color.lorcanaGold : Color.gray.opacity(0.4))
+                            .fill(!aiService.isLoading && deck.deckFormat != .coconut ? Color.lorcanaGold : Color.gray.opacity(0.4))
                     )
-                    .foregroundStyle(!aiService.isLoading && deck.totalCards < 60 ? .black : .gray)
+                    .foregroundStyle(!aiService.isLoading && deck.deckFormat != .coconut ? .black : .gray)
                 }
-                .disabled(aiService.isLoading || deck.totalCards >= 60 || deck.deckFormat == .coconut)
+                .disabled(aiService.isLoading || deck.deckFormat == .coconut)
                 .padding(.horizontal)
                 .padding(.bottom, 20)
             }
@@ -1000,6 +1000,9 @@ struct AIDeckCompleterView: View {
                         .padding(.horizontal)
                     }
 
+                    if !aiService.improveSwaps.isEmpty {
+                        swapResults
+                    } else {
                     // Stats
                     HStack(spacing: 16) {
                         StatPill(label: "Suggested", value: "\(aiService.totalSuggestedCards)")
@@ -1080,6 +1083,8 @@ struct AIDeckCompleterView: View {
                                 .fill(Color.orange.opacity(0.1))
                         )
                         .padding(.horizontal)
+                    }
+
                     }
 
                     // Action buttons
@@ -1165,19 +1170,75 @@ struct AIDeckCompleterView: View {
     }
 
     // MARK: - Helpers
+    // MARK: - Swap Results (full-deck improvement mode)
+
+    private var swapResults: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Suggested Swaps")
+                .font(.headline)
+                .foregroundStyle(.lorcanaGold)
+                .padding(.horizontal)
+
+            Text("Toggle any swap off, then apply the rest.")
+                .font(.caption)
+                .foregroundStyle(.gray)
+                .padding(.horizontal)
+
+            ForEach(aiService.improveSwaps) { swap in
+                AIDeckSwapRow(swap: swap) {
+                    aiService.toggleSwapAccepted(id: swap.id)
+                }
+            }
+
+            let acceptedCount = aiService.improveSwaps.filter { $0.isAccepted }.count
+            Button {
+                aiService.applySwaps(to: deck, deckManager: deckManager)
+                dismiss()
+            } label: {
+                HStack {
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                    Text("Apply \(acceptedCount) Swap\(acceptedCount == 1 ? "" : "s")")
+                        .bold()
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(acceptedCount > 0 ? Color.lorcanaGold : Color.gray.opacity(0.4))
+                )
+                .foregroundStyle(acceptedCount > 0 ? .black : .gray)
+            }
+            .disabled(acceptedCount == 0)
+            .padding(.horizontal)
+            .padding(.top, 8)
+        }
+    }
+
     private func generateCompletion() {
         hasGenerated = true
-        let ownedQuantities = useCollectionOnly ? collectionManager.collectedCardQuantities : [:]
-        Task {
-            await aiService.completeDeck(
-                existingCards: deck.cards ?? [],
-                format: deck.deckFormat,
-                inkColors: deck.deckInkColors,
-                archetype: deck.deckArchetype,
-                notes: additionalNotes,
-                collectionOnly: useCollectionOnly,
-                ownedCardQuantities: ownedQuantities
-            )
+        if deck.totalCards >= 60 {
+            Task {
+                await aiService.improveDeck(
+                    existingCards: deck.cards ?? [],
+                    format: deck.deckFormat,
+                    inkColors: deck.deckInkColors,
+                    archetype: deck.deckArchetype,
+                    notes: additionalNotes
+                )
+            }
+        } else {
+            let ownedQuantities = useCollectionOnly ? collectionManager.collectedCardQuantities : [:]
+            Task {
+                await aiService.completeDeck(
+                    existingCards: deck.cards ?? [],
+                    format: deck.deckFormat,
+                    inkColors: deck.deckInkColors,
+                    archetype: deck.deckArchetype,
+                    notes: additionalNotes,
+                    collectionOnly: useCollectionOnly,
+                    ownedCardQuantities: ownedQuantities
+                )
+            }
         }
     }
 
@@ -1913,5 +1974,73 @@ struct AIDeckErrorBanner: View {
                 )
         )
         .padding(.horizontal)
+    }
+}
+
+// MARK: - Swap Row
+
+/// One suggested swap: the card coming out and the card going in, with an accept toggle.
+struct AIDeckSwapRow: View {
+    let swap: AIDeckSwap
+    let onToggle: () -> Void
+
+    var body: some View {
+        Button(action: onToggle) {
+            HStack(spacing: 12) {
+                Image(systemName: swap.isAccepted ? "checkmark.circle.fill" : "circle")
+                    .font(.title3)
+                    .foregroundStyle(swap.isAccepted ? .lorcanaGold : .gray)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "minus.circle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.red.opacity(0.8))
+                        Text("\(swap.removeQuantity)x \(swap.removeName)")
+                            .font(.subheadline)
+                            .foregroundStyle(.white.opacity(swap.isAccepted ? 0.9 : 0.5))
+                            .strikethrough(swap.isAccepted)
+                            .lineLimit(1)
+                    }
+
+                    HStack(spacing: 6) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.green.opacity(0.9))
+                        Text("\(swap.addSuggestion.quantity)x \(swap.addSuggestion.cardName)")
+                            .font(.subheadline)
+                            .bold()
+                            .foregroundStyle(.white.opacity(swap.isAccepted ? 1 : 0.5))
+                            .lineLimit(1)
+                    }
+                }
+
+                Spacer()
+
+                if let card = swap.addSuggestion.matchedCard {
+                    AsyncImage(url: card.bestImageUrl()) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                    } placeholder: {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.gray.opacity(0.3))
+                    }
+                    .frame(width: 36, height: 50)
+                    .clipShape(.rect(cornerRadius: 4))
+                }
+            }
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.lorcanaDark.opacity(swap.isAccepted ? 0.8 : 0.5))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(swap.isAccepted ? Color.lorcanaGold.opacity(0.4) : Color.clear, lineWidth: 1)
+                    )
+            )
+            .padding(.horizontal)
+        }
+        .buttonStyle(.plain)
     }
 }

@@ -36,6 +36,40 @@ struct AIDeckSuggestion: Identifiable, Hashable, Sendable {
     }
 }
 
+// MARK: - AI Deck Swap Model
+
+/// One suggested improvement to a full deck: cut some copies of one card, add another.
+struct AIDeckSwap: Identifiable, Hashable, Sendable {
+    let id: UUID
+    let removeName: String
+    let removeQuantity: Int
+    var addSuggestion: AIDeckSuggestion
+    /// Whether the user wants this swap applied (all start accepted).
+    var isAccepted: Bool
+
+    init(
+        id: UUID = UUID(),
+        removeName: String,
+        removeQuantity: Int,
+        addSuggestion: AIDeckSuggestion,
+        isAccepted: Bool = true
+    ) {
+        self.id = id
+        self.removeName = removeName
+        self.removeQuantity = removeQuantity
+        self.addSuggestion = addSuggestion
+        self.isAccepted = isAccepted
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+
 // MARK: - AI Deck Service
 @MainActor
 @Observable
@@ -56,6 +90,9 @@ class AIDeckService {
     var strategyStreamingContent: String = ""
     var strategyResponse: String = ""
     var strategyError: String?
+
+    /// Swap suggestions for improving an already-full deck (the completer's other mode).
+    var improveSwaps: [AIDeckSwap] = []
 
     private var apiKey: String?
     private let dataManager = SetsDataManager.shared
@@ -325,6 +362,214 @@ class AIDeckService {
         prompt += buildCardCatalog(format: format, inkColors: effectiveColors, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities)
 
         await streamCompletion(apiKey: apiKey, prompt: prompt, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities)
+    }
+
+    // MARK: - Improve Full Deck (Swap Suggestions)
+
+    /// Suggests swaps (cut X, add Y) for a deck that's already at 60 cards.
+    func improveDeck(
+        existingCards: [DeckCard],
+        format: DeckFormat,
+        inkColors: [InkColor],
+        archetype: DeckArchetype?,
+        notes: String = ""
+    ) async {
+        reset()
+        currentMaxInkColors = format.maxInkColors
+        isLoading = true
+
+        guard let apiKey = apiKey else {
+            errorMessage = "Service not available. Please try again later."
+            isLoading = false
+            return
+        }
+
+        guard remainingGenerationsToday > 0 else {
+            errorMessage = dailyLimitMessage
+            isLoading = false
+            return
+        }
+
+        guard format != .coconut else {
+            errorMessage = "AI improvements don't support the Coconut beta yet."
+            isLoading = false
+            return
+        }
+
+        var effectiveColors = inkColors
+        if effectiveColors.isEmpty {
+            let detected = Set(existingCards.compactMap { $0.inkColor })
+            effectiveColors = detected.compactMap { InkColor.fromString($0) }
+        }
+        guard !effectiveColors.isEmpty else {
+            errorMessage = "Set the deck's ink colors first, so suggestions match your deck."
+            isLoading = false
+            return
+        }
+
+        currentNormalCards = dataManager.getAllCards().filter { $0.variant == .normal }
+
+        var prompt = "Here is my complete Disney Lorcana deck. Suggest 3 to 6 SWAPS to make it stronger.\n\n"
+        prompt += "Format: \(format.rawValue)\n"
+        prompt += "Ink Colors: \(effectiveColors.map { $0.rawValue }.joined(separator: " / "))\n"
+        if let archetype = archetype {
+            prompt += "Archetype: \(archetype.rawValue)\n"
+        }
+        let trimmedNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedNotes.isEmpty {
+            prompt += "Guidance from the user: \(trimmedNotes)\n"
+        }
+
+        prompt += "\nCurrent deck:\n"
+        for card in existingCards.sorted(by: { $0.cost < $1.cost }) {
+            prompt += "  \(card.quantity)x \(card.name) (Cost \(card.cost), \(card.type))\n"
+        }
+
+        prompt += """
+
+        Respond with a short explanation of the deck's weaknesses, then EXACTLY this format \
+        (OUT lines name cards from the deck above; IN lines name cards from the AVAILABLE CARDS \
+        list, same ink colors, and each swap's quantities must match so the deck stays at the \
+        same size):
+        [SWAPS]
+        OUT: 2x Card Name
+        IN: 2x Replacement Card Name
+        OUT: 1x Another Card
+        IN: 1x Another Replacement
+        [/SWAPS]
+        """
+
+        prompt += buildCardCatalog(format: format, inkColors: effectiveColors)
+
+        let messages: [OpenAIChatMessage] = [
+            OpenAIChatMessage(role: "system", content: systemInstructions),
+            OpenAIChatMessage(role: "user", content: prompt)
+        ]
+
+        do {
+            let stream = OpenAIService.shared.streamChatCompletion(
+                apiKey: apiKey,
+                messages: messages,
+                model: AIConfigService.shared.deckModel
+            )
+            for try await chunk in stream {
+                if Task.isCancelled { break }
+                currentStreamingContent += chunk
+            }
+            rawResponse = currentStreamingContent
+            currentStreamingContent = ""
+        } catch {
+            if currentStreamingContent.isEmpty {
+                errorMessage = "Failed to generate improvements. Please try again."
+                isLoading = false
+                return
+            }
+            rawResponse = currentStreamingContent
+            currentStreamingContent = ""
+        }
+
+        if !rawResponse.isEmpty {
+            consumeDailyAllowance()
+        }
+        await resolveSwaps(from: rawResponse, existingCards: existingCards)
+        isLoading = false
+    }
+
+    /// Parses OUT/IN pairs and validates them: OUT must exist in the deck (with enough
+    /// copies), IN must match a real card. Invalid pairs are dropped.
+    private func resolveSwaps(from response: String, existingCards: [DeckCard]) async {
+        let parsed = Self.parseSwaps(from: response)
+        guard !parsed.isEmpty else {
+            if errorMessage == nil {
+                errorMessage = "The AI didn't return usable swaps. Please try again."
+            }
+            return
+        }
+
+        // Match IN cards against the database off the main actor.
+        let inSuggestions = parsed.map { AIDeckSuggestion(cardName: $0.inName, quantity: $0.inQuantity) }
+        let cards = currentNormalCards
+        let matched = await Task.detached(priority: .userInitiated) {
+            Self.matchSuggestions(inSuggestions, against: cards)
+        }.value
+
+        let deckByNormalizedName = Dictionary(
+            existingCards.map { (DeckFormat.normalizeCardName($0.name), $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        let deckNames = Set(existingCards.map { DeckFormat.normalizeCardName($0.name) })
+
+        var swaps: [AIDeckSwap] = []
+        for (index, pair) in parsed.enumerated() {
+            let outNormalized = DeckFormat.normalizeCardName(pair.outName)
+            guard let deckCard = deckByNormalizedName[outNormalized],
+                  deckCard.quantity >= pair.outQuantity else { continue }
+
+            let suggestion = matched[index]
+            guard let inCard = suggestion.matchedCard,
+                  !deckNames.contains(DeckFormat.normalizeCardName(inCard.name)) else { continue }
+
+            swaps.append(AIDeckSwap(
+                removeName: deckCard.name,
+                removeQuantity: pair.outQuantity,
+                addSuggestion: suggestion
+            ))
+        }
+
+        improveSwaps = swaps
+        if swaps.isEmpty && errorMessage == nil {
+            errorMessage = "The suggested swaps didn't match your deck. Please try again."
+        }
+    }
+
+    /// Parses `[SWAPS]` OUT/IN line pairs. Pure and static for testability.
+    static func parseSwaps(from response: String) -> [(outName: String, outQuantity: Int, inName: String, inQuantity: Int)] {
+        let content: String
+        if let start = response.range(of: "[SWAPS]"), let end = response.range(of: "[/SWAPS]") {
+            content = String(response[start.upperBound..<end.lowerBound])
+        } else {
+            content = response
+        }
+
+        var result: [(String, Int, String, Int)] = []
+        var pendingOut: (name: String, quantity: Int)?
+
+        for rawLine in content.components(separatedBy: "\n") {
+            let line = rawLine.trimmingCharacters(in: .whitespaces)
+            if let out = Self.parseSwapLine(line, prefix: "OUT:") {
+                pendingOut = out
+            } else if let inn = Self.parseSwapLine(line, prefix: "IN:"), let out = pendingOut {
+                result.append((out.name, out.quantity, inn.name, inn.quantity))
+                pendingOut = nil
+            }
+        }
+        return result
+    }
+
+    private static func parseSwapLine(_ line: String, prefix: String) -> (name: String, quantity: Int)? {
+        guard line.uppercased().hasPrefix(prefix) else { return nil }
+        let body = line.dropFirst(prefix.count).trimmingCharacters(in: .whitespaces)
+        guard let suggestion = parseCardLine(body) else { return nil }
+        return (suggestion.cardName, suggestion.quantity)
+    }
+
+    /// Applies the accepted swaps to the deck.
+    func applySwaps(to deck: Deck, deckManager: DeckManager) {
+        for swap in improveSwaps where swap.isAccepted {
+            guard let inCard = swap.addSuggestion.matchedCard else { continue }
+            if let deckCard = (deck.cards ?? []).first(where: {
+                DeckFormat.normalizeCardName($0.name) == DeckFormat.normalizeCardName(swap.removeName)
+            }) {
+                let newQuantity = deckCard.quantity - swap.removeQuantity
+                deckManager.updateCardQuantity(deckCard, in: deck, quantity: newQuantity)
+            }
+            deckManager.addCard(inCard, to: deck, quantity: swap.addSuggestion.quantity)
+        }
+    }
+
+    func toggleSwapAccepted(id: UUID) {
+        guard let index = improveSwaps.firstIndex(where: { $0.id == id }) else { return }
+        improveSwaps[index].isAccepted.toggle()
     }
 
     // MARK: - Generate Strategy for Existing Deck
@@ -1260,6 +1505,7 @@ class AIDeckService {
     // MARK: - Reset
     func reset() {
         suggestions = []
+        improveSwaps = []
         rawResponse = ""
         currentStreamingContent = ""
         errorMessage = nil
