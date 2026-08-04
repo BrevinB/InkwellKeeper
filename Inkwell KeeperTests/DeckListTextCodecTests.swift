@@ -153,6 +153,45 @@ struct DeckListTextCodecTests {
         #expect(result.entries[0].card.variant == .normal)
     }
 
+    // MARK: - Coconut leader round-trip
+
+    @Test func exportLeadsWithLeaderCommentForCoconutDecks() {
+        let deck = Deck(
+            name: "Coconut",
+            format: .coconut,
+            coconutLeader: "Ariel – Spectacular Singer"
+        )
+        deck.cards?.append(DeckCard(from: makeCard(name: "Be Prepared", cost: 7), quantity: 1))
+
+        let text = DeckListTextCodec.export(deck)
+
+        #expect(text.hasPrefix("# Leader: Ariel – Spectacular Singer"))
+        #expect(text.contains("1 Be Prepared"))
+    }
+
+    @Test func parseExtractsLeaderDashInsensitively() {
+        // Hyphen in the paste; canonical leader names use en dashes.
+        let result = DeckListTextCodec.parse(
+            "# Leader: Ariel - Spectacular Singer\n4 Elsa - Snow Queen",
+            cards: catalog
+        )
+
+        #expect(result.coconutLeader == "Ariel – Spectacular Singer")
+        #expect(result.entries.count == 1)
+    }
+
+    @Test func ordinaryCommentsAreNotLeaders() {
+        let result = DeckListTextCodec.parse("# my cool deck\n4 Elsa - Snow Queen", cards: catalog)
+        #expect(result.coconutLeader == nil)
+        #expect(result.unmatched.isEmpty)
+    }
+
+    @Test func unknownLeaderNamesAreIgnored() {
+        let result = DeckListTextCodec.parse("# Leader: Not A Real Leader\n4 Elsa - Snow Queen", cards: catalog)
+        #expect(result.coconutLeader == nil)
+        #expect(result.entries.count == 1)
+    }
+
     // MARK: - Detection
 
     @Test func detectsDeckListText() {

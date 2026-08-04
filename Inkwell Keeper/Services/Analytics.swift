@@ -36,11 +36,11 @@ enum Analytics {
         case scanMultiConfirmed(count: Int)
 
         // MARK: Decks
-        case deckCreated
+        case deckCreated(format: String)
         case deckDeleted
         case deckCardAdded
         case deckCardRemoved
-        case deckImported
+        case deckImported(format: String)
         case starterDeckImported(name: String)
 
         // MARK: AI features
@@ -125,6 +125,10 @@ enum Analytics {
                 ["source": source]
             case let .rulesAnswerRated(helpful):
                 ["helpful": String(helpful)]
+            case let .deckCreated(format):
+                ["format": format]
+            case let .deckImported(format):
+                ["format": format]
             case let .paywallShown(source):
                 ["source": source]
             case let .subscriptionPurchased(product):

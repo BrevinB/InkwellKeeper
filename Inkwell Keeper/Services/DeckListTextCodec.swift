@@ -20,6 +20,8 @@ enum DeckListTextCodec {
         /// Resolved cards with their summed quantities, in first-appearance order.
         var entries: [(card: LorcanaCard, quantity: Int)]
         var unmatched: [UnmatchedLine]
+        /// Canonical Coconut leader name from a `# Leader:` line, when present and recognized.
+        var coconutLeader: String?
 
         var totalMatchedCards: Int {
             entries.reduce(0) { $0 + $1.quantity }
@@ -29,12 +31,17 @@ enum DeckListTextCodec {
     // MARK: - Export
 
     /// Renders a deck as community-format text: `{qty} {Name - Title}` per line,
-    /// sorted by cost then name so lists diff cleanly.
+    /// sorted by cost then name so lists diff cleanly. Coconut decks lead with a
+    /// `# Leader:` comment — our importer round-trips it, other tools skip comment lines.
     static func export(_ deck: Deck) -> String {
-        (deck.cards ?? [])
+        var lines: [String] = []
+        if let leader = deck.coconutLeaderInfo {
+            lines.append("# Leader: \(leader.name)")
+        }
+        lines.append(contentsOf: (deck.cards ?? [])
             .sorted { ($0.cost, $0.name) < ($1.cost, $1.name) }
-            .map { "\($0.quantity) \($0.name)" }
-            .joined(separator: "\n")
+            .map { "\($0.quantity) \($0.name)" })
+        return lines.joined(separator: "\n")
     }
 
     // MARK: - Import
@@ -63,9 +70,16 @@ enum DeckListTextCodec {
         var order: [String: LorcanaCard] = [:]
         var orderedIds: [String] = []
         var unmatched: [UnmatchedLine] = []
+        var coconutLeader: String?
 
         for (index, rawLine) in text.split(separator: "\n", omittingEmptySubsequences: false).enumerated() {
             let line = rawLine.trimmingCharacters(in: .whitespaces)
+
+            if coconutLeader == nil, let leader = parseLeaderLine(line) {
+                coconutLeader = leader
+                continue
+            }
+
             guard !line.isEmpty, !isNonCardLine(line) else { continue }
 
             guard let parsed = parseLine(line) else {
@@ -89,7 +103,22 @@ enum DeckListTextCodec {
             guard let card = order[id], let quantity = quantities[id] else { return nil }
             return (card, quantity)
         }
-        return ParseResult(entries: entries, unmatched: unmatched)
+        return ParseResult(entries: entries, unmatched: unmatched, coconutLeader: coconutLeader)
+    }
+
+    /// Recognizes a `# Leader: {name}` comment and resolves it to a known Coconut leader,
+    /// dash/case-insensitively. Returns nil for ordinary comments or unknown leaders.
+    private static func parseLeaderLine(_ line: String) -> String? {
+        let lowered = line.lowercased()
+        guard lowered.hasPrefix("# leader:") || lowered.hasPrefix("#leader:") else { return nil }
+        guard let colon = line.firstIndex(of: ":") else { return nil }
+        let name = String(line[line.index(after: colon)...]).trimmingCharacters(in: .whitespaces)
+        guard !name.isEmpty else { return nil }
+
+        let normalized = DeckFormat.normalizeCardName(name)
+        return CoconutLeaders.all.first {
+            DeckFormat.normalizeCardName($0.name) == normalized
+        }?.name
     }
 
     // MARK: - Line parsing

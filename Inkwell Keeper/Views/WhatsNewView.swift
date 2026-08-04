@@ -152,6 +152,26 @@ struct ChangelogEntry {
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
     ChangelogEntry(
+        version: "3.3.0",
+        date: "August 2026",
+        features: [
+            "Format Coconut is here! Build singleton decks around any of the 18 beta leaders — with official leader card art, deck validation, and leaders that travel in shared deck links",
+            "Coconut games in the Lore Counter — pick your leader per player, play to 25 lore, and tap your leader anytime to re-read its ability",
+            "Draw Opening Hand — deal a sample 7 from any deck, set cards aside for the alteration, and feel your curve before you sleeve up",
+            "AI deck improvements — full decks now get suggested swaps (cut this, add that) you can toggle and apply with one tap (Pro)"
+        ],
+        improvements: [
+            "AI upgraded to newer models that know the modern Lorcana card pool — smarter deck suggestions and rulings",
+            "The AI Rules Assistant knows Format Coconut's rules",
+            "Deck AI is faster and more reliable — no more freeze when results arrive, and clear error messages with retry when something goes wrong",
+            "Text deck lists now carry your Coconut leader, and pasting one back recreates the deck"
+        ],
+        bugFixes: [
+            "Coconut games no longer celebrate a win at 20 lore — the target is correctly 25",
+            "Opening the AI Strategy Guide no longer clears your deck builder results"
+        ],
+        inProgress: []),
+    ChangelogEntry(
         version: "3.2.0",
         date: "August 2026",
         features: [

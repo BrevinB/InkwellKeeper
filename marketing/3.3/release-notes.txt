@@ -1,0 +1,15 @@
+App Store Connect "What's New" — version 3.3.0
+
+FORMAT COCONUT IS HERE 🥥
+Be first to the new official multiplayer beta! Build singleton decks around any of the 18 leaders — with official leader card art, full deck validation, and leaders that travel in your shared deck links. The Lore Counter plays Coconut too: pick your leader per player, play to 25 lore, and tap your leader anytime to re-read its ability.
+
+DRAW YOUR OPENING HAND
+Deal a sample 7 from any deck, set cards aside for the alteration, and feel your curve before you sleeve up.
+
+SMARTER AI, BETTER SUGGESTIONS
+The AI now runs on newer models that know the modern card pool. Full decks get suggested swaps — cut this, add that — you can toggle and apply with one tap (Pro). Plus the Rules Assistant already knows Coconut's rules.
+
+ALSO IN THIS RELEASE
+• Text deck lists carry your Coconut leader and round-trip on import
+• Faster, more reliable deck AI with clear errors and retry
+• Coconut games correctly play to 25 lore

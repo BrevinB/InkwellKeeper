@@ -135,7 +135,7 @@ class DeckManager: ObservableObject {
 
         do {
             try context.save()
-            Analytics.send(.deckCreated)
+            Analytics.send(.deckCreated(format: format.rawValue))
             loadDecks(context: context)
         } catch {
             // Handle error silently
@@ -369,7 +369,12 @@ class DeckManager: ObservableObject {
         let result = DeckListTextCodec.parse(text, cards: SetsDataManager.shared.getAllCards())
         guard !result.entries.isEmpty else { return nil }
 
-        let deck = Deck(name: name, format: .infinityConstructed)
+        // A "# Leader:" line marks a Format Coconut deck.
+        let deck = Deck(
+            name: name,
+            format: result.coconutLeader != nil ? .coconut : .infinityConstructed,
+            coconutLeader: result.coconutLeader
+        )
         context.insert(deck)
 
         for entry in result.entries {
@@ -381,7 +386,7 @@ class DeckManager: ObservableObject {
 
         do {
             try context.save()
-            Analytics.send(.deckImported)
+            Analytics.send(.deckImported(format: deck.format))
             updateDeckColorsFromCards(deck)
             loadDecks(context: context)
             return (deck, result.unmatched)
@@ -535,7 +540,7 @@ class DeckManager: ObservableObject {
 
         do {
             try context.save()
-            Analytics.send(.deckImported)
+            Analytics.send(.deckImported(format: deck.format))
             loadDecks(context: context)
             return deck
         } catch {
