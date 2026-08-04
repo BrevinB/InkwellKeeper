@@ -73,8 +73,16 @@ symbols in card text · offline card images.
   the account has NO bio link until 1k followers (or a Business-account
   switch) — until then CTAs must say "search Ink Well Keeper on the App
   Store," never "link in bio."
-- **Instagram/Threads**: caption + which in-app share card to attach
-  (haul card, milestone card, card-flex). Visual-first.
+- **Instagram/Threads**: PRIORITY CHANNEL (verified driving downloads and
+  subscriptions, Aug 2026) — one feed post per day, planned as a weekly
+  calendar (see `drafts/ig-week-*.md` for the format: hook first line,
+  CTA "Free on iOS · link in bio", 4 hashtags). Visual-first: branded
+  1080×1350 images in the app-theme style (gradient + gold sparkles +
+  ink ribbon; see `drafts/images/`), rotating through feature spotlights,
+  share-card showcases, and one market-data post per week with real
+  backend numbers. Reshare each post to the story the next morning.
+  Prices must be real; collection/haul stats may be demo values (App
+  Store screenshot convention).
 
 ## X engagement & outreach (human-only — not for the drafts agent)
 
