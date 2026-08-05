@@ -376,12 +376,33 @@ def scaffold_new_set(number: str, code: str, name: str, backend_repo: Path, ci: 
     )
 
     # 4. ImportService Dreamborn set map
+    case_patterns = f'"{padded}"' if padded == number else f'"{padded}", "{number}"'
     patch_file(
         APP_DIR / "Services" / "ImportService.swift",
         anchor='        case "P1": return "Promo Set 1"',
-        insertion=f'        case "{padded}", "{number}": return "{name}"\n',
+        insertion=f'        case {case_patterns}: return "{name}"\n',
         already=f'case "{padded}"',
         label="ImportService.mapDreambornSetNumber",
+        dry_run=dry_run,
+    )
+
+    # 4b. Runtime bundled-image folder map (without this the app ignores bundled images)
+    patch_file(
+        APP_DIR / "Extensions" / "LorcanaCardExtensions.swift",
+        anchor='            "Attack of the Vine!": "attack_of_the_vine",',
+        insertion=f'            "{name}": "{set_id}",\n',
+        already=f'"{name}": "{set_id}"',
+        label="LorcanaCardExtensions.setFolderMap",
+        dry_run=dry_run,
+    )
+
+    # 4c. dedupe_card_images.py folder map (without this it flags the new images as orphans)
+    patch_file(
+        SCRIPTS_DIR / "dedupe_card_images.py",
+        anchor='    "Attack of the Vine!": "attack_of_the_vine",',
+        insertion=f'    "{name}": "{set_id}",\n',
+        already=f'"{name}": "{set_id}"',
+        label="dedupe_card_images.SET_FOLDER_MAP",
         dry_run=dry_run,
     )
 
