@@ -60,7 +60,8 @@ extension LorcanaCard {
             "EPCOT Festival of the Arts": "epcot_festival_of_the_arts",
             "Lorcana Challenge Year 3": "lorcana_challenge_year_3",
             "Wilds Unknown": "wilds_unknown",
-            "Attack of the Vine!": "attack_of_the_vine"
+            "Attack of the Vine!": "attack_of_the_vine",
+            "Promo Set PD1": "promo_set_pd1"
         ]
 
         guard let folderName = setFolderMap[setName] else {
@@ -84,7 +85,6 @@ extension LorcanaCard {
         case .iconic:
             variantSuffix = "-iconic"
         }
-
 
         // Try avif first (primary format from API, verified correct), then fallback formats
         let extensions = ["avif", "jpg", "png"]

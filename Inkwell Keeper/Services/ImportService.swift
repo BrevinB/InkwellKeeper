@@ -844,6 +844,7 @@ class ImportService {
         case "011", "11": return "Winterspell"
         case "012", "12": return "Wilds Unknown"
         case "013", "13": return "Attack of the Vine!"
+        case "PD1": return "Promo Set PD1"
         case "P1": return "Promo Set 1"
         case "P2": return "Promo Set 2"
         case "P3": return "Promo Set 3"

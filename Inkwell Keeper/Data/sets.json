@@ -201,6 +201,16 @@
       "cardCount": 242,
       "description": "A relentless botanical menace overtakes the realm, bringing new vine-based mechanics and fierce plant-powered characters.",
       "isReleased": true
+    },
+    {
+      "id": "promo_set_pd1",
+      "name": "Promo Set PD1",
+      "setCode": "PD1",
+      "setNumber": "PD1",
+      "releaseDate": "2026-07-28",
+      "cardCount": 8,
+      "description": "Event promo series PD1 — pre-release and event exclusive cards, beginning with the Attack of the Vine! pre-release promos.",
+      "isReleased": true
     }
   ]
 }

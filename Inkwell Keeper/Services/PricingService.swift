@@ -336,6 +336,7 @@ class PricingService: ObservableObject {
         "EPCOT Festival of the Arts": "EFA",
         "Lorcana Challenge Year 3": "C2",
         "Wilds Unknown": "WU",
+        "Promo Set PD1": "PD1",
         "Attack of the Vine!": "AOV",
     ]
 

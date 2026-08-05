@@ -135,6 +135,7 @@
 		8FFB5E5A73AFBE9B4EF1C7E0 /* attack_of_the_vine.json in Resources */ = {isa = PBXBuildFile; fileRef = D3F932B4B946EA58B9D03BB8 /* attack_of_the_vine.json */; };
 		9070EFB18DB5DDF8E3BE9E44 /* DeckListTextCodecTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645B4477BD0071F7CE5CD3D0 /* DeckListTextCodecTests.swift */; };
 		980FFB8901722D3AA2161984 /* CloudSyncOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62B893B8E6EECDC960A44D4D /* CloudSyncOverlay.swift */; };
+		9B7641EDC5D344AFBDD3905E /* promo_set_pd1.json in Resources */ = {isa = PBXBuildFile; fileRef = 15F50C364FAAE00764832474 /* promo_set_pd1.json */; };
 		A107F06F96BBA4E1AF0DB402 /* StatsSummaryShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7604DCFB6FA45F47A3674BC6 /* StatsSummaryShareCardView.swift */; };
 		A1A1A1A1000000020000A002 /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1000000010000A001 /* Analytics.swift */; };
 		A1B2C3D4E5F6789012345679 /* winterspell.json in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345678 /* winterspell.json */; };
@@ -193,6 +194,7 @@
 /* Begin PBXFileReference section */
 		00A0DC199D804E5399BF0EE9 /* InkableRatioCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkableRatioCard.swift; sourceTree = "<group>"; };
 		0642DCC4EC0C5EFC8AAFDD4F /* CoconutFormatTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoconutFormatTests.swift; sourceTree = "<group>"; };
+		15F50C364FAAE00764832474 /* promo_set_pd1.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = promo_set_pd1.json; sourceTree = "<group>"; };
 		1910551A9F8E16761BC5CE33 /* ShareCardPresenter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareCardPresenter.swift; sourceTree = "<group>"; };
 		1DA4228D6C3310035BB99ACE /* CardTextView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardTextView.swift; sourceTree = "<group>"; };
 		1E3D652CBA4843E9BA303B2E /* DataMigrationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataMigrationService.swift; sourceTree = "<group>"; };
@@ -463,6 +465,7 @@
 				A1B2C3D4E5F6789012345678 /* winterspell.json */,
 				D3F932B4B946EA58B9D03BB8 /* attack_of_the_vine.json */,
 				1E5ECE8969A316AA84595FF5 /* official_card_ids.json */,
+				15F50C364FAAE00764832474 /* promo_set_pd1.json */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -809,6 +812,7 @@
 				8FFB5E5A73AFBE9B4EF1C7E0 /* attack_of_the_vine.json in Resources */,
 				50597E11048AF006F8F845F8 /* PrivacyInfo.xcprivacy in Resources */,
 				54DAC9CF5EABFB7103BA4B9C /* official_card_ids.json in Resources */,
+				9B7641EDC5D344AFBDD3905E /* promo_set_pd1.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

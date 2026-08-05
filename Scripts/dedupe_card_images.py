@@ -70,6 +70,7 @@ SET_FOLDER_MAP = {
     "Lorcana Challenge Year 3": "lorcana_challenge_year_3",
     "Wilds Unknown": "wilds_unknown",
     "Attack of the Vine!": "attack_of_the_vine",
+    "Promo Set PD1": "promo_set_pd1",
 }
 
 # Mirror of the `variantSuffix` switch in LorcanaCardExtensions.swift. JSON stores

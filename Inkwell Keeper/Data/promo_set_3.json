@@ -1,7 +1,7 @@
 {
   "setName": "Promo Set 3",
   "setCode": "UNK",
-  "cardCount": 55,
+  "cardCount": 56,
   "cards": [
     {
       "id": "Promo_Set_3_1_Dumbo___The_Flying_Elephant_Promo",
@@ -1047,6 +1047,25 @@
       "lore": 1,
       "franchise": "",
       "inkColor": "Amethyst"
+    },
+    {
+      "id": "Promo_Set_3_57_Buzz_Lightyear___Space_Ranger_Promo",
+      "name": "Buzz Lightyear - Space Ranger",
+      "cost": 2,
+      "type": "Character",
+      "rarity": "Promo",
+      "setName": "Promo Set 3",
+      "cardText": "“Environment appears habitable, but the flora seems to have undergone some strange mutations. Could be Zurg’s influence.”",
+      "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_56cc296c52fe43ada125b81c456ff6de.avif?1785782425",
+      "variant": "Promo",
+      "cardNumber": 57,
+      "uniqueId": "P3-057",
+      "inkwell": true,
+      "strength": 3,
+      "willpower": 3,
+      "lore": 1,
+      "franchise": "",
+      "inkColor": "Emerald"
     }
   ]
 }

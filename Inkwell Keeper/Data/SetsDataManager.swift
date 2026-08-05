@@ -129,6 +129,7 @@ class SetsDataManager: ObservableObject {
             "epcot_festival_of_the_arts": "epcot_festival_of_the_arts.json",
             "lorcana_challenge_year_3": "lorcana_challenge_year_3.json",
             "wilds_unknown": "wilds_unknown.json",
+            "promo_set_pd1": "promo_set_pd1.json",
             "attack_of_the_vine": "attack_of_the_vine.json"
         ]
 
