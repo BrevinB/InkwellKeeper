@@ -325,7 +325,11 @@ class CollectionManager: ObservableObject {
     /// special variant are the source of truth for their uniqueId; Normal/Foil
     /// uniqueIds are never touched.
     private func repairSpecialPrintingMetadataIfNeeded(context: ModelContext) {
-        let defaultsKey = "didRepairSpecialPrintingMetadata_v1"
+        // Keyed per app version so the realignment re-runs after every update —
+        // catalog corrections (spoiler-season mislabels happen most sets) then heal
+        // collections automatically instead of waiting for a hand-bumped flag.
+        let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
+        let defaultsKey = "didRepairSpecialPrintingMetadata_\(appVersion)"
         guard !UserDefaults.standard.bool(forKey: defaultsKey) else { return }
 
         Task { @MainActor in
