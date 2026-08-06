@@ -102,6 +102,26 @@ struct ContentView: View {
             checkOnboardingStatus()
             ReviewManager.shared.recordAppLaunch()
             Analytics.send(.screenViewed(name: Self.tabName(for: selectedTab)))
+            #if DEBUG
+            // Filming rig: `simctl launch … -deeplink "inkwellkeeper://…"` navigates
+            // straight to a screen without the SpringBoard confirmation dialog.
+            // Deferred so the card catalog is loaded before the route resolves.
+            if let spec = UserDefaults.standard.string(forKey: "deeplink"),
+               let url = URL(string: spec) {
+                print("IWK-FILM: deeplink arg -> \(url)")
+                Task {
+                    // Wait for the card catalog before resolving the route.
+                    for _ in 0..<60 where !SetsDataManager.shared.isDataLoaded {
+                        try? await Task.sleep(for: .milliseconds(250))
+                    }
+                    try? await Task.sleep(for: .milliseconds(500))
+                    let handled = router.handle(url)
+                    print("IWK-FILM: handled=\(handled) loaded=\(SetsDataManager.shared.isDataLoaded)")
+                }
+            } else {
+                print("IWK-FILM: no deeplink arg; args=\(ProcessInfo.processInfo.arguments)")
+            }
+            #endif
         }
         .onChange(of: selectedTab) { _, newTab in
             Analytics.send(.screenViewed(name: Self.tabName(for: newTab)))
