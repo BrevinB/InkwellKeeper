@@ -93,4 +93,15 @@ git add "$OUT" && git commit -q -m "Weekly marketing drafts $DATE" && git push -
     && echo "committed and pushed" \
     || echo "ERROR: commit/push failed — drafts are in $OUT locally"
 
+# Weekly Instagram market reel (reels outperform statics — see PLAYBOOK.md).
+# Non-fatal: a missing Chrome/ffmpeg or a blip-only week just skips the reel.
+REEL="marketing/drafts/reels/$DATE/reel-market.mp4"
+if python3 Scripts/weekly_market_reel.py --out "$REEL"; then
+    git add "$(dirname "$REEL")" && git commit -q -m "Weekly market reel $DATE" && git push -q \
+        && echo "reel committed and pushed" \
+        || echo "WARN: reel commit/push failed — reel is at $REEL locally"
+else
+    echo "WARN: market reel generation skipped/failed"
+fi
+
 echo "=== run finished $(date) ==="

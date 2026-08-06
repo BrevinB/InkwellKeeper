@@ -80,7 +80,13 @@ symbols in card text · offline card images.
   1080×1350 images in the app-theme style (gradient + gold sparkles +
   ink ribbon; see `drafts/images/`), rotating through feature spotlights,
   share-card showcases, and one market-data post per week with real
-  backend numbers. Reshare each post to the story the next morning.
+  backend numbers. Reels outperform static posts (verified Aug 2026):
+  prefer Reels where footage or an animated data story exists — screen
+  recordings composed onto the brand background, or generated
+  market-data reels; statics become next-morning story reshares. Reels
+  ship silent; add a trending audio track in the IG composer at post
+  time. TikTok script outlines double as Reel scripts — film once,
+  post both. Reshare each post to the story the next morning.
   Prices must be real; collection/haul stats may be demo values (App
   Store screenshot convention).
 
