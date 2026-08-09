@@ -20,6 +20,7 @@ struct DeckShareSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var copiedLink = false
     @State private var copiedList = false
+    @State private var showLinkShareSheet = false
 
     var body: some View {
         NavigationStack {
@@ -43,7 +44,9 @@ struct DeckShareSheet: View {
                 .padding(.top)
 
                 VStack(spacing: 12) {
-                    ShareLink(item: shareURL) {
+                    Button {
+                        showLinkShareSheet = true
+                    } label: {
                         Label("Share Link", systemImage: "link")
                             .bold()
                             .foregroundStyle(.lorcanaDark)
@@ -103,20 +106,32 @@ struct DeckShareSheet: View {
                     }
                 }
             }
+            .onAppear {
+                Analytics.send(.deckSharePresented)
+            }
+            .sheet(isPresented: $showLinkShareSheet) {
+                ShareSheet(items: [shareURL]) { completed in
+                    if completed { Analytics.send(.deckShareCompleted(method: "link")) }
+                }
+            }
         }
     }
 
     private func copyLink() {
         UIPasteboard.general.string = shareURL.absoluteString
+        if !copiedLink { Analytics.send(.deckShareCompleted(method: "copyLink")) }
         withAnimation { copiedLink = true }
     }
 
     private func copyList() {
         UIPasteboard.general.string = deckListText
+        if !copiedList { Analytics.send(.deckShareCompleted(method: "copyList")) }
         withAnimation { copiedList = true }
     }
 
     private func shareAsImage() {
+        // The image flow reports itself via share.cardPresented/share.completed
+        // once ShareCardPresenter takes over after dismissal.
         onShareImage()
         dismiss()
     }

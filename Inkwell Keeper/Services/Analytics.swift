@@ -61,7 +61,8 @@ enum Analytics {
         // MARK: Sharing & deep links
         case shareCardPresented(type: String)
         case shareCompleted(type: String)
-        case shareDeckLinkCreated
+        case deckSharePresented
+        case deckShareCompleted(method: String)
         case deepLinkOpened(type: String)
 
         // MARK: Lifecycle
@@ -98,7 +99,8 @@ enum Analytics {
             case .exportCompleted: "export.completed"
             case .shareCardPresented: "share.cardPresented"
             case .shareCompleted: "share.completed"
-            case .shareDeckLinkCreated: "share.deckLinkCreated"
+            case .deckSharePresented: "deck.sharePresented"
+            case .deckShareCompleted: "deck.shareCompleted"
             case .deepLinkOpened: "deepLink.opened"
             case .onboardingStarted: "onboarding.started"
             case .onboardingCompleted: "onboarding.completed"
@@ -145,6 +147,11 @@ enum Analytics {
                 ["shareType": type]
             case let .shareCompleted(type):
                 ["shareType": type]
+            // A share that actually happened: the link activity finished or a
+            // copy landed on the pasteboard. Image shares are counted by the
+            // share.cardPresented/share.completed pair instead.
+            case let .deckShareCompleted(method):
+                ["method": method]
             case let .deepLinkOpened(type):
                 ["linkType": type]
             case let .loreCounterGameStarted(players, mode):

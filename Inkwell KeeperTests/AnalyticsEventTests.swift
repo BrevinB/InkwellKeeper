@@ -43,7 +43,8 @@ struct AnalyticsEventTests {
         .exportCompleted(format: "csv"),
         .shareCardPresented(type: "cardFlex"),
         .shareCompleted(type: "cardFlex"),
-        .shareDeckLinkCreated,
+        .deckSharePresented,
+        .deckShareCompleted(method: "copyLink"),
         .deepLinkOpened(type: "card"),
         .onboardingStarted,
         .onboardingCompleted,
@@ -62,6 +63,7 @@ struct AnalyticsEventTests {
     func shareAndDeepLinkParametersSurvive() {
         #expect(Analytics.Event.shareCardPresented(type: "haul").parameters["shareType"] == "haul")
         #expect(Analytics.Event.shareCompleted(type: "haul").parameters["shareType"] == "haul")
+        #expect(Analytics.Event.deckShareCompleted(method: "link").parameters["method"] == "link")
         #expect(Analytics.Event.deepLinkOpened(type: "deck").parameters["linkType"] == "deck")
     }
 
