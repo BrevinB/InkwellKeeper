@@ -219,9 +219,36 @@ $('s4').style.opacity=i; $('s4').style.transform=`scale(${{0.94+0.06*i}})`;}}
 </script></body>'''
 
 
+def build_static(movers, histories):
+    """A 1080x1350 IG feed image of the same chart (posted or used as a story)."""
+    body = build_html(movers, histories)
+    # Reuse the reel page at its final animation state: pin T past the last scene
+    # and re-position for the 4:5 canvas.
+    body = body.replace("parseFloat(location.hash.slice(1)) || 0", "8.0")
+    # Keep the title scene visible despite the T=8 animation state.
+    body = body.replace("out=1-seg(T,2.2,2.6);", "out=1;")
+    body = body.replace("$('s1').style.display=T<2.7?'block':'none'",
+                        "$('s1').style.display='block'")
+    body = body.replace("width:1080px;height:1920px", "width:1080px;height:1350px")
+    body = body.replace('#s2h{position:absolute;left:0;right:0;top:390px',
+                        '#s2h{position:absolute;left:0;right:0;top:250px')
+    body = body.replace("#panel{position:absolute;left:90px;top:560px",
+                        "#panel{position:absolute;left:90px;top:330px")
+    body = body.replace('id="s1"><div class="disp l1">The market</div>',
+                        'id="s1" style="top:60px;display:block"><div class="disp l1" style="font-size:96px">The market</div>')
+    body = body.replace('class="magic l2">moved.</div>',
+                        'class="magic l2" style="font-size:84px">moved.</div>')
+    body = body.replace("M -100 1560 C 300 1660, 700 1440, 1180 1540",
+                        "M -100 1180 C 300 1280, 700 1060, 1180 1160")
+    return body
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--static-out", help="also write a 1080x1350 IG chart image here")
+    ap.add_argument("--static-only", action="store_true",
+                    help="skip the reel render (fast; for testing the chart image)")
     ap.add_argument("--days", type=int, default=9)
     args = ap.parse_args()
 
@@ -242,22 +269,35 @@ def main():
     frames = work / "frames"
     frames.mkdir()
 
-    total = int(DURATION * FPS_RENDER)
-    for n in range(total):
-        run([CHROME, "--headless", "--disable-gpu",
-             f"--screenshot={frames}/f_{n:04d}.png",
-             "--window-size=1080,1920", "--hide-scrollbars",
-             f"file://{page}#{n / FPS_RENDER}"],
-            capture_output=True)
+    if not args.static_only:
+        total = int(DURATION * FPS_RENDER)
+        for n in range(total):
+            run([CHROME, "--headless", "--disable-gpu",
+                 f"--screenshot={frames}/f_{n:04d}.png",
+                 "--window-size=1080,1920", "--hide-scrollbars",
+                 f"file://{page}#{n / FPS_RENDER}"],
+                capture_output=True)
 
-    out = Path(args.out)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    run(["ffmpeg", "-y", "-v", "error", "-framerate", str(FPS_RENDER),
-         "-i", f"{frames}/f_%04d.png",
-         "-vf", f"framerate=fps={FPS_OUT}",
-         "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20", "-an", str(out)])
+        out = Path(args.out)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        run(["ffmpeg", "-y", "-v", "error", "-framerate", str(FPS_RENDER),
+             "-i", f"{frames}/f_%04d.png",
+             "-vf", f"framerate=fps={FPS_OUT}",
+             "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20", "-an", str(out)])
+
+    if args.static_out:
+        static_page = work / "static.html"
+        static_page.write_text(build_static(movers, histories))
+        static_out = Path(args.static_out)
+        static_out.parent.mkdir(parents=True, exist_ok=True)
+        run([CHROME, "--headless", "--disable-gpu",
+             f"--screenshot={static_out}", "--window-size=1080,1350",
+             "--force-device-scale-factor=2", "--hide-scrollbars",
+             f"file://{static_page}"], capture_output=True)
+        print(f"static written: {static_out}")
+
     shutil.rmtree(work)
-    print(f"reel written: {out} ({movers[0]['name']} {movers[0]['pct']:+.0f}%, "
+    print(f"reel written: {args.out} ({movers[0]['name']} {movers[0]['pct']:+.0f}%, "
           f"{movers[1]['name']} {movers[1]['pct']:+.0f}%)")
 
 
