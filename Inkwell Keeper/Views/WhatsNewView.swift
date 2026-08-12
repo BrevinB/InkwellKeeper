@@ -12,7 +12,7 @@ struct WhatsNewView: View {
     @State private var currentVersion: String = ""
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
                     // Header
@@ -46,17 +46,17 @@ struct WhatsNewView: View {
         VStack(spacing: 16) {
             Image(systemName: "sparkles")
                 .font(.system(size: 60))
-                .foregroundColor(.lorcanaGold)
+                .foregroundStyle(.lorcanaGold)
 
             Text("What's New in Ink Well Keeper")
                 .font(.title)
                 .fontWeight(.bold)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
             Text("Version \(currentVersion)")
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
         }
         .padding()
         .frame(maxWidth: .infinity)
@@ -70,13 +70,13 @@ struct WhatsNewView: View {
                 Text("Version \(entry.version)")
                     .font(.title3)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
 
                 if entry.version == currentVersion {
                     Text("LATEST")
                         .font(.caption2)
                         .fontWeight(.bold)
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(
@@ -90,7 +90,7 @@ struct WhatsNewView: View {
 
             Text(entry.date)
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
 
             // Features
             if !entry.features.isEmpty {
@@ -119,18 +119,18 @@ struct WhatsNewView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.headline)
-                .foregroundColor(color)
+                .foregroundStyle(color)
                 .padding(.top, 8)
 
             ForEach(items, id: \.self) { item in
                 HStack(alignment: .top, spacing: 8) {
                     Text("•")
-                        .foregroundColor(color)
+                        .foregroundStyle(color)
                         .fontWeight(.bold)
 
                     Text(item)
                         .font(.body)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -151,6 +151,19 @@ struct ChangelogEntry {
 
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
+    ChangelogEntry(
+        version: "3.3.1",
+        date: "August 2026",
+        features: [
+            "Pre-release promos added — the new PD1 promo series (Attack of the Vine pre-release and event cards) is in the card database with images, plus Buzz Lightyear - Space Ranger in Promo Set 3"
+        ],
+        improvements: [
+            "Promo cards now show real market prices — Promo Sets 1–3, PD1, D23, Challenge, and event promos"
+        ],
+        bugFixes: [
+            "Fixed the Rules Assistant answering every question with an error"
+        ],
+        inProgress: []),
     ChangelogEntry(
         version: "3.3.0",
         date: "August 2026",
@@ -319,7 +332,7 @@ private let changelogEntries: [ChangelogEntry] = [
         version: "2.0.0",
         date: "March 2026",
         features: ["More accurate pricing coming from TCGTrader", "Added CardMarket", "AI Deck Building (Pro Feature)", "Improved Set Tracking", "Improved Scanning: New mode as Multi Scan", "Added Search for all cards without going to scanning tab"],
-        improvements: ["Your collection now shows which cards belong to which deck and how many 'available' cards you have", "You can now add cards to wishlist easier", ],
+        improvements: ["Your collection now shows which cards belong to which deck and how many 'available' cards you have", "You can now add cards to wishlist easier"],
         bugFixes: ["Previously cards that are reprinted appeard as the same card with a tag showing which set they belonged to, now they act as separate cards", "Scanning didn't grab cards with different rarity, now it should"],
         inProgress: ["Pricing isn't perfect, thats being improved", "AI Deck Building and AI Rules is a constant effort to improve quality of responses ", "Continuing to improve app performance"]
     ),
@@ -385,7 +398,7 @@ private let changelogEntries: [ChangelogEntry] = [
         features: [
             "DISCLAIMER: A big overhaul happened to get all the missing cards into the app, if you notice any issues with your cards they may have to be re-added. We apologize for the inconvenience",
             "Enhanced character normalization for imports - Better handling of special characters like apostrophes and ellipsis",
-            "Improved image loading for newly added cards",
+            "Improved image loading for newly added cards"
         ],
         improvements: [
             "Fixed set count display for reprinted cards",
