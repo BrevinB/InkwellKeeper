@@ -39,12 +39,16 @@ class OpenAIService {
                     request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
                     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
+                    let resolvedModel = model ?? defaultModel
                     var body: [String: Any] = [
-                        "model": model ?? defaultModel,
+                        "model": resolvedModel,
                         "messages": messages.map { ["role": $0.role, "content": $0.content] },
                         "stream": true
                     ]
-                    if let temperature {
+                    // GPT-5-family and o-series reasoning models reject any
+                    // non-default temperature with HTTP 400, so only attach it
+                    // for the gpt-4 family, which accepts it.
+                    if let temperature, resolvedModel.hasPrefix("gpt-4") {
                         body["temperature"] = temperature
                     }
                     request.httpBody = try JSONSerialization.data(withJSONObject: body)
@@ -57,7 +61,18 @@ class OpenAIService {
                     }
 
                     guard httpResponse.statusCode == 200 else {
-                        continuation.finish(throwing: OpenAIError.httpError(httpResponse.statusCode))
+                        // Error bodies are small JSON blobs explaining the
+                        // rejection — capture one so failures are diagnosable
+                        // from the console instead of a bare status code.
+                        var detail = ""
+                        for try await line in bytes.lines {
+                            detail += line
+                            if detail.count > 500 { break }
+                        }
+                        print("[OpenAI] HTTP \(httpResponse.statusCode): \(detail)")
+                        continuation.finish(
+                            throwing: OpenAIError.httpError(httpResponse.statusCode, detail: detail)
+                        )
                         return
                     }
 
@@ -95,14 +110,14 @@ class OpenAIService {
 
 enum OpenAIError: LocalizedError {
     case invalidResponse
-    case httpError(Int)
+    case httpError(Int, detail: String)
 
     var errorDescription: String? {
         switch self {
         case .invalidResponse:
             return "Invalid response from OpenAI API."
-        case .httpError(let code):
-            return "OpenAI API returned HTTP \(code)."
+        case let .httpError(code, detail):
+            return "OpenAI API returned HTTP \(code)\(detail.isEmpty ? "" : ": \(detail)")."
         }
     }
 }

@@ -151,6 +151,8 @@ class RulesAssistantService {
 
     // Rules answers are reasoning-heavy, so use a stronger model than the deck builder and a
     // low temperature for deterministic, factual rulings. The model is remotely configurable.
+    // The temperature only applies when the configured model is gpt-4 family — reasoning
+    // models (gpt-5.x) reject non-default temperatures, so OpenAIService drops it for them.
     private var rulesModel: String { AIConfigService.shared.rulesModel }
     private let rulesTemperature = 0.3
 
