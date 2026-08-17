@@ -265,11 +265,17 @@ class SetsDataManager: ObservableObject {
         }.sorted { $0.name < $1.name }
     }
 
-    /// Build pre-normalized search index for fast lookups
+    /// Build pre-normalized search index for fast lookups.
+    ///
+    /// Iterates sets in their sorted order (main sets by number, then promo sets) —
+    /// NOT dictionary order, which reshuffles every launch and made every
+    /// `.first(where:)` tie-break downstream (scanner matching, search-result ties)
+    /// resolve differently run to run.
     private func buildSearchIndex() {
         cachedAllCards = []
         normalizedSearchIndex = [:]
-        for cards in setCards.values {
+        for set in sets {
+            guard let cards = setCards[set.name] else { continue }
             for card in cards {
                 let pricedCard = getCardWithCachedPrice(card)
                 cachedAllCards.append(pricedCard)
@@ -334,9 +340,13 @@ class SetsDataManager: ObservableObject {
     }
     
     func getAllCards() -> [LorcanaCard] {
+        // Same deterministic set order as buildSearchIndex, so `.first(where:)`
+        // tie-breaks in the scanner resolve identically on every launch.
         var allCards: [LorcanaCard] = []
-        for cards in setCards.values {
-            allCards.append(contentsOf: cards)
+        for set in sets {
+            if let cards = setCards[set.name] {
+                allCards.append(contentsOf: cards)
+            }
         }
         return allCards.map { getCardWithCachedPrice($0) }
     }

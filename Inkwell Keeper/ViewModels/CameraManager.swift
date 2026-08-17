@@ -8,6 +8,7 @@
 import SwiftUI
 internal import AVFoundation
 import Vision
+import CoreImage.CIFilterBuiltins
 
 struct ScannedCardEntry: Identifiable {
     let id = UUID()
@@ -48,6 +49,13 @@ class CameraManager: NSObject {
         "of", "the", "and", "in", "on", "to", "a", "an", "for", "from", "with", "at", "by"
     ]
 
+    // Brand/collector-line text printed on every card front ("Disney Lorcana",
+    // "EN") and on every card back (the LORCANA logo). OCR text made up solely
+    // of these words is never a card name and must not become a search query:
+    // exactly one card's name contains "Lorcana" — "Jafar - High Sultan of
+    // Lorcana" — so a logo read used to resolve every uncertain scan to it.
+    nonisolated static let brandWords: Set<String> = ["disney", "lorcana", "tm", "en"]
+
     // Live framing guidance from the continuous video feed.
     enum CardAlignment: Equatable {
         case searching   // no card-like rectangle in view
@@ -80,6 +88,9 @@ class CameraManager: NSObject {
     @ObservationIgnored private var lastSuccessfulScanTime: Date?
     // Auto-capture re-arms only after a card leaves the frame (see maybeAutoCapture).
     @ObservationIgnored private var armedForAutoCapture = true
+    // Failed-read retries taken for the currently framed card (see maybeAutoRetry).
+    @ObservationIgnored private var autoRetryCount = 0
+    private static let maxAutoRetries = 1
     
     // Card detection thresholds (relaxed for better detection)
     private let cardDetectionConfidence: Float = 0.5  // Lower threshold for more forgiving detection
@@ -276,9 +287,10 @@ class CameraManager: NSObject {
             if device.isSmoothAutoFocusSupported {
                 device.isSmoothAutoFocusEnabled = true
             }
-            // Cards are held close to the lens — don't bias focus to far subjects.
+            // Cards are held close to the lens — restrict autofocus to the near
+            // range so it locks faster and never hunts toward the background.
             if device.isAutoFocusRangeRestrictionSupported {
-                device.autoFocusRangeRestriction = .none
+                device.autoFocusRangeRestriction = .near
             }
             if device.isFocusPointOfInterestSupported {
                 device.focusPointOfInterest = CGPoint(x: 0.5, y: 0.5)
@@ -322,6 +334,7 @@ class CameraManager: NSObject {
     func toggleAutoScan() {
         isAutoScanEnabled.toggle()
         armedForAutoCapture = true
+        autoRetryCount = 0
     }
 
     func pauseAutoScan() {
@@ -331,6 +344,7 @@ class CameraManager: NSObject {
     func resumeAutoScan() {
         isAutoScanPaused = false
         armedForAutoCapture = true
+        autoRetryCount = 0
     }
 
     /// Capture automatically when a freshly-framed card aligns, if auto-capture is on.
@@ -428,6 +442,11 @@ class CameraManager: NSObject {
         guard let entry = lastScannedEntry else { return }
         let variant = entry.variant
 
+        Analytics.send(.scanCorrected(
+            from: "\(entry.card.name) [\(entry.card.setName)]",
+            to: "\(newCard.name) [\(newCard.setName)]"
+        ))
+
         // Remove the wrongly scanned card (same variant as the one being corrected).
         if let index = scannedCards.firstIndex(where: { $0.card.name == entry.card.name && $0.card.setName == entry.card.setName && $0.variant == variant }) {
             if scannedCards[index].quantity > 1 {
@@ -475,6 +494,12 @@ class CameraManager: NSObject {
         guard index >= 0 && index < scannedCards.count else { return }
         let variant = scannedCards[index].variant
         let quantity = scannedCards[index].quantity
+
+        let guessed = scannedCards[index].card
+        Analytics.send(.scanCorrected(
+            from: "\(guessed.name) [\(guessed.setName)]",
+            to: "\(newCard.name) [\(newCard.setName)]"
+        ))
 
         scannedCards.remove(at: index)
 
@@ -541,18 +566,36 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
     private func processCardImage(_ image: UIImage) async {
         isProcessingCard = true
 
-        // Normalize once: bake in orientation (upright) and downscale. Both Vision
-        // requests share this image so rectangle detection no longer runs on raw,
-        // possibly-rotated pixels while OCR runs on an upright copy.
+        // Normalize once: bake in orientation (upright) and downscale for fast
+        // rectangle detection. Vision ignores UIImage orientation metadata, so
+        // detection must run on upright pixels.
         let normalizedImage = image.uprightScaled(to: 1200)
 
-        // Run rectangle detection and text recognition concurrently.
+        // Find the card's bounds first, then OCR a perspective-corrected crop taken
+        // from a higher-resolution copy. The collector line ("97/204 · EN · 6") is
+        // the most reliable identification signal we have, but at ~1.5% of frame
+        // height it is unreadable on a 1200px full-frame image.
         // These helpers are nonisolated, so they execute off the main actor.
-        async let cardDetectedResult = detectCardInImage(normalizedImage)
-        async let recognitionResult = recognizeCard(in: normalizedImage)
+        let cardRectangle = await detectCardRectangle(in: normalizedImage)
+        let cardDetected = cardRectangle != nil
 
-        let cardDetected = await cardDetectedResult
-        let (recognizedCard, ocrTexts) = await recognitionResult
+        var recognizedCard: LorcanaCard?
+        var ocrTexts: [String] = []
+
+        if let cardRectangle, let cardCrop = await cropCard(from: image, rectangle: cardRectangle) {
+            (recognizedCard, ocrTexts) = await recognizeCard(in: cardCrop)
+        }
+
+        // Fall back to the full frame when no card rectangle was found, cropping
+        // failed, or the crop didn't resolve a card (e.g. the detected rectangle
+        // clipped the title or collector line).
+        if recognizedCard == nil {
+            let (fullFrameCard, fullFrameTexts) = await recognizeCard(in: normalizedImage)
+            if fullFrameCard != nil || ocrTexts.isEmpty {
+                recognizedCard = fullFrameCard
+                ocrTexts = fullFrameTexts
+            }
+        }
 
         isProcessingCard = false
 
@@ -560,6 +603,7 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
         // Rectangle detection is now just a hint, not a hard requirement.
         if let card = recognizedCard {
             lastSuccessfulScanTime = Date()
+            autoRetryCount = 0
             Analytics.send(.scanCardRecognized)
 
             // Resolve which set this card belongs to
@@ -576,6 +620,10 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
                 detectedCard = resolved
             }
         } else {
+            Analytics.send(.scanFailed(
+                reason: ocrTexts.isEmpty ? (cardDetected ? "noText" : "noCard") : "noMatch"
+            ))
+
             // Only show error for manual captures, not auto scan
             if !isAutoScanEnabled && !isMultiScanMode {
                 errorMessage = cardDetected
@@ -594,6 +642,27 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
                     autoScanStatus = nil
                 }
             }
+
+            maybeAutoRetry()
+        }
+    }
+
+    /// One automatic re-capture after a failed read while the card is still aligned.
+    /// The failed shot may have caught the card mid-placement (motion blur, focus
+    /// hunting); without a retry, auto-capture stays disarmed until the card leaves
+    /// the frame, forcing the user to lift and re-place a card that just needed a
+    /// second shot. Capped so an unreadable card can't loop captures forever.
+    private func maybeAutoRetry() {
+        guard isAutoScanEnabled, !isAutoScanPaused, alignmentState == .aligned,
+              autoRetryCount < Self.maxAutoRetries else { return }
+        autoRetryCount += 1
+
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(0.6))
+            guard let self,
+                  self.isAutoScanEnabled, !self.isAutoScanPaused,
+                  self.alignmentState == .aligned, !self.isProcessingCard else { return }
+            self.capturePhoto()
         }
     }
     
@@ -614,7 +683,10 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
         let request = VNRecognizeTextRequest()
         request.recognitionLevel = .accurate  // Use accurate mode for better text recognition
         request.usesLanguageCorrection = true
-        request.minimumTextHeight = 0.02  // Lower threshold to catch more text (was 0.03)
+        // Low enough to catch the collector line ("97/204 · EN · 6"), which is only
+        // ~1.5% of the card's height. The 0.3 confidence filter below handles the
+        // extra noise a lower threshold lets through.
+        request.minimumTextHeight = 0.01
         request.recognitionLanguages = ["en-US"]  // English only for better accuracy
 
         let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
@@ -653,17 +725,17 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
         // the OCR text. A single misread digit in the small, low-contrast card-number
         // text otherwise returns a confidently-wrong card, so corroborate it with the
         // name before short-circuiting name-based matching.
-        if let cardByNumber, cardNameMatchesDetectedText(cardByNumber, detectedTexts: detectedTexts) {
+        if let cardByNumber, Self.cardNameMatchesDetectedText(cardByNumber, detectedTexts: detectedTexts) {
             return cardByNumber
         }
 
         // Name-based search.
-        let potentialNames = extractCardNames(from: detectedTexts)
+        let potentialNames = Self.extractCardNames(from: detectedTexts)
 
         for name in potentialNames {
             let results = setsDataManager.searchCards(query: name)
             if !results.isEmpty,
-               let bestMatch = findBestMatch(for: name, in: results, allDetectedTexts: detectedTexts) {
+               let bestMatch = Self.findBestMatch(for: name, in: results, allDetectedTexts: detectedTexts) {
                 return bestMatch
             }
         }
@@ -675,7 +747,7 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
         if !combinedText.isEmpty {
             let fallbackResults = setsDataManager.searchCards(query: combinedText)
             if let bestMatch = fallbackResults.first(where: {
-                cardNameMatchesDetectedText($0, detectedTexts: detectedTexts)
+                Self.cardNameMatchesDetectedText($0, detectedTexts: detectedTexts)
             }) {
                 return bestMatch
             }
@@ -686,7 +758,7 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
         return cardByNumber
     }
     
-    nonisolated private func extractCardNames(from texts: [String]) -> [String] {
+    nonisolated static func extractCardNames(from texts: [String]) -> [String] {
         var mainNames: [String] = []      // ALL-CAPS main names like "RAFIKI", "SKULL ROCK"
         var subNames: [String] = []       // Capitalized subnames like "Shaman of the Savanna"
         var otherNames: [String] = []     // Other potential names
@@ -709,7 +781,15 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
                rulesTextPatterns.contains(where: { lowercaseText.contains($0) }) {
                 continue
             }
-            
+
+            // Skip text that is only brand words (e.g. "LORCANA", "Disney Lorcana").
+            let words = lowercaseText
+                .components(separatedBy: CharacterSet.alphanumerics.inverted)
+                .filter { !$0.isEmpty }
+            if !words.isEmpty && words.allSatisfy({ Self.brandWords.contains($0) }) {
+                continue
+            }
+
             // Identify main names (ALL-CAPS like "RAFIKI", "SKULL ROCK", "TRAINING DUMMY")
             if cleanText.count >= 3 && cleanText == cleanText.uppercased() {
                 mainNames.append(cleanText)
@@ -769,8 +849,9 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
         return searchQueries
     }
     
-    nonisolated private func detectCardInImage(_ image: UIImage) async -> Bool {
-        guard let cgImage = image.cgImage else { return false }
+    /// Find the largest card-shaped rectangle in the image, if any.
+    nonisolated private func detectCardRectangle(in image: UIImage) async -> VNRectangleObservation? {
+        guard let cgImage = image.cgImage else { return nil }
 
         let request = VNDetectRectanglesRequest()
         request.minimumAspectRatio = 0.5
@@ -782,36 +863,41 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
         do {
             try handler.perform([request])
         } catch {
-            return false
+            return nil
         }
 
-        guard let observations = request.results else { return false }
+        return (request.results ?? [])
+            .filter { observation in
+                // Cards typically have an aspect ratio around 2.5:3.5 (0.714)
+                let aspectRatio = Float(observation.boundingBox.width / observation.boundingBox.height)
+                let area = Float(observation.boundingBox.width * observation.boundingBox.height)
+                return aspectRatio >= cardAspectRatioMin && aspectRatio <= cardAspectRatioMax
+                    && area >= minimumCardArea
+                    && observation.confidence >= cardDetectionConfidence
+            }
+            .max { ($0.boundingBox.width * $0.boundingBox.height) < ($1.boundingBox.width * $1.boundingBox.height) }
+    }
 
-        // Check if we found any rectangles that could be cards
-        let cardLikeRectangles = observations.filter { observation in
-            // Cards typically have an aspect ratio around 2.5:3.5 (0.714)
-            let aspectRatio = Float(observation.boundingBox.width / observation.boundingBox.height)
-            let isCardLikeRatio = aspectRatio >= cardAspectRatioMin && aspectRatio <= cardAspectRatioMax
-
-            // Rectangle should be reasonably large in the image
-            let area = Float(observation.boundingBox.width * observation.boundingBox.height)
-            let isReasonableSize = area >= minimumCardArea
-
-            // Confidence should meet our threshold
-            let isConfident = observation.confidence >= cardDetectionConfidence
-
-            return isCardLikeRatio && isReasonableSize && isConfident
-        }
-
-        return !cardLikeRectangles.isEmpty
+    /// Perspective-corrected crop of the detected card, taken from a high-resolution
+    /// upright copy of the original capture. OCR on card-only pixels keeps the tiny
+    /// collector line legible and stops background text from polluting name extraction.
+    nonisolated private func cropCard(from image: UIImage, rectangle: VNRectangleObservation) async -> UIImage? {
+        // Re-render upright at high resolution; the rectangle's normalized
+        // coordinates apply to any upright copy regardless of scale.
+        let highRes = image.uprightScaled(to: 2400)
+        return highRes.perspectiveCropped(to: rectangle, maxDimension: 1600)
     }
     
-    nonisolated private func findBestMatch(for searchTerm: String, in cards: [LorcanaCard], allDetectedTexts: [String]) -> LorcanaCard? {
+    nonisolated static func findBestMatch(for searchTerm: String, in cards: [LorcanaCard], allDetectedTexts: [String]) -> LorcanaCard? {
         let lowercaseSearch = searchTerm.lowercased()
 
-        // Look for exact matches first (highest priority)
-        if let exactMatch = cards.first(where: { $0.name.lowercased() == lowercaseSearch }) {
-            return exactMatch
+        // Look for exact matches first (highest priority). Promo printings share
+        // the regular card's exact name, so break ties toward the normal printing —
+        // promo resolution can still swap in the promo when the collector line
+        // proves it (see resolveCardSet).
+        let exactMatches = cards.filter { $0.name.lowercased() == lowercaseSearch }
+        if !exactMatches.isEmpty {
+            return exactMatches.first { $0.variant == .normal } ?? exactMatches.first
         }
 
         // If search contains both main and sub name (like "MAUI - Half Shark" or "MAUI Half Shark")
@@ -924,10 +1010,15 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
             return startsWithMatches.first
         }
 
-        // Priority 6: Cards that contain the search term anywhere
+        // Priority 6: Cards that contain the search term anywhere. A fragment
+        // matching mid-name or in the subtitle is weak evidence (this is how the
+        // brand word "Lorcana" matched "Jafar - High Sultan of Lorcana"), so only
+        // commit when the candidate's main name is corroborated by the OCR text.
         let containsMatches = cards.filter { $0.name.lowercased().contains(lowercaseSearch) }
-        if !containsMatches.isEmpty {
-            return containsMatches.first
+        if let corroborated = containsMatches.first(where: {
+            cardNameMatchesDetectedText($0, detectedTexts: allDetectedTexts)
+        }) {
+            return corroborated
         }
 
         // No reliable match found. Returning nil lets the caller report
@@ -938,7 +1029,7 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
     /// Lightweight sanity check that a candidate card's name actually appears in the
     /// detected OCR text. Used to gate low-confidence fallback matches so the scanner
     /// reports "not recognized" rather than silently adding the wrong card.
-    nonisolated private func cardNameMatchesDetectedText(_ card: LorcanaCard, detectedTexts: [String]) -> Bool {
+    nonisolated static func cardNameMatchesDetectedText(_ card: LorcanaCard, detectedTexts: [String]) -> Bool {
         let haystack = detectedTexts.joined(separator: " ").lowercased()
         guard !haystack.isEmpty else { return false }
 
@@ -1115,13 +1206,31 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
             return resolved
         }
 
+        // Promo printings reuse the regular card's exact name, so only resolve to
+        // a promo when the collector line proves it (e.g. "12/P2").
+        let promoSetNamesByCode = Dictionary(
+            uniqueKeysWithValues: SetsDataManager.shared.sets.compactMap { set -> (String, String)? in
+                guard let code = set.setNumber, Int(code) == nil else { return nil }
+                return (code.uppercased(), set.name)
+            }
+        )
+        if let promo = Self.promoPrinting(
+            for: card,
+            detectedTexts: detectedTexts,
+            allCards: allCards,
+            promoSetNamesByCode: promoSetNamesByCode
+        ) {
+            return promo
+        }
+
         // Get all normal versions of this card across sets
         let allVersions = allCards.filter {
             $0.name == card.name && $0.variant == .normal
         }
 
-        // If only one set has this card, no disambiguation needed
-        guard allVersions.count > 1 else { return card }
+        // A single normal printing needs no disambiguation — but return THAT
+        // printing, not the matched card, which may be a name-tied promo.
+        guard allVersions.count > 1 else { return allVersions.first ?? card }
 
         // Try OCR-based set detection
         if let resolved = narrowBySetInfo(cards: allVersions, detectedTexts: detectedTexts) {
@@ -1213,6 +1322,47 @@ extension CameraManager: AVCapturePhotoCaptureDelegate {
             }
         }
 
+        return nil
+    }
+
+    /// Detect a promo printing from its collector line (e.g. "12/P2 · EN", "3/D23").
+    /// Promo printings reuse the regular card's exact name, so the promo set code in
+    /// the collector text is the only reliable signal the physical card is the promo.
+    /// `promoSetNamesByCode` maps uppercased promo set codes (e.g. "P2") to set names.
+    nonisolated static func promoPrinting(
+        for card: LorcanaCard,
+        detectedTexts: [String],
+        allCards: [LorcanaCard],
+        promoSetNamesByCode: [String: String]
+    ) -> LorcanaCard? {
+        guard !promoSetNamesByCode.isEmpty else { return nil }
+
+        // "12/P2" — a card number over a lettered set code. A regular collector
+        // line ("97/204 · EN · 6") cannot match because its total is numeric.
+        let pattern = #"(\d{1,3})\s*/\s*([A-Z]+\d*)"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) else {
+            return nil
+        }
+
+        for text in detectedTexts {
+            let range = NSRange(text.startIndex..., in: text)
+            for match in regex.matches(in: text, range: range) {
+                guard let numRange = Range(match.range(at: 1), in: text),
+                      let codeRange = Range(match.range(at: 2), in: text),
+                      let cardNumber = Int(text[numRange]),
+                      let promoSetName = promoSetNamesByCode[String(text[codeRange]).uppercased()] else {
+                    continue
+                }
+
+                let inSet = allCards.filter { $0.setName == promoSetName && $0.name == card.name }
+                if let exact = inSet.first(where: { $0.cardNumber == cardNumber }) {
+                    return exact
+                }
+                if let byName = inSet.first {
+                    return byName
+                }
+            }
+        }
         return nil
     }
 
@@ -1315,6 +1465,7 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
         } else {
             // Card left the frame (or isn't well-framed): re-arm for the next card.
             armedForAutoCapture = true
+            autoRetryCount = 0
         }
     }
 }
@@ -1335,5 +1486,35 @@ extension UIImage {
         return renderer.image { _ in
             self.draw(in: CGRect(origin: .zero, size: newSize))
         }
+    }
+
+    /// Shared context for perspective crops — creating a CIContext per capture is
+    /// expensive, and the scanner produces one crop per shutter press.
+    private static let perspectiveCropContext = CIContext()
+
+    /// Crop this image to a Vision rectangle observation, correcting perspective so
+    /// an angled card becomes a flat, straight-on scan. The image must already be
+    /// upright (`.up` orientation) — Vision's normalized corners (origin bottom-left)
+    /// are mapped onto CIImage's identical coordinate space. The result is downscaled
+    /// so its longest side is at most `maxDimension`.
+    func perspectiveCropped(to rectangle: VNRectangleObservation, maxDimension: CGFloat) -> UIImage? {
+        guard let cgImage else { return nil }
+        let ciImage = CIImage(cgImage: cgImage)
+        let width = ciImage.extent.width
+        let height = ciImage.extent.height
+
+        let filter = CIFilter.perspectiveCorrection()
+        filter.inputImage = ciImage
+        filter.topLeft = CGPoint(x: rectangle.topLeft.x * width, y: rectangle.topLeft.y * height)
+        filter.topRight = CGPoint(x: rectangle.topRight.x * width, y: rectangle.topRight.y * height)
+        filter.bottomLeft = CGPoint(x: rectangle.bottomLeft.x * width, y: rectangle.bottomLeft.y * height)
+        filter.bottomRight = CGPoint(x: rectangle.bottomRight.x * width, y: rectangle.bottomRight.y * height)
+
+        guard let output = filter.outputImage,
+              let croppedCG = Self.perspectiveCropContext.createCGImage(output, from: output.extent) else {
+            return nil
+        }
+
+        return UIImage(cgImage: croppedCG).uprightScaled(to: maxDimension)
     }
 }

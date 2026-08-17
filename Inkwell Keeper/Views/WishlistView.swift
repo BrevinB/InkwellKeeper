@@ -122,6 +122,8 @@ struct WishlistView: View {
             cards.sort { $0.rarity.sortOrder < $1.rarity.sortOrder }
         case .set:
             cards.sort { $0.setName < $1.setName }
+        case .price:
+            cards.sort { $0.price ?? 0 > $1.price ?? 0}
         }
 
         filteredCards = cards

@@ -34,6 +34,13 @@ enum Analytics {
         case scanStarted(mode: String)
         case scanCardRecognized
         case scanMultiConfirmed(count: Int)
+        /// A capture that produced no card. Reasons: "noCard" (no card-shaped
+        /// rectangle in frame), "noText" (card seen but OCR read nothing usable),
+        /// "noMatch" (text read but nothing in the catalog matched).
+        case scanFailed(reason: String)
+        /// The user corrected a mis-scan (reveal chip or review sheet). `from`/`to`
+        /// are "Card Name [Set Name]" — the pair shows what the matcher confused.
+        case scanCorrected(from: String, to: String)
 
         // MARK: Decks
         case deckCreated(format: String)
@@ -82,6 +89,8 @@ enum Analytics {
             case .scanStarted: "scan.started"
             case .scanCardRecognized: "scan.cardRecognized"
             case .scanMultiConfirmed: "scan.multiConfirmed"
+            case .scanFailed: "scan.failed"
+            case .scanCorrected: "scan.corrected"
             case .deckCreated: "deck.created"
             case .deckDeleted: "deck.deleted"
             case .deckCardAdded: "deck.cardAdded"
@@ -119,6 +128,10 @@ enum Analytics {
                 ["mode": mode]
             case let .scanMultiConfirmed(count):
                 ["count": String(count)]
+            case let .scanFailed(reason):
+                ["reason": reason]
+            case let .scanCorrected(from, to):
+                ["guessedCard": from, "correctedCard": to]
             case let .starterDeckImported(name):
                 ["name": name]
             case let .aiDeckGenerated(ink):

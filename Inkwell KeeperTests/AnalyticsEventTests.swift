@@ -26,6 +26,8 @@ struct AnalyticsEventTests {
         .scanStarted(mode: "multi"),
         .scanCardRecognized,
         .scanMultiConfirmed(count: 12),
+        .scanFailed(reason: "noMatch"),
+        .scanCorrected(from: "Elsa - Snow Queen [Promo Set 1]", to: "Elsa - Snow Queen [The First Chapter]"),
         .deckCreated(format: "Coconut (Beta)"),
         .deckDeleted,
         .deckCardAdded,
@@ -71,5 +73,13 @@ struct AnalyticsEventTests {
     func collectionAddCarriesSource() {
         let event = Analytics.Event.collectionCardAdded(rarity: "Common", set: "AotV", foil: false, source: "import")
         #expect(event.parameters["source"] == "import")
+    }
+
+    @Test("Scan accuracy events carry their segmentation parameters")
+    func scanAccuracyParametersSurvive() {
+        #expect(Analytics.Event.scanFailed(reason: "noText").parameters["reason"] == "noText")
+        let corrected = Analytics.Event.scanCorrected(from: "A [Set1]", to: "B [Set2]")
+        #expect(corrected.parameters["guessedCard"] == "A [Set1]")
+        #expect(corrected.parameters["correctedCard"] == "B [Set2]")
     }
 }

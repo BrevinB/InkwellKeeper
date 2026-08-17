@@ -13,6 +13,7 @@
 		118D09E628E7401E65DF12BF /* ShareCardChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCE88E31AE5CD5995E68AC5 /* ShareCardChrome.swift */; };
 		1B60780DF7836064A08CE457 /* ShareCardPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1910551A9F8E16761BC5CE33 /* ShareCardPresenter.swift */; };
 		1E34BEC4FE724210B4368238 /* ValueBySetCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6502D77B1F14DFEA73094B1 /* ValueBySetCard.swift */; };
+		1FD7B6E3D492B2FE4151BABF /* ScanCardMatchingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26A5F418A5ABA797A4DF64C0 /* ScanCardMatchingTests.swift */; };
 		21B089C1E42CC3E9A0094048 /* PricingSelectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A1198A827C589B87EBB410 /* PricingSelectionTests.swift */; };
 		230F91D32EA89E65006E5A70 /* StarterDecksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230F91D22EA89E65006E5A70 /* StarterDecksView.swift */; };
 		230F91D52EA89E86006E5A70 /* StarterDeckManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230F91D42EA89E86006E5A70 /* StarterDeckManager.swift */; };
@@ -287,6 +288,7 @@
 		23E099222F6CF6DC0063C758 /* CompactPhotoAttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompactPhotoAttachmentView.swift; sourceTree = "<group>"; };
 		23E8DB0D2FE8871D00BF5EB4 /* ManualAddCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualAddCardView.swift; sourceTree = "<group>"; };
 		23E8DB0F2FE8883400BF5EB4 /* SimpleCardSearchRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleCardSearchRow.swift; sourceTree = "<group>"; };
+		26A5F418A5ABA797A4DF64C0 /* ScanCardMatchingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScanCardMatchingTests.swift; sourceTree = "<group>"; };
 		282AAE9D0E6DFD4DB49ACF8B /* CoconutLeaderPicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoconutLeaderPicker.swift; sourceTree = "<group>"; };
 		2F1B8FB605BA4901A05BB709 /* InkColorChartCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkColorChartCard.swift; sourceTree = "<group>"; };
 		3744E1396FD647F29C30135B /* CostCurveCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CostCurveCard.swift; sourceTree = "<group>"; };
@@ -676,6 +678,7 @@
 				9AF59884E10538C70058F6CB /* RulesCardDetectionTests.swift */,
 				0642DCC4EC0C5EFC8AAFDD4F /* CoconutFormatTests.swift */,
 				E105E89F1FF43FD4CBC90929 /* DeckToolsTests.swift */,
+				26A5F418A5ABA797A4DF64C0 /* ScanCardMatchingTests.swift */,
 			);
 			path = "Inkwell KeeperTests";
 			sourceTree = "<group>";
@@ -978,6 +981,7 @@
 				8524C3E300288E5D393A7C19 /* RulesCardDetectionTests.swift in Sources */,
 				A90FCDE7934EA0BB4D3B8580 /* CoconutFormatTests.swift in Sources */,
 				78F3F157E7FA419F04B06384 /* DeckToolsTests.swift in Sources */,
+				1FD7B6E3D492B2FE4151BABF /* ScanCardMatchingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1140,7 +1144,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.3.1;
+				MARKETING_VERSION = 3.3.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1178,7 +1182,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.3.1;
+				MARKETING_VERSION = 3.3.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

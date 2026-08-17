@@ -184,7 +184,7 @@ struct CollectionView: View {
         case .name:
             cards.sort { $0.name < $1.name }
         case .cost:
-            cards.sort { $0.cost < $1.cost }
+            cards.sort { $0.cost > $1.cost }
         case .rarity:
             cards.sort { $0.rarity.sortOrder > $1.rarity.sortOrder }
         case .set:
@@ -199,6 +199,8 @@ struct CollectionView: View {
                 if l.1 != r.1 { return l.1 < r.1 }
                 return lhs.setName < rhs.setName
             }
+        case .price:
+            cards.sort { $0.price ?? 0 > $1.price ?? 0}
         }
         
         filteredCards = cards

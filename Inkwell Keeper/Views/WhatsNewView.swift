@@ -151,6 +151,7 @@ struct ChangelogEntry {
 
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
+    ChangelogEntry(version: "3.3.2", date: "August 2026", features: ["Added filter based off card price"], improvements: ["Improved Scanning"], bugFixes: [], inProgress: []),
     ChangelogEntry(
         version: "3.3.1",
         date: "August 2026",

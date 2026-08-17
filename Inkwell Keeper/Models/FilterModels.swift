@@ -61,7 +61,7 @@ enum InkColorFilter: String, CaseIterable {
 }
 
 enum SortOption: CaseIterable {
-    case recentlyAdded, name, cost, rarity, set
+    case recentlyAdded, name, cost, rarity, set, price
 
     var displayName: String {
         switch self {
@@ -70,6 +70,7 @@ enum SortOption: CaseIterable {
         case .cost: return "Cost"
         case .rarity: return "Rarity"
         case .set: return "Set"
+        case .price: return "Price"
         }
     }
 }
