@@ -71,7 +71,7 @@ final class DeepLinkRouter {
         let verb: String
         if url.scheme == AppLinks.scheme {
             verb = url.host ?? ""
-        } else if url.host == AppLinks.universalHost {
+        } else if url.scheme == "https", url.host == AppLinks.universalHost {
             verb = url.pathComponents.first { $0 != "/" } ?? ""
         } else {
             return nil

@@ -14,6 +14,14 @@ struct DeepLinkRouteParsingTests {
         let url = URL(string: "inkwellkeeper://deck?code=IWK:abc123")!
         #expect(DeepLinkRouter.parse(url) == .deck(code: "IWK:abc123"))
     }
+    
+    @Test func rejectsInsecureUniversalLink() {
+        let url = URL(string: "http://inkwellkeeper.app/card?id=TFC_001_N")!
+        
+        let route = DeepLinkRouter.parse(url)
+        
+        #expect(route == nil)
+    }
 
     @Test func parsesCardUniversalLink() {
         let url = URL(string: "https://inkwellkeeper.app/card?id=TFC_001_N")!
