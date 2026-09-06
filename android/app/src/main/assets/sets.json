@@ -1,0 +1,216 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-07-05",
+  "sets": [
+    {
+      "id": "the_first_chapter",
+      "name": "The First Chapter",
+      "setCode": "TFC",
+      "setNumber": "1",
+      "releaseDate": "2023-08-18",
+      "cardCount": 204,
+      "description": "The inaugural set of Disney Lorcana featuring beloved Disney characters reimagined as magical ink.",
+      "isReleased": true
+    },
+    {
+      "id": "rise_of_the_floodborn",
+      "name": "Rise of the Floodborn",
+      "setCode": "ROF",
+      "setNumber": "2",
+      "releaseDate": "2023-11-17",
+      "cardCount": 204,
+      "description": "The second set introducing Floodborn characters and new gameplay mechanics.",
+      "isReleased": true
+    },
+    {
+      "id": "into_the_inklands",
+      "name": "Into the Inklands",
+      "setCode": "ITI",
+      "setNumber": "3",
+      "releaseDate": "2024-02-23",
+      "cardCount": 227,
+      "description": "Journey deeper into the magical realm with new characters and locations.",
+      "isReleased": true
+    },
+    {
+      "id": "ursulas_return",
+      "name": "Ursula's Return",
+      "setCode": "URS",
+      "setNumber": "4",
+      "releaseDate": "2024-05-17",
+      "cardCount": 204,
+      "description": "The sea witch returns with powerful new allies and treacherous schemes.",
+      "isReleased": true
+    },
+    {
+      "id": "shimmering_skies",
+      "name": "Shimmering Skies",
+      "setCode": "SSK",
+      "setNumber": "5",
+      "releaseDate": "2024-08-09",
+      "cardCount": 204,
+      "description": "Soar through magical skies with flying characters and aerial adventures.",
+      "isReleased": true
+    },
+    {
+      "id": "azurite_sea",
+      "name": "Azurite Sea",
+      "setCode": "AZS",
+      "setNumber": "6",
+      "releaseDate": "2024-11-15",
+      "cardCount": 204,
+      "description": "Dive into the depths of the mystical Azurite Sea and its underwater wonders.",
+      "isReleased": true
+    },
+    {
+      "id": "archazias_island",
+      "name": "Archazia's Island",
+      "setCode": "ARC",
+      "setNumber": "7",
+      "releaseDate": "2025-03-07",
+      "cardCount": 204,
+      "description": "Embark on an adventure to the mysterious Archazia's Island.",
+      "isReleased": true
+    },
+    {
+      "id": "reign_of_jafar",
+      "name": "Reign of Jafar",
+      "setCode": "ROJ",
+      "setNumber": "8",
+      "releaseDate": "2025-06-02",
+      "cardCount": 204,
+      "description": "The villainous sorcerer's rise to power brings darkness to the realm.",
+      "isReleased": true
+    },
+    {
+      "id": "fabled",
+      "name": "Fabled",
+      "setCode": "FAB",
+      "setNumber": "9",
+      "releaseDate": "2025-02-15",
+      "cardCount": 205,
+      "description": "Legendary tales come to life in this special collection.",
+      "isReleased": true
+    },
+    {
+      "id": "whispers_in_the_well",
+      "name": "Whispers in the Well",
+      "setCode": "WIW",
+      "setNumber": "10",
+      "releaseDate": "2025-11-14",
+      "cardCount": 204,
+      "description": "Strange specters and mysterious whispers emerge from the well, introducing the new Boost mechanic.",
+      "isReleased": true
+    },
+    {
+      "id": "winterspell",
+      "name": "Winterspell",
+      "setCode": "WIN",
+      "setNumber": "11",
+      "releaseDate": "2026-02-13",
+      "cardCount": 184,
+      "description": "A frosty new chapter brings winter magic and icy adventures to the realm of Lorcana.",
+      "isReleased": true
+    },
+    {
+      "id": "promo_set_1",
+      "name": "Promo Set 1",
+      "setCode": "P1",
+      "setNumber": "P1",
+      "releaseDate": "2023-08-18",
+      "cardCount": 42,
+      "description": "First wave of promotional cards from various events",
+      "isReleased": true
+    },
+    {
+      "id": "promo_set_2",
+      "name": "Promo Set 2",
+      "setCode": "P2",
+      "setNumber": "P2",
+      "releaseDate": "2024-08-09",
+      "cardCount": 34,
+      "description": "Second wave of promotional cards from various events",
+      "isReleased": true
+    },
+    {
+      "id": "challenge_promo",
+      "name": "Challenge Promo",
+      "setCode": "CP",
+      "setNumber": "CP",
+      "releaseDate": "2024-05-17",
+      "cardCount": 9,
+      "description": "Special promotional cards from Lorcana Challenge events",
+      "isReleased": true
+    },
+    {
+      "id": "d23_collection",
+      "name": "D23 Collection",
+      "setCode": "D23",
+      "setNumber": "D23",
+      "releaseDate": "2024-08-09",
+      "cardCount": 6,
+      "description": "Exclusive cards from the D23 Disney fan event",
+      "isReleased": true
+    },
+    {
+      "id": "promo_set_3",
+      "name": "Promo Set 3",
+      "setCode": "P3",
+      "setNumber": "P3",
+      "releaseDate": "2025-06-01",
+      "cardCount": 48,
+      "description": "Third wave of promotional cards from various events",
+      "isReleased": true
+    },
+    {
+      "id": "epcot_festival_of_the_arts",
+      "name": "EPCOT Festival of the Arts",
+      "setCode": "EFA",
+      "setNumber": "EFA",
+      "releaseDate": "2025-01-17",
+      "cardCount": 3,
+      "description": "Exclusive cards from the EPCOT International Festival of the Arts",
+      "isReleased": true
+    },
+    {
+      "id": "lorcana_challenge_year_3",
+      "name": "Lorcana Challenge Year 3",
+      "setCode": "C2",
+      "setNumber": "C2",
+      "releaseDate": "2026-01-16",
+      "cardCount": 14,
+      "description": "Promotional cards from the third year of Lorcana Challenge events.",
+      "isReleased": true
+    },
+    {
+      "id": "wilds_unknown",
+      "name": "Wilds Unknown",
+      "setCode": "WU",
+      "setNumber": "12",
+      "releaseDate": "2026-05-08",
+      "cardCount": 204,
+      "description": "Venture into uncharted lands as the realm's wild frontiers reveal new heroes and untamed magic.",
+      "isReleased": true
+    },
+    {
+      "id": "attack_of_the_vine",
+      "name": "Attack of the Vine!",
+      "setCode": "AOV",
+      "setNumber": "13",
+      "releaseDate": "2026-07-17",
+      "cardCount": 242,
+      "description": "A relentless botanical menace overtakes the realm, bringing new vine-based mechanics and fierce plant-powered characters.",
+      "isReleased": true
+    },
+    {
+      "id": "promo_set_pd1",
+      "name": "Promo Set PD1",
+      "setCode": "PD1",
+      "setNumber": "PD1",
+      "releaseDate": "2026-07-28",
+      "cardCount": 8,
+      "description": "Event promo series PD1 — pre-release and event exclusive cards, beginning with the Attack of the Vine! pre-release promos.",
+      "isReleased": true
+    }
+  ]
+}

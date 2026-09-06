@@ -223,6 +223,13 @@ class Deck {
         return isFourOf ? 4 : 1
     }
 
+    /// Total copies of a card already in this deck, summed across every variant/printing
+    /// (Normal, Foil, Enchanted, ...) sharing that name — since the copy limit applies to
+    /// the name as a whole, not to each variant's own `DeckCard` row separately.
+    func totalQuantity(ofCardNamed cardName: String) -> Int {
+        (cards ?? []).filter { $0.name == cardName }.reduce(0) { $0 + $1.quantity }
+    }
+
     init(
         name: String,
         description: String = "",
@@ -385,11 +392,15 @@ struct DeckStatistics {
             // Try ID match first, then fallback to name match
             var ownedQuantity = collectionManager.getCollectedQuantity(for: deckCard.cardId)
             if ownedQuantity == 0 {
-                ownedQuantity = collectionManager.getCollectedQuantityByName(
-                    deckCard.name,
-                    setName: deckCard.setName,
-                    variant: deckCard.cardVariant
-                )
+                if deckCard.cardVariant == .normal {
+                    ownedQuantity = collectionManager.getCollectedQuantityAnyVariant(deckCard.name, setName: deckCard.setName)
+                } else {
+                    ownedQuantity = collectionManager.getCollectedQuantityByName(
+                        deckCard.name,
+                        setName: deckCard.setName,
+                        variant: deckCard.cardVariant
+                    )
+                }
             }
 
             let missing = max(0, neededQuantity - ownedQuantity)

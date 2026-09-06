@@ -596,6 +596,9 @@ struct DeckOverview: View {
                                             if byId > 0 {
                                                 return byId
                                             }
+                                            if card.cardVariant == .normal {
+                                                return collectionManager.getCollectedQuantityAnyVariant(card.name, setName: card.setName)
+                                            }
                                             return collectionManager.getCollectedQuantityByName(
                                                 card.name,
                                                 setName: card.setName,
@@ -966,7 +969,7 @@ struct DeckCardRow: View {
         ownedQuantity >= card.quantity
     }
 
-    private var atMax: Bool { card.quantity >= deck.maxCopies(ofCardNamed: card.name) }
+    private var atMax: Bool { deck.totalQuantity(ofCardNamed: card.name) >= deck.maxCopies(ofCardNamed: card.name) }
 
     private func addOne() {
         guard !atMax else { return }
@@ -1005,6 +1008,16 @@ struct DeckCardRow: View {
 
                         HStack(spacing: 6) {
                             RarityBadge(rarity: card.cardRarity)
+
+                            if card.cardVariant == .foil {
+                                Label("Foil", systemImage: "sparkles")
+                                    .font(.caption2)
+                                    .bold()
+                                    .foregroundStyle(.lorcanaDark)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Capsule().fill(Color.lorcanaGold))
+                            }
 
                             if let inkColor = card.cardInkColor {
                                 HStack(spacing: 2) {
@@ -1105,6 +1118,16 @@ struct DeckCardDetailView: View {
                 .frame(maxWidth: 300)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
 
+                if card.cardVariant == .foil {
+                    Label("Foil", systemImage: "sparkles")
+                        .font(.caption)
+                        .bold()
+                        .foregroundStyle(.lorcanaDark)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(Capsule().fill(Color.lorcanaGold))
+                }
+
                 VStack(spacing: 12) {
                     HStack {
                         Text("Quantity:")
@@ -1130,7 +1153,7 @@ struct DeckCardDetailView: View {
                                 Image(systemName: "plus.circle.fill")
                                     .foregroundStyle(.green)
                             }
-                            .disabled(card.quantity >= deck.maxCopies(ofCardNamed: card.name))
+                            .disabled(deck.totalQuantity(ofCardNamed: card.name) >= deck.maxCopies(ofCardNamed: card.name))
                             .accessibilityLabel("Increase quantity")
                         }
                     }
@@ -1739,6 +1762,17 @@ struct BuilderBrowser: View {
     var filteredCards: [LorcanaCard] {
         var cards = availableCards
 
+        // The catalog only has a single "Normal" row per card — split in a synthetic Foil row
+        // wherever the player owns a foil copy, so it's selectable (and shows up under "Owned
+        // Only") independently of whether they also own the Normal printing.
+        cards = cards.flatMap { card -> [LorcanaCard] in
+            guard card.variant == .normal,
+                  collectionManager.isCardCollectedByName(card.name, setName: card.setName, variant: .foil) else {
+                return [card]
+            }
+            return [card, card.withVariant(.foil)]
+        }
+
         // Filter by deck ink colors FIRST (most restrictive)
         if !deck.deckInkColors.isEmpty {
             let cardsWithInk = cards.filter { $0.inkColor != nil }
@@ -1763,7 +1797,8 @@ struct BuilderBrowser: View {
             }
         }
 
-        // Filter by owned/all
+        // Filter by owned/all. Rows are already split by variant above, so each row's own
+        // variant is the one to check — a Foil row only exists here when it's owned.
         if showOwnedOnly {
             cards = cards.filter { card in
                 if collectionManager.isCardCollected(card.id) {
@@ -1949,13 +1984,16 @@ struct BuilderBrowser: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 let deckCardsByCardId = deckCardLookup
+                let deckQuantityByName = deckQuantityByName
                 ScrollView {
                     LazyVGrid(columns: gridHelper.deckGridColumns(), spacing: gridHelper.gridSpacing) {
                         ForEach(filteredCards) { card in
                             BuilderCardView(
                                 card: card,
                                 deck: deck,
-                                inDeck: deckCardsByCardId[card.id]
+                                inDeck: deckCardsByCardId[card.id],
+                                totalInDeckForName: deckQuantityByName[card.name] ?? 0,
+                                ownedQuantity: showOwnedOnly ? ownedQuantity(for: card) : nil
                             )
                             .environmentObject(deckManager)
                         }
@@ -1974,6 +2012,27 @@ struct BuilderBrowser: View {
     /// instead of an O(deck size) scan.
     private var deckCardLookup: [String: DeckCard] {
         Dictionary((deck.cards ?? []).map { ($0.cardId, $0) }, uniquingKeysWith: { first, _ in first })
+    }
+
+    /// Owned quantity for this exact row's variant — used to cap adding while "Owned Only" is on,
+    /// so the picker never lets you add more copies of a printing than you actually have.
+    private func ownedQuantity(for card: LorcanaCard) -> Int {
+        let byId = collectionManager.getCollectedQuantity(for: card.id)
+        if byId > 0 {
+            return byId
+        }
+        return collectionManager.getCollectedQuantityByName(card.name, setName: card.setName, variant: card.variant)
+    }
+
+    /// Card name → total quantity in the deck across all of that name's variants (Normal, Foil, ...).
+    /// The copy limit applies per name, not per variant row, so this is what each row's "at max"
+    /// check needs — a Foil row must count copies already added as Normal, and vice versa.
+    private var deckQuantityByName: [String: Int] {
+        var totals: [String: Int] = [:]
+        for deckCard in deck.cards ?? [] {
+            totals[deckCard.name, default: 0] += deckCard.quantity
+        }
+        return totals
     }
 
     private func loadAllCards() {
@@ -1996,6 +2055,12 @@ struct BuilderCardView: View {
     let card: LorcanaCard
     let deck: Deck
     let inDeck: DeckCard?
+    /// Copies of this card name already in the deck across every variant — a Foil row must
+    /// respect copies already added as Normal (and vice versa), since the limit is per name.
+    let totalInDeckForName: Int
+    /// How many of this exact printing the player owns, or nil when "Owned Only" isn't active
+    /// (in which case ownership doesn't cap adding — only the format's copy limit does).
+    let ownedQuantity: Int?
     @EnvironmentObject var deckManager: DeckManager
 
     var quantityInDeck: Int {
@@ -2003,7 +2068,11 @@ struct BuilderCardView: View {
     }
 
     private var maxCopies: Int { deck.maxCopies(ofCardNamed: card.name) }
-    private var atMax: Bool { quantityInDeck >= maxCopies }
+    private var atOwnedCap: Bool {
+        guard let ownedQuantity else { return false }
+        return quantityInDeck >= ownedQuantity
+    }
+    private var atMax: Bool { totalInDeckForName >= maxCopies || atOwnedCap }
 
     private func addOne() {
         guard !atMax else { return }
@@ -2059,14 +2128,32 @@ struct BuilderCardView: View {
                         }
                         .padding(4)
                     }
+
+                    // Foil badge — distinguishes this row from the Normal printing of the same name
+                    if card.variant == .foil {
+                        VStack {
+                            Spacer()
+                            HStack {
+                                Label("Foil", systemImage: "sparkles")
+                                    .font(.caption2)
+                                    .bold()
+                                    .foregroundStyle(.lorcanaDark)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 3)
+                                    .background(Capsule().fill(Color.lorcanaGold))
+                                Spacer()
+                            }
+                        }
+                        .padding(4)
+                    }
                 }
                 .opacity(atMax ? 0.55 : 1.0)
             }
             .buttonStyle(.plain)
             .disabled(atMax)
-            .accessibilityLabel(card.name)
+            .accessibilityLabel(card.variant == .foil ? "\(card.name), Foil" : card.name)
             .accessibilityValue(quantityInDeck > 0 ? "\(quantityInDeck) in deck" : "Not in deck")
-            .accessibilityHint(atMax ? "At maximum copies" : "Add one copy")
+            .accessibilityHint(atOwnedCap ? "You don't own any more copies" : (atMax ? "At maximum copies" : "Add one copy"))
 
             Text(card.name)
                 .font(.caption2)

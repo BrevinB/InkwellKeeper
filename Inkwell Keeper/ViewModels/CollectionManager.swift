@@ -1126,6 +1126,20 @@ class CollectionManager: ObservableObject {
         return ownedQuantityByNameSetVariant[key] ?? 0
     }
 
+    /// Owned quantity across Normal + Foil combined (O(1), backed by `collectedCardQuantities`).
+    /// Deck building only cares whether the player owns a physical copy of a card, not which
+    /// printing — the catalog itself has no separate "Foil" row, so any check keyed on a
+    /// specific variant misses foil-only owners. Use this instead of `getCollectedQuantityByName`
+    /// whenever the card in hand is a regular (non-Enchanted/Epic/Iconic/Promo) card.
+    func getCollectedQuantityAnyVariant(_ cardName: String, setName: String) -> Int {
+        collectedCardQuantities[Self.cardKey(name: cardName, setName: setName)] ?? 0
+    }
+
+    /// See `getCollectedQuantityAnyVariant` — ownership check across Normal + Foil combined.
+    func isCardCollectedAnyVariant(_ cardName: String, setName: String) -> Bool {
+        getCollectedQuantityAnyVariant(cardName, setName: setName) > 0
+    }
+
     /// Get collected quantity by uniqueId (more reliable for promo cards)
     func getCollectedQuantityByUniqueId(_ uniqueId: String, variant: CardVariant) -> Int {
         guard let context = modelContext else { return 0 }

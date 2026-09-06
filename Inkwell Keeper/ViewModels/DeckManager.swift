@@ -176,21 +176,30 @@ class DeckManager: ObservableObject {
     func addCard(_ card: LorcanaCard, to deck: Deck, quantity: Int = 1) {
         guard let context = modelContext else { return }
 
+        // A card's copy limit applies across all its variants (e.g. Normal + Foil rows of the
+        // same name), not per DeckCard row, so cap against everything else already in the deck
+        // under this name before touching this row.
+        let cap = deck.maxCopies(ofCardNamed: card.name)
+        let existingCard = (deck.cards ?? []).first(where: { $0.cardId == card.id })
+        let otherVariantsTotal = (deck.cards ?? [])
+            .filter { $0.name == card.name && $0.cardId != card.id }
+            .reduce(0) { $0 + $1.quantity }
+        let room = max(0, cap - otherVariantsTotal)
+
         var cardToUpdate: DeckCard?
 
-        // Check if card already exists in deck
-        if let existingCard = (deck.cards ?? []).first(where: { $0.cardId == card.id }) {
-            // Increment quantity (respecting max copies)
-            let newQuantity = min(existingCard.quantity + quantity, deck.maxCopies(ofCardNamed: existingCard.name))
-            existingCard.quantity = newQuantity
+        if let existingCard {
+            existingCard.quantity = min(existingCard.quantity + quantity, room)
             cardToUpdate = existingCard
-        } else {
-            // Add new card
-            let deckCard = DeckCard(from: card, quantity: min(quantity, deck.maxCopies(ofCardNamed: card.name)))
+        } else if room > 0 {
+            let deckCard = DeckCard(from: card, quantity: min(quantity, room))
             if deck.cards == nil { deck.cards = [] }
             deck.cards?.append(deckCard)
             context.insert(deckCard)
             cardToUpdate = deckCard
+        } else {
+            // No room left under this name across other variants — nothing to add.
+            return
         }
 
         deck.lastModified = Date()
@@ -248,12 +257,16 @@ class DeckManager: ObservableObject {
     // MARK: - Update Card Quantity
     func updateCardQuantity(_ deckCard: DeckCard, in deck: Deck, quantity: Int) {
         guard let context = modelContext else { return }
-        let maxCopies = deck.maxCopies(ofCardNamed: deckCard.name)
+        let cap = deck.maxCopies(ofCardNamed: deckCard.name)
+        let otherVariantsTotal = (deck.cards ?? [])
+            .filter { $0.name == deckCard.name && $0.cardId != deckCard.cardId }
+            .reduce(0) { $0 + $1.quantity }
+        let room = max(0, cap - otherVariantsTotal)
 
         if quantity <= 0 {
             removeCard(deckCard, from: deck)
         } else {
-            deckCard.quantity = min(quantity, maxCopies)
+            deckCard.quantity = min(quantity, room)
             deck.lastModified = Date()
 
             do {
@@ -335,11 +348,15 @@ class DeckManager: ObservableObject {
             // Try ID match first, then fallback to name match
             var ownedQuantity = collectionManager.getCollectedQuantity(for: deckCard.cardId)
             if ownedQuantity == 0 {
-                ownedQuantity = collectionManager.getCollectedQuantityByName(
-                    deckCard.name,
-                    setName: deckCard.setName,
-                    variant: deckCard.cardVariant
-                )
+                if deckCard.cardVariant == .normal {
+                    ownedQuantity = collectionManager.getCollectedQuantityAnyVariant(deckCard.name, setName: deckCard.setName)
+                } else {
+                    ownedQuantity = collectionManager.getCollectedQuantityByName(
+                        deckCard.name,
+                        setName: deckCard.setName,
+                        variant: deckCard.cardVariant
+                    )
+                }
             }
 
             let neededQuantity = deckCard.quantity
