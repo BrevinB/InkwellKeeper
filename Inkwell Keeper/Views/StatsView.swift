@@ -14,11 +14,13 @@ struct StatsView: View {
     @State private var viewModel = StatsViewModel()
     @State private var isRefreshingPrices = false
     @State private var showingShareImage = false
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVStack(spacing: 20) {
+                LazyVGrid(columns: [GridItem(horizontalSizeClass == .compact || dynamicTypeSize.isAccessibilitySize ? .flexible() : .adaptive(minimum: 340), spacing: 20)], alignment: .leading, spacing: 20) {
                     let snapshot = viewModel.snapshot
 
                     StatsOverviewCard(snapshot: snapshot)
@@ -42,7 +44,9 @@ struct StatsView: View {
                         StatsEmptyCollectionCard()
                     }
                 }
+                .frame(maxWidth: 1400)
                 .padding()
+                .frame(maxWidth: .infinity)
             }
             .background(LorcanaBackground())
             .navigationTitle("Stats")

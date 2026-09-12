@@ -13,7 +13,7 @@ struct CardDetailView: View {
     @EnvironmentObject var collectionManager: CollectionManager
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
                     AsyncImage(url: card.bestImageUrl()) { image in
@@ -94,6 +94,18 @@ struct CollectionCardDetailView: View {
     @State private var showFoilArt = false
     @State private var imageAttachments: [Data] = []
     @State private var showingShareImage = false
+    @State private var availableWidth: CGFloat = 0
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    private var usesWideLayout: Bool {
+        availableWidth >= 760 && !dynamicTypeSize.isAccessibilitySize
+    }
+
+    private var detailLayout: AnyLayout {
+        usesWideLayout
+            ? AnyLayout(HStackLayout(alignment: .top, spacing: 24))
+            : AnyLayout(VStackLayout(spacing: 20))
+    }
 
     /// Builds the snapshot the card-flex share template consumes, decoding the user's first
     /// attached photo (if any) so they can flex their actual card.
@@ -127,210 +139,220 @@ struct CollectionCardDetailView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
-                VStack(spacing: 20) {
-                    InteractiveCardView(card: displayCard) {
-                        showingFullscreenViewer = true
-                    }
-                    .frame(width: 250, height: 350)
+                detailLayout {
+                    VStack(spacing: 16) {
+                        InteractiveCardView(card: displayCard) {
+                            showingFullscreenViewer = true
+                        }
+                        .frame(width: usesWideLayout ? 300 : 250, height: usesWideLayout ? 420 : 350)
 
-                    // Foil art toggle — visible when user owns foil copies
-                    if showFoilSection && foilQuantity > 0 {
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                showFoilArt.toggle()
+                        // Foil art toggle — visible when user owns foil copies
+                        if showFoilSection && foilQuantity > 0 {
+                            Button(action: {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    showFoilArt.toggle()
+                                }
+                            }) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: showFoilArt ? "sparkles" : "rectangle.portrait")
+                                        .font(.caption)
+                                    Text(showFoilArt ? "Viewing Foil" : "View Foil")
+                                        .font(.caption)
+                                        .fontWeight(.semibold)
+                                }
+                                .foregroundColor(showFoilArt ? .lorcanaDark : .lorcanaGold)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 8)
+                                .background(
+                                    Capsule()
+                                        .fill(showFoilArt ? Color.lorcanaGold : Color.lorcanaGold.opacity(0.15))
+                                )
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color.lorcanaGold.opacity(0.5), lineWidth: 1)
+                                )
                             }
-                        }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: showFoilArt ? "sparkles" : "rectangle.portrait")
-                                    .font(.caption)
-                                Text(showFoilArt ? "Viewing Foil" : "View Foil")
+                        }
+
+                    }
+
+                    VStack(spacing: 20) {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text(card.name)
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+
+                            Text(card.setName)
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+
+                            HStack {
+                                RarityBadge(rarity: card.rarity)
+
+                                Text(card.variant.displayName)
                                     .font(.caption)
                                     .fontWeight(.semibold)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .fill(Color.purple.opacity(0.8))
+                                    )
+
+                                Spacer()
                             }
-                            .foregroundColor(showFoilArt ? .lorcanaDark : .lorcanaGold)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
-                            .background(
-                                Capsule()
-                                    .fill(showFoilArt ? Color.lorcanaGold : Color.lorcanaGold.opacity(0.15))
-                            )
-                            .overlay(
-                                Capsule()
-                                    .stroke(Color.lorcanaGold.opacity(0.5), lineWidth: 1)
-                            )
-                        }
-                    }
 
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text(card.name)
-                            .font(.title)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
+                            // Collection specific information - only show if card is owned
+                            if collectedCard != nil || foilCollectedCard != nil {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    collectionQuantitySection
 
-                        Text(card.setName)
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-
-                        HStack {
-                            RarityBadge(rarity: card.rarity)
-
-                            Text(card.variant.displayName)
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .fill(Color.purple.opacity(0.8))
-                                )
-
-                            Spacer()
-                        }
-
-                        // Collection specific information - only show if card is owned
-                        if collectedCard != nil || foilCollectedCard != nil {
-                            VStack(alignment: .leading, spacing: 12) {
-                                collectionQuantitySection
-
-                                if let collected = collectedCard {
-                                    HStack {
-                                        Text("Date Added:")
-                                            .font(.subheadline)
-                                            .foregroundColor(.gray)
-                                        Spacer()
-                                        Text(collected.dateAdded, style: .date)
-                                            .font(.subheadline)
-                                            .foregroundColor(.white)
-                                    }
-
-                                    HStack {
-                                        Text("Condition:")
-                                            .font(.subheadline)
-                                            .foregroundColor(.gray)
-                                        Spacer()
-                                        Text(collected.condition)
-                                            .font(.subheadline)
-                                            .foregroundColor(.white)
-                                    }
-                                }
-
-                                // Deck Usage section
-                                if !deckAllocations.isEmpty {
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        let totalAllocated = deckAllocations.reduce(0) { $0 + $1.quantity }
-                                        let totalOwned = tempQuantity + foilQuantity
-                                        let available = max(0, totalOwned - totalAllocated)
+                                    if let collected = collectedCard {
+                                        HStack {
+                                            Text("Date Added:")
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                            Spacer()
+                                            Text(collected.dateAdded, style: .date)
+                                                .font(.subheadline)
+                                                .foregroundColor(.white)
+                                        }
 
                                         HStack {
-                                            Text("Deck Usage")
-                                                .font(.headline)
-                                                .foregroundColor(.lorcanaGold)
-                                            Spacer()
-                                            Text("\(available) available")
+                                            Text("Condition:")
                                                 .font(.subheadline)
-                                                .fontWeight(.semibold)
-                                                .foregroundColor(available > 0 ? .green : .red)
-                                        }
-
-                                        ForEach(deckAllocations, id: \.deckName) { allocation in
-                                            HStack {
-                                                Image(systemName: "rectangle.stack.fill")
-                                                    .font(.caption)
-                                                    .foregroundColor(.lorcanaGold.opacity(0.7))
-                                                Text(allocation.deckName)
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.white)
-                                                Spacer()
-                                                Text("\(allocation.quantity) used")
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.gray)
-                                            }
+                                                .foregroundColor(.gray)
+                                            Spacer()
+                                            Text(collected.condition)
+                                                .font(.subheadline)
+                                                .foregroundColor(.white)
                                         }
                                     }
-                                    .padding(.top, 4)
+
+                                    // Deck Usage section
+                                    if !deckAllocations.isEmpty {
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            let totalAllocated = deckAllocations.reduce(0) { $0 + $1.quantity }
+                                            let totalOwned = tempQuantity + foilQuantity
+                                            let available = max(0, totalOwned - totalAllocated)
+
+                                            HStack {
+                                                Text("Deck Usage")
+                                                    .font(.headline)
+                                                    .foregroundColor(.lorcanaGold)
+                                                Spacer()
+                                                Text("\(available) available")
+                                                    .font(.subheadline)
+                                                    .fontWeight(.semibold)
+                                                    .foregroundColor(available > 0 ? .green : .red)
+                                            }
+
+                                            ForEach(deckAllocations, id: \.deckName) { allocation in
+                                                HStack {
+                                                    Image(systemName: "rectangle.stack.fill")
+                                                        .font(.caption)
+                                                        .foregroundColor(.lorcanaGold.opacity(0.7))
+                                                    Text(allocation.deckName)
+                                                        .font(.subheadline)
+                                                        .foregroundColor(.white)
+                                                    Spacer()
+                                                    Text("\(allocation.quantity) used")
+                                                        .font(.subheadline)
+                                                        .foregroundColor(.gray)
+                                                }
+                                            }
+                                        }
+                                        .padding(.top, 4)
+                                    }
+                                }
+                                .padding(.vertical, 8)
+                            }
+                        
+                            if !card.cardText.isEmpty {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Card Text:")
+                                        .font(.headline)
+                                        .foregroundColor(.lorcanaGold)
+                                    CardTextView(text: card.cardText)
+                                        .font(.body)
+                                        .foregroundColor(.white)
                                 }
                             }
-                            .padding(.vertical, 8)
-                        }
                         
-                        if !card.cardText.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Card Text:")
-                                    .font(.headline)
-                                    .foregroundColor(.lorcanaGold)
-                                CardTextView(text: card.cardText)
-                                    .font(.body)
-                                    .foregroundColor(.white)
-                            }
+                            AsyncPriceWithConfidenceView(card: card, style: .detailed)
                         }
-                        
-                        AsyncPriceWithConfidenceView(card: card, style: .detailed)
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.lorcanaDark.opacity(0.8))
-                    )
-
-                    AskAIRulesButton(card: card, source: "collectionDetail")
-                        .padding(.horizontal)
-
-                    PriceHistoryChartView(card: card)
-                        .padding(.horizontal)
-
-                    // My Card Photos section - only show for owned cards
-                    if collectedCard != nil || foilCollectedCard != nil {
-                        CardImageAttachmentView(
-                            imageAttachments: $imageAttachments,
-                            onSave: saveImageAttachments
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.lorcanaDark.opacity(0.8))
                         )
-                        .padding(.horizontal)
-                    }
 
-                    // Check Prices section
-                    BuyCardOptionsView(card: card)
-                        .padding(.horizontal)
+                        AskAIRulesButton(card: card, source: "collectionDetail")
+                            .padding(.horizontal)
 
-                    // Action buttons - show different buttons based on ownership
-                    VStack(spacing: 12) {
+                        PriceHistoryChartView(card: card)
+                            .padding(.horizontal)
+
+                        // My Card Photos section - only show for owned cards
                         if collectedCard != nil || foilCollectedCard != nil {
-                            // Card is owned - show collection management buttons
-                            Button(action: {
-                                showingDeleteConfirmation = true
-                            }) {
-                                Text("Remove All from Collection")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(.bordered)
-                            .foregroundColor(.red)
-                        } else {
-                            // Card is not owned - show add buttons
-                            Button(action: {
-                                collectionManager.addCard(card.withVariant(.normal), quantity: 1)
-                                loadCollectedCardData()
-                            }) {
-                                Text("Add to Collection")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(LorcanaButtonStyle())
-
-                            Button(action: {
-                                collectionManager.addToWishlist(card)
-                                isPresented = false
-                            }) {
-                                Text("Add to Wishlist")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(.bordered)
-                            .foregroundColor(.lorcanaGold)
+                            CardImageAttachmentView(
+                                imageAttachments: $imageAttachments,
+                                onSave: saveImageAttachments
+                            )
+                            .padding(.horizontal)
                         }
+
+                        // Check Prices section
+                        BuyCardOptionsView(card: card)
+                            .padding(.horizontal)
+
+                        // Action buttons - show different buttons based on ownership
+                        VStack(spacing: 12) {
+                            if collectedCard != nil || foilCollectedCard != nil {
+                                // Card is owned - show collection management buttons
+                                Button(action: {
+                                    showingDeleteConfirmation = true
+                                }) {
+                                    Text("Remove All from Collection")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.bordered)
+                                .foregroundColor(.red)
+                            } else {
+                                // Card is not owned - show add buttons
+                                Button(action: {
+                                    collectionManager.addCard(card.withVariant(.normal), quantity: 1)
+                                    loadCollectedCardData()
+                                }) {
+                                    Text("Add to Collection")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(LorcanaButtonStyle())
+
+                                Button(action: {
+                                    collectionManager.addToWishlist(card)
+                                    isPresented = false
+                                }) {
+                                    Text("Add to Wishlist")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.bordered)
+                                .foregroundColor(.lorcanaGold)
+                            }
+                        }
+                        .padding()
                     }
-                    .padding()
+                    .frame(maxWidth: 640)
                 }
+                .padding(.horizontal, usesWideLayout ? 24 : 0)
+                .padding(.top, 16)
+                .frame(maxWidth: .infinity)
             }
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { availableWidth = $0 }
             .background(LorcanaBackground())
             .navigationTitle("Card Details")
             .navigationBarTitleDisplayMode(.inline)
@@ -350,6 +372,7 @@ struct CollectionCardDetailView: View {
         .onAppear {
             loadCollectedCardData()
         }
+        .presentationSizing(.page)
         .sheet(isPresented: $showingShareImage) {
             CardFlexShareView(data: makeCardFlexShareData())
         }
@@ -616,7 +639,7 @@ struct WishlistCardDetailView: View {
     @State private var showingFullscreenViewer = false
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
                     InteractiveCardView(card: card) {
@@ -750,7 +773,7 @@ struct AddToWishlistView: View {
     @State private var selectedCardGroupForWishlist: CardGroup?
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 SearchBar(text: $searchText)
                     .padding()
@@ -876,7 +899,7 @@ struct AddCardModal: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
                     headerSection
@@ -1193,7 +1216,7 @@ struct AddCardGroupModal: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
                     // Card image and basic info
@@ -1664,7 +1687,7 @@ struct CardSearchForCorrectionView: View {
     @State private var searchTask: Task<Void, Never>?
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 SearchBar(text: $searchText)
                     .padding()

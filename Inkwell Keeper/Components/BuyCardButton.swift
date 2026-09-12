@@ -114,7 +114,7 @@ struct BuyCardSheet: View {
     let card: LorcanaCard
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 20) {
                 // Card preview
                 HStack(spacing: 16) {

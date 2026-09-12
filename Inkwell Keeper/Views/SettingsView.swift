@@ -524,7 +524,7 @@ struct DisclaimerView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     Text("⚠️ Important Disclaimer")

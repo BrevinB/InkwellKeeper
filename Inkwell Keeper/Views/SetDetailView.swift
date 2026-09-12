@@ -141,7 +141,7 @@ struct SetDetailView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 0) {
                 progressHeader
                 
@@ -769,4 +769,3 @@ struct CardDetailSheetView: View {
             }
     }
 }
-

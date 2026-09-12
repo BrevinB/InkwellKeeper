@@ -13,13 +13,15 @@ struct InteractiveCardView: View {
     var onTap: (() -> Void)? = nil
 
     @ObservedObject private var motionManager = MotionManager.shared
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var isVisible = false
+    @State private var ownsMotionUpdates = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // Touch-based interaction state
     @State private var isTouching = false
     @State private var touchPitch: Double = 0
     @State private var touchRoll: Double = 0
-    @State private var dragStartLocation: CGPoint = .zero
     @State private var dragDistance: CGFloat = 0
 
     // 3D rotation parameters
@@ -29,12 +31,12 @@ struct InteractiveCardView: View {
 
     // Active pitch/roll values - uses touch when touching, motion otherwise
     private var activePitch: Double {
-        if reduceMotion && !isTouching { return 0 }
+        if reduceMotion { return 0 }
         return isTouching ? touchPitch : motionManager.pitch
     }
 
     private var activeRoll: Double {
-        if reduceMotion && !isTouching { return 0 }
+        if reduceMotion { return 0 }
         return isTouching ? touchRoll : motionManager.roll
     }
 
@@ -100,18 +102,15 @@ struct InteractiveCardView: View {
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
                         // Track drag distance from start
-                        if !isTouching {
-                            dragStartLocation = value.startLocation
-                        }
                         isTouching = true
 
                         let dx = value.location.x - value.startLocation.x
                         let dy = value.location.y - value.startLocation.y
-                        dragDistance = sqrt(dx * dx + dy * dy)
+                        dragDistance = max(dragDistance, hypot(dx, dy))
 
                         // Convert touch position to -1...1 range relative to card center
-                        let centerX = geometry.size.width / 2
-                        let centerY = geometry.size.height / 2
+                        let centerX = max(geometry.size.width / 2, 1)
+                        let centerY = max(geometry.size.height / 2, 1)
 
                         // Roll based on horizontal position (left = negative, right = positive)
                         let rawRoll = (value.location.x - centerX) / centerX
@@ -127,7 +126,7 @@ struct InteractiveCardView: View {
                         }
 
                         // Animate back to neutral when touch ends
-                        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                        withAnimation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.7)) {
                             isTouching = false
                             touchPitch = 0
                             touchRoll = 0
@@ -136,12 +135,27 @@ struct InteractiveCardView: View {
                     }
             )
         }
+        .aspectRatio(5.0 / 7.0, contentMode: .fit)
         .onAppear {
-            if !reduceMotion {
-                motionManager.start()
-            }
+            isVisible = true
+            updateMotionSubscription()
         }
+        .onChange(of: reduceMotion) { updateMotionSubscription() }
+        .onChange(of: scenePhase) { updateMotionSubscription() }
+        .onChange(of: card.variant) { updateMotionSubscription() }
         .onDisappear {
+            isVisible = false
+            updateMotionSubscription()
+        }
+    }
+
+    private func updateMotionSubscription() {
+        let needsMotion = isVisible && !reduceMotion && scenePhase == .active
+        guard needsMotion != ownsMotionUpdates else { return }
+        ownsMotionUpdates = needsMotion
+        if needsMotion {
+            motionManager.start()
+        } else {
             motionManager.stop()
         }
     }
@@ -155,6 +169,6 @@ struct InteractiveCardView: View {
                     endPoint: .bottomTrailing
                 )
             )
-            .aspectRatio(0.714, contentMode: .fit)  // Standard card aspect ratio
+            .aspectRatio(5.0 / 7.0, contentMode: .fit)  // Standard card aspect ratio
     }
 }

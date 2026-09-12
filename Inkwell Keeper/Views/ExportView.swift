@@ -249,7 +249,7 @@ struct ExportView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
                     // Header Info
@@ -1205,7 +1205,7 @@ struct FieldSelectionView: View {
     @Binding var selectedFields: Set<ExportField>
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 // Core Fields
                 Section("Core Fields") {

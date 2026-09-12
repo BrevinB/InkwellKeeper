@@ -64,12 +64,15 @@ struct CollectionView: View {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.lorcanaGold)
                     }
+                    .accessibilityLabel("Search card catalog")
+                    .keyboardShortcut("f", modifiers: .command)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Button(action: { showingBulkImport = true }) {
                             Label("Bulk Import", systemImage: "square.and.arrow.down")
                         }
+                        .keyboardShortcut("i", modifiers: [.command, .shift])
                         
                         Button(action: { showingExport = true }) {
                             Label("Export Collection", systemImage: "square.and.arrow.up")
@@ -135,6 +138,7 @@ struct CollectionView: View {
         .sheet(isPresented: $showingCardSearch) {
             CardSearchView(isPresented: $showingCardSearch)
                 .environmentObject(collectionManager)
+                .presentationSizing(.page)
         }
     }
     

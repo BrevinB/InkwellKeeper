@@ -12,7 +12,7 @@ struct SupportView: View {
     @State private var showingTipJar = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
                     // Header

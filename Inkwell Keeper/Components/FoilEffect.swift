@@ -7,11 +7,10 @@
 
 import SwiftUI
 
-/// Adds a shimmering foil/holographic effect overlay to card images
-/// Mimics the official Lorcana app's diagonal shimmer pattern
+/// A gentle automatic light sweep using the same foil finish as interactive cards.
 struct FoilEffect: ViewModifier {
-    @State private var shimmerOffset: CGFloat = -1.5
-    @State private var glowIntensity: Double = 0.4
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
     let isAnimated: Bool
 
     init(isAnimated: Bool = true) {
@@ -19,86 +18,21 @@ struct FoilEffect: ViewModifier {
     }
 
     func body(content: Content) -> some View {
+        let animates = isAnimated && !reduceMotion && scenePhase == .active
         content
-            .overlay(
-                // Diagonal shimmer bands (like official Lorcana app)
-                ZStack {
-                    // Primary shimmer band
-                    LinearGradient(
-                        gradient: Gradient(stops: [
-                            .init(color: .clear, location: 0.0),
-                            .init(color: .clear, location: 0.4),
-                            .init(color: .white.opacity(0.15 * glowIntensity), location: 0.45),
-                            .init(color: .white.opacity(0.3 * glowIntensity), location: 0.5),
-                            .init(color: .white.opacity(0.15 * glowIntensity), location: 0.55),
-                            .init(color: .clear, location: 0.6),
-                            .init(color: .clear, location: 1.0)
-                        ]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    .rotationEffect(.degrees(45))
-                    .offset(x: shimmerOffset * 600, y: shimmerOffset * 300)
-                    .blendMode(.screen)
-
-                    // Secondary rainbow shimmer
-                    LinearGradient(
-                        gradient: Gradient(stops: [
-                            .init(color: .clear, location: 0.0),
-                            .init(color: .clear, location: 0.35),
-                            .init(color: Color.cyan.opacity(0.2 * glowIntensity), location: 0.4),
-                            .init(color: Color.purple.opacity(0.15 * glowIntensity), location: 0.45),
-                            .init(color: Color.blue.opacity(0.2 * glowIntensity), location: 0.5),
-                            .init(color: Color.cyan.opacity(0.15 * glowIntensity), location: 0.55),
-                            .init(color: .clear, location: 0.6),
-                            .init(color: .clear, location: 1.0)
-                        ]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    .rotationEffect(.degrees(45))
-                    .offset(x: shimmerOffset * 600, y: shimmerOffset * 300)
-                    .blendMode(.screen)
+            .overlay {
+                TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: !animates)) { timeline in
+                    let phase = animates ? timeline.date.timeIntervalSinceReferenceDate
+                        .truncatingRemainder(dividingBy: 8) * .pi / 4 : 0
+                    Color.clear
+                        .interactiveHolographicEffect(
+                            pitch: animates ? sin(phase) * 0.45 : 0,
+                            roll: animates ? cos(phase) * 0.6 : 0,
+                            variant: .foil
+                        )
                 }
-                .mask(content)
-            )
-            .overlay(
-                // Subtle holographic sparkles
-                GeometryReader { geometry in
-                    Canvas { context, size in
-                        // Add fewer, more subtle sparkle points
-                        for _ in 0..<8 {
-                            let x = CGFloat.random(in: 0...size.width)
-                            let y = CGFloat.random(in: 0...size.height)
-                            let radius = CGFloat.random(in: 0.5...1.5)
-
-                            context.fill(
-                                Path(ellipseIn: CGRect(x: x, y: y, width: radius, height: radius)),
-                                with: .color(.white.opacity(0.4 * glowIntensity))
-                            )
-                        }
-                    }
-                }
-                .blendMode(.screen)
-            )
-            .onAppear {
-                if isAnimated {
-                    // Continuous diagonal shimmer sweep (like official app)
-                    withAnimation(
-                        Animation.linear(duration: 4.0)
-                            .repeatForever(autoreverses: false)
-                    ) {
-                        shimmerOffset = 1.5
-                    }
-
-                    // Subtle glow intensity pulse
-                    withAnimation(
-                        Animation.easeInOut(duration: 2.5)
-                            .repeatForever(autoreverses: true)
-                    ) {
-                        glowIntensity = 0.6
-                    }
-                }
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
             }
     }
 }

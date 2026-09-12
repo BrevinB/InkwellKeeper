@@ -18,6 +18,8 @@ struct DecksView: View {
     @State private var showingCreateDeck = false
     @State private var newlyCreatedDeck: Deck?
     @State private var path: [Deck] = []
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -30,7 +32,7 @@ struct DecksView: View {
                         .environmentObject(collectionManager)
                 } else {
                     ScrollView {
-                        LazyVStack(spacing: 12) {
+                        LazyVGrid(columns: [GridItem(horizontalSizeClass == .compact || dynamicTypeSize.isAccessibilitySize ? .flexible() : .adaptive(minimum: 340), spacing: 16)], spacing: 16) {
                             ForEach(deckManager.decks) { deck in
                                 DeckRow(deck: deck)
                                     .environmentObject(collectionManager)
@@ -66,6 +68,7 @@ struct DecksView: View {
                                 .foregroundStyle(.lorcanaGold)
                         }
                         .accessibilityLabel("Import deck")
+                        .keyboardShortcut("i", modifiers: [.command, .shift])
 
                         Button(action: { showingAIDeckBuilder = true }) {
                             Image(systemName: "sparkles")
@@ -78,6 +81,7 @@ struct DecksView: View {
                                 .foregroundStyle(.lorcanaGold)
                         }
                         .accessibilityLabel("Create deck")
+                        .keyboardShortcut("n", modifiers: .command)
                     }
                 }
             }
@@ -93,6 +97,7 @@ struct DecksView: View {
         .sheet(isPresented: $showingAIDeckBuilder) {
             AIDeckBuilderView()
                 .environmentObject(deckManager)
+                .presentationSizing(.page)
         }
         .sheet(isPresented: $showingImportDeck) {
             ImportDeckView()
@@ -1488,6 +1493,7 @@ struct DeckWorkspaceView: View {
     let deck: Deck
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject var deckManager: DeckManager
     @EnvironmentObject var collectionManager: CollectionManager
 
@@ -1580,24 +1586,41 @@ struct DeckWorkspaceView: View {
                 onTap: { withAnimation { mode = .deck } }
             )
 
-            // Mode toggle: build (browser) vs. view your deck
-            Picker("View", selection: $mode.animation()) {
-                Text("Add Cards").tag(WorkspaceMode.add)
-                Text("Deck (\(deckCardCount))").tag(WorkspaceMode.deck)
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal)
-            .padding(.vertical, 8)
-            .background(Color.black.opacity(0.2))
+            GeometryReader { geometry in
+                let showsBothPanes = geometry.size.width >= 900 && !dynamicTypeSize.isAccessibilitySize
 
-            if mode == .add {
-                BuilderBrowser(deck: deck, gridHelper: gridHelper)
-                    .environmentObject(deckManager)
-                    .environmentObject(collectionManager)
-            } else {
-                DeckOverview(deck: deck)
-                    .environmentObject(deckManager)
-                    .environmentObject(collectionManager)
+                VStack(spacing: 0) {
+                    if !showsBothPanes {
+                        // Compact windows keep the mode toggle; wide windows show both workspaces.
+                        Picker("View", selection: $mode.animation()) {
+                            Text("Add Cards").tag(WorkspaceMode.add)
+                            Text("Deck (\(deckCardCount))").tag(WorkspaceMode.deck)
+                        }
+                        .pickerStyle(.segmented)
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+                        .background(Color.black.opacity(0.2))
+                    }
+
+                    HStack(spacing: 0) {
+                        if showsBothPanes || mode == .add {
+                            BuilderBrowser(deck: deck, gridHelper: gridHelper)
+                                .environmentObject(deckManager)
+                                .environmentObject(collectionManager)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        }
+                        if showsBothPanes {
+                            Divider().overlay(Color.lorcanaGold.opacity(0.25))
+                        }
+                        if showsBothPanes || mode == .deck {
+                            DeckOverview(deck: deck)
+                                .environmentObject(deckManager)
+                                .environmentObject(collectionManager)
+                                .frame(width: showsBothPanes ? min(420, geometry.size.width * 0.4) : nil)
+                                .frame(maxWidth: showsBothPanes ? nil : .infinity, maxHeight: .infinity)
+                        }
+                    }
+                }
             }
         }
         .background(LorcanaBackground())

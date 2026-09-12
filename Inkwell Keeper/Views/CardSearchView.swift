@@ -23,7 +23,7 @@ struct CardSearchView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 SearchBar(text: $searchText, placeholder: "Search all cards...")
                     .padding()

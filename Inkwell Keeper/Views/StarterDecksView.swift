@@ -27,7 +27,7 @@ struct StarterDecksView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 LorcanaBackground()
 
@@ -232,7 +232,7 @@ struct ImportOptionsSheet: View {
     let onCancel: () -> Void
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 LorcanaBackground()
 
@@ -349,7 +349,7 @@ struct ImportResultView: View {
     let onDismiss: () -> Void
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 LorcanaBackground()
 

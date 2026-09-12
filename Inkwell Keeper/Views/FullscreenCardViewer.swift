@@ -17,58 +17,64 @@ struct FullscreenCardViewer: View {
             Color.black.opacity(0.95)
                 .ignoresSafeArea()
 
-            VStack(spacing: 20) {
-                // Close button
-                HStack {
-                    Spacer()
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title)
-                            .foregroundColor(.white.opacity(0.7))
+            GeometryReader { geometry in
+                ScrollView {
+                    VStack(spacing: 20) {
+                        // Close button
+                        HStack {
+                            Spacer()
+                            Button(action: { dismiss() }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.title)
+                                    .foregroundColor(.white.opacity(0.7))
+                            }
+                            .accessibilityLabel("Close card viewer")
+                            .keyboardShortcut(.cancelAction)
+                            .frame(minWidth: 44, minHeight: 44)
+                            .padding()
+                        }
+
+                        Spacer()
+
+                        // Interactive card
+                        InteractiveCardView(card: card)
+                            .frame(width: max(1, min(geometry.size.width - 64, geometry.size.height * 0.60 * 0.7)),
+                                   height: max(1, min((geometry.size.width - 64) / 0.7, geometry.size.height * 0.60)))
+
+                        // Card name
+                        Text(card.name)
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+
+                        // Variant badge for special cards
+                        if card.variant != .normal {
+                            Text(card.variant.displayName)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(.white.opacity(0.8))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(
+                                    Capsule()
+                                        .fill(variantColor.opacity(0.6))
+                                )
+                        }
+
+                        Spacer()
+
+                        // Hint text
+                        Text("Tilt your device to see the holographic effect")
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.5))
+                            .padding(.bottom, 30)
                     }
-                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: geometry.size.height)
                 }
-
-                Spacer()
-
-                // Interactive card
-                InteractiveCardView(card: card)
-                    .padding(.horizontal, 40)
-                    .frame(maxHeight: UIScreen.main.bounds.height * 0.65)
-
-                // Card name
-                Text(card.name)
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-
-                // Variant badge for special cards
-                if card.variant != .normal {
-                    Text(card.variant.displayName)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundColor(.white.opacity(0.8))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(
-                            Capsule()
-                                .fill(variantColor.opacity(0.6))
-                        )
-                }
-
-                Spacer()
-
-                // Hint text
-                Text("Tilt your device to see the holographic effect")
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.5))
-                    .padding(.bottom, 30)
             }
-        }
-        .onTapGesture {
-            dismiss()
         }
         .statusBarHidden(true)
     }

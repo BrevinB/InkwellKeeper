@@ -100,6 +100,9 @@ class AIDeckService {
     private var currentOwnedCardQuantities: [String: Int] = [:]
     /// Max ink colors allowed for the format being generated (e.g. 2 for Core/Casual, 6 for Infinity).
     private var currentMaxInkColors = 2
+    /// Format and explicit color selection for deterministic post-processing.
+    private var currentFormat: DeckFormat = .casual
+    private var currentAllowedInkColors: Set<String>?
     /// How many cards the suggestions should total — 60 for a new deck, fewer for completion
     private var targetSuggestionCount = 60
     /// Normal-variant card snapshot for the current generation, fetched once per run —
@@ -226,6 +229,8 @@ class AIDeckService {
     ) async {
         reset()
         currentMaxInkColors = format.maxInkColors
+        currentFormat = format
+        currentAllowedInkColors = inkColors.isEmpty ? nil : Set(inkColors.map(\.rawValue))
         isLoading = true
         errorMessage = nil
 
@@ -280,6 +285,8 @@ class AIDeckService {
     ) async {
         reset()
         currentMaxInkColors = format.maxInkColors
+        currentFormat = format
+        currentAllowedInkColors = inkColors.isEmpty ? nil : Set(inkColors.map(\.rawValue))
         isLoading = true
         errorMessage = nil
 
@@ -847,8 +854,11 @@ class AIDeckService {
             Self.matchSuggestions(snapshot, against: cards)
         }.value
 
+        enforceFormatLegality()
         enforceColorConstraint()
         autoFixUnmatched()
+        enforceFormatLegality()
+        enforceCopyLimit()
         enforceOwnedQuantities()
         enforceCostCurve()
         normalizeTo60Cards()
@@ -1018,6 +1028,36 @@ class AIDeckService {
         return dp[rows][cols]
     }
 
+    // MARK: - Enforce Format Rules
+    private func isLegalCandidate(_ card: LorcanaCard) -> Bool {
+        if let legalSets = currentFormat.legalSets, !legalSets.contains(card.setName) {
+            return false
+        }
+        if currentFormat.isBanned(card.name) {
+            return false
+        }
+        if let allowedColors = currentAllowedInkColors {
+            guard let inkColor = card.inkColor, allowedColors.contains(inkColor) else {
+                return false
+            }
+        }
+        return true
+    }
+
+    private func enforceFormatLegality() {
+        suggestions = suggestions.filter { suggestion in
+            guard let card = suggestion.matchedCard else { return true }
+            return isLegalCandidate(card)
+        }
+    }
+
+    private func enforceCopyLimit() {
+        let maximum = currentFormat.maxCopiesPerCard
+        for index in suggestions.indices where suggestions[index].quantity > maximum {
+            suggestions[index] = suggestions[index].withQuantity(maximum)
+        }
+    }
+
     // MARK: - Enforce Ink-Color Constraint
     private func enforceColorConstraint() {
         let maxInks = currentMaxInkColors
@@ -1083,6 +1123,7 @@ class AIDeckService {
         var pool = currentNormalCards.filter { card in
             deckColors.contains(card.inkColor ?? "")
             && !usedNames.contains(card.name)
+            && isLegalCandidate(card)
         }
 
         // Filter to only owned cards when collection-only mode is active
@@ -1281,6 +1322,7 @@ class AIDeckService {
                 var pool = currentNormalCards.filter { card in
                     deckColors.contains(card.inkColor ?? "")
                     && !usedNames.contains(card.name)
+                    && isLegalCandidate(card)
                 }
 
                 if currentCollectionOnly && !currentOwnedCardQuantities.isEmpty {
@@ -1294,8 +1336,8 @@ class AIDeckService {
                     guard deficit > 0 else { break }
                     let cardKey = CollectionManager.cardKey(name: card.name, setName: card.setName)
                     let maxAllowed = currentCollectionOnly && !currentOwnedCardQuantities.isEmpty
-                        ? min(4, currentOwnedCardQuantities[cardKey] ?? 4)
-                        : 4
+                        ? min(currentFormat.maxCopiesPerCard, currentOwnedCardQuantities[cardKey] ?? currentFormat.maxCopiesPerCard)
+                        : currentFormat.maxCopiesPerCard
                     let qty = min(maxAllowed, deficit)
                     if qty > 0 {
                         suggestions.append(AIDeckSuggestion(cardName: card.name, quantity: qty, matchedCard: card))
@@ -1514,6 +1556,8 @@ class AIDeckService {
         currentCollectionOnly = false
         currentOwnedCardQuantities = [:]
         currentMaxInkColors = 2
+        currentFormat = .casual
+        currentAllowedInkColors = nil
         targetSuggestionCount = 60
     }
 }

@@ -15,39 +15,25 @@ struct AdaptiveGridHelper {
 
     /// Get columns for card collection grids
     func cardGridColumns() -> [GridItem] {
-        let count = columnCount(base: 2)
-        return Array(repeating: GridItem(.flexible(), spacing: 16), count: count)
+        columns(phoneCount: 2, minimumWidth: 160, spacing: 16)
     }
 
     /// Get columns for set detail grids
     func setDetailColumns() -> [GridItem] {
-        let count = columnCount(base: 3)
-        return Array(repeating: GridItem(.flexible(), spacing: 12), count: count)
+        columns(phoneCount: 3, minimumWidth: 140, spacing: 12)
     }
 
     /// Get columns for deck card grids
     func deckGridColumns() -> [GridItem] {
-        let count = columnCount(base: 3)
-        return Array(repeating: GridItem(.flexible(), spacing: 8), count: count)
+        columns(phoneCount: 3, minimumWidth: 140, spacing: 8)
     }
 
-    /// Calculate column count based on device and size class
-    private func columnCount(base: Int) -> Int {
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            if horizontalSizeClass == .regular {
-                // iPad full width - use more columns
-                switch base {
-                case 2: return 4  // Collection: 2 -> 4
-                case 3: return 5  // Set detail: 3 -> 5
-                default: return base * 2
-                }
-            } else {
-                // iPad split screen - use moderate columns
-                return base + 1  // 2 -> 3, 3 -> 4
-            }
+    /// Let the actual container width decide density, including sheets and resized windows.
+    private func columns(phoneCount: Int, minimumWidth: CGFloat, spacing: CGFloat) -> [GridItem] {
+        if isIPad {
+            return [GridItem(.adaptive(minimum: minimumWidth), spacing: spacing)]
         }
-        // iPhone uses base columns
-        return base
+        return Array(repeating: GridItem(.flexible(), spacing: spacing), count: phoneCount)
     }
 
     /// Check if we're on iPad

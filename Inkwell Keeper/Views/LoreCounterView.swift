@@ -529,7 +529,7 @@ private struct LoreGameView: View {
     // MARK: - History Sheet
 
     private var historySheet: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 if history.isEmpty {
                     Text("No history yet")

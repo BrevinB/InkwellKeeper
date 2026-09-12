@@ -14,6 +14,9 @@ struct HolographicCardImage: View {
     let reduceMotion: Bool
 
     @ObservedObject private var motionManager = MotionManager.shared
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var isVisible = false
+    @State private var ownsMotionUpdates = false
 
     var body: some View {
         AsyncImage(url: card.bestImageUrl()) { phase in
@@ -36,11 +39,25 @@ struct HolographicCardImage: View {
             }
         }
         .onAppear {
-            if !reduceMotion {
-                motionManager.start()
-            }
+            isVisible = true
+            updateMotionSubscription()
         }
+        .onChange(of: reduceMotion) { updateMotionSubscription() }
+        .onChange(of: scenePhase) { updateMotionSubscription() }
+        .onChange(of: card.variant) { updateMotionSubscription() }
         .onDisappear {
+            isVisible = false
+            updateMotionSubscription()
+        }
+    }
+
+    private func updateMotionSubscription() {
+        let needsMotion = isVisible && !reduceMotion && scenePhase == .active && [.foil, .enchanted, .epic, .iconic].contains(card.variant)
+        guard needsMotion != ownsMotionUpdates else { return }
+        ownsMotionUpdates = needsMotion
+        if needsMotion {
+            motionManager.start()
+        } else {
             motionManager.stop()
         }
     }

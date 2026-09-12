@@ -60,18 +60,21 @@ struct ContentView: View {
                 .tabItem {
                     Label("Stats", systemImage: "chart.bar.fill")
                 }
+                .tag(4)
 
             WishlistView()
                 .environmentObject(collectionManager)
                 .tabItem {
                     Label("Wishlist", systemImage: "star.fill")
                 }
+                .tag(5)
 
             SettingsView()
                 .environmentObject(collectionManager)
                 .tabItem {
                     Label("Settings", systemImage: "gear")
                 }
+                .tag(6)
             SupportView()
                 .tabItem {
                     Label("Support", systemImage: "heart.fill")
@@ -202,6 +205,9 @@ struct ContentView: View {
         case 1: "Scan"
         case 2: "Sets"
         case 3: "Decks"
+        case 4: "Stats"
+        case 5: "Wishlist"
+        case 6: "Settings"
         case 7: "Support"
         case 8: "Rules"
         case 9: "Play"

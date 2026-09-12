@@ -351,7 +351,7 @@ private struct CustomValuePickerSheet: View {
     let onCancel: () -> Void
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 24) {
                 Text("Set Lore Value")
                     .font(.headline)

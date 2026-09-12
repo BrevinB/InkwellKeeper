@@ -11,6 +11,8 @@ struct SetsView: View {
     @EnvironmentObject var collectionManager: CollectionManager
     @StateObject private var dataManager = SetsDataManager.shared
     @State private var selectedSet: LorcanaSet?
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
     var body: some View {
         NavigationStack {
@@ -52,7 +54,7 @@ struct SetsView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     ScrollView {
-                        LazyVStack(spacing: 12) {
+                        LazyVGrid(columns: [GridItem(horizontalSizeClass == .compact || dynamicTypeSize.isAccessibilitySize ? .flexible() : .adaptive(minimum: 320), spacing: 16)], spacing: 16) {
                             ForEach(dataManager.getAllSets()) { set in
                                 SetProgressCard(
                                     set: set,
@@ -87,6 +89,7 @@ struct SetsView: View {
         .sheet(item: $selectedSet) { set in
             SetDetailView(set: set)
                 .environmentObject(collectionManager)
+                .presentationSizing(.page)
         }
     }
 }

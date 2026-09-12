@@ -219,7 +219,7 @@ struct FullscreenPhotoViewer: View {
     @State private var showingDeleteConfirmation = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 Color.black.ignoresSafeArea()
 
