@@ -151,6 +151,7 @@ struct ChangelogEntry {
 
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
+    ChangelogEntry(version: "3.3.4", date: "September 2026", features: [], improvements: ["Significant improvements for iPad users"], bugFixes: [], inProgress: ["Better AI Features", "Storage tracking: Binders, Troves, Bins, etc"]),
     ChangelogEntry(version: "3.3.3", date: "September 2026", features: ["Added the ability to add foil cards to decks instead of just regular cards"], improvements: [], bugFixes: [], inProgress: ["Better AI Deck Building"]),
     ChangelogEntry(version: "3.3.2", date: "August 2026", features: ["Added filter based off card price"], improvements: ["Improved Scanning"], bugFixes: [], inProgress: []),
     ChangelogEntry(
