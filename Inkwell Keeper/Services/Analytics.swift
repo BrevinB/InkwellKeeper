@@ -68,6 +68,7 @@ enum Analytics {
         // MARK: Sharing & deep links
         case shareCardPresented(type: String)
         case shareCompleted(type: String)
+        case tradeConfirmed(yourCards: Int, theirCards: Int)
         case deckSharePresented
         case deckShareCompleted(method: String)
         case deepLinkOpened(type: String)
@@ -108,6 +109,7 @@ enum Analytics {
             case .exportCompleted: "export.completed"
             case .shareCardPresented: "share.cardPresented"
             case .shareCompleted: "share.completed"
+            case .tradeConfirmed: "trade.confirmed"
             case .deckSharePresented: "deck.sharePresented"
             case .deckShareCompleted: "deck.shareCompleted"
             case .deepLinkOpened: "deepLink.opened"
@@ -163,6 +165,8 @@ enum Analytics {
             // A share that actually happened: the link activity finished or a
             // copy landed on the pasteboard. Image shares are counted by the
             // share.cardPresented/share.completed pair instead.
+            case let .tradeConfirmed(yourCards, theirCards):
+                ["yourCards": String(yourCards), "theirCards": String(theirCards)]
             case let .deckShareCompleted(method):
                 ["method": method]
             case let .deepLinkOpened(type):
