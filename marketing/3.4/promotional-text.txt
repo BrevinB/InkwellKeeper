@@ -1,0 +1,16 @@
+App Store Connect "Promotional Text" — version 3.4.0
+(170 character limit; can be updated without submitting a new build)
+
+PRIMARY
+See what your collection is worth over time, what moved this week, and what you paid versus what it's worth. Plus a trade calculator that values both sides.
+
+ALTERNATES
+
+A — trade-led
+New: value both sides of a trade before you shake on it, scan cards straight in, and share the result. Plus collection value history and weekly biggest movers.
+
+B — collector-led
+Your collection now has a value chart. Track it day by day, see the biggest movers each week, and record what you paid to know exactly where you stand.
+
+C — short, punchy
+Know what your collection is worth — and what changed this week. New value history, biggest movers, cost tracking, and a trade calculator.
