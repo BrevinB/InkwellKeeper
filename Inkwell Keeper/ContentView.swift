@@ -18,83 +18,11 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            CollectionView(selectedTab: $selectedTab)
-                .environmentObject(collectionManager)
-                .tabItem {
-                    Label("Collection", systemImage: "square.grid.3x3.fill")
-                }
-                .tag(0)
-
-            ScannerView(isActive: Binding(
-                get: { selectedTab == 1 },
-                set: { _ in }
-            ))
-                .environmentObject(collectionManager)
-                .tabItem {
-                    Label("Scan", systemImage: "viewfinder")
-                }
-                .tag(1)
-
-            SetsView()
-                .environmentObject(collectionManager)
-                .tabItem {
-                    Label("Sets", systemImage: "books.vertical.fill")
-                }
-                .tag(2)
-
-            DecksView()
-                .environmentObject(collectionManager)
-                .tabItem {
-                    Label("Decks", systemImage: "rectangle.stack.fill")
-                }
-                .tag(3)
-
-            LoreCounterView()
-                .tabItem {
-                    Label("Play", systemImage: "gamecontroller.fill")
-                }
-                .tag(9)
-
-            StatsView()
-                .environmentObject(collectionManager)
-                .tabItem {
-                    Label("Stats", systemImage: "chart.bar.fill")
-                }
-                .tag(4)
-
-            WishlistView()
-                .environmentObject(collectionManager)
-                .tabItem {
-                    Label("Wishlist", systemImage: "star.fill")
-                }
-                .tag(5)
-
-            SettingsView()
-                .environmentObject(collectionManager)
-                .tabItem {
-                    Label("Settings", systemImage: "gear")
-                }
-                .tag(6)
-            SupportView()
-                .tabItem {
-                    Label("Support", systemImage: "heart.fill")
-                }
-                .tag(7)
-
-            RulesAssistantView()
-                .tabItem {
-                    Label("Rules", systemImage: "book.circle")
-                }
-                .tag(8)
+            primaryTabs
+            overflowTabs
         }
-        .apply { view in
-            if #available(iOS 18.0, *) {
-                view.tabViewStyle(.sidebarAdaptable)
-            } else {
-                view
-            }
-        }
-        .accentColor(.lorcanaGold)
+        .tabViewStyle(.sidebarAdaptable)
+        .tint(.lorcanaGold)
         .preferredColorScheme(.dark)
         .overlay(alignment: .top) {
             CloudSyncOverlay()
@@ -198,6 +126,75 @@ struct ContentView: View {
         }
     }
 
+    /// The four that lead the tab bar. iOS shows the first four plus a More
+    /// list once there are more than five, so the core loop leads: collect,
+    /// scan, build, and what it is worth.
+    ///
+    /// `value:` carries the same identifier the old `.tag()` did, so
+    /// DeepLinkRouter.tab and Analytics' tabName(for:) keep working unchanged.
+    @TabContentBuilder<Int>
+    private var primaryTabs: some TabContent<Int> {
+        Tab("Collection", systemImage: "square.grid.3x3.fill", value: 0) {
+            CollectionView(selectedTab: $selectedTab)
+                .environmentObject(collectionManager)
+        }
+
+        Tab("Scan", systemImage: "viewfinder", value: 1) {
+            ScannerView(isActive: Binding(
+                get: { selectedTab == 1 },
+                set: { _ in }
+            ))
+            .environmentObject(collectionManager)
+        }
+
+        Tab("Decks", systemImage: "rectangle.stack.fill", value: 3) {
+            DecksView()
+                .environmentObject(collectionManager)
+        }
+
+        Tab("Stats", systemImage: "chart.bar.fill", value: 4) {
+            StatsView()
+                .environmentObject(collectionManager)
+        }
+    }
+
+    /// Everything the system collects into More on iPhone, and lists below the
+    /// primary tabs in the iPad sidebar.
+    @TabContentBuilder<Int>
+    private var overflowTabs: some TabContent<Int> {
+        Tab("Sets", systemImage: "books.vertical.fill", value: 2) {
+            SetsView()
+                .environmentObject(collectionManager)
+        }
+
+        Tab("Trades", systemImage: "arrow.left.arrow.right", value: 10) {
+            TradeCalculatorView()
+                .environmentObject(collectionManager)
+        }
+
+        Tab("Play", systemImage: "gamecontroller.fill", value: 9) {
+            LoreCounterView()
+        }
+
+        Tab("Wishlist", systemImage: "star.fill", value: 5) {
+            WishlistView()
+                .environmentObject(collectionManager)
+        }
+
+        Tab("Settings", systemImage: "gear", value: 6) {
+            SettingsView()
+                .environmentObject(collectionManager)
+        }
+
+        Tab("Support", systemImage: "heart.fill", value: 7) {
+            SupportView()
+        }
+
+        Tab("Rules", systemImage: "book.circle", value: 8) {
+            RulesAssistantView()
+        }
+    }
+
     /// Maps a tab's selection tag to a human-readable screen name for analytics.
     private static func tabName(for tag: Int) -> String {
         switch tag {
@@ -211,6 +208,7 @@ struct ContentView: View {
         case 7: "Support"
         case 8: "Rules"
         case 9: "Play"
+        case 10: "Trades"
         default: "Tab\(tag)"
         }
     }
