@@ -12,6 +12,11 @@ struct StatsView: View {
     @EnvironmentObject var collectionManager: CollectionManager
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel = StatsViewModel()
+    /// One instance shared by every portfolio card, so the collection's price
+    /// history is fetched once per visit rather than once per card.
+    @State private var portfolio = PortfolioHistoryViewModel()
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @State private var showingPaywall = false
     @State private var isRefreshingPrices = false
     @State private var showingShareImage = false
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -26,7 +31,42 @@ struct StatsView: View {
                     StatsOverviewCard(snapshot: snapshot)
 
                     if snapshot.totalCards > 0 {
+                        // Pro and free cards alternate rather than sitting in
+                        // two blocks: a wall of locked cards at the top reads
+                        // as a paywalled screen, and pairing each Pro card with
+                        // the related free one (value over time next to top
+                        // value, movers next to value by set) keeps the mix
+                        // visible while the subjects still follow on.
+                        PortfolioHistoryCard(
+                            viewModel: portfolio,
+                            isSubscribed: subscriptionManager.isSubscribed,
+                            onUnlock: presentPaywall
+                        )
+                        TopValuableCardsCard(cards: snapshot.topValuable)
+                        PortfolioMoversCard(
+                            viewModel: portfolio,
+                            isSubscribed: subscriptionManager.isSubscribed,
+                            onUnlock: presentPaywall
+                        )
+                        ValueBySetCard(valueBySet: snapshot.valueBySet)
+                        PortfolioExtremesCard(
+                            viewModel: portfolio,
+                            isSubscribed: subscriptionManager.isSubscribed,
+                            onUnlock: presentPaywall
+                        )
                         RarityDonutCard(counts: snapshot.rarityCounts)
+                        PortfolioVariantSplitCard(
+                            viewModel: portfolio,
+                            isSubscribed: subscriptionManager.isSubscribed,
+                            onUnlock: presentPaywall
+                        )
+                        SetCompletionCard(cards: collectionManager.collectedCards)
+                        CostBasisCard(
+                            summary: portfolio.costBasis,
+                            entries: portfolio.costBasisEntries,
+                            isSubscribed: subscriptionManager.isSubscribed,
+                            onUnlock: presentPaywall
+                        )
                         InkColorChartCard(counts: snapshot.inkColorCounts)
                         CollectionCostCurveCard(counts: snapshot.costCounts)
                         TypeBreakdownCard(counts: snapshot.typeCounts)
@@ -36,9 +76,6 @@ struct StatsView: View {
                                 nonInkable: snapshot.nonInkableCount
                             )
                         }
-                        TopValuableCardsCard(cards: snapshot.topValuable)
-                        ValueBySetCard(valueBySet: snapshot.valueBySet)
-                        SetCompletionCard(cards: collectionManager.collectedCards)
                         RecentAdditionsCard(recentCards: snapshot.recentCards)
                     } else {
                         StatsEmptyCollectionCard()
@@ -65,6 +102,12 @@ struct StatsView: View {
             .onAppear {
                 viewModel.refresh(context: modelContext)
             }
+            .task(id: collectionManager.collectedCards.count) {
+                await portfolio.load(cards: ownedCards())
+            }
+            .sheet(isPresented: $showingPaywall) {
+                RulesPaywallView(source: "portfolioHistory")
+            }
             .onChange(of: collectionManager.collectedCards.count) { _, _ in
                 viewModel.refresh(context: modelContext)
             }
@@ -81,6 +124,21 @@ struct StatsView: View {
                 }
             }
         }
+    }
+
+    private func presentPaywall() {
+        // RulesPaywallView reports its own exposure on appear — sending it here
+        // too would double-count this funnel.
+        showingPaywall = true
+    }
+
+    /// Wishlisted rows are aspirational, not owned, so they stay out of the
+    /// portfolio — the same filter StatsViewModel applies to the totals.
+    private func ownedCards() -> [CollectedCard] {
+        let descriptor = FetchDescriptor<CollectedCard>(
+            predicate: #Predicate { $0.isWishlisted == false }
+        )
+        return (try? modelContext.fetch(descriptor)) ?? []
     }
 
     private func refreshPrices() {
