@@ -35,6 +35,11 @@ enum ExportField: String, CaseIterable, Identifiable {
     case price = "Price"
     case uniqueId = "Unique ID"
 
+    // Valuation
+    case purchasePrice = "Purchase Price"
+    case totalValue = "Total Value"
+    case gainLoss = "Gain/Loss"
+
     // Collection-specific
     case condition = "Condition"
     case notes = "Notes"
@@ -59,6 +64,9 @@ enum ExportField: String, CaseIterable, Identifiable {
         case .inkwell: return "drop"
         case .franchise: return "film"
         case .price: return "banknote"
+        case .purchasePrice: return "tag"
+        case .totalValue: return "sum"
+        case .gainLoss: return "chart.line.uptrend.xyaxis"
         case .uniqueId: return "qrcode"
         case .condition: return "checkmark.seal"
         case .notes: return "note.text"
@@ -83,6 +91,9 @@ enum ExportField: String, CaseIterable, Identifiable {
         case .inkwell: return "Can be used as ink"
         case .franchise: return "Disney franchise"
         case .price: return "Estimated card value"
+        case .purchasePrice: return "What you paid per copy"
+        case .totalValue: return "Market value of all copies"
+        case .gainLoss: return "Value minus what you paid"
         case .uniqueId: return "Unique identifier (e.g., TFC-001)"
         case .condition: return "Card condition"
         case .notes: return "Your personal notes"
@@ -998,6 +1009,23 @@ struct ExportView: View {
                 return String(format: "%.2f", price)
             }
             return ""
+        case .purchasePrice:
+            if let paid = collectedCard?.purchasePrice {
+                return String(format: "%.2f", paid)
+            }
+            return ""
+        case .totalValue:
+            if let price = card.price {
+                return String(format: "%.2f", price * Double(quantity))
+            }
+            return ""
+        case .gainLoss:
+            // Blank rather than zero when either side is unknown: an unrecorded
+            // purchase price is not the same as having broken even.
+            guard let paid = collectedCard?.purchasePrice, let price = card.price else {
+                return ""
+            }
+            return String(format: "%.2f", (price - paid) * Double(quantity))
         case .uniqueId:
             return "\"\(card.uniqueId ?? "")\""
         case .condition:

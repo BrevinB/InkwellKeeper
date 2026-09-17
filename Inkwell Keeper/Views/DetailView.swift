@@ -231,6 +231,8 @@ struct CollectionCardDetailView: View {
                                                 .font(.subheadline)
                                                 .foregroundColor(.white)
                                         }
+
+                                        PurchasePriceRow(collected: collected)
                                     }
 
                                     // Deck Usage section
