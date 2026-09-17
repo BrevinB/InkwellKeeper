@@ -109,8 +109,53 @@ struct TradeScannerSheet: View {
             }
             .frame(maxHeight: .infinity)
 
+            TradeScanShutter(
+                isDisabled: !cameraManager.isSessionRunning || cameraManager.isProcessingCard,
+                isProcessing: cameraManager.isProcessingCard
+            ) {
+                cameraManager.capturePhoto()
+            }
+
             TradeScanTray(cards: added)
         }
+    }
+}
+
+/// Takes the shot.
+///
+/// CameraManager's auto-capture only fires when auto-scan has been switched on,
+/// which this sheet never did — so without a shutter there was no way to scan
+/// a card into a trade at all. Mirrors the Scan tab's control so the gesture is
+/// the same in both places.
+private struct TradeScanShutter: View {
+    let isDisabled: Bool
+    let isProcessing: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            ZStack {
+                Circle()
+                    .fill(Color.lorcanaGold)
+                    .frame(width: 72, height: 72)
+
+                if isProcessing {
+                    ProgressView()
+                        .tint(.white)
+                        .scaleEffect(1.3)
+                } else {
+                    Circle()
+                        .stroke(.white, lineWidth: 4)
+                        .frame(width: 62, height: 62)
+                }
+            }
+            .shadow(color: .black.opacity(0.3), radius: 8)
+            .opacity(isDisabled ? 0.6 : 1)
+        }
+        .buttonStyle(ShutterButtonStyle())
+        .disabled(isDisabled)
+        .accessibilityLabel("Capture card")
+        .padding(.vertical, 12)
     }
 }
 
