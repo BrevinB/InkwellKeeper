@@ -1,0 +1,25 @@
+App Store Connect "What's New" — version 3.4.0
+
+Your collection has a value. Now it has a story.
+
+WHAT IS IT WORTH? 📈
+Collection Value charts what your cards have been worth, day by day, with this week's change on top. Built from real daily market prices — not an estimate you have to take on faith (Pro).
+
+WHAT MOVED THIS WEEK
+Biggest Movers names the cards that gained and lost the most, counted across every copy you own. Highs & Lows flags anything sitting at the top or bottom of its recent range — the closest thing to a nudge to look again at that one card (Pro).
+
+WHAT YOU PAID, AND WHAT YOU MADE
+Add what you paid for a card and Cost vs Value does the rest: your gain or loss per card, per set, and overall. Cards without a recorded price stay out of the maths, so the number you see is real (Pro).
+
+TRADE WITH YOUR EYES OPEN 🤝
+Build both sides of a trade and see what each is actually worth before you shake on it. Scan cards straight in with the camera, foils included. Confirm the trade for a little send-off, then share the result (Pro).
+
+FOIL PREMIUM
+See what your foils are really worth next to the rest of your collection (Pro).
+
+ALSO IN THIS RELEASE
+• Stats is now a main tab — one tap from anywhere
+• Export now includes purchase price, total value, and gain/loss
+• Fixed 134 cards that were showing another card's price
+• Fixed subscription options hidden behind the tab bar
+• Clearer, more readable share cards

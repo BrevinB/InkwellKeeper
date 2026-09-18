@@ -45,6 +45,7 @@ struct AnalyticsEventTests {
         .exportCompleted(format: "csv"),
         .shareCardPresented(type: "cardFlex"),
         .shareCompleted(type: "cardFlex"),
+        .tradeConfirmed(yourCards: 3, theirCards: 2),
         .deckSharePresented,
         .deckShareCompleted(method: "copyLink"),
         .deepLinkOpened(type: "card"),

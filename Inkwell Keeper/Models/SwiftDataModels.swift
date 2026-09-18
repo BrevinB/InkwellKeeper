@@ -29,6 +29,10 @@ class CollectedCard {
     var inkColor: String?
     var uniqueId: String?
     var cardNumber: Int?
+    /// What the collector paid per copy, when they have recorded it. Optional
+    /// so the CloudKit mirror stays happy and so "not recorded" stays
+    /// distinguishable from "paid nothing".
+    var purchasePrice: Double?
     @Attribute(.externalStorage) var imageAttachments: [Data]?
 
     var cardRarity: CardRarity {

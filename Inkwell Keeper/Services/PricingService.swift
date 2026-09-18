@@ -1053,3 +1053,135 @@ extension PricingService.PricingProvider: CustomStringConvertible {
         }
     }
 }
+
+// MARK: - Bulk Price History (backend)
+
+extension PricingService {
+    /// One daily value for a printing, as the backend's compressed series
+    /// reports it: `day` counts days since 1970-01-01 UTC.
+    struct PortfolioPricePoint: Hashable, Sendable, Codable {
+        let day: Int
+        let price: Double
+    }
+
+    private struct BulkHistoryRequestBody: Encodable {
+        let cards: [Card]
+        let days: Int
+
+        struct Card: Encodable {
+            let uniqueId: String
+            let foil: Bool
+
+            enum CodingKeys: String, CodingKey {
+                case uniqueId = "unique_id"
+                case foil
+            }
+        }
+    }
+
+    private struct BulkHistoryResponse: Decodable {
+        /// "TFC-1" or "TFC-1|foil" -> [[epochDay, price], ...]
+        let series: [String: [[Double]]]
+    }
+
+    /// Daily value series for many printings at once, keyed by each card's
+    /// `variantAwareId`.
+    ///
+    /// Fetching `/prices/{id}/history` per card would be ~42KB and one request
+    /// each — 20MB over 469 requests for a mid-sized collection. The backend
+    /// collapses each printing to one point per day and drops points that
+    /// repeat the previous price, which brings the same collection under
+    /// 350KB. Chunks run concurrently because the backend spends roughly
+    /// 30ms per card.
+    func fetchBulkHistory(
+        for cards: [LorcanaCard],
+        days: Int = 180
+    ) async -> [String: [PortfolioPricePoint]] {
+        guard !cards.isEmpty else { return [:] }
+
+        // Several collected rows can share a printing (different conditions,
+        // same card); request each printing once and fan the result back out.
+        var cardsByKey: [String: LorcanaCard] = [:]
+        for card in cards where cardsByKey[card.variantAwareId] == nil {
+            cardsByKey[card.variantAwareId] = card
+        }
+        let printings = Array(cardsByKey.values)
+
+        let chunks = stride(from: 0, to: printings.count, by: Self.historyChunkSize).map {
+            Array(printings[$0..<min($0 + Self.historyChunkSize, printings.count)])
+        }
+
+        var merged: [String: [PortfolioPricePoint]] = [:]
+        await withTaskGroup(of: [String: [PortfolioPricePoint]].self) { group in
+            for chunk in chunks {
+                group.addTask { [weak self] in
+                    await self?.fetchHistoryChunk(chunk, days: days) ?? [:]
+                }
+            }
+            for await result in group {
+                merged.merge(result) { existing, _ in existing }
+            }
+        }
+        return merged
+    }
+
+    /// Current market price per printing, keyed by `variantAwareId`.
+    ///
+    /// `fetchBulkPrices` is not a substitute: it returns the backend's
+    /// `best_price_usd`, the minimum across every marketplace, which is
+    /// dominated by TCGplayer lowest-listing rows and comes back as $0.01 for
+    /// most cards. That is fine for the price *filters* it was written for and
+    /// wrong for anything that shows a collector what something is worth. The
+    /// history endpoint applies the same market-row selection as
+    /// `getMarketPrice`, so the last point agrees with the rest of the app.
+    func fetchBulkMarketPrices(for cards: [LorcanaCard]) async -> [String: Double] {
+        let series = await fetchBulkHistory(for: cards, days: 7)
+        return series.compactMapValues { $0.last?.price }
+    }
+
+    private static let historyChunkSize = 200
+
+    private func fetchHistoryChunk(
+        _ cards: [LorcanaCard],
+        days: Int
+    ) async -> [String: [PortfolioPricePoint]] {
+        guard let url = URL(string: "\(inkwellAPIBaseURL)/prices/history/bulk") else { return [:] }
+
+        // The backend keys foil printings "<uniqueId>|foil"; map that back to
+        // the card so callers never deal in backend ids.
+        var cardKeyByResponseKey: [String: String] = [:]
+        let payload = cards.map { card -> BulkHistoryRequestBody.Card in
+            let uniqueId = buildUniqueId(for: card)
+            let foil = card.variant != .normal
+            cardKeyByResponseKey[foil ? "\(uniqueId)|foil" : uniqueId] = card.variantAwareId
+            return .init(uniqueId: uniqueId, foil: foil)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 30
+        request.httpBody = try? JSONEncoder().encode(
+            BulkHistoryRequestBody(cards: payload, days: days)
+        )
+
+        guard let (data, response) = try? await session.data(for: request),
+              (response as? HTTPURLResponse)?.statusCode == 200,
+              let decoded = try? JSONDecoder().decode(BulkHistoryResponse.self, from: data) else {
+            return [:]
+        }
+
+        var result: [String: [PortfolioPricePoint]] = [:]
+        for (responseKey, rawPoints) in decoded.series {
+            guard let cardKey = cardKeyByResponseKey[responseKey] else { continue }
+            let points = rawPoints.compactMap { pair -> PortfolioPricePoint? in
+                guard pair.count == 2 else { return nil }
+                return PortfolioPricePoint(day: Int(pair[0]), price: pair[1])
+            }
+            if !points.isEmpty {
+                result[cardKey] = points.sorted { $0.day < $1.day }
+            }
+        }
+        return result
+    }
+}

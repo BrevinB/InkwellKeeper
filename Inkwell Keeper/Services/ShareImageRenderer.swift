@@ -15,7 +15,12 @@ enum ShareImageRenderer {
     /// specify its own size (the share-card chrome fixes a 360×450pt canvas → 1080×1350px at 3x).
     @MainActor
     static func render(_ view: some View, scale: CGFloat = 3) -> UIImage? {
-        let renderer = ImageRenderer(content: view)
+        // ImageRenderer draws outside the app's view hierarchy, so it does not
+        // inherit the `.preferredColorScheme(.dark)` set on ContentView and
+        // defaults to light. Every share card is drawn on a near-black brand
+        // background, which left semantic colours — `.secondary` above all —
+        // resolving to a dark grey that was barely visible on it.
+        let renderer = ImageRenderer(content: view.environment(\.colorScheme, .dark))
         renderer.scale = scale
         renderer.isOpaque = true
         return renderer.uiImage
