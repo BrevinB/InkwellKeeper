@@ -7,15 +7,16 @@
 
 import SwiftUI
 import CoreMotion
-import Combine
 
-class MotionManager: ObservableObject {
+@MainActor
+@Observable
+class MotionManager {
     // Shared instance for efficient motion sharing across views
     static let shared = MotionManager()
 
-    @Published var pitch: Double = 0.0  // Vertical tilt (-1 to 1)
-    @Published var roll: Double = 0.0   // Horizontal tilt (-1 to 1)
-    @Published var isAvailable: Bool = false
+    var pitch: Double = 0.0  // Vertical tilt (-1 to 1)
+    var roll: Double = 0.0   // Horizontal tilt (-1 to 1)
+    var isAvailable: Bool = false
 
     private var motionManager: CMMotionManager?
     private let updateInterval: TimeInterval = 1.0 / 20.0  // 20fps — sufficient for smooth holographic effects

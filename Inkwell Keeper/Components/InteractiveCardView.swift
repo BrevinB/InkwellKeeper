@@ -10,9 +10,9 @@ import SwiftUI
 struct InteractiveCardView: View {
     let card: LorcanaCard
     let imageURL: URL?
-    var onTap: (() -> Void)? = nil
+    var onTap: (() -> Void)?
 
-    @ObservedObject private var motionManager = MotionManager.shared
+    private let motionManager = MotionManager.shared
     @Environment(\.scenePhase) private var scenePhase
     @State private var isVisible = false
     @State private var ownsMotionUpdates = false
@@ -59,8 +59,7 @@ struct InteractiveCardView: View {
                 switch phase {
                 case .success(let image):
                     image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
+                        .resizable().scaledToFit()
                         .interactiveHolographicEffect(
                             pitch: activePitch,
                             roll: activeRoll,

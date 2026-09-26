@@ -12,8 +12,7 @@ struct SimpleCardSearchRow: View {
                 HStack {
                     AsyncImage(url: card.bestImageUrl()) { image in
                         image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
+                            .resizable().scaledToFit()
                     } placeholder: {
                         RoundedRectangle(cornerRadius: 6)
                             .fill(Color.gray.opacity(0.3))

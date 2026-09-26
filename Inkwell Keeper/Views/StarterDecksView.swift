@@ -9,10 +9,10 @@ import SwiftUI
 
 struct StarterDecksView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var deckManager: DeckManager
-    @EnvironmentObject var collectionManager: CollectionManager
-    @StateObject private var starterDeckManager = StarterDeckManager.shared
-    @StateObject private var dataManager = SetsDataManager.shared
+    @Environment(DeckManager.self) var deckManager
+    @Environment(CollectionManager.self) var collectionManager
+    private let starterDeckManager = StarterDeckManager.shared
+    private let dataManager = SetsDataManager.shared
     @State private var selectedDeckForImport: StarterDeck?
     @State private var importedDeck: Deck?
     @State private var unmatchedCards: [String] = []
@@ -44,11 +44,11 @@ struct StarterDecksView: View {
                                 Text("Starter Decks")
                                     .font(.title)
                                     .fontWeight(.bold)
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
 
                                 Text("Import official starter decks into your collection")
                                     .font(.subheadline)
-                                    .foregroundColor(.gray)
+                                    .foregroundStyle(.gray)
                                     .multilineTextAlignment(.center)
                             }
                             .padding(.top)
@@ -62,7 +62,7 @@ struct StarterDecksView: View {
                                     VStack(alignment: .leading, spacing: 12) {
                                         Text(setName)
                                             .font(.headline)
-                                            .foregroundColor(.lorcanaGold)
+                                            .foregroundStyle(.lorcanaGold)
                                             .padding(.horizontal)
 
                                         ForEach(decks) { deck in
@@ -85,7 +85,7 @@ struct StarterDecksView: View {
                     Button("Done") {
                         dismiss()
                     }
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                 }
             }
         }
@@ -165,11 +165,11 @@ struct StarterDeckCard: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(deck.name)
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
 
                     Text(deck.description)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                         .lineLimit(2)
                 }
 
@@ -193,7 +193,7 @@ struct StarterDeckCard: View {
 
                 Text("\(deck.totalCards) cards")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
 
                 Spacer()
 
@@ -204,11 +204,11 @@ struct StarterDeckCard: View {
                     }
                     .font(.caption)
                     .fontWeight(.medium)
-                    .foregroundColor(.lorcanaDark)
+                    .foregroundStyle(.lorcanaDark)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(Color.lorcanaGold)
-                    .cornerRadius(8)
+                    .clipShape(.rect(cornerRadius: 8))
                 }
             }
         }
@@ -241,17 +241,17 @@ struct ImportOptionsSheet: View {
                     VStack(spacing: 12) {
                         Image(systemName: "square.stack.3d.down.right.fill")
                             .font(.system(size: 50))
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
 
                         Text("Import \"\(deck.name)\"")
                             .font(.title2)
                             .fontWeight(.bold)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
 
                         Text("\(deck.totalCards) cards")
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                     .padding(.top, 40)
 
@@ -290,7 +290,7 @@ struct ImportOptionsSheet: View {
                     Button("Cancel") {
                         onCancel()
                     }
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                 }
             }
         }
@@ -309,23 +309,23 @@ struct ImportOptionButton: View {
             HStack(spacing: 16) {
                 Image(systemName: icon)
                     .font(.title2)
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                     .frame(width: 40)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
 
                     Text(description)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
             }
             .padding()
             .background(
@@ -358,7 +358,7 @@ struct ImportResultView: View {
                         // Success icon
                         Image(systemName: unmatchedCards.isEmpty ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
                             .font(.system(size: 60))
-                            .foregroundColor(unmatchedCards.isEmpty ? .green : .orange)
+                            .foregroundStyle(unmatchedCards.isEmpty ? .green : .orange)
                             .padding(.top, 40)
 
                         // Message
@@ -366,7 +366,7 @@ struct ImportResultView: View {
                             Text(unmatchedCards.isEmpty ? "Import Complete!" : "Import Complete with Warnings")
                                 .font(.title2)
                                 .fontWeight(.bold)
-                                .foregroundColor(.white)
+                                .foregroundStyle(.white)
 
                             // Mode-specific messages
                             switch importMode {
@@ -374,26 +374,26 @@ struct ImportResultView: View {
                                 if let deck = deck {
                                     Text("\"\(deck.name)\" has been added to your decks")
                                         .font(.subheadline)
-                                        .foregroundColor(.gray)
+                                        .foregroundStyle(.gray)
                                         .multilineTextAlignment(.center)
 
                                     Text("\(deck.totalCards) cards in deck")
                                         .font(.caption)
-                                        .foregroundColor(.lorcanaGold)
+                                        .foregroundStyle(.lorcanaGold)
                                         .padding(.top, 4)
                                 }
 
                             case .collectionOnly:
                                 Text("\(addedToCollectionCount) cards added to collection")
                                     .font(.subheadline)
-                                    .foregroundColor(.gray)
+                                    .foregroundStyle(.gray)
                                     .multilineTextAlignment(.center)
 
                             case .both:
                                 if let deck = deck {
                                     Text("\"\(deck.name)\" created")
                                         .font(.subheadline)
-                                        .foregroundColor(.gray)
+                                        .foregroundStyle(.gray)
                                         .multilineTextAlignment(.center)
 
                                     HStack(spacing: 20) {
@@ -401,20 +401,20 @@ struct ImportResultView: View {
                                             Text("\(deck.totalCards)")
                                                 .font(.title3)
                                                 .fontWeight(.bold)
-                                                .foregroundColor(.lorcanaGold)
+                                                .foregroundStyle(.lorcanaGold)
                                             Text("Deck Cards")
                                                 .font(.caption)
-                                                .foregroundColor(.gray)
+                                                .foregroundStyle(.gray)
                                         }
 
                                         VStack {
                                             Text("\(addedToCollectionCount)")
                                                 .font(.title3)
                                                 .fontWeight(.bold)
-                                                .foregroundColor(.green)
+                                                .foregroundStyle(.green)
                                             Text("In Collection")
                                                 .font(.caption)
-                                                .foregroundColor(.gray)
+                                                .foregroundStyle(.gray)
                                         }
                                     }
                                     .padding(.top, 4)
@@ -427,21 +427,21 @@ struct ImportResultView: View {
                             VStack(alignment: .leading, spacing: 12) {
                                 HStack {
                                     Image(systemName: "exclamationmark.triangle")
-                                        .foregroundColor(.orange)
+                                        .foregroundStyle(.orange)
                                     Text("Some Cards Not Found")
                                         .font(.headline)
-                                        .foregroundColor(.white)
+                                        .foregroundStyle(.white)
                                 }
 
                                 Text("The following cards could not be matched and were skipped:")
                                     .font(.caption)
-                                    .foregroundColor(.gray)
+                                    .foregroundStyle(.gray)
 
                                 VStack(alignment: .leading, spacing: 6) {
                                     ForEach(unmatchedCards, id: \.self) { cardName in
                                         Text("• \(cardName)")
                                             .font(.caption)
-                                            .foregroundColor(.orange.opacity(0.9))
+                                            .foregroundStyle(.orange.opacity(0.9))
                                     }
                                 }
                                 .padding(.leading, 8)
@@ -462,11 +462,11 @@ struct ImportResultView: View {
                         Button(action: onDismiss) {
                             Text("Done")
                                 .font(.headline)
-                                .foregroundColor(.lorcanaDark)
+                                .foregroundStyle(.lorcanaDark)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
                                 .background(Color.lorcanaGold)
-                                .cornerRadius(10)
+                                .clipShape(.rect(cornerRadius: 10))
                         }
                         .padding(.horizontal)
                         .padding(.top, 20)
@@ -488,15 +488,15 @@ struct ErrorView: View {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.system(size: 60))
-                .foregroundColor(.red)
+                .foregroundStyle(.red)
 
             Text("Error Loading Starter Decks")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
 
             Text(message)
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
                 .multilineTextAlignment(.center)
         }
         .padding()

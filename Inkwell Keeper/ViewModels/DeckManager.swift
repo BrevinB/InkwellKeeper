@@ -6,17 +6,18 @@
 //
 
 import SwiftUI
-import Combine
 import SwiftData
 import Foundation
 import CoreData
 
-class DeckManager: ObservableObject {
+@MainActor
+@Observable
+class DeckManager {
     var modelContext: ModelContext?
-    @Published var decks: [Deck] = []
+    var decks: [Deck] = []
 
     /// Observer token for CloudKit remote-change notifications.
-    private var remoteChangeObserver: NSObjectProtocol?
+    @ObservationIgnored private var remoteChangeObserver: NSObjectProtocol?
 
     init(modelContext: ModelContext? = nil) {
         self.modelContext = modelContext

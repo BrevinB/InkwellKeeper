@@ -55,14 +55,14 @@ struct PortfolioVariantSplitCard: View {
                             y: .value("Kind", "Foil")
                         )
                         .foregroundStyle(Color.lorcanaGold.gradient)
-                        .cornerRadius(4)
+                        .cornerRadius(4) // swiftlint:disable:this no_corner_radius
 
                         BarMark(
                             x: .value("Average value", split.averageNormalValue),
                             y: .value("Kind", "Normal")
                         )
                         .foregroundStyle(Color.gray.gradient)
-                        .cornerRadius(4)
+                        .cornerRadius(4) // swiftlint:disable:this no_corner_radius
                     }
                     .chartXAxis {
                         AxisMarks(values: .automatic(desiredCount: 3)) { value in

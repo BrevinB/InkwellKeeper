@@ -9,7 +9,7 @@ import SwiftUI
 
 struct WishlistCardRow: View {
     let card: LorcanaCard
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) var collectionManager
     @State private var showingDetail = false
     
     var body: some View {
@@ -17,13 +17,11 @@ struct WishlistCardRow: View {
             AsyncImage(url: card.bestImageUrl()) { image in
                 if card.variant == .foil {
                     image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
+                        .resizable().scaledToFit()
                         .foilEffect(isAnimated: true)
                 } else {
                     image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
+                        .resizable().scaledToFit()
                 }
             } placeholder: {
                 RoundedRectangle(cornerRadius: 8)
@@ -39,7 +37,7 @@ struct WishlistCardRow: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text(card.name)
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .lineLimit(2)
                 
                 HStack {
@@ -50,7 +48,7 @@ struct WishlistCardRow: View {
                         Text(card.variant.shortName)
                             .font(.caption)
                             .fontWeight(.bold)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
                             .background(
@@ -78,7 +76,7 @@ struct WishlistCardRow: View {
                 }) {
                     Image(systemName: "plus.circle.fill")
                         .font(.title2)
-                        .foregroundColor(.green)
+                        .foregroundStyle(.green)
                 }
                 
                 Button(action: {
@@ -86,7 +84,7 @@ struct WishlistCardRow: View {
                 }) {
                     Image(systemName: "trash.circle.fill")
                         .font(.title2)
-                        .foregroundColor(.red)
+                        .foregroundStyle(.red)
                 }
             }
         }
@@ -105,7 +103,7 @@ struct WishlistCardRow: View {
         }
         .sheet(isPresented: $showingDetail) {
             WishlistCardDetailView(card: card, isPresented: $showingDetail)
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
     }
 }

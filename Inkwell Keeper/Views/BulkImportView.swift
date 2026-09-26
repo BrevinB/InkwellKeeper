@@ -10,7 +10,7 @@ import UniformTypeIdentifiers
 
 struct BulkImportView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) var collectionManager
 
     @State private var importText = ""
     @State private var showingFilePicker = false
@@ -800,5 +800,5 @@ struct ImportMethodButton: View {
 
 #Preview {
     BulkImportView()
-        .environmentObject(CollectionManager())
+        .environment(CollectionManager())
 }

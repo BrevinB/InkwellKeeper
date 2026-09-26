@@ -27,7 +27,7 @@ struct FilterChip: View {
                                 .stroke(Color.lorcanaGold, lineWidth: 1)
                         )
                 )
-                .foregroundColor(isSelected ? .black : .lorcanaGold)
+                .foregroundStyle(isSelected ? .black : .lorcanaGold)
         }
         .animation(.easeInOut(duration: 0.2), value: isSelected)
     }

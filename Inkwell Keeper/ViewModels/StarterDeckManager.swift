@@ -7,14 +7,15 @@
 
 import Foundation
 import SwiftUI
-import Combine
 
-class StarterDeckManager: ObservableObject {
+@MainActor
+@Observable
+class StarterDeckManager {
     static let shared = StarterDeckManager()
 
-    @Published private(set) var starterDecks: [StarterDeck] = []
-    @Published private(set) var isLoading = false
-    @Published private(set) var errorMessage: String?
+    private(set) var starterDecks: [StarterDeck] = []
+    private(set) var isLoading = false
+    private(set) var errorMessage: String?
 
     private init() {
         loadStarterDecks()

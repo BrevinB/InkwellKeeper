@@ -15,7 +15,7 @@ import SwiftUI
 struct TradeCardPicker: View {
     let onSelect: (LorcanaCard) -> Void
 
-    @EnvironmentObject private var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) private var collectionManager
     @Environment(\.dismiss) private var dismiss
     @State private var query = ""
     @State private var scope: Scope = .owned

@@ -390,7 +390,7 @@ private func makePreviewEntries() -> [ScannedCardEntry] {
             ),
             quantity: 3,
             scannedAt: Date()
-        ),
+        )
     ]
 }
 

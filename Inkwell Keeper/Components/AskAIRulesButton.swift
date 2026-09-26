@@ -14,7 +14,7 @@ struct AskAIRulesButton: View {
     /// Where the button lives ("collectionDetail", "deckDetail", …) for funnel analytics.
     let source: String
 
-    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    private let subscriptionManager = SubscriptionManager.shared
     @State private var showingRulesAssistant = false
 
     var body: some View {

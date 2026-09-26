@@ -52,12 +52,12 @@ struct InkwellKeeperApp: App {
         )
 
         do {
-            let c = try ModelContainer(
+            let container = try ModelContainer(
                 for: CollectedCard.self, CardSet.self, CollectionStats.self,
                 PriceHistory.self, Deck.self, DeckCard.self,
                 configurations: config
             )
-            return c
+            return container
         } catch {
         }
 
@@ -72,12 +72,12 @@ struct InkwellKeeperApp: App {
         }
 
         do {
-            let c = try ModelContainer(
+            let container = try ModelContainer(
                 for: CollectedCard.self, CardSet.self, CollectionStats.self,
                 PriceHistory.self, Deck.self, DeckCard.self,
                 configurations: config
             )
-            return c
+            return container
         } catch {
             fatalError("❌ [ModelContainer] Cannot create container even after store deletion: \(error)")
         }

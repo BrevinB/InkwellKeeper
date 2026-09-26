@@ -9,12 +9,12 @@
 import SwiftUI
 
 struct TradeCalculatorView: View {
-    @EnvironmentObject private var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) private var collectionManager
     @State private var viewModel = TradeCalculatorViewModel()
     @State private var addingTo: TradeCalculatorViewModel.Side?
     @State private var scanningInto: TradeCalculatorViewModel.Side?
     @State private var showingConfirm = false
-    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    private let subscriptionManager = SubscriptionManager.shared
     @State private var showingPaywall = false
 
     var body: some View {
@@ -41,7 +41,7 @@ struct TradeCalculatorView: View {
                     viewModel.add(card, to: side)
                     addingTo = nil
                 }
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
             }
             .sheet(item: $scanningInto) { side in
                 TradeScannerSheet(sideTitle: side.title) { card in

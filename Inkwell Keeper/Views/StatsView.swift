@@ -9,13 +9,13 @@ import SwiftUI
 import SwiftData
 
 struct StatsView: View {
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) var collectionManager
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel = StatsViewModel()
     /// One instance shared by every portfolio card, so the collection's price
     /// history is fetched once per visit rather than once per card.
     @State private var portfolio = PortfolioHistoryViewModel()
-    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    private let subscriptionManager = SubscriptionManager.shared
     @State private var showingPaywall = false
     @State private var isRefreshingPrices = false
     @State private var showingShareImage = false
@@ -100,16 +100,19 @@ struct StatsView: View {
                 }
             }
             .onAppear {
-                viewModel.refresh(context: modelContext)
+                refreshStats()
             }
             .task(id: collectionManager.collectedCards.count) {
                 await portfolio.load(cards: ownedCards())
+            }
+            .onChange(of: portfolio.livePrices) {
+                refreshStats()
             }
             .sheet(isPresented: $showingPaywall) {
                 RulesPaywallView(source: "portfolioHistory")
             }
             .onChange(of: collectionManager.collectedCards.count) { _, _ in
-                viewModel.refresh(context: modelContext)
+                refreshStats()
             }
             .sheet(isPresented: $showingShareImage) {
                 ShareCardPresenter(
@@ -124,6 +127,11 @@ struct StatsView: View {
                 }
             }
         }
+    }
+
+    /// The overview values cards with the chart's live prices so the two totals agree.
+    private func refreshStats() {
+        viewModel.refresh(context: modelContext, livePrices: portfolio.livePrices)
     }
 
     private func presentPaywall() {
@@ -146,7 +154,8 @@ struct StatsView: View {
         isRefreshingPrices = true
         Task {
             await collectionManager.refreshAllPrices()
-            viewModel.refresh(context: modelContext)
+            await portfolio.load(cards: ownedCards(), force: true)
+            refreshStats()
             isRefreshingPrices = false
         }
     }

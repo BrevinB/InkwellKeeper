@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MultiScanReviewView: View {
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) var collectionManager
     var cameraManager: CameraManager
     @Binding var isPresented: Bool
 
@@ -55,7 +55,7 @@ struct MultiScanReviewView: View {
             }
             .sheet(isPresented: $showingExportView, onDismiss: dismissAfterExport) {
                 ExportView(initialDateFilter: .today)
-                    .environmentObject(collectionManager)
+                    .environment(collectionManager)
             }
             .sheet(item: $correctingTarget) { target in
                 ScanCorrectionSearchView { newCard in
@@ -259,8 +259,7 @@ struct ScannedCardRow: View {
             Button(action: onChangeCard) {
                 AsyncImage(url: entry.card.bestImageUrl()) { image in
                     image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
+                        .resizable().scaledToFit()
                 } placeholder: {
                     RoundedRectangle(cornerRadius: 6)
                         .fill(Color.gray.opacity(0.3))
@@ -427,10 +426,10 @@ private func makePreviewCamera() -> CameraManager {
 
 #Preview("With Cards") {
     MultiScanReviewView(cameraManager: makePreviewCamera(), isPresented: .constant(true))
-        .environmentObject(CollectionManager())
+        .environment(CollectionManager())
 }
 
 #Preview("Empty") {
     MultiScanReviewView(cameraManager: CameraManager(), isPresented: .constant(true))
-        .environmentObject(CollectionManager())
+        .environment(CollectionManager())
 }

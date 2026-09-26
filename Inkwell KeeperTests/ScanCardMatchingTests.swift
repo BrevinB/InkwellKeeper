@@ -189,7 +189,7 @@ struct ScanCardMatchingTests {
     /// catalog must be in deterministic set order (main sets by number, then promos) —
     /// dictionary-order iteration reshuffled it every launch, which is what made
     /// wrong-printing bugs feel "random".
-    @Test func catalogFollowsDeterministicSetOrder() async throws {
+    @Test @MainActor func catalogFollowsDeterministicSetOrder() async throws {
         let manager = SetsDataManager.shared
         var attempts = 0
         while !manager.isDataLoaded && attempts < 100 {

@@ -7,8 +7,8 @@ import SwiftUI
 
 struct ManualAddCardView: View {
     @Binding var isPresented: Bool
-    @EnvironmentObject var collectionManager: CollectionManager
-    @StateObject private var dataManager = SetsDataManager.shared
+    @Environment(CollectionManager.self) var collectionManager
+    private let dataManager = SetsDataManager.shared
     @State private var searchText = ""
     @State private var searchResults: [CardGroup] = []
     @State private var searchTask: Task<Void, Never>?
@@ -22,7 +22,7 @@ struct ManualAddCardView: View {
                     .onChange(of: searchText) { _, newValue in
                         searchTask?.cancel()
                         searchTask = Task {
-                            try? await Task.sleep(nanoseconds: 200_000_000)
+                            try? await Task.sleep(for: .milliseconds(200))
                             if !Task.isCancelled {
                                 await MainActor.run {
                                     searchCards(query: newValue)
@@ -35,9 +35,9 @@ struct ManualAddCardView: View {
                     VStack(spacing: 16) {
                         Image(systemName: "magnifyingglass")
                             .font(.largeTitle)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         Text("No cards found for '\(searchText)'")
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                             .multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -45,12 +45,12 @@ struct ManualAddCardView: View {
                     VStack(spacing: 16) {
                         Image(systemName: "magnifyingglass")
                             .font(.largeTitle)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         Text("Search for Lorcana cards")
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         Text("Try searching for character names, types, or sets")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                             .multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -93,7 +93,7 @@ struct ManualAddCardView: View {
                 },
                 isWishlist: false
             )
-            .environmentObject(collectionManager)
+            .environment(collectionManager)
         }
     }
 

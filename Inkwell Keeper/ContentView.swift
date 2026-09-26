@@ -2,8 +2,8 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @StateObject private var collectionManager = CollectionManager()
-    @StateObject private var deckManager = DeckManager()
+    @State private var collectionManager = CollectionManager()
+    @State private var deckManager = DeckManager()
     @Environment(\.modelContext) private var modelContext
     @State private var router = DeepLinkRouter()
     @State private var selectedTab = 0
@@ -68,14 +68,15 @@ struct ContentView: View {
         .sheet(isPresented: $showOnboarding) {
             OnboardingView(onImportTap: {
                 // Delay showing import to allow onboarding to dismiss
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                Task {
+                    try? await Task.sleep(for: .seconds(0.5))
                     showBulkImport = true
                 }
             })
         }
         .sheet(isPresented: $showBulkImport) {
             BulkImportView()
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
         .sheet(isPresented: $showWhatsNew) {
             WhatsNewView()
@@ -88,7 +89,7 @@ struct ContentView: View {
                     set: { if !$0 { deepLinkedCard = nil } }
                 )
             )
-            .environmentObject(collectionManager)
+            .environment(collectionManager)
         }
         .alert("Import Deck", isPresented: Binding(
             get: { deckImportCode != nil },
@@ -136,7 +137,7 @@ struct ContentView: View {
     private var primaryTabs: some TabContent<Int> {
         Tab("Collection", systemImage: "square.grid.3x3.fill", value: 0) {
             CollectionView(selectedTab: $selectedTab)
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
 
         Tab("Scan", systemImage: "viewfinder", value: 1) {
@@ -144,17 +145,17 @@ struct ContentView: View {
                 get: { selectedTab == 1 },
                 set: { _ in }
             ))
-            .environmentObject(collectionManager)
+            .environment(collectionManager)
         }
 
         Tab("Decks", systemImage: "rectangle.stack.fill", value: 3) {
             DecksView()
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
 
         Tab("Stats", systemImage: "chart.bar.fill", value: 4) {
             StatsView()
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
     }
 
@@ -164,12 +165,12 @@ struct ContentView: View {
     private var overflowTabs: some TabContent<Int> {
         Tab("Sets", systemImage: "books.vertical.fill", value: 2) {
             SetsView()
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
 
         Tab("Trades", systemImage: "arrow.left.arrow.right", value: 10) {
             TradeCalculatorView()
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
 
         Tab("Play", systemImage: "gamecontroller.fill", value: 9) {
@@ -178,12 +179,12 @@ struct ContentView: View {
 
         Tab("Wishlist", systemImage: "star.fill", value: 5) {
             WishlistView()
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
 
         Tab("Settings", systemImage: "gear", value: 6) {
             SettingsView()
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
 
         Tab("Support", systemImage: "heart.fill", value: 7) {
@@ -217,7 +218,8 @@ struct ContentView: View {
         let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
         if !hasCompletedOnboarding {
             // Delay showing onboarding slightly to allow the app to fully load
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            Task {
+                try? await Task.sleep(for: .seconds(0.5))
                 showOnboarding = true
             }
         } else {
@@ -229,7 +231,8 @@ struct ContentView: View {
     private func checkWhatsNewStatus() {
         // Show What's New if this is a new version
         if WhatsNewManager.shared.shouldShowWhatsNew {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            Task {
+                try? await Task.sleep(for: .seconds(1.0))
                 showWhatsNew = true
             }
         }

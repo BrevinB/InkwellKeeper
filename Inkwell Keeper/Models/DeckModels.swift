@@ -33,9 +33,9 @@ enum InkColor: String, Codable, CaseIterable, Hashable {
         "circle.fill"
     }
 
-    static func fromString(_ string: String) -> InkColor? {
-        return InkColor(rawValue: string) ??
-               InkColor.allCases.first { $0.rawValue.lowercased() == string.lowercased() }
+    static func fromString(_ string: String) -> Self? {
+        return Self(rawValue: string) ??
+               Self.allCases.first { $0.rawValue.lowercased() == string.lowercased() }
     }
 }
 
@@ -358,7 +358,7 @@ struct DeckStatistics {
     let completionPercentage: Double
     let costToComplete: Double
 
-    static func calculate(for deck: Deck, collectionManager: CollectionManager) -> DeckStatistics {
+    static func calculate(for deck: Deck, collectionManager: CollectionManager) -> Self {
         let cards = deck.cards ?? []
         let totalCards = deck.totalCards
 
@@ -422,7 +422,7 @@ struct DeckStatistics {
 
         let completionPercentage = totalCards > 0 ? (Double(ownedCount) / Double(totalCards)) * 100 : 0
 
-        return DeckStatistics(
+        return Self(
             totalCards: totalCards,
             uniqueCards: cards.count,
             averageCost: avgCost,

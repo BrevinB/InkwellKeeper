@@ -19,15 +19,15 @@ struct CompactPhotoAttachmentView: View {
             HStack {
                 Image(systemName: "camera.fill")
                     .font(.subheadline)
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                 Text("Attach Card Photo")
                     .font(.headline)
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                 Spacer()
                 if !imageAttachments.isEmpty {
                     Text("\(imageAttachments.count)")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 }
             }
 
@@ -42,7 +42,7 @@ struct CompactPhotoAttachmentView: View {
                             Text("Take Photo")
                                 .font(.caption)
                         }
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
                         .background(
@@ -58,7 +58,7 @@ struct CompactPhotoAttachmentView: View {
                             Text("Choose Photo")
                                 .font(.caption)
                         }
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
                         .background(
@@ -74,8 +74,7 @@ struct CompactPhotoAttachmentView: View {
                             if let uiImage = UIImage(data: imageData) {
                                 ZStack(alignment: .topTrailing) {
                                     Image(uiImage: uiImage)
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
+                                        .resizable().scaledToFill()
                                         .frame(width: 70, height: 95)
                                         .clipShape(RoundedRectangle(cornerRadius: 8))
                                         .overlay(
@@ -88,7 +87,7 @@ struct CompactPhotoAttachmentView: View {
                                     } label: {
                                         Image(systemName: "xmark.circle.fill")
                                             .font(.caption)
-                                            .foregroundColor(.white)
+                                            .foregroundStyle(.white)
                                             .background(Circle().fill(Color.black.opacity(0.6)))
                                     }
                                     .offset(x: 4, y: -4)
@@ -110,7 +109,7 @@ struct CompactPhotoAttachmentView: View {
                             VStack(spacing: 4) {
                                 Image(systemName: "plus")
                                     .font(.caption)
-                                    .foregroundColor(.lorcanaGold)
+                                    .foregroundStyle(.lorcanaGold)
                             }
                             .frame(width: 40, height: 95)
                             .background(
@@ -128,14 +127,14 @@ struct CompactPhotoAttachmentView: View {
 
             Text("Optional — attach a photo of your physical card")
                 .font(.caption2)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
         }
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.lorcanaDark.opacity(0.6))
         )
-        .onChange(of: selectedPhotoItem) { newItem in
+        .onChange(of: selectedPhotoItem) { _, newItem in
             guard let newItem else { return }
             Task {
                 if let data = try? await newItem.loadTransferable(type: Data.self),

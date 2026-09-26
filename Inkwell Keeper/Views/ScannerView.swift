@@ -23,9 +23,8 @@ extension View {
     }
 }
 
-
 struct ScannerView: View {
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) var collectionManager
     @State private var cameraManager = CameraManager()
     @State private var showingManualAdd = false
     @State private var showingBatchReview = false
@@ -111,11 +110,11 @@ struct ScannerView: View {
         }
         .sheet(isPresented: $showingManualAdd) {
             ManualAddCardView(isPresented: $showingManualAdd)
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
         .sheet(isPresented: $showingBatchReview) {
             MultiScanReviewView(cameraManager: cameraManager, isPresented: $showingBatchReview)
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
         .sheet(isPresented: $showingCorrectionSearch) {
             ScanCorrectionSearchView { cameraManager.replaceLastScannedCard(with: $0) }
@@ -373,7 +372,7 @@ struct ScanTrayView: View {
                     HStack(spacing: -10) {
                         ForEach(cameraManager.scannedCards.suffix(8).reversed()) { entry in
                             AsyncImage(url: entry.card.bestImageUrl()) { image in
-                                image.resizable().aspectRatio(contentMode: .fit)
+                                image.resizable().scaledToFit()
                             } placeholder: {
                                 RoundedRectangle(cornerRadius: 4).fill(Color.gray.opacity(0.3))
                             }
@@ -490,8 +489,7 @@ struct MultiScanRevealView: View {
             HStack(spacing: 10) {
                 AsyncImage(url: entry.card.bestImageUrl()) { image in
                     image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
+                        .resizable().scaledToFit()
                 } placeholder: {
                     RoundedRectangle(cornerRadius: 5)
                         .fill(Color.gray.opacity(0.3))
@@ -545,7 +543,7 @@ struct MultiScanRevealView: View {
 struct ScanCorrectionSearchView: View {
     let onSelect: (LorcanaCard) -> Void
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var dataManager = SetsDataManager.shared
+    private let dataManager = SetsDataManager.shared
     @State private var searchText = ""
     @State private var searchResults: [LorcanaCard] = []
     @State private var searchTask: Task<Void, Never>?
@@ -636,8 +634,7 @@ struct SetPickerSheet: View {
                     HStack(spacing: 12) {
                         AsyncImage(url: first.bestImageUrl()) { image in
                             image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
+                                .resizable().scaledToFit()
                         } placeholder: {
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color.gray.opacity(0.3))

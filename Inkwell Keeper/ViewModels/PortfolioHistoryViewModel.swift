@@ -25,6 +25,10 @@ final class PortfolioHistoryViewModel {
     private(set) var costBasisEntries: [CostBasisEntry] = []
     private(set) var isLoading = false
     private(set) var hasLoadedOnce = false
+    /// Latest market price per printing (`variantAwareId`), taken from the same
+    /// series the chart is drawn from. The Stats overview values cards with
+    /// these so its total matches the chart's latest point.
+    private(set) var livePrices: [String: Double] = [:]
 
     /// Window the chart covers. The backend holds daily prices from mid-May
     /// 2026, so a longer window simply starts where the data does.
@@ -53,17 +57,31 @@ final class PortfolioHistoryViewModel {
     var highs: [PortfolioExtreme] { extremes.filter { $0.kind == .high } }
     var lows: [PortfolioExtreme] { extremes.filter { $0.kind == .low } }
 
+    /// Backend history is priced in USD only, so live prices and stored-price
+    /// fallbacks are only mixed into the chart when that is the display currency.
+    static var historyMatchesDisplayCurrency: Bool {
+        PricingService.preferredCurrency == "USD"
+    }
+
     /// Collapses the collection to one holding per printing — the same card in
     /// two conditions is two rows but one series.
+    ///
+    /// Quantities are floored at 1 per row, the same rule `StatsViewModel`
+    /// applies, so both surfaces count the same number of cards.
     static func holdings(from cards: [CollectedCard]) -> [PortfolioHolding] {
+        let includeFallbackPrices = historyMatchesDisplayCurrency
         var quantities: [String: Int] = [:]
         var details: [String: (name: String, isFoil: Bool)] = [:]
+        var fallbackPrices: [String: Double] = [:]
         for card in cards {
             let lorcanaCard = card.toLorcanaCard
             let key = lorcanaCard.variantAwareId
-            quantities[key, default: 0] += card.quantity
+            quantities[key, default: 0] += max(1, card.quantity)
             if details[key] == nil {
                 details[key] = (lorcanaCard.name, lorcanaCard.variant != .normal)
+            }
+            if includeFallbackPrices, fallbackPrices[key] == nil, let price = card.price, price > 0 {
+                fallbackPrices[key] = price
             }
         }
         return quantities.map { key, quantity in
@@ -71,7 +89,8 @@ final class PortfolioHistoryViewModel {
                 cardKey: key,
                 quantity: quantity,
                 name: details[key]?.name ?? "",
-                isFoil: details[key]?.isFoil ?? false
+                isFoil: details[key]?.isFoil ?? false,
+                fallbackPrice: fallbackPrices[key]
             )
         }
     }
@@ -80,7 +99,15 @@ final class PortfolioHistoryViewModel {
         guard !isLoading else { return }
 
         let holdings = Self.holdings(from: cards)
-        let signature = holdings.sorted { $0.cardKey < $1.cardKey }.hashValue
+        // Keyed on printings and quantities only: a stored price changing
+        // doesn't alter the history the backend returns, so it shouldn't
+        // invalidate the cached series.
+        var hasher = Hasher()
+        for holding in holdings.sorted(by: { $0.cardKey < $1.cardKey }) {
+            hasher.combine(holding.cardKey)
+            hasher.combine(holding.quantity)
+        }
+        let signature = hasher.finalize()
 
         // Re-fetching costs a few seconds of backend time, so only do it when
         // the collection actually changed or the cached series went stale.
@@ -123,6 +150,7 @@ final class PortfolioHistoryViewModel {
         )
         extremes = PortfolioInsightsBuilder.extremes(holdings: holdings, series: series)
         variantSplit = PortfolioInsightsBuilder.variantSplit(holdings: holdings, series: series)
+        livePrices = Self.historyMatchesDisplayCurrency ? series.compactMapValues { $0.last?.price } : [:]
         hasLoadedOnce = true
     }
 

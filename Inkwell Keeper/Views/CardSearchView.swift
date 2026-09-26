@@ -9,8 +9,8 @@ import SwiftUI
 
 struct CardSearchView: View {
     @Binding var isPresented: Bool
-    @EnvironmentObject var collectionManager: CollectionManager
-    @StateObject private var dataManager = SetsDataManager.shared
+    @Environment(CollectionManager.self) var collectionManager
+    private let dataManager = SetsDataManager.shared
     @State private var searchText = ""
     @State private var allCardGroups: [CardGroup] = []
     @State private var searchResults: [CardGroup] = []
@@ -43,9 +43,9 @@ struct CardSearchView: View {
                     VStack(spacing: 16) {
                         Image(systemName: "magnifyingglass")
                             .font(.largeTitle)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         Text("No cards found for '\(searchText)'")
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                             .multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -53,7 +53,7 @@ struct CardSearchView: View {
                     VStack(spacing: 16) {
                         ProgressView()
                         Text("Loading cards...")
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
@@ -114,7 +114,7 @@ struct CardSearchView: View {
                     selectedCardGroupForAdd = nil
                 }
             )
-            .environmentObject(collectionManager)
+            .environment(collectionManager)
         }
         .sheet(item: $selectedCardGroupForWishlist) { cardGroup in
             AddCardGroupModal(
@@ -131,7 +131,7 @@ struct CardSearchView: View {
                 },
                 isWishlist: true
             )
-            .environmentObject(collectionManager)
+            .environment(collectionManager)
         }
     }
 

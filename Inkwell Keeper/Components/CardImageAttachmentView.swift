@@ -30,14 +30,14 @@ struct CardImageAttachmentView: View {
             HStack {
                 Image(systemName: "camera.fill")
                     .font(.subheadline)
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                 Text("My Card Photos")
                     .font(.headline)
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                 Spacer()
                 Text("\(imageAttachments.count)")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
             }
 
             if !imageAttachments.isEmpty {
@@ -45,8 +45,7 @@ struct CardImageAttachmentView: View {
                     ForEach(Array(imageAttachments.enumerated()), id: \.offset) { index, imageData in
                         if let uiImage = UIImage(data: imageData) {
                             Image(uiImage: uiImage)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
+                                .resizable().scaledToFill()
                                 .frame(height: 100)
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
                                 .overlay(
@@ -78,7 +77,7 @@ struct CardImageAttachmentView: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color.lorcanaDark.opacity(0.8))
         )
-        .onChange(of: selectedPhotoItem) { newItem in
+        .onChange(of: selectedPhotoItem) { _, newItem in
             guard let newItem else { return }
             Task {
                 if let data = try? await newItem.loadTransferable(type: Data.self),
@@ -148,10 +147,10 @@ struct CardImageAttachmentView: View {
             VStack(spacing: 8) {
                 Image(systemName: "plus.circle.fill")
                     .font(.title2)
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                 Text("Add Photo")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
             }
             .frame(maxWidth: imageAttachments.isEmpty ? .infinity : nil)
             .frame(height: 100)
@@ -227,8 +226,7 @@ struct FullscreenPhotoViewer: View {
                     ForEach(Array(images.enumerated()), id: \.offset) { index, imageData in
                         if let uiImage = UIImage(data: imageData) {
                             Image(uiImage: uiImage)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
+                                .resizable().scaledToFit()
                                 .tag(index)
                         }
                     }
@@ -241,13 +239,13 @@ struct FullscreenPhotoViewer: View {
                     Button("Done") {
                         dismiss()
                     }
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                 }
 
                 ToolbarItem(placement: .principal) {
                     Text("\(selectedIndex + 1) of \(images.count)")
                         .font(.subheadline)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -255,7 +253,7 @@ struct FullscreenPhotoViewer: View {
                         showingDeleteConfirmation = true
                     } label: {
                         Image(systemName: "trash")
-                            .foregroundColor(.red)
+                            .foregroundStyle(.red)
                     }
                 }
             }
@@ -266,7 +264,8 @@ struct FullscreenPhotoViewer: View {
             Button("Delete", role: .destructive) {
                 let indexToDelete = selectedIndex
                 dismiss()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                Task {
+                    try? await Task.sleep(for: .seconds(0.3))
                     onDelete(indexToDelete)
                 }
             }

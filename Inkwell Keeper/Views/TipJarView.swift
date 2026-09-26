@@ -7,11 +7,10 @@
 
 import SwiftUI
 import RevenueCat
-import Combine
 
 struct TipJarView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var tipManager = TipJarManager.shared
+    private let tipManager = TipJarManager.shared
     
     @State private var selectedPackage: Package?
     @State private var purchasingPackageId: String?
@@ -73,7 +72,7 @@ struct TipJarView: View {
         VStack(spacing: 12) {
             Image(systemName: "heart.fill")
                 .font(.system(size: 60))
-                .foregroundColor(.lorcanaGold)
+                .foregroundStyle(.lorcanaGold)
             
             Text("Support Ink Well Keeper")
                 .font(.title2)
@@ -81,7 +80,7 @@ struct TipJarView: View {
             
             Text("Ink Well Keeper is free with no ads. If you find it useful, consider leaving a tip to support development!")
                 .font(.body)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
                 .multilineTextAlignment(.center)
         }
         .padding(.vertical)
@@ -113,12 +112,12 @@ struct TipJarView: View {
         VStack(spacing: 8) {
             Text("Tips are optional and do not unlock any features.")
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
                 .multilineTextAlignment(.center)
             
             Text("All Lorcana content remains free per Ravensburger's Community Code Policy.")
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
                 .multilineTextAlignment(.center)
         }
         .padding(.top)
@@ -161,11 +160,11 @@ struct TipOptionCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(product.message)
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
 
                     Text(product.title)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 }
 
                 Spacer()
@@ -178,7 +177,7 @@ struct TipOptionCard: View {
                     Text(package.storeProduct.localizedPriceString)
                         .font(.title3)
                         .fontWeight(.bold)
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                 }
             }
             .padding()

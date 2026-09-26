@@ -50,7 +50,7 @@ struct FilterBar: View {
                             Text("\(activeFilterCount)")
                                 .font(.caption2)
                                 .fontWeight(.bold)
-                                .foregroundColor(.black)
+                                .foregroundStyle(.black)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
                                 .background(Capsule().fill(Color.lorcanaGold))
@@ -59,7 +59,7 @@ struct FilterBar: View {
                         Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                             .font(.caption)
                     }
-                    .foregroundColor(hasActiveFilters ? .lorcanaGold : .gray)
+                    .foregroundStyle(hasActiveFilters ? .lorcanaGold : .gray)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .background(
@@ -113,7 +113,7 @@ struct FilterBar: View {
                         Text(sortOption.displayName)
                             .font(.caption)
                     }
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 8)
                     .background(
@@ -170,7 +170,7 @@ struct FilterBar: View {
                                 Text("Clear All Filters")
                             }
                             .font(.caption)
-                            .foregroundColor(.red.opacity(0.8))
+                            .foregroundStyle(.red.opacity(0.8))
                         }
                         .padding(.top, 4)
                     }
@@ -187,7 +187,7 @@ struct FilterBar: View {
         HStack {
             Text("\(label):")
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
                 .frame(width: 45, alignment: .leading)
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -210,7 +210,7 @@ struct FilterBar: View {
                     .font(.caption)
             }
         }
-        .foregroundColor(color)
+        .foregroundStyle(color)
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .background(
@@ -272,7 +272,7 @@ struct ColorFilterChip: View {
                             .stroke(isSelected ? inkColor.color : Color.clear, lineWidth: 2)
                     )
             )
-            .foregroundColor(isSelected ? inkColor.color : .gray)
+            .foregroundStyle(isSelected ? inkColor.color : .gray)
         }
         .buttonStyle(.plain)
     }
@@ -316,7 +316,7 @@ struct VariantFilterChip: View {
                             .stroke(isSelected ? chipColor : Color.clear, lineWidth: 2)
                     )
             )
-            .foregroundColor(isSelected ? chipColor : .gray)
+            .foregroundStyle(isSelected ? chipColor : .gray)
         }
         .buttonStyle(.plain)
     }

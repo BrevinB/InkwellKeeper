@@ -16,7 +16,7 @@ struct CollectionCostCurveCard: View {
     }
 
     private var hasData: Bool {
-        entries.contains { $0.count > 0 }
+        entries.contains { $0.count > 0 } // swiftlint:disable:this empty_count
     }
 
     var body: some View {
@@ -30,7 +30,7 @@ struct CollectionCostCurveCard: View {
                         y: .value("Count", entry.count)
                     )
                     .foregroundStyle(Color.lorcanaGold.gradient)
-                    .cornerRadius(4)
+                    .cornerRadius(4) // swiftlint:disable:this no_corner_radius
                 }
                 .frame(height: 180)
                 .chartXAxis {

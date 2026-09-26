@@ -45,7 +45,7 @@ struct ValueBySetCard: View {
                         y: .value("Set", shortName(for: entry.setName))
                     )
                     .foregroundStyle(Color.lorcanaGold.gradient)
-                    .cornerRadius(4)
+                    .cornerRadius(4) // swiftlint:disable:this no_corner_radius
                     .annotation(position: .trailing) {
                         Text(PricingService.formatPrice(entry.value))
                             .font(.caption2)

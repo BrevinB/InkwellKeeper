@@ -119,7 +119,7 @@ struct PlayerLoreCard: View {
                 TextField("Name", text: $player.name)
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
                     .textFieldStyle(.plain)
                     .padding(.horizontal, 12)
@@ -131,12 +131,12 @@ struct PlayerLoreCard: View {
                     HStack(spacing: 6) {
                         Image(systemName: "person.fill")
                             .font(.caption2)
-                            .foregroundColor(player.inkColor.color.opacity(0.8))
+                            .foregroundStyle(player.inkColor.color.opacity(0.8))
 
                         Text(player.name)
                             .font(.subheadline)
                             .fontWeight(.semibold)
-                            .foregroundColor(.white.opacity(0.9))
+                            .foregroundStyle(.white.opacity(0.9))
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 5)
@@ -154,7 +154,7 @@ struct PlayerLoreCard: View {
                                     .font(.caption2)
                                     .lineLimit(1)
                             }
-                            .foregroundColor(.lorcanaGold.opacity(0.9))
+                            .foregroundStyle(.lorcanaGold.opacity(0.9))
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
                             .background(Color.lorcanaGold.opacity(0.12), in: Capsule())
@@ -202,7 +202,7 @@ struct PlayerLoreCard: View {
                 // Lore number
                 Text("\(player.lore)")
                     .font(.system(size: size * 0.45, weight: .bold, design: .rounded))
-                    .foregroundColor(hasWon ? .lorcanaGold : .white)
+                    .foregroundStyle(hasWon ? .lorcanaGold : .white)
                     .contentTransition(.numericText())
                     .animation(.snappy, value: player.lore)
 
@@ -210,7 +210,7 @@ struct PlayerLoreCard: View {
                 if hasWon {
                     Text("VICTORY")
                         .font(.system(size: 9, weight: .black, design: .rounded))
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                         .tracking(2)
                         .offset(y: size * 0.28)
                 }
@@ -232,7 +232,10 @@ struct PlayerLoreCard: View {
             Button {
                 minusPressed = true
                 adjustLore(by: -1)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { minusPressed = false }
+                Task {
+                    try? await Task.sleep(for: .seconds(0.15))
+                    minusPressed = false
+                }
             } label: {
                 ZStack {
                     RoundedRectangle(cornerRadius: 14)
@@ -244,7 +247,7 @@ struct PlayerLoreCard: View {
 
                     Image(systemName: "minus")
                         .font(.title2.weight(.bold))
-                        .foregroundColor(player.inkColor.color)
+                        .foregroundStyle(player.inkColor.color)
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 48)
@@ -263,7 +266,10 @@ struct PlayerLoreCard: View {
             Button {
                 plusPressed = true
                 adjustLore(by: 1)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { plusPressed = false }
+                Task {
+                    try? await Task.sleep(for: .seconds(0.15))
+                    plusPressed = false
+                }
             } label: {
                 ZStack {
                     RoundedRectangle(cornerRadius: 14)
@@ -275,7 +281,7 @@ struct PlayerLoreCard: View {
 
                     Image(systemName: "plus")
                         .font(.title2.weight(.bold))
-                        .foregroundColor(player.inkColor.color)
+                        .foregroundStyle(player.inkColor.color)
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 48)
@@ -355,12 +361,12 @@ private struct CustomValuePickerSheet: View {
             VStack(spacing: 24) {
                 Text("Set Lore Value")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
 
                 Stepper(value: $customValue, in: 0...20) {
                     Text("\(customValue)")
                         .font(.system(size: 48, weight: .bold, design: .rounded))
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                         .frame(maxWidth: .infinity)
                 }
                 .tint(inkColor.color)
@@ -376,7 +382,7 @@ private struct CustomValuePickerSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel", action: onCancel)
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                 }
             }
         }

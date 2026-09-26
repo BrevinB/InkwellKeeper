@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftUI
-import Combine
 
 struct LorcanaSet: Identifiable, Codable {
     let id: String
@@ -49,13 +48,15 @@ struct SetCardData: Codable {
     let cards: [LorcanaCard]
 }
 
-class SetsDataManager: ObservableObject {
+@MainActor
+@Observable
+class SetsDataManager {
     static let shared = SetsDataManager()
     
-    @Published private(set) var sets: [LorcanaSet] = []
-    @Published private(set) var isLoading = false
-    @Published private(set) var errorMessage: String?
-    @Published private(set) var isDataLoaded = false
+    private(set) var sets: [LorcanaSet] = []
+    private(set) var isLoading = false
+    private(set) var errorMessage: String?
+    private(set) var isDataLoaded = false
 
     private var setCards: [String: [LorcanaCard]] = [:]
     private let priceCache = PriceCache.shared
@@ -368,11 +369,9 @@ class SetsDataManager: ObservableObject {
     /// Get all set names that a card (by name) appears in
     func getSetsForCard(cardName: String) -> [String] {
         var sets: Set<String> = []
-        for cards in setCards.values {
-            if cards.contains(where: { $0.name == cardName }) {
-                if let setName = cards.first?.setName {
-                    sets.insert(setName)
-                }
+        for cards in setCards.values where cards.contains(where: { $0.name == cardName }) {
+            if let setName = cards.first?.setName {
+                sets.insert(setName)
             }
         }
         return Array(sets).sorted()
@@ -386,11 +385,13 @@ class SetsDataManager: ObservableObject {
 
 // MARK: - Price Caching System
 
-class PriceCache: ObservableObject {
+@MainActor
+@Observable
+class PriceCache {
     static let shared = PriceCache()
     
-    @Published private(set) var isRefreshing = false
-    @Published private(set) var lastRefresh: Date?
+    private(set) var isRefreshing = false
+    private(set) var lastRefresh: Date?
 
     private let priceService = PricingService.shared
     private let userDefaults = UserDefaults.standard
@@ -471,4 +472,3 @@ enum DataError: LocalizedError {
         }
     }
 }
-

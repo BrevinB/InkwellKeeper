@@ -17,11 +17,16 @@ struct PortfolioHolding: Hashable, Sendable {
     /// lookup; the value chart itself does not need it.
     let name: String
     let isFoil: Bool
+    /// Price stored on the collection record, used when the backend has no
+    /// history for this printing so the chart still counts it — otherwise the
+    /// chart's total falls short of the Stats overview, which does count it.
+    let fallbackPrice: Double?
 
-    init(cardKey: String, quantity: Int, name: String = "", isFoil: Bool = false) {
+    init(cardKey: String, quantity: Int, name: String = "", isFoil: Bool = false, fallbackPrice: Double? = nil) {
         self.cardKey = cardKey
         self.quantity = max(0, quantity)
         self.name = name
         self.isFoil = isFoil
+        self.fallbackPrice = fallbackPrice
     }
 }

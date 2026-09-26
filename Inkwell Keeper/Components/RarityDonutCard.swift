@@ -59,7 +59,7 @@ struct RarityDonutCard: View {
                 angularInset: 1.5
             )
             .foregroundStyle(entry.rarity.color)
-            .cornerRadius(4)
+            .cornerRadius(4) // swiftlint:disable:this no_corner_radius
         }
         .chartLegend(.hidden)
         .overlay {

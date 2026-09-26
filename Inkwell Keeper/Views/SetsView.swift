@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct SetsView: View {
-    @EnvironmentObject var collectionManager: CollectionManager
-    @StateObject private var dataManager = SetsDataManager.shared
+    @Environment(CollectionManager.self) var collectionManager
+    private let dataManager = SetsDataManager.shared
     @State private var selectedSet: LorcanaSet?
     /// Upcoming set awaiting the "show spoilers?" confirmation.
     @State private var spoilerPromptSet: LorcanaSet?
@@ -23,20 +23,20 @@ struct SetsView: View {
                     VStack(spacing: 16) {
                         ProgressView()
                         Text("Loading sets...")
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if let errorMessage = dataManager.errorMessage {
                     VStack(spacing: 16) {
                         Image(systemName: "exclamationmark.triangle")
                             .font(.largeTitle)
-                            .foregroundColor(.red)
+                            .foregroundStyle(.red)
                         Text("Error loading sets")
                             .font(.headline)
-                            .foregroundColor(.red)
+                            .foregroundStyle(.red)
                         Text(errorMessage)
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                             .multilineTextAlignment(.center)
                         Button("Retry") {
                             // Data manager handles loading automatically
@@ -49,9 +49,9 @@ struct SetsView: View {
                     VStack(spacing: 16) {
                         Image(systemName: "books.vertical")
                             .font(.largeTitle)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         Text("No sets found")
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
@@ -87,7 +87,7 @@ struct SetsView: View {
                         dataManager.refreshPricesInBackground()
                     }) {
                         Image(systemName: "arrow.clockwise")
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                     }
                 }
             }
@@ -111,7 +111,7 @@ struct SetsView: View {
         }
         .sheet(item: $selectedSet) { set in
             SetDetailView(set: set)
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
                 .presentationSizing(.page)
         }
     }
@@ -144,7 +144,7 @@ struct SetProgressCard: View {
                         Text(set.name)
                             .font(.headline)
                             .fontWeight(.bold)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .lineLimit(2)
 
                         if set.isUpcoming() {
@@ -153,7 +153,7 @@ struct SetProgressCard: View {
 
                         Text("\(progress.collected) of \(progress.total) cards")
                             .font(.subheadline)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                     }
                 
                     Spacer()
@@ -162,11 +162,11 @@ struct SetProgressCard: View {
                         Text("\(Int(progress.percentage))%")
                             .font(.title2)
                             .fontWeight(.bold)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                     
                         Text("Complete")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                 }
             
@@ -212,5 +212,5 @@ struct SetProgressCard: View {
 
 #Preview {
     SetsView()
-        .environmentObject(CollectionManager())
+        .environment(CollectionManager())
 }

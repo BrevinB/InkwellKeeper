@@ -10,17 +10,17 @@ import SwiftUI
 // MARK: - AI Deck Builder View (Create New Deck)
 struct AIDeckBuilderView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var deckManager: DeckManager
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(DeckManager.self) var deckManager
+    @Environment(CollectionManager.self) var collectionManager
     @State private var aiService = AIDeckService.shared
-    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    private let subscriptionManager = SubscriptionManager.shared
 
     @State private var deckName = ""
     @State private var selectedFormat: DeckFormat = .casual
     @State private var selectedColors: Set<InkColor> = []
     /// Inks ruled out via "Try Different Inks" while the AI is picking inks.
     @State private var excludedInks: Set<InkColor> = []
-    @State private var selectedArchetype: DeckArchetype? = nil
+    @State private var selectedArchetype: DeckArchetype?
     @State private var userPrompt = ""
     @State private var useCollectionOnly = false
     @State private var hasGenerated = false
@@ -709,10 +709,10 @@ struct AIDeckBuilderView: View {
 struct AIDeckCompleterView: View {
     let deck: Deck
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var deckManager: DeckManager
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(DeckManager.self) var deckManager
+    @Environment(CollectionManager.self) var collectionManager
     @State private var aiService = AIDeckService.shared
-    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    private let subscriptionManager = SubscriptionManager.shared
 
     @State private var additionalNotes = ""
     @State private var useCollectionOnly = false
@@ -1316,8 +1316,8 @@ struct AIDeckCompleterView: View {
 // MARK: - Suggestion Row
 struct AISuggestionRow: View {
     let suggestion: AIDeckSuggestion
-    var onReplace: (() -> Void)? = nil
-    var onDelete: (() -> Void)? = nil
+    var onReplace: (() -> Void)?
+    var onDelete: (() -> Void)?
 
     var isMatched: Bool {
         suggestion.matchedCard != nil
@@ -1432,11 +1432,11 @@ struct CardSelectionView: View {
     let mode: Mode
     let aiService: AIDeckService
     var collectionOnly: Bool = false
-    var collectionManager: CollectionManager? = nil
+    var collectionManager: CollectionManager?
     @Environment(\.dismiss) private var dismiss
 
     @State private var searchText = ""
-    @State private var selectedCard: LorcanaCard? = nil
+    @State private var selectedCard: LorcanaCard?
     @State private var quantity: Int = 1
 
     private let resultLimit = 50
@@ -1753,7 +1753,7 @@ struct AIDeckStrategyView: View {
     let deck: Deck
     @Environment(\.dismiss) private var dismiss
     @State private var aiService = AIDeckService.shared
-    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    private let subscriptionManager = SubscriptionManager.shared
 
     @State private var hasStarted = false
     @State private var strategyTask: Task<Void, Never>?

@@ -102,35 +102,35 @@ enum ExportField: String, CaseIterable, Identifiable {
     }
 
     /// Fields that are on by default
-    static var defaultFields: Set<ExportField> {
+    static var defaultFields: Set<Self> {
         [.cardName, .setName, .cardNumber, .variant, .quantity]
     }
 
     /// Group fields by category for UI
-    static var coreFields: [ExportField] {
+    static var coreFields: [Self] {
         [.cardName, .setName, .cardNumber, .variant, .quantity]
     }
 
-    static var cardDetailFields: [ExportField] {
+    static var cardDetailFields: [Self] {
         [.rarity, .inkColor, .cardType, .cost]
     }
 
-    static var statFields: [ExportField] {
+    static var statFields: [Self] {
         [.strength, .willpower, .lore, .inkwell]
     }
 
-    static var additionalFields: [ExportField] {
+    static var additionalFields: [Self] {
         [.franchise, .price, .uniqueId]
     }
 
-    static var collectionFields: [ExportField] {
+    static var collectionFields: [Self] {
         [.condition, .notes, .dateAdded]
     }
 }
 
 struct ExportView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) var collectionManager
 
     var initialDateFilter: DateRangePreset?
 
@@ -147,7 +147,7 @@ struct ExportView: View {
     @State private var customStartDate = Calendar.current.startOfDay(for: Date())
     @State private var customEndDate = Date()
 
-    @StateObject private var dataManager = SetsDataManager.shared
+    private let dataManager = SetsDataManager.shared
 
     enum DateRangePreset: String, CaseIterable {
         case today = "Today"
@@ -330,16 +330,16 @@ struct ExportView: View {
         VStack(spacing: 12) {
             Image(systemName: "arrow.up.doc.fill")
                 .font(.system(size: 50))
-                .foregroundColor(.lorcanaGold)
+                .foregroundStyle(.lorcanaGold)
 
             Text("Export Your Collection")
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
 
             Text("Generate a CSV file that you can backup, share, or import into other apps")
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
         }
@@ -354,7 +354,7 @@ struct ExportView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("What to Export")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
 
             ForEach(ExportOption.allCases, id: \.self) { option in
                 Button(action: {
@@ -362,21 +362,21 @@ struct ExportView: View {
                 }) {
                     HStack(spacing: 12) {
                         Image(systemName: exportOption == option ? "checkmark.circle.fill" : "circle")
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                             .font(.title3)
 
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
                                 Image(systemName: option.icon)
-                                    .foregroundColor(.lorcanaGold)
+                                    .foregroundStyle(.lorcanaGold)
                                 Text(option.rawValue)
                                     .font(.body)
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                             }
 
                             Text(option.description)
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
                         }
 
                         Spacer()
@@ -384,7 +384,7 @@ struct ExportView: View {
                         // Show count
                         Text("\(getCardCount(for: option)) cards")
                             .font(.caption)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
                             .background(
@@ -407,7 +407,7 @@ struct ExportView: View {
             HStack {
                 Text("Select Sets")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
 
                 Spacer()
 
@@ -420,7 +420,7 @@ struct ExportView: View {
                 }) {
                     Text(selectedSets.count == availableSets.count ? "Deselect All" : "Select All")
                         .font(.caption)
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                 }
             }
 
@@ -434,17 +434,17 @@ struct ExportView: View {
                 }) {
                     HStack {
                         Image(systemName: selectedSets.contains(setName) ? "checkmark.square.fill" : "square")
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
 
                         Text(setName)
                             .font(.body)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
 
                         Spacer()
 
                         Text("\(getCardCountForSet(setName)) cards")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                     .padding()
                     .background(
@@ -461,10 +461,10 @@ struct ExportView: View {
             Toggle(isOn: $filterByDate) {
                 HStack(spacing: 8) {
                     Image(systemName: "calendar.badge.clock")
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                     Text("Filter by Date Added")
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                 }
             }
             .tint(Color.lorcanaGold)
@@ -476,22 +476,22 @@ struct ExportView: View {
                     } label: {
                         HStack(spacing: 12) {
                             Image(systemName: dateRangePreset == preset ? "checkmark.circle.fill" : "circle")
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                                 .font(.title3)
 
                             Image(systemName: preset.icon)
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                                 .frame(width: 24)
 
                             Text(preset.rawValue)
                                 .font(.body)
-                                .foregroundColor(.white)
+                                .foregroundStyle(.white)
 
                             Spacer()
 
                             Text("\(getFilteredCardCount(for: preset)) cards")
                                 .font(.caption)
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
                                 .background(
@@ -516,7 +516,7 @@ struct ExportView: View {
                             displayedComponents: .date
                         )
                         .datePickerStyle(.compact)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .tint(Color.lorcanaGold)
 
                         DatePicker(
@@ -526,7 +526,7 @@ struct ExportView: View {
                             displayedComponents: .date
                         )
                         .datePickerStyle(.compact)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .tint(Color.lorcanaGold)
                     }
                     .padding()
@@ -543,7 +543,7 @@ struct ExportView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Export Format")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
 
             ForEach(ExportFormat.allCases, id: \.self) { format in
                 Button(action: {
@@ -551,22 +551,22 @@ struct ExportView: View {
                 }) {
                     HStack(spacing: 12) {
                         Image(systemName: exportFormat == format ? "checkmark.circle.fill" : "circle")
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                             .font(.title3)
 
                         Image(systemName: format.icon)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                             .frame(width: 24)
 
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
                                 Text(format.rawValue)
                                     .font(.body)
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
 
                                 Text(".\(format.fileExtension)")
                                     .font(.caption)
-                                    .foregroundColor(.gray)
+                                    .foregroundStyle(.gray)
                                     .padding(.horizontal, 6)
                                     .padding(.vertical, 2)
                                     .background(
@@ -577,7 +577,7 @@ struct ExportView: View {
 
                             Text(format.description)
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
                         }
 
                         Spacer()
@@ -597,34 +597,34 @@ struct ExportView: View {
             HStack {
                 Text("Export Fields")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
 
                 Spacer()
 
                 Text("\(selectedFields.count) selected")
                     .font(.caption)
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
             }
 
             // Quick summary of selected fields
             Text(selectedFieldsSummary)
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
                 .lineLimit(2)
 
             Button(action: { showingFieldSelection = true }) {
                 HStack {
                     Image(systemName: "checklist")
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
 
                     Text("Choose Fields to Export")
                         .font(.body)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
 
                     Spacer()
 
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 }
                 .padding()
                 .background(
@@ -655,7 +655,7 @@ struct ExportView: View {
             Text(title)
                 .font(.caption)
                 .fontWeight(.medium)
-                .foregroundColor(selectedFields == fields ? .black : .lorcanaGold)
+                .foregroundStyle(selectedFields == fields ? .black : .lorcanaGold)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(
@@ -669,7 +669,7 @@ struct ExportView: View {
         VStack(spacing: 12) {
             Text("Export Preview")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             HStack(spacing: 16) {
@@ -705,16 +705,16 @@ struct ExportView: View {
         VStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.title2)
-                .foregroundColor(.lorcanaGold)
+                .foregroundStyle(.lorcanaGold)
 
             Text(value)
                 .font(.title3)
                 .fontWeight(.bold)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
 
             Text(title)
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
         }
         .frame(maxWidth: .infinity)
         .padding()
@@ -746,10 +746,10 @@ struct ExportView: View {
             dict[set.name] = (numeric, set.releaseDate ?? "")
         }
         return Array(allSets).sorted { lhs, rhs in
-            let l = setOrder[lhs] ?? (Int.max, "")
-            let r = setOrder[rhs] ?? (Int.max, "")
-            if l.0 != r.0 { return l.0 < r.0 }
-            if l.1 != r.1 { return l.1 < r.1 }
+            let lhsOrder = setOrder[lhs] ?? (Int.max, "")
+            let rhsOrder = setOrder[rhs] ?? (Int.max, "")
+            if lhsOrder.0 != rhsOrder.0 { return lhsOrder.0 < rhsOrder.0 }
+            if lhsOrder.1 != rhsOrder.1 { return lhsOrder.1 < rhsOrder.1 }
             return lhs < rhs
         }
     }
@@ -1293,19 +1293,19 @@ struct FieldSelectionView: View {
         Button(action: { toggleField(field) }) {
             HStack(spacing: 12) {
                 Image(systemName: selectedFields.contains(field) ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(selectedFields.contains(field) ? .lorcanaGold : .gray)
+                    .foregroundStyle(selectedFields.contains(field) ? .lorcanaGold : .gray)
                     .font(.title3)
 
                 Image(systemName: field.icon)
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                     .frame(width: 24)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(field.rawValue)
-                        .foregroundColor(.primary)
+                        .foregroundStyle(.primary)
                     Text(field.description)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 }
 
                 Spacer()
@@ -1345,5 +1345,5 @@ struct ShareSheet: UIViewControllerRepresentable {
 
 #Preview {
     ExportView()
-        .environmentObject(CollectionManager())
+        .environment(CollectionManager())
 }

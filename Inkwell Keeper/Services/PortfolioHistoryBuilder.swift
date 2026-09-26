@@ -23,6 +23,10 @@ enum PortfolioHistoryBuilder {
     /// or one the backend only began tracking later) carries its earliest known
     /// price backwards. Leaving it at zero instead would draw a jump on the day
     /// tracking started, which reads as a gain that never happened.
+    ///
+    /// A holding with no series at all is valued flat at its `fallbackPrice`,
+    /// so the latest point equals the Stats overview total. A flat line adds
+    /// value without adding movement.
     static func dailyValues(
         holdings: [PortfolioHolding],
         series: [String: [PricingService.PortfolioPricePoint]]
@@ -31,6 +35,12 @@ enum PortfolioHistoryBuilder {
             holding.quantity > 0 && !(series[holding.cardKey] ?? []).isEmpty
         }
         guard !priced.isEmpty else { return [] }
+
+        let unseriesedTotal = holdings.reduce(0.0) { total, holding in
+            guard (series[holding.cardKey] ?? []).isEmpty,
+                  let fallback = holding.fallbackPrice, fallback > 0 else { return total }
+            return total + fallback * Double(holding.quantity)
+        }
 
         let allDays = priced.flatMap { series[$0.cardKey]?.map(\.day) ?? [] }
         guard let firstDay = windowStart(observationDays: allDays),
@@ -43,7 +53,7 @@ enum PortfolioHistoryBuilder {
         points.reserveCapacity(lastDay - firstDay + 1)
 
         for day in firstDay...lastDay {
-            var total = 0.0
+            var total = unseriesedTotal
             for (index, holding) in priced.enumerated() {
                 guard let cardSeries = series[holding.cardKey], !cardSeries.isEmpty else { continue }
                 var cursor = cursors[index]

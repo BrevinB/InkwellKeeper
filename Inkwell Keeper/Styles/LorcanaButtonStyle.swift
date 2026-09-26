@@ -21,7 +21,7 @@ struct LorcanaButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundColor(style == .primary ? .black : .lorcanaGold)
+            .foregroundStyle(style == .primary ? .black : .lorcanaGold)
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 12)

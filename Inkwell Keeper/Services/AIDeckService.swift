@@ -767,10 +767,8 @@ class AIDeckService {
         // Deduplicate cards by name (same card can appear in multiple sets)
         var seen = Set<String>()
         var uniqueCards: [LorcanaCard] = []
-        for card in filteredCards.sorted(by: { $0.name < $1.name }) {
-            if seen.insert(card.name).inserted {
-                uniqueCards.append(card)
-            }
+        for card in filteredCards.sorted(by: { $0.name < $1.name }) where seen.insert(card.name).inserted {
+            uniqueCards.append(card)
         }
         filteredCards = uniqueCards
 
@@ -1357,7 +1355,7 @@ class AIDeckService {
             (6...6, 6),    // max 6 total cards at cost 6
             (7...7, 4),    // max 4 total cards at cost 7
             (8...8, 3),    // max 3 total cards at cost 8
-            (9...99, 2),   // max 2 total cards at cost 9+
+            (9...99, 2)   // max 2 total cards at cost 9+
         ]
 
         for bracket in bracketLimits {
@@ -1531,7 +1529,7 @@ class AIDeckService {
         "gargoyles": ["goliath", "demona", "david xanatos", "elisa", "brooklyn", "broadway", "lexington", "hudson", "angela"],
         "atlantis": ["milo", "kida", "rourke", "helga", "vinny", "audrey"],
         "big hero": ["hiro", "baymax", "honey lemon", "gogo", "wasabi", "fred", "yokai"],
-        "baymax": ["hiro", "baymax", "honey lemon", "gogo", "wasabi", "fred", "yokai"],
+        "baymax": ["hiro", "baymax", "honey lemon", "gogo", "wasabi", "fred", "yokai"]
     ]
 
     /// Extracts meaningful keywords from the user's description for card matching.
@@ -1543,11 +1541,9 @@ class AIDeckService {
 
         // Collect character names from any matching franchise triggers
         var expandedKeywords: Set<String> = []
-        for (trigger, characters) in franchiseCharacters {
-            if descLower.contains(trigger) {
-                for character in characters {
-                    expandedKeywords.insert(character)
-                }
+        for (trigger, characters) in franchiseCharacters where descLower.contains(trigger) {
+            for character in characters {
+                expandedKeywords.insert(character)
             }
         }
 

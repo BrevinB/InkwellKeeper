@@ -16,7 +16,7 @@ struct InkableRatioCard: View {
         [
             Entry(category: "Inkable", count: inkable, color: Color.lorcanaGold),
             Entry(category: "Non-Inkable", count: nonInkable, color: Color.gray.opacity(0.6))
-        ].filter { $0.count > 0 }
+        ].filter { $0.count > 0 } // swiftlint:disable:this empty_count
     }
 
     var body: some View {
@@ -32,7 +32,7 @@ struct InkableRatioCard: View {
                             angularInset: 1.5
                         )
                         .foregroundStyle(entry.color)
-                        .cornerRadius(4)
+                        .cornerRadius(4) // swiftlint:disable:this no_corner_radius
                     }
                     .chartLegend(.hidden)
                     .frame(width: 120, height: 120)

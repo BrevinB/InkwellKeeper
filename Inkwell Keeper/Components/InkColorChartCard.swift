@@ -32,7 +32,7 @@ struct InkColorChartCard: View {
                         y: .value("Count", entry.count)
                     )
                     .foregroundStyle(entry.ink.color)
-                    .cornerRadius(4)
+                    .cornerRadius(4) // swiftlint:disable:this no_corner_radius
                     .annotation(position: .top) {
                         Text("\(entry.count)")
                             .font(.caption2)

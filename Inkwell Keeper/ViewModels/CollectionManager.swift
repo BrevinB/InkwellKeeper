@@ -8,22 +8,23 @@
 import SwiftUI
 import SwiftData
 import Foundation
-import Combine
 import CoreData
 
-class CollectionManager: ObservableObject {
+@MainActor
+@Observable
+class CollectionManager {
     private var modelContext: ModelContext?
     private let pricingService = PricingService.shared
 
     /// Observer token for CloudKit remote-change notifications.
-    private var remoteChangeObserver: NSObjectProtocol?
+    @ObservationIgnored private var remoteChangeObserver: NSObjectProtocol?
     /// Pending coalesced reload scheduled by `scheduleRemoteChangeReload()`.
-    private var remoteChangeReloadTask: Task<Void, Never>?
+    @ObservationIgnored private var remoteChangeReloadTask: Task<Void, Never>?
 
-    @Published var collectedCards: [LorcanaCard] = []
-    @Published var wishlistCards: [LorcanaCard] = []
+    var collectedCards: [LorcanaCard] = []
+    var wishlistCards: [LorcanaCard] = []
     /// Card key ("name||setName") → total owned quantity (normal + foil), for AI deck building
-    @Published var collectedCardQuantities: [String: Int] = [:]
+    var collectedCardQuantities: [String: Int] = [:]
 
     /// O(1) ownership lookups, rebuilt whenever the collected set changes (see `rebuildCollectedIndexes`).
     /// These replace per-card SwiftData fetches in hot paths such as deck-statistics calculation and
@@ -95,7 +96,7 @@ class CollectionManager: ObservableObject {
     }
 
     /// CloudKit imports changes on a background context and posts
-    /// `.NSPersistentStoreRemoteChange`. Our @Published arrays are populated by manual
+    /// `.NSPersistentStoreRemoteChange`. Our observed arrays are populated by manual
     /// fetches, so we reload whenever synced data lands.
     private func startObservingRemoteChanges() {
         guard remoteChangeObserver == nil else { return }
@@ -203,7 +204,7 @@ class CollectionManager: ObservableObject {
 
     @MainActor
     private func performBulkAddRepair(context: ModelContext) {
-        let masterSpecialVariants: [String: CardVariant] = {
+        let canonicalSpecialVariants: [String: CardVariant] = {
             var map: [String: CardVariant] = [:]
             for card in SetsDataManager.shared.getAllCards() {
                 guard let uid = card.uniqueId, !uid.isEmpty else { continue }
@@ -216,7 +217,7 @@ class CollectionManager: ObservableObject {
             }
             return map
         }()
-        guard !masterSpecialVariants.isEmpty else { return }
+        guard !canonicalSpecialVariants.isEmpty else { return }
 
         do {
             let allCards = try context.fetch(FetchDescriptor<CollectedCard>())
@@ -233,7 +234,7 @@ class CollectionManager: ObservableObject {
             for record in allCards {
                 guard record.cardVariant == .normal,
                       let uid = record.uniqueId, !uid.isEmpty,
-                      let correctVariant = masterSpecialVariants[uid] else { continue }
+                      let correctVariant = canonicalSpecialVariants[uid] else { continue }
 
                 let targetKey = "\(uid)|\(correctVariant.rawValue)"
                 if let collision = existingByKey[targetKey], collision !== record {
@@ -971,18 +972,23 @@ class CollectionManager: ObservableObject {
             let price = await pricingService.getMarketPrice(for: card)
 
             if let updatedPrice = price {
-                // Match by uniqueId or name+set to find the stored card
+                // Match by uniqueId or name+set, plus variant: legacy foils share
+                // their base card's uniqueId, so matching without the variant
+                // wrote a foil's price onto the normal copy and vice versa.
+                let variantString = card.variant.rawValue
                 let cardsToUpdate: [CollectedCard]
                 if let uniqueId = card.uniqueId, !uniqueId.isEmpty {
                     let descriptor = FetchDescriptor<CollectedCard>(
-                        predicate: #Predicate<CollectedCard> { $0.uniqueId == uniqueId }
+                        predicate: #Predicate<CollectedCard> { $0.uniqueId == uniqueId && $0.variant == variantString }
                     )
                     cardsToUpdate = try context.fetch(descriptor)
                 } else {
                     let cardName = card.name
                     let setName = card.setName
                     let descriptor = FetchDescriptor<CollectedCard>(
-                        predicate: #Predicate<CollectedCard> { $0.name == cardName && $0.setName == setName }
+                        predicate: #Predicate<CollectedCard> {
+                            $0.name == cardName && $0.setName == setName && $0.variant == variantString
+                        }
                     )
                     cardsToUpdate = try context.fetch(descriptor)
                 }

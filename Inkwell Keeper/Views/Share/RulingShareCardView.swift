@@ -54,8 +54,7 @@ struct RulingShareCardView: View {
                     HStack(spacing: 6) {
                         ForEach(cardImages, id: \.0) { _, image in
                             Image(uiImage: image)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
+                                .resizable().scaledToFit()
                                 .frame(height: 96)
                                 .clipShape(.rect(cornerRadius: 6))
                                 .overlay(

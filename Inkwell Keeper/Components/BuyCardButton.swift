@@ -15,7 +15,7 @@ struct BuyCardOptionsView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Check Prices")
                 .font(.headline)
-                .foregroundColor(.lorcanaGold)
+                .foregroundStyle(.lorcanaGold)
 
             ForEach(buyOptions.indices, id: \.self) { index in
                 let option = buyOptions[index]
@@ -34,23 +34,23 @@ struct BuyCardOptionsView: View {
                             Text(option.platform)
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
-                                .foregroundColor(.white)
+                                .foregroundStyle(.white)
 
                             if let price = option.price {
                                 Text("From $\(price, specifier: "%.2f")")
                                     .font(.caption)
-                                    .foregroundColor(.gray)
+                                    .foregroundStyle(.gray)
                             } else {
                                 Text("View Prices →")
                                     .font(.caption)
-                                    .foregroundColor(.gray)
+                                    .foregroundStyle(.gray)
                             }
                         }
 
                         Spacer()
 
                         Image(systemName: "arrow.up.right.square")
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                     }
                     .padding()
                     .background(
@@ -67,7 +67,7 @@ struct BuyCardOptionsView: View {
             if buyOptions.isEmpty {
                 Text("Buy options loading...")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                     .padding()
             }
         }
@@ -96,11 +96,11 @@ struct CompactBuyButton: View {
             }
             .font(.caption)
             .fontWeight(.semibold)
-            .foregroundColor(.white)
+            .foregroundStyle(.white)
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
             .background(Color.lorcanaGold)
-            .cornerRadius(8)
+            .clipShape(.rect(cornerRadius: 8))
         }
         .sheet(isPresented: $showingOptions) {
             BuyCardSheet(card: card)
@@ -120,8 +120,7 @@ struct BuyCardSheet: View {
                 HStack(spacing: 16) {
                     AsyncImage(url: card.bestImageUrl()) { image in
                         image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
+                            .resizable().scaledToFit()
                     } placeholder: {
                         RoundedRectangle(cornerRadius: 8)
                             .fill(Color.gray.opacity(0.3))
@@ -132,7 +131,7 @@ struct BuyCardSheet: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(card.name)
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
 
                         RarityBadge(rarity: card.rarity)
                     }
@@ -151,7 +150,7 @@ struct BuyCardSheet: View {
 
                 Text("Prices shown are from affiliated retailers.")
                     .font(.caption2)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                     .multilineTextAlignment(.center)
                     .padding()
             }

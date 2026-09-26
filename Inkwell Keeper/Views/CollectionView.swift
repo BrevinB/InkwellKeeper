@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CollectionView: View {
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) var collectionManager
     @Binding var selectedTab: Int
     @State private var searchText = ""
     @State private var selectedFilter: CardFilter = .all
@@ -62,7 +62,7 @@ struct CollectionView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingCardSearch = true }) {
                         Image(systemName: "magnifyingglass")
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                     }
                     .accessibilityLabel("Search card catalog")
                     .keyboardShortcut("f", modifiers: .command)
@@ -81,7 +81,7 @@ struct CollectionView: View {
                         Divider()
                         
                         CollectionStatsButton()
-                            .environmentObject(collectionManager)
+                            .environment(collectionManager)
                         
                         Divider()
                         
@@ -90,7 +90,7 @@ struct CollectionView: View {
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                     }
                 }
             }
@@ -121,23 +121,23 @@ struct CollectionView: View {
         }
         .sheet(isPresented: $showingManualAdd) {
             ManualAddCardView(isPresented: $showingManualAdd)
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
         .sheet(isPresented: $showingBulkImport) {
             BulkImportView()
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
         .sheet(isPresented: $showingExport) {
             ExportView()
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
         .sheet(isPresented: $showingCardSearch) {
             CardSearchView(isPresented: $showingCardSearch)
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
                 .presentationSizing(.page)
         }
     }
@@ -197,10 +197,10 @@ struct CollectionView: View {
                 dict[set.name] = (numeric, set.releaseDate ?? "")
             }
             cards.sort { lhs, rhs in
-                let l = setOrder[lhs.setName] ?? (Int.max, "")
-                let r = setOrder[rhs.setName] ?? (Int.max, "")
-                if l.0 != r.0 { return l.0 < r.0 }
-                if l.1 != r.1 { return l.1 < r.1 }
+                let lhsOrder = setOrder[lhs.setName] ?? (Int.max, "")
+                let rhsOrder = setOrder[rhs.setName] ?? (Int.max, "")
+                if lhsOrder.0 != rhsOrder.0 { return lhsOrder.0 < rhsOrder.0 }
+                if lhsOrder.1 != rhsOrder.1 { return lhsOrder.1 < rhsOrder.1 }
                 return lhs.setName < rhs.setName
             }
         case .price:

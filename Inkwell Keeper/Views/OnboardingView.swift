@@ -27,7 +27,7 @@ struct OnboardingView: View {
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title2)
-                            .foregroundColor(.gray.opacity(0.6))
+                            .foregroundStyle(.gray.opacity(0.6))
                     }
                     .padding()
                 }
@@ -65,21 +65,21 @@ struct OnboardingView: View {
 
             Image(systemName: "square.grid.3x3.fill")
                 .font(.system(size: 80))
-                .foregroundColor(.lorcanaGold)
+                .foregroundStyle(.lorcanaGold)
 
             VStack(spacing: 12) {
                 Text("Welcome to")
                     .font(.title2)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
 
                 Text("Ink Well Keeper")
                     .font(.system(size: 36, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
             }
 
             Text("Your ultimate Disney Lorcana collection manager")
                 .font(.body)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
 
@@ -87,7 +87,7 @@ struct OnboardingView: View {
 
             Text("Free • No Ads • No Tracking")
                 .font(.caption)
-                .foregroundColor(.gray.opacity(0.6))
+                .foregroundStyle(.gray.opacity(0.6))
 
             Spacer()
         }
@@ -99,7 +99,7 @@ struct OnboardingView: View {
 
             Text("Powerful Features")
                 .font(.system(size: 32, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
 
             VStack(spacing: 24) {
                 featureRow(
@@ -138,16 +138,16 @@ struct OnboardingView: View {
 
             Image(systemName: "square.and.arrow.down.fill")
                 .font(.system(size: 70))
-                .foregroundColor(.lorcanaGold)
+                .foregroundStyle(.lorcanaGold)
 
             VStack(spacing: 12) {
                 Text("Import Your Collection")
                     .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
 
                 Text("Already tracking cards on Dreamborn.ink?")
                     .font(.body)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                     .multilineTextAlignment(.center)
             }
 
@@ -166,7 +166,7 @@ struct OnboardingView: View {
 
             Text("You can also add cards manually or by scanning anytime!")
                 .font(.caption)
-                .foregroundColor(.gray.opacity(0.8))
+                .foregroundStyle(.gray.opacity(0.8))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
 
@@ -180,17 +180,17 @@ struct OnboardingView: View {
         HStack(alignment: .top, spacing: 16) {
             Image(systemName: icon)
                 .font(.title2)
-                .foregroundColor(.lorcanaGold)
+                .foregroundStyle(.lorcanaGold)
                 .frame(width: 32)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
 
                 Text(description)
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
             }
 
             Spacer()
@@ -202,7 +202,7 @@ struct OnboardingView: View {
             Text("\(number)")
                 .font(.caption)
                 .fontWeight(.bold)
-                .foregroundColor(.black)
+                .foregroundStyle(.black)
                 .frame(width: 24, height: 24)
                 .background(
                     Circle()
@@ -211,7 +211,7 @@ struct OnboardingView: View {
 
             Text(text)
                 .font(.subheadline)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
 
             Spacer()
         }
@@ -226,7 +226,7 @@ struct OnboardingView: View {
                 } label: {
                     Text("Skip for Now")
                         .font(.headline)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
                         .background(
@@ -241,7 +241,7 @@ struct OnboardingView: View {
                 } label: {
                     Text("Import Now")
                         .font(.headline)
-                        .foregroundColor(.black)
+                        .foregroundStyle(.black)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
                         .background(
@@ -258,7 +258,7 @@ struct OnboardingView: View {
                 } label: {
                     Text("Next")
                         .font(.headline)
-                        .foregroundColor(.black)
+                        .foregroundStyle(.black)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
                         .background(

@@ -51,8 +51,12 @@ identifier_name:
   min_length: 2          # allow short names like `id`, `x`, `vm`
   excluded:
     - id
+    - i                  # loop indices
     - x
     - y
+
+empty_count:
+  only_after_dot: true   # bare `count` is usually an Int property, not a collection
 
 type_name:
   max_length:

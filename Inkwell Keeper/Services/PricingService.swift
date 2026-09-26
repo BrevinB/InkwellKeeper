@@ -6,9 +6,8 @@
 //
 
 import Foundation
-import Combine
 
-class PricingService: ObservableObject {
+class PricingService {
     static let shared = PricingService()
 
     static func formatPrice(_ value: Double) -> String {
@@ -170,7 +169,7 @@ class PricingService: ObservableObject {
             }
 
             let variantPrices = Self.marketRows(variant: card.variant, in: pricing.prices)
-            let preferred = PricingService.preferredCurrency
+            let preferred = Self.preferredCurrency
             let preferredPrices = variantPrices.filter { $0.currency == preferred && $0.condition == condition }
             let relevantPrices: [PriceData]
             if !preferredPrices.isEmpty {
@@ -203,7 +202,7 @@ class PricingService: ObservableObject {
             }
 
             let variantPrices = Self.marketRows(variant: card.variant, in: pricing.prices)
-            let preferred = PricingService.preferredCurrency
+            let preferred = Self.preferredCurrency
             let preferredConditionPrices = variantPrices.filter { $0.currency == preferred && $0.condition == condition }
             let conditionPrices = variantPrices.filter { $0.condition == condition }
             let preferredAllPrices = variantPrices.filter { $0.currency == preferred }
@@ -340,7 +339,7 @@ class PricingService: ObservableObject {
         "Hyperia City": "HYC",
         "Promo Set 4": "P4",
         "Curator's Collection: Heroines Edition": "CC1",
-        "Attack of the Vine!": "AOV",
+        "Attack of the Vine!": "AOV"
     ]
 
     private static func setCode(for setName: String) -> String {
@@ -349,7 +348,7 @@ class PricingService: ObservableObject {
 
     private func buildUniqueId(for card: LorcanaCard) -> String {
         // Always construct from set code + card number to match backend format (e.g., "TFC-1")
-        let code = PricingService.setCode(for: card.setName)
+        let code = Self.setCode(for: card.setName)
         if let cardNum = card.cardNumber {
             return "\(code)-\(cardNum)"
         }
@@ -518,27 +517,27 @@ class PricingService: ObservableObject {
         let decoder = JSONDecoder()
         let inkwellResponse = try decoder.decode(InkwellPriceResponse.self, from: data)
 
-        let prices: [PriceData] = inkwellResponse.prices.flatMap { p -> [PriceData] in
-            let cardCondition = CardCondition(rawValue: p.condition) ?? condition
+        let prices: [PriceData] = inkwellResponse.prices.flatMap { row -> [PriceData] in
+            let cardCondition = CardCondition(rawValue: row.condition) ?? condition
             var entries: [PriceData] = []
-            if let usd = p.priceUsd {
+            if let usd = row.priceUsd {
                 entries.append(PriceData(
                     price: usd,
                     condition: cardCondition,
                     currency: "USD",
-                    marketplace: p.marketplace,
+                    marketplace: row.marketplace,
                     url: nil,
-                    confidence: p.confidence
+                    confidence: row.confidence
                 ))
             }
-            if let eur = p.priceEur {
+            if let eur = row.priceEur {
                 entries.append(PriceData(
                     price: eur,
                     condition: cardCondition,
                     currency: "EUR",
-                    marketplace: p.marketplace,
+                    marketplace: row.marketplace,
                     url: nil,
-                    confidence: p.confidence
+                    confidence: row.confidence
                 ))
             }
             return entries
@@ -669,7 +668,7 @@ class PricingService: ObservableObject {
             }
 
             // Card number match
-            if let apiNum = apiCard.card_number, let cardNum = card.cardNumber {
+            if let apiNum = apiCard.cardNumber, let cardNum = card.cardNumber {
                 let apiNumInt = Int(apiNum.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression))
                 if apiNumInt == cardNum {
                     score += 20
@@ -697,7 +696,7 @@ class PricingService: ObservableObject {
 
         if let cardmarketPrices = apiCard.prices?.cardmarket {
             // Near Mint price from Cardmarket
-            if let nmPrice = cardmarketPrices.lowest_near_mint, nmPrice > 0 {
+            if let nmPrice = cardmarketPrices.lowestNearMint, nmPrice > 0 {
                 // Convert EUR to approximate USD (1 EUR ~ 1.08 USD)
                 let usdPrice = nmPrice * 1.08
                 prices.append(PriceData(
@@ -721,7 +720,7 @@ class PricingService: ObservableObject {
             }
 
             // Regional prices for additional data points
-            if let dePrice = cardmarketPrices.lowest_near_mint_DE, dePrice > 0 {
+            if let dePrice = cardmarketPrices.lowestNearMintDE, dePrice > 0 {
                 prices.append(PriceData(
                     price: dePrice * 1.08,
                     condition: .nearMint,
@@ -732,7 +731,7 @@ class PricingService: ObservableObject {
                 ))
             }
 
-            if let frPrice = cardmarketPrices.lowest_near_mint_FR, frPrice > 0 {
+            if let frPrice = cardmarketPrices.lowestNearMintFR, frPrice > 0 {
                 prices.append(PriceData(
                     price: frPrice * 1.08,
                     condition: .nearMint,
@@ -743,7 +742,7 @@ class PricingService: ObservableObject {
                 ))
             }
 
-            if let itPrice = cardmarketPrices.lowest_near_mint_IT, itPrice > 0 {
+            if let itPrice = cardmarketPrices.lowestNearMintIT, itPrice > 0 {
                 prices.append(PriceData(
                     price: itPrice * 1.08,
                     condition: .nearMint,
@@ -810,15 +809,21 @@ class PricingService: ObservableObject {
     struct LorcanaAPICard: Codable {
         let id: Int?
         let name: String
-        let name_numbered: String?
+        let nameNumbered: String?
         let slug: String?
         let type: String?
-        let card_number: String?
+        let cardNumber: String?
         let rarity: String?
         let prices: LorcanaAPIPrices?
         let episode: LorcanaAPIEpisode?
         let artist: LorcanaAPIArtist?
         let image: String?
+
+        enum CodingKeys: String, CodingKey {
+            case id, name, slug, type, rarity, prices, episode, artist, image
+            case nameNumbered = "name_numbered"
+            case cardNumber = "card_number"
+        }
     }
 
     struct LorcanaAPIPrices: Codable {
@@ -828,10 +833,18 @@ class PricingService: ObservableObject {
 
     struct LorcanaCardmarketPrices: Codable {
         let currency: String?
-        let lowest_near_mint: Double?
-        let lowest_near_mint_DE: Double?
-        let lowest_near_mint_FR: Double?
-        let lowest_near_mint_IT: Double?
+        let lowestNearMint: Double?
+        let lowestNearMintDE: Double?
+        let lowestNearMintFR: Double?
+        let lowestNearMintIT: Double?
+
+        enum CodingKeys: String, CodingKey {
+            case currency
+            case lowestNearMint = "lowest_near_mint"
+            case lowestNearMintDE = "lowest_near_mint_DE"
+            case lowestNearMintFR = "lowest_near_mint_FR"
+            case lowestNearMintIT = "lowest_near_mint_IT"
+        }
     }
 
     struct LorcanaTCGPlayerPrices: Codable {
@@ -845,7 +858,12 @@ class PricingService: ObservableObject {
         let id: Int?
         let name: String?
         let slug: String?
-        let released_at: String?
+        let releasedAt: String?
+
+        enum CodingKeys: String, CodingKey {
+            case id, name, slug
+            case releasedAt = "released_at"
+        }
     }
 
     struct LorcanaAPIArtist: Codable {

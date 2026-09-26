@@ -37,12 +37,12 @@ final class SpoilerSettings {
     private(set) var revealedCardIds: Set<String> = []
 
     @ObservationIgnored private let defaults: UserDefaults
-    @ObservationIgnored private let releaseDateForSet: (String) -> String?
+    @ObservationIgnored private let releaseDateForSet: @MainActor (String) -> String?
     @ObservationIgnored private let now: () -> Date
 
     init(
         defaults: UserDefaults = .standard,
-        releaseDateForSet: @escaping (String) -> String? = { SetsDataManager.shared.getSet(byName: $0)?.releaseDate },
+        releaseDateForSet: @escaping @MainActor (String) -> String? = { SetsDataManager.shared.getSet(byName: $0)?.releaseDate },
         now: @escaping () -> Date = { .now }
     ) {
         self.defaults = defaults

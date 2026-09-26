@@ -78,8 +78,7 @@ struct OpeningHandView: View {
                 } label: {
                     AsyncImage(url: card.bestImageUrl()) { image in
                         image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
+                            .resizable().scaledToFit()
                     } placeholder: {
                         RoundedRectangle(cornerRadius: 6)
                             .fill(Color.lorcanaDark.opacity(0.8))

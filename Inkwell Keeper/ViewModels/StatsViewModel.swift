@@ -15,19 +15,24 @@ final class StatsViewModel {
     private(set) var snapshot: CollectionStatsSnapshot = .empty
 
     /// Recompute the snapshot from the SwiftData model context.
-    func refresh(context: ModelContext) {
+    ///
+    /// - Parameter livePrices: Latest market price per printing (`variantAwareId`)
+    ///   from the portfolio history. Preferred over the price stored on each record,
+    ///   which is only as fresh as the last refresh, so the overview agrees with
+    ///   the Collection Value chart.
+    func refresh(context: ModelContext, livePrices: [String: Double] = [:]) {
         do {
             let descriptor = FetchDescriptor<CollectedCard>(
                 predicate: #Predicate { $0.isWishlisted == false }
             )
             let records = try context.fetch(descriptor)
-            snapshot = Self.buildSnapshot(from: records)
+            snapshot = Self.buildSnapshot(from: records, livePrices: livePrices)
         } catch {
             snapshot = .empty
         }
     }
 
-    private static func buildSnapshot(from records: [CollectedCard]) -> CollectionStatsSnapshot {
+    private static func buildSnapshot(from records: [CollectedCard], livePrices: [String: Double]) -> CollectionStatsSnapshot {
         // Build a name→inkable lookup from the bundled card data so we can compute
         // inkable/non-inkable ratios even though CollectedCard doesn't persist the flag.
         let inkableLookup: [String: Bool] = {
@@ -79,7 +84,7 @@ final class StatsViewModel {
                 }
             }
 
-            if let price = record.price, price > 0 {
+            if let price = livePrices[card.variantAwareId] ?? record.price, price > 0 {
                 pricedCardCount += quantity
                 let stackValue = price * Double(quantity)
                 totalValue += stackValue
@@ -145,7 +150,7 @@ struct CollectionStatsSnapshot {
     let topValuable: [TopValuableCard]
     let recentCards: [LorcanaCard]
 
-    static let empty = CollectionStatsSnapshot(
+    static let empty = Self(
         totalCards: 0,
         uniqueCards: 0,
         totalValue: 0,

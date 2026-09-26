@@ -17,7 +17,7 @@ struct RulesPaywallView: View {
 
     private var context: PaywallContext { .forSource(source) }
 
-    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    private let subscriptionManager = SubscriptionManager.shared
     @State private var selectedPackage: Package?
     @State private var isPurchasing = false
     @State private var showError = false

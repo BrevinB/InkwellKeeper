@@ -11,7 +11,7 @@ import SwiftData
 struct RulesAssistantView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var service = RulesAssistantService.shared
-    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    private let subscriptionManager = SubscriptionManager.shared
     @State private var inputText = ""
     @State private var showingHistory = false
     @State private var showingSaveAlert = false
@@ -744,8 +744,7 @@ struct RulesInputBar: View {
         HStack(spacing: 8) {
             AsyncImage(url: card.bestImageUrl()) { image in
                 image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .resizable().scaledToFit()
             } placeholder: {
                 RoundedRectangle(cornerRadius: 3)
                     .fill(Color.gray.opacity(0.3))
@@ -794,8 +793,7 @@ struct RulesInputBar: View {
                     HStack(spacing: 6) {
                         AsyncImage(url: card.bestImageUrl()) { image in
                             image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
+                                .resizable().scaledToFit()
                         } placeholder: {
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(Color.gray.opacity(0.3))
@@ -1264,8 +1262,7 @@ struct AttachedCardThumbnail: View {
         VStack(spacing: 3) {
             AsyncImage(url: URL(string: card.imageUrl)) { image in
                 image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .resizable().scaledToFit()
             } placeholder: {
                 RoundedRectangle(cornerRadius: 6)
                     .fill(Color.gray.opacity(0.3))
@@ -1408,7 +1405,7 @@ struct TypingIndicator: View {
 // MARK: - Card Search Sheet
 
 struct CardSearchSheet: View {
-    @StateObject private var dataManager = SetsDataManager.shared
+    private let dataManager = SetsDataManager.shared
     @Binding var attachedCards: [LorcanaCard]
     @Binding var isPresented: Bool
     @State private var searchText = ""
@@ -1636,8 +1633,7 @@ struct CardSearchSheet: View {
             HStack(spacing: 12) {
                 AsyncImage(url: card.bestImageUrl()) { image in
                     image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
+                        .resizable().scaledToFit()
                 } placeholder: {
                     RoundedRectangle(cornerRadius: 4)
                         .fill(Color.gray.opacity(0.3))

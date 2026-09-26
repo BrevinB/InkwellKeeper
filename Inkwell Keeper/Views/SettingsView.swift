@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) var collectionManager
 
     let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
     let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
@@ -108,7 +108,7 @@ struct SettingsView: View {
 
                     Text("Unofficial Lorcana Collection Tracker")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 }
 
                 Spacer()
@@ -120,7 +120,7 @@ struct SettingsView: View {
                     .overlay(
                         Image(systemName: "square.stack.3d.up.fill")
                             .font(.title)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                     )
             }
 
@@ -128,13 +128,13 @@ struct SettingsView: View {
                 Text("Version")
                 Spacer()
                 Text("\(appVersion) (\(buildNumber))")
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
             }
 
             Button(action: { showingWhatsNew = true }) {
                 HStack {
                     Label("What's New", systemImage: "sparkles")
-                        .foregroundColor(.primary)
+                        .foregroundStyle(.primary)
 
                     Spacer()
 
@@ -172,7 +172,7 @@ struct SettingsView: View {
                 Label("Total Cards", systemImage: "rectangle.stack.fill")
                 Spacer()
                 Text("\(collectionManager.collectedCards.count)")
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                     .fontWeight(.semibold)
             }
 
@@ -180,7 +180,7 @@ struct SettingsView: View {
                 Label("Wishlist", systemImage: "heart.fill")
                 Spacer()
                 Text("\(collectionManager.wishlistCards.count)")
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                     .fontWeight(.semibold)
             }
 
@@ -188,7 +188,7 @@ struct SettingsView: View {
                 Label("Total Value", systemImage: "dollarsign.circle.fill")
                 Spacer()
                 Text(totalCollectionValue)
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                     .fontWeight(.semibold)
             }
         }
@@ -198,17 +198,17 @@ struct SettingsView: View {
         Section("Legal") {
             Button(action: { showingPricingInfo = true }) {
                 Label("About Pricing", systemImage: "tag.fill")
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
             }
 
             Button(action: { showingDisclaimer = true }) {
                 Label("Disclaimer", systemImage: "exclamationmark.triangle.fill")
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
             }
 
             Button(action: { showingPrivacyPolicy = true }) {
                 Label("Privacy Policy", systemImage: "hand.raised.fill")
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
             }
 
             Link(destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!) {
@@ -229,12 +229,12 @@ struct SettingsView: View {
 
             Button(action: requestReview) {
                 Label("Rate App", systemImage: "star.fill")
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
             }
 
             Button(action: shareApp) {
                 Label("Share App", systemImage: "square.and.arrow.up.fill")
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
             }
         }
     }
@@ -244,11 +244,11 @@ struct SettingsView: View {
             Button(action: { showingTipJar = true }) {
                 HStack {
                     Label("Support Development", systemImage: "heart.fill")
-                        .foregroundColor(.primary)
+                        .foregroundStyle(.primary)
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 }
             }
         } footer: {
@@ -265,28 +265,28 @@ struct SettingsView: View {
                 }
             }) {
                 Label("Refresh All Prices", systemImage: "arrow.clockwise")
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
             }
 
             Button(action: {
                 // Clear cache
             }) {
                 Label("Clear Image Cache", systemImage: "trash.fill")
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
             }
 
             Button(action: {
                 resetOnboarding()
             }) {
                 Label("Reset Onboarding", systemImage: "arrow.counterclockwise")
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
             }
 
             Button(action: {
                 showingDeleteConfirmation = true
             }) {
                 Label("Delete All Data", systemImage: "trash.fill")
-                    .foregroundColor(.red)
+                    .foregroundStyle(.red)
             }
         }
     }
@@ -307,28 +307,28 @@ struct SettingsView: View {
                     ProgressView()
                         .padding(.trailing, 8)
                     Text(addCardsProgress)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 }
             } else {
                 Button(action: {
                     showingAddSomeConfirmation = true
                 }) {
                     Label("Add Some Cards (50)", systemImage: "plus.rectangle.on.rectangle")
-                        .foregroundColor(.orange)
+                        .foregroundStyle(.orange)
                 }
 
                 Button(action: {
                     showingAddMoreConfirmation = true
                 }) {
                     Label("Add More Cards (200)", systemImage: "plus.rectangle.fill.on.rectangle.fill")
-                        .foregroundColor(.orange)
+                        .foregroundStyle(.orange)
                 }
 
                 Button(action: {
                     showingAddAllConfirmation = true
                 }) {
                     Label("Add All Cards", systemImage: "rectangle.stack.fill.badge.plus")
-                        .foregroundColor(.orange)
+                        .foregroundStyle(.orange)
                 }
             }
         }
@@ -348,16 +348,16 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Image(systemName: "doc.text.fill")
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                         Text("Community Code Policy")
                             .font(.subheadline)
                             .fontWeight(.semibold)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                     }
 
                     Text("This app uses trademarks and/or copyrights associated with Disney Lorcana TCG, under Ravensburger's Community Code Policy.")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 }
 
                 Divider()
@@ -367,20 +367,20 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Image(systemName: "info.circle.fill")
-                            .foregroundColor(.blue)
+                            .foregroundStyle(.blue)
                         Text("Official Disclaimer")
                             .font(.subheadline)
                             .fontWeight(.semibold)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                     }
 
                     Text("This app is not published, endorsed, or specifically approved by Disney or Ravensburger.")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
 
                     Text("The developer is expressly prohibited from charging you to use or access this content.")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 }
 
                 Divider()
@@ -391,7 +391,7 @@ struct SettingsView: View {
                     Link(destination: URL(string: "https://www.disneylorcana.com/")!) {
                         HStack {
                             Image(systemName: "link")
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                             Text("Disney Lorcana Official Website")
                                 .font(.caption)
                             Spacer()
@@ -403,7 +403,7 @@ struct SettingsView: View {
                     Link(destination: URL(string: "https://cdn.ravensburger.com/lorcana/community-code-en")!) {
                         HStack {
                             Image(systemName: "link")
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                             Text("Community Code Policy Document")
                                 .font(.caption)
                             Spacer()
@@ -422,19 +422,19 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Ink Well Keeper is an unofficial, fan-made collection tracking app for Disney Lorcana.")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
 
                 Text("This app is not affiliated with, endorsed by, or sponsored by Disney or Ravensburger.")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
 
                 Text("All card images, names, and game elements are property of their respective owners.")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
 
                 Text("Made with ❤️ for the Lorcana community")
                     .font(.caption)
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
             }
             .padding(.vertical, 8)
         }
@@ -536,7 +536,7 @@ struct DisclaimerView: View {
                     Text("⚠️ Important Disclaimer")
                         .font(.title)
                         .fontWeight(.bold)
-                        .foregroundColor(.orange)
+                        .foregroundStyle(.orange)
 
                     disclaimerText
 
@@ -801,5 +801,5 @@ import StoreKit
 
 #Preview {
     SettingsView()
-        .environmentObject(CollectionManager())
+        .environment(CollectionManager())
 }

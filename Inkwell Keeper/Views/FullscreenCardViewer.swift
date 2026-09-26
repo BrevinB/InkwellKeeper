@@ -26,7 +26,7 @@ struct FullscreenCardViewer: View {
                             Button(action: { dismiss() }) {
                                 Image(systemName: "xmark.circle.fill")
                                     .font(.title)
-                                    .foregroundColor(.white.opacity(0.7))
+                                    .foregroundStyle(.white.opacity(0.7))
                             }
                             .accessibilityLabel("Close card viewer")
                             .keyboardShortcut(.cancelAction)
@@ -45,7 +45,7 @@ struct FullscreenCardViewer: View {
                         Text(card.name)
                             .font(.title2)
                             .fontWeight(.semibold)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
 
@@ -54,7 +54,7 @@ struct FullscreenCardViewer: View {
                             Text(card.variant.displayName)
                                 .font(.caption)
                                 .fontWeight(.medium)
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundStyle(.white.opacity(0.8))
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
                                 .background(
@@ -68,7 +68,7 @@ struct FullscreenCardViewer: View {
                         // Hint text
                         Text("Tilt your device to see the holographic effect")
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundStyle(.white.opacity(0.5))
                             .padding(.bottom, 30)
                     }
                     .frame(maxWidth: .infinity)

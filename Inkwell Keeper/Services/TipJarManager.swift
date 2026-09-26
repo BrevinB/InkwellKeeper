@@ -7,14 +7,15 @@
 
 import RevenueCat
 import SwiftUI
-import Combine
 
-class TipJarManager: ObservableObject {
+@MainActor
+@Observable
+class TipJarManager {
     static let shared = TipJarManager()
 
-    @Published var offerings: [Package] = []
-    @Published var isLoading = false
-    @Published var hasPurchasedAnyTip = false
+    var offerings: [Package] = []
+    var isLoading = false
+    var hasPurchasedAnyTip = false
 
     private init() {}
 

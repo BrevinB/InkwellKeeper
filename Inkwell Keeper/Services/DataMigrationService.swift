@@ -8,7 +8,6 @@
 
 import Foundation
 import SwiftData
-import Combine
 
 /// Result of a migration operation
 struct MigrationResult {
@@ -76,7 +75,7 @@ class DataMigrationService {
             let variant = CardVariant(rawValue: collected.variant ?? "Normal") ?? .normal
 
             // Try to find matching new card
-            var newCard: LorcanaCard? = nil
+            var newCard: LorcanaCard?
             var matchMethod = ""
 
             // Strategy 1: Match by old ID in migration map
@@ -286,4 +285,3 @@ enum MigrationError: Error {
     case backupFailed
     case restoreFailed
 }
-

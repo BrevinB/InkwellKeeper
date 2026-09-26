@@ -79,8 +79,7 @@ struct CoconutLeaderPicker: View {
                         } label: {
                             AsyncImage(url: imageURL) { image in
                                 image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
+                                    .resizable().scaledToFit()
                             } placeholder: {
                                 RoundedRectangle(cornerRadius: 6)
                                     .fill(Color.gray.opacity(0.3))
@@ -144,8 +143,7 @@ struct CoconutLeaderDetailSheet: View {
                         if let imageURL = CoconutLeaderImageService.shared.imageURL(for: leader) {
                             AsyncImage(url: imageURL) { image in
                                 image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
+                                    .resizable().scaledToFit()
                             } placeholder: {
                                 RoundedRectangle(cornerRadius: 12)
                                     .fill(Color.gray.opacity(0.3))

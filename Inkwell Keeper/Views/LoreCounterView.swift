@@ -61,18 +61,18 @@ struct LoreCounterView: View {
 
                     Image(systemName: "sparkles")
                         .font(.system(size: 32))
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                 }
                 .padding(.bottom, 8)
 
                 Text("Lore Counter")
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
 
                 Text("Track lore for your game")
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundStyle(.white.opacity(0.6))
             }
 
             Spacer()
@@ -109,20 +109,20 @@ struct LoreCounterView: View {
                         HStack(spacing: 14) {
                             Image(systemName: option.icon)
                                 .font(.title3)
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                                 .frame(width: 32)
 
                             Text(option.label)
                                 .font(.title3)
                                 .fontWeight(.semibold)
-                                .foregroundColor(.white)
+                                .foregroundStyle(.white)
 
                             Spacer()
 
                             Image(systemName: "chevron.right")
                                 .font(.caption)
                                 .fontWeight(.semibold)
-                                .foregroundColor(.white.opacity(0.4))
+                                .foregroundStyle(.white.opacity(0.4))
                         }
                         .padding(.horizontal, 20)
                         .padding(.vertical, 18)
@@ -180,7 +180,7 @@ struct LoreCounterView: View {
                         Text("Back")
                             .font(.body)
                     }
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                 }
                 Spacer()
             }
@@ -193,11 +193,11 @@ struct LoreCounterView: View {
                 Text("Choose Your Ink")
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
 
                 Text("Select a color for each player")
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundStyle(.white.opacity(0.6))
 
                 VStack(spacing: 16) {
                     ForEach(players.indices, id: \.self) { index in
@@ -222,7 +222,7 @@ struct LoreCounterView: View {
                         .font(.title3)
                         .fontWeight(.bold)
                 }
-                .foregroundColor(.lorcanaDark)
+                .foregroundStyle(.lorcanaDark)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(
@@ -241,7 +241,7 @@ struct LoreCounterView: View {
                 // Player name
                 Text(players[index].name)
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .frame(width: 90, alignment: .leading)
 
                 Spacer()
@@ -313,18 +313,18 @@ struct LoreCounterView: View {
             HStack(spacing: 8) {
                 Image(systemName: "crown.fill")
                     .font(.caption)
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
 
                 Text(players[index].coconutLeader ?? "Choose a Coconut leader")
                     .font(.caption)
-                    .foregroundColor(players[index].coconutLeader == nil ? .white.opacity(0.6) : .white)
+                    .foregroundStyle(players[index].coconutLeader == nil ? .white.opacity(0.6) : .white)
                     .lineLimit(1)
 
                 Spacer()
 
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.caption2)
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundStyle(.white.opacity(0.4))
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
@@ -435,7 +435,7 @@ private struct LoreGameView: View {
         } label: {
             Image(systemName: "ellipsis")
                 .font(.footnote.weight(.bold))
-                .foregroundColor(.white.opacity(0.9))
+                .foregroundStyle(.white.opacity(0.9))
                 .frame(width: 44, height: 44)
                 .background(.ultraThinMaterial, in: Circle())
                 .shadow(color: .black.opacity(0.3), radius: 8, y: 2)
@@ -533,16 +533,16 @@ private struct LoreGameView: View {
             List {
                 if history.isEmpty {
                     Text("No history yet")
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                 } else {
                     ForEach(history) { entry in
                         HStack {
                             Text("\(entry.playerName): \(entry.previousValue) → \(entry.newValue)")
-                                .foregroundColor(.white)
+                                .foregroundStyle(.white)
                             Spacer()
                             Text(entry.timestamp, style: .relative)
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
                         }
                         .listRowBackground(Color.lorcanaDark)
                     }
@@ -555,14 +555,14 @@ private struct LoreGameView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") { showHistory = false }
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if !history.isEmpty {
                         Button("Clear") {
                             history.removeAll()
                         }
-                        .foregroundColor(.red)
+                        .foregroundStyle(.red)
                     }
                 }
             }

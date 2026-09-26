@@ -7,15 +7,16 @@
 
 import RevenueCat
 import SwiftUI
-import Combine
 
-class SubscriptionManager: ObservableObject {
+@MainActor
+@Observable
+class SubscriptionManager {
     static let shared = SubscriptionManager()
 
-    @Published var isSubscribed = false
-    @Published var currentOffering: Offering?
-    @Published var isLoading = false
-    @Published var error: String?
+    var isSubscribed = false
+    var currentOffering: Offering?
+    var isLoading = false
+    var error: String?
 
     static let entitlementID = "Ink Well Keeper Pro"
     static let offeringID = "default"

@@ -137,7 +137,7 @@ struct CoconutFormatTests {
             cards: []
         )
         let data = try JSONEncoder().encode(payload)
-        let json = String(decoding: data, as: UTF8.self)
+        let json = try #require(String(bytes: data, encoding: .utf8))
         #expect(json.contains("\"l\""))
 
         let decoded = try JSONDecoder().decode(DeckManager.CompactShareableDeck.self, from: data)

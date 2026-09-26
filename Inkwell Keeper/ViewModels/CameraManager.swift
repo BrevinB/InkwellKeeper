@@ -29,16 +29,16 @@ class CameraManager: NSObject {
     var showCaptureFlash = false
     var isAutoScanEnabled = false
     var isAutoScanPaused = false
-    var autoScanStatus: String? = nil
+    var autoScanStatus: String?
     // Multi-scan (batch) is the only mode — scans always accumulate into the tray.
     var isMultiScanMode = true
     var scannedCards: [ScannedCardEntry] = []
-    var lastScannedCardName: String? = nil
-    var lastScannedEntry: ScannedCardEntry? = nil
+    var lastScannedCardName: String?
+    var lastScannedEntry: ScannedCardEntry?
     var isFoilMode = false
     var isCorrectionActive = false
     // Set disambiguation — when scanner can't determine which set a reprint belongs to
-    var pendingSetChoices: [LorcanaCard]? = nil
+    var pendingSetChoices: [LorcanaCard]?
 
     // Bumped on each successful multi-scan add; drives the center-reveal animation.
     var scanEventID = 0

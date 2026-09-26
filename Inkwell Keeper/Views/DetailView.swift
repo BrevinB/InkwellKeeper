@@ -10,7 +10,7 @@ import SwiftUI
 struct CardDetailView: View {
     let card: LorcanaCard
     @Binding var isPresented: Bool
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) var collectionManager
     
     var body: some View {
         NavigationStack {
@@ -18,8 +18,7 @@ struct CardDetailView: View {
                 VStack(spacing: 20) {
                     AsyncImage(url: card.bestImageUrl()) { image in
                         image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
+                            .resizable().scaledToFit()
                     } placeholder: {
                         RoundedRectangle(cornerRadius: 12)
                             .fill(Color.gray.opacity(0.3))
@@ -35,7 +34,7 @@ struct CardDetailView: View {
 
                         Text(card.setName)
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
 
                         HStack {
                             RarityBadge(rarity: card.rarity)
@@ -45,7 +44,7 @@ struct CardDetailView: View {
                         if !card.cardText.isEmpty {
                             CardTextView(text: card.cardText)
                                 .font(.body)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
 
                         AsyncPriceWithConfidenceView(card: card, style: .detailed)
@@ -83,7 +82,7 @@ struct CollectionCardDetailView: View {
     let card: LorcanaCard
     @Binding var isPresented: Bool
     var showAllVariants: Bool = false
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) var collectionManager
     @State private var collectedCard: CollectedCard?
     @State private var tempQuantity: Int = 1
     @State private var foilCollectedCard: CollectedCard?
@@ -129,8 +128,8 @@ struct CollectionCardDetailView: View {
     /// Whether to show the foil section — only when opened from Sets view and card supports foil
     private var showFoilSection: Bool {
         guard showAllVariants else { return false }
-        let v = card.variant
-        return v == .normal || v == .foil
+        let variant = card.variant
+        return variant == .normal || variant == .foil
     }
 
     /// The card to display — switches to foil variant when foil art toggle is on
@@ -162,7 +161,7 @@ struct CollectionCardDetailView: View {
                                         .font(.caption)
                                         .fontWeight(.semibold)
                                 }
-                                .foregroundColor(showFoilArt ? .lorcanaDark : .lorcanaGold)
+                                .foregroundStyle(showFoilArt ? .lorcanaDark : .lorcanaGold)
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 8)
                                 .background(
@@ -183,11 +182,11 @@ struct CollectionCardDetailView: View {
                             Text(card.name)
                                 .font(.title)
                                 .fontWeight(.bold)
-                                .foregroundColor(.white)
+                                .foregroundStyle(.white)
 
                             Text(card.setName)
                                 .font(.subheadline)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
 
                             HStack {
                                 RarityBadge(rarity: card.rarity)
@@ -195,7 +194,7 @@ struct CollectionCardDetailView: View {
                                 Text(card.variant.displayName)
                                     .font(.caption)
                                     .fontWeight(.semibold)
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 4)
                                     .background(
@@ -215,21 +214,21 @@ struct CollectionCardDetailView: View {
                                         HStack {
                                             Text("Date Added:")
                                                 .font(.subheadline)
-                                                .foregroundColor(.gray)
+                                                .foregroundStyle(.gray)
                                             Spacer()
                                             Text(collected.dateAdded, style: .date)
                                                 .font(.subheadline)
-                                                .foregroundColor(.white)
+                                                .foregroundStyle(.white)
                                         }
 
                                         HStack {
                                             Text("Condition:")
                                                 .font(.subheadline)
-                                                .foregroundColor(.gray)
+                                                .foregroundStyle(.gray)
                                             Spacer()
                                             Text(collected.condition)
                                                 .font(.subheadline)
-                                                .foregroundColor(.white)
+                                                .foregroundStyle(.white)
                                         }
 
                                         PurchasePriceRow(collected: collected)
@@ -245,26 +244,26 @@ struct CollectionCardDetailView: View {
                                             HStack {
                                                 Text("Deck Usage")
                                                     .font(.headline)
-                                                    .foregroundColor(.lorcanaGold)
+                                                    .foregroundStyle(.lorcanaGold)
                                                 Spacer()
                                                 Text("\(available) available")
                                                     .font(.subheadline)
                                                     .fontWeight(.semibold)
-                                                    .foregroundColor(available > 0 ? .green : .red)
+                                                    .foregroundStyle(available > 0 ? .green : .red)
                                             }
 
                                             ForEach(deckAllocations, id: \.deckName) { allocation in
                                                 HStack {
                                                     Image(systemName: "rectangle.stack.fill")
                                                         .font(.caption)
-                                                        .foregroundColor(.lorcanaGold.opacity(0.7))
+                                                        .foregroundStyle(.lorcanaGold.opacity(0.7))
                                                     Text(allocation.deckName)
                                                         .font(.subheadline)
-                                                        .foregroundColor(.white)
+                                                        .foregroundStyle(.white)
                                                     Spacer()
                                                     Text("\(allocation.quantity) used")
                                                         .font(.subheadline)
-                                                        .foregroundColor(.gray)
+                                                        .foregroundStyle(.gray)
                                                 }
                                             }
                                         }
@@ -278,10 +277,10 @@ struct CollectionCardDetailView: View {
                                 VStack(alignment: .leading, spacing: 8) {
                                     Text("Card Text:")
                                         .font(.headline)
-                                        .foregroundColor(.lorcanaGold)
+                                        .foregroundStyle(.lorcanaGold)
                                     CardTextView(text: card.cardText)
                                         .font(.body)
-                                        .foregroundColor(.white)
+                                        .foregroundStyle(.white)
                                 }
                             }
                         
@@ -323,7 +322,7 @@ struct CollectionCardDetailView: View {
                                         .frame(maxWidth: .infinity)
                                 }
                                 .buttonStyle(.bordered)
-                                .foregroundColor(.red)
+                                .foregroundStyle(.red)
                             } else {
                                 // Card is not owned - show add buttons
                                 Button(action: {
@@ -343,7 +342,7 @@ struct CollectionCardDetailView: View {
                                         .frame(maxWidth: .infinity)
                                 }
                                 .buttonStyle(.bordered)
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                             }
                         }
                         .padding()
@@ -406,7 +405,7 @@ struct CollectionCardDetailView: View {
         if showFoilSection {
             Text("Quantity")
                 .font(.headline)
-                .foregroundColor(.lorcanaGold)
+                .foregroundStyle(.lorcanaGold)
 
             HStack(spacing: 16) {
                 // Normal quantity
@@ -418,7 +417,7 @@ struct CollectionCardDetailView: View {
                             .font(.subheadline)
                             .fontWeight(.medium)
                     }
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
 
                     HStack(spacing: 12) {
                         Button("-") {
@@ -432,14 +431,14 @@ struct CollectionCardDetailView: View {
                         }
                         .frame(width: 28, height: 28)
                         .background(Color.red.opacity(0.8))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .clipShape(Circle())
                         .disabled(tempQuantity <= 0)
 
                         Text("\(tempQuantity)")
                             .font(.title3)
                             .fontWeight(.bold)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .frame(minWidth: 30)
 
                         Button("+") {
@@ -448,7 +447,7 @@ struct CollectionCardDetailView: View {
                         }
                         .frame(width: 28, height: 28)
                         .background(Color.green.opacity(0.8))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .clipShape(Circle())
                     }
                 }
@@ -472,7 +471,7 @@ struct CollectionCardDetailView: View {
                             .font(.subheadline)
                             .fontWeight(.medium)
                     }
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
 
                     HStack(spacing: 12) {
                         Button("-") {
@@ -486,14 +485,14 @@ struct CollectionCardDetailView: View {
                         }
                         .frame(width: 28, height: 28)
                         .background(Color.red.opacity(0.8))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .clipShape(Circle())
                         .disabled(foilQuantity <= 0)
 
                         Text("\(foilQuantity)")
                             .font(.title3)
                             .fontWeight(.bold)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .frame(minWidth: 30)
 
                         Button("+") {
@@ -502,7 +501,7 @@ struct CollectionCardDetailView: View {
                         }
                         .frame(width: 28, height: 28)
                         .background(Color.lorcanaGold)
-                        .foregroundColor(.lorcanaDark)
+                        .foregroundStyle(.lorcanaDark)
                         .clipShape(Circle())
                     }
                 }
@@ -522,7 +521,7 @@ struct CollectionCardDetailView: View {
             HStack {
                 Text("Quantity:")
                     .font(.headline)
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                 Spacer()
                 HStack(spacing: 12) {
                     Button("-") {
@@ -536,14 +535,14 @@ struct CollectionCardDetailView: View {
                     }
                     .frame(width: 30, height: 30)
                     .background(Color.red.opacity(0.8))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .clipShape(Circle())
                     .disabled(tempQuantity <= 0)
 
                     Text("\(tempQuantity)")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .frame(minWidth: 40)
 
                     Button("+") {
@@ -552,7 +551,7 @@ struct CollectionCardDetailView: View {
                     }
                     .frame(width: 30, height: 30)
                     .background(Color.green.opacity(0.8))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .clipShape(Circle())
                 }
             }
@@ -636,7 +635,7 @@ struct CollectionCardDetailView: View {
 struct WishlistCardDetailView: View {
     let card: LorcanaCard
     @Binding var isPresented: Bool
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) var collectionManager
     @State private var showingMoveConfirmation = false
     @State private var showingFullscreenViewer = false
     
@@ -653,11 +652,11 @@ struct WishlistCardDetailView: View {
                         Text(card.name)
                             .font(.title)
                             .fontWeight(.bold)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                         
                         Text(card.setName)
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         
                         VStack(alignment: .leading) {
                             
@@ -665,10 +664,10 @@ struct WishlistCardDetailView: View {
                                 VStack(alignment: .leading, spacing: 8) {
                                     Text("Card Text:")
                                         .font(.headline)
-                                        .foregroundColor(.lorcanaGold)
+                                        .foregroundStyle(.lorcanaGold)
                                     CardTextView(text: card.cardText)
                                         .font(.body)
-                                        .foregroundColor(.white)
+                                        .foregroundStyle(.white)
                                 }
                             }
                             
@@ -678,7 +677,7 @@ struct WishlistCardDetailView: View {
                                 Text(card.variant.displayName)
                                     .font(.caption)
                                     .fontWeight(.semibold)
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 4)
                                     .background(
@@ -723,7 +722,7 @@ struct WishlistCardDetailView: View {
                                     .frame(maxWidth: .infinity)
                             }
                             .buttonStyle(.bordered)
-                            .foregroundColor(.red)
+                            .foregroundStyle(.red)
                         }
                         .padding()
                     }
@@ -767,8 +766,8 @@ struct WishlistCardDetailView: View {
 
 struct AddToWishlistView: View {
     @Binding var isPresented: Bool
-    @EnvironmentObject var collectionManager: CollectionManager
-    @StateObject private var dataManager = SetsDataManager.shared
+    @Environment(CollectionManager.self) var collectionManager
+    private let dataManager = SetsDataManager.shared
     @State private var searchText = ""
     @State private var searchResults: [CardGroup] = []
     @State private var searchTask: Task<Void, Never>?
@@ -779,10 +778,10 @@ struct AddToWishlistView: View {
             VStack {
                 SearchBar(text: $searchText)
                     .padding()
-                    .onChange(of: searchText) { newValue in
+                    .onChange(of: searchText) { _, newValue in
                         searchTask?.cancel()
                         searchTask = Task {
-                            try? await Task.sleep(nanoseconds: 200_000_000) // 0.2 second delay (faster since local)
+                            try? await Task.sleep(for: .milliseconds(200)) // 0.2 second delay (faster since local)
                             if !Task.isCancelled {
                                 await MainActor.run {
                                     searchCards(query: newValue)
@@ -795,9 +794,9 @@ struct AddToWishlistView: View {
                     VStack(spacing: 16) {
                         Image(systemName: "magnifyingglass")
                             .font(.largeTitle)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         Text("No cards found for '\(searchText)'")
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                             .multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -805,12 +804,12 @@ struct AddToWishlistView: View {
                     VStack(spacing: 16) {
                         Image(systemName: "heart.magnifyingglass")
                             .font(.largeTitle)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         Text("Search for cards to add to wishlist")
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         Text("Find cards you want to collect")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                             .multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -853,7 +852,7 @@ struct AddToWishlistView: View {
                 },
                 isWishlist: true
             )
-            .environmentObject(collectionManager)
+            .environment(collectionManager)
         }
     }
     
@@ -879,7 +878,7 @@ struct AddCardModal: View {
     let onAdd: (LorcanaCard, Int) -> Void
     let isWishlist: Bool
     
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) var collectionManager
     @State private var selectedVariant: CardVariant = .normal
     @State private var quantity: Int = 1
     @State private var showingCardSearch = false
@@ -928,7 +927,7 @@ struct AddCardModal: View {
                             Text("Wrong Card?")
                         }
                         .font(.caption)
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                     }
                 }
                 
@@ -941,7 +940,6 @@ struct AddCardModal: View {
             .sheet(isPresented: $showingCardSearch) {
                 CardSearchForCorrectionView(selectedCard: $currentCard)
             }
-            .onChange(of: currentCard.id) { _ in }
         }
     }
     
@@ -952,13 +950,11 @@ struct AddCardModal: View {
                     Group {
                         if selectedVariant == .foil {
                             image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
+                                .resizable().scaledToFit()
                                 .staticFoilEffect()
                         } else {
                             image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
+                                .resizable().scaledToFit()
                         }
                     }
                 } placeholder: {
@@ -971,7 +967,7 @@ struct AddCardModal: View {
                     Text(selectedVariant.shortName)
                         .font(.caption2)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .padding(4)
                         .background(Color.lorcanaGold)
                         .clipShape(RoundedRectangle(cornerRadius: 4))
@@ -987,11 +983,11 @@ struct AddCardModal: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text(currentCard.name)
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                 
                 Text(currentCard.setName)
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                 
                 HStack {
                     RarityBadge(rarity: currentCard.rarity)
@@ -1017,7 +1013,7 @@ struct AddCardModal: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Card Variant")
                 .font(.headline)
-                .foregroundColor(.lorcanaGold)
+                .foregroundStyle(.lorcanaGold)
             
             let availableVariants = currentCard.availableVariants()
             
@@ -1031,7 +1027,7 @@ struct AddCardModal: View {
                             Text(variant.displayName)
                                 .font(.caption2)
                         }
-                        .foregroundColor(selectedVariant == variant ? .white : .gray)
+                        .foregroundStyle(selectedVariant == variant ? .white : .gray)
                         .padding(.vertical, 8)
                         .frame(maxWidth: .infinity)
                         .background(
@@ -1048,7 +1044,7 @@ struct AddCardModal: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Quantity")
                 .font(.headline)
-                .foregroundColor(.lorcanaGold)
+                .foregroundStyle(.lorcanaGold)
             
             HStack {
                 Button("-") {
@@ -1056,7 +1052,7 @@ struct AddCardModal: View {
                 }
                 .frame(width: 40, height: 40)
                 .background(Color.red.opacity(0.8))
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .clipShape(Circle())
                 .disabled(quantity <= 1)
                 
@@ -1065,7 +1061,7 @@ struct AddCardModal: View {
                 Text("\(quantity)")
                     .font(.title)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                 
                 Spacer()
                 
@@ -1074,7 +1070,7 @@ struct AddCardModal: View {
                 }
                 .frame(width: 40, height: 40)
                 .background(Color.green.opacity(0.8))
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .clipShape(Circle())
             }
             .padding(.horizontal)
@@ -1085,7 +1081,7 @@ struct AddCardModal: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Or Buy This Card")
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
                 .padding(.horizontal)
             
             BuyCardOptionsView(card: currentCard)
@@ -1120,8 +1116,7 @@ private struct CardGroupInfoHeader: View {
             ZStack(alignment: .topTrailing) {
                 AsyncImage(url: displayCard.bestImageUrl()) { image in
                     image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
+                        .resizable().scaledToFit()
                 } placeholder: {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color.gray.opacity(0.3))
@@ -1139,11 +1134,11 @@ private struct CardGroupInfoHeader: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text(displayCard.name)
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                 
                 Text(displayCard.setName)
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                 
                 HStack {
                     RarityBadge(rarity: displayCard.rarity)
@@ -1167,9 +1162,9 @@ struct AddCardGroupModal: View {
     @Binding var isPresented: Bool
     let onAdd: (LorcanaCard, Int) -> Void
     let isWishlist: Bool
-    var onAddToWishlist: ((LorcanaCard, Int) -> Void)? = nil
+    var onAddToWishlist: ((LorcanaCard, Int) -> Void)?
     
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) var collectionManager
     
     // For regular cards (Normal/Foil), use multi-quantity mode.
     // Quantities start at 0 — a pre-filled 1 reads as owned quantity, not intent.
@@ -1244,10 +1239,10 @@ struct AddCardGroupModal: View {
                             HStack {
                                 Image(systemName: "square.on.square")
                                     .font(.caption)
-                                    .foregroundColor(.blue)
+                                    .foregroundStyle(.blue)
                                 Text("This card appears in multiple sets")
                                     .font(.subheadline)
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                             }
                             
                             // Show all sets as badges
@@ -1259,10 +1254,10 @@ struct AddCardGroupModal: View {
                                         if let uniqueId = card.uniqueId {
                                             Text("(\(uniqueId))")
                                                 .font(.caption2)
-                                                .foregroundColor(.gray)
+                                                .foregroundStyle(.gray)
                                         }
                                     }
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 4)
                                     .background(
@@ -1274,7 +1269,7 @@ struct AddCardGroupModal: View {
                             
                             Text("Adding this card will count toward all sets")
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
                                 .italic()
                         }
                         .padding()
@@ -1290,11 +1285,11 @@ struct AddCardGroupModal: View {
                         VStack(alignment: .leading, spacing: 16) {
                             Text("Add Cards")
                                 .font(.headline)
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                             
                             Text("Set quantities for each variant you want to add")
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
                             
                             HStack(spacing: 16) {
                                 // Normal quantity
@@ -1326,7 +1321,7 @@ struct AddCardGroupModal: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Card Variant")
                                 .font(.headline)
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                             
                             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
                                 ForEach(availableVariants, id: \.self) { variant in
@@ -1349,7 +1344,7 @@ struct AddCardGroupModal: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Quantity to Add")
                                 .font(.headline)
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                             
                             HStack {
                                 Button(action: {
@@ -1359,14 +1354,14 @@ struct AddCardGroupModal: View {
                                 }) {
                                     Image(systemName: "minus.circle.fill")
                                         .font(.title2)
-                                        .foregroundColor(specialQuantity > 0 ? .lorcanaGold : .gray)
+                                        .foregroundStyle(specialQuantity > 0 ? .lorcanaGold : .gray)
                                 }
                                 .disabled(specialQuantity <= 0)
                                 
                                 Text("\(specialQuantity)")
                                     .font(.title2)
                                     .fontWeight(.bold)
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                                     .frame(minWidth: 50)
                                 
                                 Button(action: {
@@ -1374,7 +1369,7 @@ struct AddCardGroupModal: View {
                                 }) {
                                     Image(systemName: "plus.circle.fill")
                                         .font(.title2)
-                                        .foregroundColor(.lorcanaGold)
+                                        .foregroundStyle(.lorcanaGold)
                                 }
                             }
                         }
@@ -1396,7 +1391,7 @@ struct AddCardGroupModal: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Or Buy This Card")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                             .padding(.horizontal)
                         
                         BuyCardOptionsView(card: displayCard)
@@ -1426,7 +1421,7 @@ struct AddCardGroupModal: View {
                             .font(.subheadline)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
-                            .foregroundColor(.yellow)
+                            .foregroundStyle(.yellow)
                             .background(
                                 RoundedRectangle(cornerRadius: 10)
                                     .stroke(Color.yellow.opacity(0.5), lineWidth: 1)
@@ -1456,15 +1451,15 @@ struct AddCardGroupModal: View {
                         HStack(spacing: 12) {
                             Image(systemName: isWishlist ? "heart.fill" : "checkmark.circle.fill")
                                 .font(.title2)
-                                .foregroundColor(.white)
+                                .foregroundStyle(.white)
                             
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Success!")
                                     .font(.headline)
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                                 Text(successMessage)
                                     .font(.caption)
-                                    .foregroundColor(.white.opacity(0.9))
+                                    .foregroundStyle(.white.opacity(0.9))
                             }
                             
                             Spacer()
@@ -1497,8 +1492,7 @@ struct AddCardGroupModal: View {
                         VStack {
                             AsyncImage(url: displayCard.bestImageUrl()) { image in
                                 image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
+                                    .resizable().scaledToFit()
                             } placeholder: {
                                 RoundedRectangle(cornerRadius: 12)
                                     .fill(Color.gray.opacity(0.3))
@@ -1510,7 +1504,7 @@ struct AddCardGroupModal: View {
                             
                             Text("Tap anywhere to close")
                                 .font(.caption)
-                                .foregroundColor(.white.opacity(0.6))
+                                .foregroundStyle(.white.opacity(0.6))
                                 .padding(.bottom, 20)
                         }
                         .transition(.scale(scale: 0.3).combined(with: .opacity))
@@ -1537,11 +1531,11 @@ struct AddCardGroupModal: View {
             HStack(spacing: 6) {
                 Image(systemName: icon)
                     .font(.caption)
-                    .foregroundColor(color)
+                    .foregroundStyle(color)
                 Text(variant.displayName)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(color)
+                    .foregroundStyle(color)
             }
             
             HStack(spacing: 12) {
@@ -1552,14 +1546,14 @@ struct AddCardGroupModal: View {
                 }) {
                     Image(systemName: "minus.circle.fill")
                         .font(.title3)
-                        .foregroundColor(quantity.wrappedValue > 0 ? color : .gray.opacity(0.5))
+                        .foregroundStyle(quantity.wrappedValue > 0 ? color : .gray.opacity(0.5))
                 }
                 .disabled(quantity.wrappedValue <= 0)
                 
                 Text("\(quantity.wrappedValue)")
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .frame(minWidth: 30)
                 
                 Button(action: {
@@ -1567,7 +1561,7 @@ struct AddCardGroupModal: View {
                 }) {
                     Image(systemName: "plus.circle.fill")
                         .font(.title3)
-                        .foregroundColor(color)
+                        .foregroundStyle(color)
                 }
             }
         }
@@ -1644,7 +1638,8 @@ struct AddCardGroupModal: View {
         showingSuccessBanner = true
         
         // Dismiss after showing success banner briefly
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+        Task {
+            try? await Task.sleep(for: .seconds(1.0))
             isPresented = false
         }
     }
@@ -1674,7 +1669,8 @@ struct AddCardGroupModal: View {
         
         showingSuccessBanner = true
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+        Task {
+            try? await Task.sleep(for: .seconds(1.0))
             isPresented = false
         }
     }
@@ -1683,7 +1679,7 @@ struct AddCardGroupModal: View {
 struct CardSearchForCorrectionView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedCard: LorcanaCard
-    @StateObject private var dataManager = SetsDataManager.shared
+    private let dataManager = SetsDataManager.shared
     @State private var searchText = ""
     @State private var searchResults: [LorcanaCard] = []
     @State private var searchTask: Task<Void, Never>?
@@ -1693,10 +1689,10 @@ struct CardSearchForCorrectionView: View {
             VStack {
                 SearchBar(text: $searchText)
                     .padding()
-                    .onChange(of: searchText) { newValue in
+                    .onChange(of: searchText) { _, newValue in
                         searchTask?.cancel()
                         searchTask = Task {
-                            try? await Task.sleep(nanoseconds: 200_000_000)
+                            try? await Task.sleep(for: .milliseconds(200))
                             if !Task.isCancelled {
                                 await MainActor.run {
                                     searchCards(query: newValue)
@@ -1709,18 +1705,18 @@ struct CardSearchForCorrectionView: View {
                     VStack(spacing: 16) {
                         Image(systemName: "magnifyingglass")
                             .font(.largeTitle)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         Text("No cards found")
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if searchText.isEmpty {
                     VStack(spacing: 16) {
                         Image(systemName: "magnifyingglass")
                             .font(.largeTitle)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         Text("Search for the correct card")
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
@@ -1763,7 +1759,7 @@ struct CardSearchForCorrectionView: View {
 struct CardGroupSearchRow: View {
     let cardGroup: CardGroup
     let onTap: () -> Void
-    var onWishlist: (() -> Void)? = nil
+    var onWishlist: (() -> Void)?
     
     var body: some View {
         if SpoilerSettings.shared.isHidden(cardGroup.primaryCard) {
@@ -1774,8 +1770,7 @@ struct CardGroupSearchRow: View {
                 HStack(spacing: 12) {
                     AsyncImage(url: cardGroup.primaryCard.bestImageUrl()) { image in
                         image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
+                            .resizable().scaledToFit()
                     } placeholder: {
                         RoundedRectangle(cornerRadius: 8)
                             .fill(Color.gray.opacity(0.3))
@@ -1790,7 +1785,7 @@ struct CardGroupSearchRow: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(cardGroup.name)
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .lineLimit(2)
                     
                         HStack(spacing: 6) {
@@ -1806,7 +1801,7 @@ struct CardGroupSearchRow: View {
                         HStack(spacing: 6) {
                             Text(cardGroup.primaryCard.setName)
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundStyle(.gray)
                                 .lineLimit(1)
                         
                             if cardGroup.isReprint {
@@ -1816,7 +1811,7 @@ struct CardGroupSearchRow: View {
                                     Text("\(cardGroup.setCount) sets")
                                         .font(.caption2)
                                 }
-                                .foregroundColor(.white)
+                                .foregroundStyle(.white)
                                 .padding(.horizontal, 5)
                                 .padding(.vertical, 2)
                                 .background(Capsule().fill(Color.blue.opacity(0.8)))
@@ -1832,14 +1827,14 @@ struct CardGroupSearchRow: View {
                         } label: {
                             Image(systemName: "star.fill")
                                 .font(.body)
-                                .foregroundColor(.yellow)
+                                .foregroundStyle(.yellow)
                                 .padding(8)
                         }
                         .buttonStyle(BorderlessButtonStyle())
                     }
                 
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.lorcanaGold.opacity(0.6))
+                        .foregroundStyle(.lorcanaGold.opacity(0.6))
                         .font(.caption)
                 }
                 .padding(.vertical, 6)
@@ -1859,8 +1854,7 @@ struct CardSearchResultRow: View {
         HStack {
             AsyncImage(url: card.bestImageUrl()) { image in
                 image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .resizable().scaledToFit()
             } placeholder: {
                 RoundedRectangle(cornerRadius: 6)
                     .fill(Color.gray.opacity(0.3))
@@ -1875,7 +1869,7 @@ struct CardSearchResultRow: View {
                 
                 Text(card.setName)
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                     .lineLimit(1)
                 
                 HStack {
@@ -1956,7 +1950,7 @@ private let _previewCardGroup = CardGroup(
         card: _previewCard,
         isPresented: .constant(true)
     )
-    .environmentObject(CollectionManager())
+    .environment(CollectionManager())
 }
 
 #Preview("Collection Card Detail") {
@@ -1976,7 +1970,7 @@ private let _previewCardGroup = CardGroup(
         ),
         isPresented: .constant(true)
     )
-    .environmentObject(CollectionManager())
+    .environment(CollectionManager())
 }
 
 #Preview("Collection Card Detail – All Variants") {
@@ -1997,7 +1991,7 @@ private let _previewCardGroup = CardGroup(
         isPresented: .constant(true),
         showAllVariants: true
     )
-    .environmentObject(CollectionManager())
+    .environment(CollectionManager())
 }
 
 #Preview("Wishlist Card Detail") {
@@ -2017,12 +2011,12 @@ private let _previewCardGroup = CardGroup(
         ),
         isPresented: .constant(true)
     )
-    .environmentObject(CollectionManager())
+    .environment(CollectionManager())
 }
 
 #Preview("Add to Wishlist") {
     AddToWishlistView(isPresented: .constant(true))
-        .environmentObject(CollectionManager())
+        .environment(CollectionManager())
 }
 
 #Preview("Add Card Modal – Collection") {
@@ -2032,7 +2026,7 @@ private let _previewCardGroup = CardGroup(
         onAdd: { _, _ in },
         isWishlist: false
     )
-    .environmentObject(CollectionManager())
+    .environment(CollectionManager())
 }
 
 #Preview("Add Card Modal – Wishlist") {
@@ -2042,7 +2036,7 @@ private let _previewCardGroup = CardGroup(
         onAdd: { _, _ in },
         isWishlist: true
     )
-    .environmentObject(CollectionManager())
+    .environment(CollectionManager())
 }
 
 #Preview("Add Card Group Modal") {
@@ -2052,7 +2046,7 @@ private let _previewCardGroup = CardGroup(
         onAdd: { _, _ in },
         isWishlist: false
     )
-    .environmentObject(CollectionManager())
+    .environment(CollectionManager())
 }
 
 #Preview("Card Search For Correction") {

@@ -22,11 +22,11 @@ struct DebugPricingView: View {
                         Text("Pricing API Debug Tool")
                             .font(.title2)
                             .fontWeight(.bold)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
 
                         Text("This tool tests the Cardmarket pricing integration (Inkwell Backend → Lorcana Prices API fallback). Check the Xcode console for detailed logs.")
                             .font(.body)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                     .padding()
                     .background(
@@ -39,13 +39,12 @@ struct DebugPricingView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Test Card")
                                 .font(.headline)
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
 
                             HStack {
                                 AsyncImage(url: card.bestImageUrl()) { image in
                                     image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
+                                        .resizable().scaledToFit()
                                 } placeholder: {
                                     RoundedRectangle(cornerRadius: 8)
                                         .fill(Color.gray.opacity(0.3))
@@ -56,11 +55,11 @@ struct DebugPricingView: View {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(card.name)
                                         .font(.headline)
-                                        .foregroundColor(.white)
+                                        .foregroundStyle(.white)
 
                                     Text(card.setName)
                                         .font(.caption)
-                                        .foregroundColor(.gray)
+                                        .foregroundStyle(.gray)
 
                                     RarityBadge(rarity: card.rarity)
                                 }
@@ -102,12 +101,12 @@ struct DebugPricingView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Results")
                             .font(.headline)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
 
                         ScrollView {
                             Text(priceResult)
                                 .font(.system(.caption, design: .monospaced))
-                                .foregroundColor(.white)
+                                .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .frame(height: 300)
@@ -127,7 +126,7 @@ struct DebugPricingView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Pricing Providers")
                             .font(.headline)
-                            .foregroundColor(.blue)
+                            .foregroundStyle(.blue)
 
                         VStack(alignment: .leading, spacing: 8) {
                             issueRow(
@@ -166,12 +165,12 @@ struct DebugPricingView: View {
     private func issueRow(icon: String, text: String) -> some View {
         HStack(alignment: .top, spacing: 8) {
             Image(systemName: icon)
-                .foregroundColor(.orange)
+                .foregroundStyle(.orange)
                 .frame(width: 20)
 
             Text(text)
                 .font(.caption)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
         }
     }
 
@@ -182,7 +181,7 @@ struct DebugPricingView: View {
         testCard = results.first
     }
 
-    private func testEbayAPI() async {
+    func testEbayAPI() async {
         guard let card = testCard else {
             priceResult = "❌ No test card loaded"
             return

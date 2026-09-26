@@ -13,7 +13,7 @@ struct DeckValidation {
     let warnings: [String]
     let errors: [String]
 
-    static func validate(_ deck: Deck) -> DeckValidation {
+    static func validate(_ deck: Deck) -> Self {
         var warnings: [String] = []
         var errors: [String] = []
 
@@ -81,7 +81,7 @@ struct DeckValidation {
             warnings.append("Low inkable ratio (\(Int(inkableRatio * 100))%). Most decks run 70%+ inkable.")
         }
 
-        return DeckValidation(
+        return Self(
             isValid: errors.isEmpty,
             warnings: warnings,
             errors: errors

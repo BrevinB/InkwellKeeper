@@ -42,16 +42,16 @@ struct SupportView: View {
         VStack(spacing: 16) {
             Image(systemName: "heart.circle.fill")
                 .font(.system(size: 60))
-                .foregroundColor(.lorcanaGold)
+                .foregroundStyle(.lorcanaGold)
 
             Text("Thank You!")
                 .font(.title)
                 .fontWeight(.bold)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
 
             Text("Ink Well Keeper is built with passion by an independent developer. Your support helps keep the app running and growing.")
                 .font(.body)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
         }
@@ -67,15 +67,15 @@ struct SupportView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Image(systemName: "gift.fill")
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                 Text("Support Development")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
             }
 
             Text("Help keep Ink Well Keeper free and ad-free for everyone!")
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
 
             // Tip Jar
             Button(action: {
@@ -90,13 +90,13 @@ struct SupportView: View {
                             .fontWeight(.semibold)
                         Text("Support with a one-time tip")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.caption)
                 }
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 12)
@@ -112,16 +112,16 @@ struct SupportView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Image(systemName: "square.and.arrow.up")
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                     Text("Share with Friends")
                         .font(.subheadline)
                         .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                 }
 
                 Text("Tell other Lorcana players about Inkwell Keeper!")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
 
                 Button(action: shareApp) {
                     HStack {
@@ -130,11 +130,11 @@ struct SupportView: View {
                     }
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.lorcanaGold)
-                    .cornerRadius(10)
+                    .clipShape(.rect(cornerRadius: 10))
                 }
             }
             .padding()
@@ -154,22 +154,22 @@ struct SupportView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Image(systemName: "questionmark.circle.fill")
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                 Text("Help & Resources")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
             }
 
             // FAQ
-            NavigationLink(destination: Text("FAQ Coming Soon").foregroundColor(.white)) {
+            NavigationLink(destination: Text("FAQ Coming Soon").foregroundStyle(.white)) {
                 HStack {
                     Image(systemName: "doc.text.fill")
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                     Text("Frequently Asked Questions")
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                         .font(.caption)
                 }
                 .padding()
@@ -183,12 +183,12 @@ struct SupportView: View {
             NavigationLink(destination: OnboardingView(onImportTap: {})) {
                 HStack {
                     Image(systemName: "play.circle.fill")
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                     Text("App Tutorial")
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
                         .font(.caption)
                 }
                 .padding()
@@ -209,15 +209,15 @@ struct SupportView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Image(systemName: "envelope.fill")
-                    .foregroundColor(.lorcanaGold)
+                    .foregroundStyle(.lorcanaGold)
                 Text("Feedback")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
             }
 
             Text("Have a suggestion or found a bug? Let me know!")
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
 
             // Email Contact
             Button(action: sendEmail) {
@@ -228,7 +228,7 @@ struct SupportView: View {
                     Image(systemName: "arrow.up.right")
                         .font(.caption)
                 }
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 10)
@@ -249,7 +249,7 @@ struct SupportView: View {
                     Image(systemName: "arrow.up.right")
                         .font(.caption)
                 }
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 10)

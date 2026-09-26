@@ -10,7 +10,7 @@ import SwiftUI
 struct CardTile: View {
     let card: LorcanaCard
     let isWishlist: Bool
-    var reprintCount: Int? = nil // Optional: number of sets this card appears in
+    var reprintCount: Int? // Optional: number of sets this card appears in
     @State private var showingDetail = false
     @State private var showingCollectionDetail = false
     @State private var showingWishlistDetail = false
@@ -20,7 +20,7 @@ struct CardTile: View {
     @State private var priceConfidence: PricingService.PriceConfidence?
     @State private var cachedCollectedCard: CollectedCard?
     @State private var cachedDeckAllocation: Int = 0
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) var collectionManager
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let pricingService = PricingService.shared
@@ -46,7 +46,7 @@ struct CardTile: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(card.name)
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .lineLimit(1)
                 
                 HStack {
@@ -57,7 +57,7 @@ struct CardTile: View {
                         Text(card.variant.shortName)
                             .font(.caption)
                             .fontWeight(.bold)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
                             .background(
@@ -101,11 +101,11 @@ struct CardTile: View {
         }
         .sheet(isPresented: $showingCollectionDetail) {
             CollectionCardDetailView(card: card, isPresented: $showingCollectionDetail)
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
         .sheet(isPresented: $showingWishlistDetail) {
             WishlistCardDetailView(card: card, isPresented: $showingWishlistDetail)
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
     }
     
@@ -129,7 +129,7 @@ struct CardTile: View {
 
             Spacer()
 
-            if let collected = cachedCollectedCard, (collected.quantity > 1 || cachedDeckAllocation > 0) {
+            if let collected = cachedCollectedCard, collected.quantity > 1 || cachedDeckAllocation > 0 {
                 VStack(spacing: 2) {
                     if collected.quantity > 1 {
                         Text("\(collected.quantity)")
@@ -213,7 +213,7 @@ struct CardTile: View {
         ),
         isWishlist: false
     )
-    .environmentObject(CollectionManager())
+    .environment(CollectionManager())
     .padding()
     .background(Color.black)
 }
@@ -235,7 +235,7 @@ struct CardTile: View {
         ),
         isWishlist: true
     )
-    .environmentObject(CollectionManager())
+    .environment(CollectionManager())
     .padding()
     .background(Color.black)
 }
@@ -258,7 +258,7 @@ struct CardTile: View {
         isWishlist: false,
         reprintCount: 3
     )
-    .environmentObject(CollectionManager())
+    .environment(CollectionManager())
     .padding()
     .background(Color.black)
 }

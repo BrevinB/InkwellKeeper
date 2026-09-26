@@ -21,17 +21,17 @@ struct EmptyCollectionView: View {
         VStack(spacing: 24) {
             Image(systemName: isSearching ? "magnifyingglass" : "square.grid.3x3")
                 .font(.system(size: 60))
-                .foregroundColor(.lorcanaGold.opacity(0.6))
+                .foregroundStyle(.lorcanaGold.opacity(0.6))
 
             VStack(spacing: 8) {
                 Text(isSearching ? "No Results Found" : "Your Collection is Empty")
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
 
                 Text(isSearching ? "Try adjusting your search or filters" : "Start building your collection!")
                     .font(.body)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                     .multilineTextAlignment(.center)
             }
 
@@ -92,17 +92,17 @@ struct EmptyWishlistView: View {
         VStack(spacing: 24) {
             Image(systemName: "star")
                 .font(.system(size: 60))
-                .foregroundColor(.lorcanaGold.opacity(0.6))
+                .foregroundStyle(.lorcanaGold.opacity(0.6))
             
             VStack(spacing: 8) {
                 Text("Your Wishlist is Empty")
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                 
                 Text("Add cards you're hoping to find!")
                     .font(.body)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                     .multilineTextAlignment(.center)
             }
         }

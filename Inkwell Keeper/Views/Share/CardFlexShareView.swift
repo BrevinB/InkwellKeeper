@@ -25,7 +25,7 @@ struct CardFlexShareData {
     /// The user's own attached photo, if any (already decoded — lives in memory).
     let userPhoto: UIImage?
     /// The source card, used to fetch a live market price for the price pill. Nil in previews.
-    var sourceCard: LorcanaCard? = nil
+    var sourceCard: LorcanaCard?
 
     var hasUserPhoto: Bool { userPhoto != nil }
 }

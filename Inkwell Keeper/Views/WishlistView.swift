@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct WishlistView: View {
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) var collectionManager
     @State private var showingAddToWishlist = false
     @State private var searchText = ""
     @State private var selectedFilter: CardFilter = .all
@@ -39,7 +39,7 @@ struct WishlistView: View {
                         LazyVStack(spacing: 12) {
                             ForEach(filteredCards) { card in
                                 WishlistCardRow(card: card)
-                                    .environmentObject(collectionManager)
+                                    .environment(collectionManager)
                             }
                         }
                         .padding()
@@ -53,7 +53,7 @@ struct WishlistView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingAddToWishlist = true }) {
                         Image(systemName: "plus")
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                     }
                 }
             }
@@ -67,7 +67,7 @@ struct WishlistView: View {
         .onChange(of: collectionManager.wishlistCards.count) { recomputeFilteredCards() }
         .sheet(isPresented: $showingAddToWishlist) {
             AddToWishlistView(isPresented: $showingAddToWishlist)
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
     }
 

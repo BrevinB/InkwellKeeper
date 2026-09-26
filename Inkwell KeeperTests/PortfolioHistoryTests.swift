@@ -51,6 +51,30 @@ struct PortfolioHistoryTests {
         #expect(points.first?.value == 3.5)
     }
 
+    /// A card the backend has no history for still counts at its stored
+    /// price, so the chart's latest point matches the Stats overview total.
+    @Test func valuesHoldingsWithoutHistoryFlatAtTheirStoredPrice() {
+        let series = ["a": [Point(day: 1, price: 1.0), Point(day: 2, price: 2.0)]]
+        let holdings = [
+            holding("a", 1),
+            PortfolioHolding(cardKey: "untracked", quantity: 2, fallbackPrice: 5.0)
+        ]
+
+        let points = PortfolioHistoryBuilder.dailyValues(holdings: holdings, series: series)
+
+        #expect(points.map(\.value) == [11.0, 12.0])
+    }
+
+    /// The fallback only fills gaps; a tracked card is valued from its series.
+    @Test func prefersSeriesOverStoredPrice() {
+        let series = ["a": [Point(day: 1, price: 3.0)]]
+        let holdings = [PortfolioHolding(cardKey: "a", quantity: 1, fallbackPrice: 99.0)]
+
+        let points = PortfolioHistoryBuilder.dailyValues(holdings: holdings, series: series)
+
+        #expect(points.map(\.value) == [3.0])
+    }
+
     /// A card the backend only started tracking partway through the window
     /// must not read as a sudden gain on the day tracking began.
     @Test func carriesAShortSeriesBackwardsInsteadOfStartingAtZero() {

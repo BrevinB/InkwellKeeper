@@ -14,19 +14,18 @@ struct RecentAdditionsCard: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Recent Additions")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
             
             if recentCards.isEmpty {
                 Text("No recent additions")
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                     .padding(.vertical)
             } else {
                 ForEach(recentCards.prefix(3)) { card in
                     HStack {
                         AsyncImage(url: card.bestImageUrl()) { image in
                             image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
+                                .resizable().scaledToFit()
                         } placeholder: {
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(Color.gray.opacity(0.3))
@@ -36,7 +35,7 @@ struct RecentAdditionsCard: View {
                         
                         Text(card.name)
                             .font(.subheadline)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .lineLimit(1)
                         
                         Spacer()
@@ -60,8 +59,8 @@ struct RecentAdditionsCard: View {
 
 struct SetCompletionCard: View {
     let cards: [LorcanaCard]
-    @EnvironmentObject var collectionManager: CollectionManager
-    @StateObject private var dataManager = SetsDataManager.shared
+    @Environment(CollectionManager.self) var collectionManager
+    private let dataManager = SetsDataManager.shared
     @State private var cachedProgress: [(name: String, collected: Int, total: Int)] = []
 
     private static let allSets = [
@@ -145,11 +144,11 @@ struct SetProgressRow: View {
             HStack {
                 Text(setName)
                     .font(.subheadline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                 Spacer()
                 Text("\(current)/\(total)")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.gray)
                 Button("Share \(setName) progress", systemImage: "square.and.arrow.up") {
                     showingShare = true
                 }
@@ -176,7 +175,7 @@ struct SetProgressRow: View {
 }
 
 struct CollectionStatsButton: View {
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(CollectionManager.self) var collectionManager
 
     private var stats: (totalValue: Double, cardCount: Int, rarityBreakdown: [CardRarity: Int]) {
         collectionManager.getCollectionStats()

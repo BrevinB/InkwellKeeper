@@ -10,8 +10,8 @@ import SwiftData
 
 struct DecksView: View {
     @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject var collectionManager: CollectionManager
-    @StateObject private var deckManager = DeckManager()
+    @Environment(CollectionManager.self) var collectionManager
+    @State private var deckManager = DeckManager()
     @State private var showingStarterDecks = false
     @State private var showingAIDeckBuilder = false
     @State private var showingImportDeck = false
@@ -28,15 +28,15 @@ struct DecksView: View {
 
                 if deckManager.decks.isEmpty {
                     EmptyDecksView(onCreateDeck: { showingCreateDeck = true })
-                        .environmentObject(deckManager)
-                        .environmentObject(collectionManager)
+                        .environment(deckManager)
+                        .environment(collectionManager)
                 } else {
                     ScrollView {
                         LazyVGrid(columns: [GridItem(horizontalSizeClass == .compact || dynamicTypeSize.isAccessibilitySize ? .flexible() : .adaptive(minimum: 340), spacing: 16)], spacing: 16) {
                             ForEach(deckManager.decks) { deck in
                                 DeckRow(deck: deck)
-                                    .environmentObject(collectionManager)
-                                    .environmentObject(deckManager)
+                                    .environment(collectionManager)
+                                    .environment(deckManager)
                             }
                         }
                         .padding()
@@ -46,8 +46,8 @@ struct DecksView: View {
             .navigationTitle("Decks")
             .navigationDestination(for: Deck.self) { deck in
                 DeckWorkspaceView(deck: deck)
-                    .environmentObject(collectionManager)
-                    .environmentObject(deckManager)
+                    .environment(collectionManager)
+                    .environment(deckManager)
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -91,21 +91,21 @@ struct DecksView: View {
         }
         .sheet(isPresented: $showingStarterDecks) {
             StarterDecksView()
-                .environmentObject(deckManager)
-                .environmentObject(collectionManager)
+                .environment(deckManager)
+                .environment(collectionManager)
         }
         .sheet(isPresented: $showingAIDeckBuilder) {
             AIDeckBuilderView()
-                .environmentObject(deckManager)
+                .environment(deckManager)
                 .presentationSizing(.page)
         }
         .sheet(isPresented: $showingImportDeck) {
             ImportDeckView()
-                .environmentObject(deckManager)
+                .environment(deckManager)
         }
         .sheet(isPresented: $showingCreateDeck, onDismiss: pushCreatedDeck) {
             NewDeckSheet(onCreated: { newlyCreatedDeck = $0 })
-                .environmentObject(deckManager)
+                .environment(deckManager)
         }
     }
 
@@ -122,8 +122,8 @@ struct EmptyDecksView: View {
     let onCreateDeck: () -> Void
     @State private var showingStarterDecks = false
     @State private var showingAIDeckBuilder = false
-    @EnvironmentObject var deckManager: DeckManager
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(DeckManager.self) var deckManager
+    @Environment(CollectionManager.self) var collectionManager
 
     var body: some View {
         VStack(spacing: 24) {
@@ -199,12 +199,12 @@ struct EmptyDecksView: View {
         .padding()
         .sheet(isPresented: $showingStarterDecks) {
             StarterDecksView()
-                .environmentObject(deckManager)
-                .environmentObject(collectionManager)
+                .environment(deckManager)
+                .environment(collectionManager)
         }
         .sheet(isPresented: $showingAIDeckBuilder) {
             AIDeckBuilderView()
-                .environmentObject(deckManager)
+                .environment(deckManager)
         }
     }
 }
@@ -212,8 +212,8 @@ struct EmptyDecksView: View {
 // MARK: - Deck Row
 struct DeckRow: View {
     let deck: Deck
-    @EnvironmentObject var collectionManager: CollectionManager
-    @EnvironmentObject var deckManager: DeckManager
+    @Environment(CollectionManager.self) var collectionManager
+    @Environment(DeckManager.self) var deckManager
 
     var statistics: DeckStatistics {
         deckManager.calculateStatistics(for: deck, collectionManager: collectionManager)
@@ -367,7 +367,7 @@ struct DeckRow: View {
 struct EditDeckView: View {
     let deck: Deck
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var deckManager: DeckManager
+    @Environment(DeckManager.self) var deckManager
 
     @State private var deckName: String
     @State private var deckDescription: String
@@ -512,12 +512,11 @@ struct EditDeckView: View {
     }
 }
 
-
 // MARK: - Deck Overview (deck stats + card list; shown in the workspace slide-up)
 struct DeckOverview: View {
     let deck: Deck
-    @EnvironmentObject var collectionManager: CollectionManager
-    @EnvironmentObject var deckManager: DeckManager
+    @Environment(CollectionManager.self) var collectionManager
+    @Environment(DeckManager.self) var deckManager
 
     var statistics: DeckStatistics {
         deckManager.calculateStatistics(for: deck, collectionManager: collectionManager)
@@ -611,7 +610,7 @@ struct DeckOverview: View {
                                             )
                                         }()
                                     )
-                                    .environmentObject(deckManager)
+                                    .environment(deckManager)
                                 }
                             }
                         }
@@ -967,7 +966,7 @@ struct DeckCardRow: View {
     let card: DeckCard
     let deck: Deck
     let ownedQuantity: Int
-    @EnvironmentObject var deckManager: DeckManager
+    @Environment(DeckManager.self) var deckManager
     @State private var showingDetail = false
 
     var isComplete: Bool {
@@ -1095,7 +1094,7 @@ struct DeckCardRow: View {
         .sensoryFeedback(.impact, trigger: card.quantity)
         .sheet(isPresented: $showingDetail) {
             DeckCardDetailView(card: card, deck: deck, ownedQuantity: ownedQuantity)
-                .environmentObject(deckManager)
+                .environment(deckManager)
         }
     }
 }
@@ -1106,7 +1105,7 @@ struct DeckCardDetailView: View {
     let deck: Deck
     let ownedQuantity: Int
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var deckManager: DeckManager
+    @Environment(DeckManager.self) var deckManager
     @State private var showingRemoveConfirm = false
 
     var body: some View {
@@ -1311,12 +1310,11 @@ struct ExportDeckView: View {
     }
 }
 
-
 // MARK: - New Deck Sheet (pick inks first; the workspace browser then filters to them)
 struct NewDeckSheet: View {
     var onCreated: (Deck) -> Void
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var deckManager: DeckManager
+    @Environment(DeckManager.self) var deckManager
 
     @State private var name = ""
     @State private var format: DeckFormat = .casual
@@ -1494,8 +1492,8 @@ struct DeckWorkspaceView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @EnvironmentObject var deckManager: DeckManager
-    @EnvironmentObject var collectionManager: CollectionManager
+    @Environment(DeckManager.self) var deckManager
+    @Environment(CollectionManager.self) var collectionManager
 
     @State private var mode: WorkspaceMode
 
@@ -1605,8 +1603,8 @@ struct DeckWorkspaceView: View {
                     HStack(spacing: 0) {
                         if showsBothPanes || mode == .add {
                             BuilderBrowser(deck: deck, gridHelper: gridHelper)
-                                .environmentObject(deckManager)
-                                .environmentObject(collectionManager)
+                                .environment(deckManager)
+                                .environment(collectionManager)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                         }
                         if showsBothPanes {
@@ -1614,8 +1612,8 @@ struct DeckWorkspaceView: View {
                         }
                         if showsBothPanes || mode == .deck {
                             DeckOverview(deck: deck)
-                                .environmentObject(deckManager)
-                                .environmentObject(collectionManager)
+                                .environment(deckManager)
+                                .environment(collectionManager)
                                 .frame(width: showsBothPanes ? min(420, geometry.size.width * 0.4) : nil)
                                 .frame(maxWidth: showsBothPanes ? nil : .infinity, maxHeight: .infinity)
                         }
@@ -1694,8 +1692,8 @@ struct DeckWorkspaceView: View {
         }
         .sheet(isPresented: $showingAICompleter) {
             AIDeckCompleterView(deck: deck)
-                .environmentObject(deckManager)
-                .environmentObject(collectionManager)
+                .environment(deckManager)
+                .environment(collectionManager)
         }
         .sheet(isPresented: $showingAIStrategy) {
             AIDeckStrategyView(deck: deck)
@@ -1737,7 +1735,7 @@ struct DeckWorkspaceView: View {
         }
         .sheet(isPresented: $showingEditDeck) {
             EditDeckView(deck: deck)
-                .environmentObject(deckManager)
+                .environment(deckManager)
         }
         .sheet(isPresented: $showingOpeningHand) {
             OpeningHandView(deck: deck)
@@ -1772,14 +1770,14 @@ struct DeckWorkspaceView: View {
 struct BuilderBrowser: View {
     let deck: Deck
     let gridHelper: AdaptiveGridHelper
-    @EnvironmentObject var deckManager: DeckManager
-    @EnvironmentObject var collectionManager: CollectionManager
-    @StateObject private var dataManager = SetsDataManager.shared
+    @Environment(DeckManager.self) var deckManager
+    @Environment(CollectionManager.self) var collectionManager
+    private let dataManager = SetsDataManager.shared
 
     @State private var searchText = ""
     @State private var showOwnedOnly = false
-    @State private var selectedInkColor: InkColor? = nil
-    @State private var selectedCost: Int? = nil
+    @State private var selectedInkColor: InkColor?
+    @State private var selectedCost: Int?
     @State private var availableCards: [LorcanaCard] = []
 
     var filteredCards: [LorcanaCard] {
@@ -2018,7 +2016,7 @@ struct BuilderBrowser: View {
                                 totalInDeckForName: deckQuantityByName[card.name] ?? 0,
                                 ownedQuantity: showOwnedOnly ? ownedQuantity(for: card) : nil
                             )
-                            .environmentObject(deckManager)
+                            .environment(deckManager)
                         }
                     }
                     .padding(gridHelper.viewPadding)
@@ -2085,7 +2083,7 @@ struct BuilderCardView: View {
     /// How many of this exact printing the player owns, or nil when "Owned Only" isn't active
     /// (in which case ownership doesn't cap adding — only the format's copy limit does).
     let ownedQuantity: Int?
-    @EnvironmentObject var deckManager: DeckManager
+    @Environment(DeckManager.self) var deckManager
 
     var quantityInDeck: Int {
         inDeck?.quantity ?? 0
@@ -2217,7 +2215,7 @@ struct BuilderCardView: View {
 // MARK: - Import Deck View
 struct ImportDeckView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var deckManager: DeckManager
+    @Environment(DeckManager.self) var deckManager
     @State private var pastedText = ""
     @State private var deckName = ""
     @State private var importError = false

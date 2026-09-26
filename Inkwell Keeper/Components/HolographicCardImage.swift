@@ -13,7 +13,7 @@ struct HolographicCardImage: View {
     let card: LorcanaCard
     let reduceMotion: Bool
 
-    @ObservedObject private var motionManager = MotionManager.shared
+    private let motionManager = MotionManager.shared
     @Environment(\.scenePhase) private var scenePhase
     @State private var isVisible = false
     @State private var ownsMotionUpdates = false
@@ -23,8 +23,7 @@ struct HolographicCardImage: View {
             switch phase {
             case .success(let image):
                 image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .resizable().scaledToFit()
                     .interactiveHolographicEffect(
                         pitch: reduceMotion ? 0 : motionManager.pitch,
                         roll: reduceMotion ? 0 : motionManager.roll,

@@ -14,25 +14,25 @@ struct TipProduct: Identifiable {
     let message: String
 
     static let tiers = [
-        TipProduct(
+        Self(
             id: "inkwellkeeper.tip.small",
             title: "Small Tip",
             emoji: "☕️",
             message: "Buy me a coffee"
         ),
-        TipProduct(
+        Self(
             id: "inkwellkeeper.tip.medium",
             title: "Medium Tip",
             emoji: "☕️☕️",
             message: "Buy me a large coffee"
         ),
-        TipProduct(
+        Self(
             id: "inkwellkeeper.tip.large",
             title: "Large Tip",
             emoji: "🍕",
             message: "Buy me lunch"
         ),
-        TipProduct(
+        Self(
             id: "inkwellkeeper.tip.love",
             title: "Love the app!!",
             emoji: "🍽️",

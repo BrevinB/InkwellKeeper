@@ -75,7 +75,7 @@ struct KeywordGlossaryView: View {
     var onAsk: (String) -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    private let subscriptionManager = SubscriptionManager.shared
 
     var body: some View {
         NavigationStack {

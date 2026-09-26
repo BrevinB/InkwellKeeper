@@ -6,10 +6,8 @@
 //
 
 import Foundation
-import Combine
 
-
-class LorcanaAPIService: ObservableObject {
+class LorcanaAPIService {
     private let baseURL = "https://api.lorcana-api.com"
     private let session = URLSession.shared
     
@@ -32,18 +30,18 @@ class LorcanaAPIService: ObservableObject {
             let results = apiCards.map { apiCard in
                 let variant = determineVariant(from: apiCard)
                 return LorcanaCard(
-                    id: "\(apiCard.Set_Name ?? "unknown")_\(apiCard.Card_Num ?? apiCard.Set_Num)_\(variant.rawValue)_\(apiCard.Name.replacingOccurrences(of: " ", with: "_"))",
-                    name: apiCard.Name,
-                    cost: apiCard.Cost ?? 0,
-                    type: apiCard.Type ?? "Unknown",
-                    rarity: CardRarity.fromString(apiCard.Rarity ?? ""),
-                    setName: apiCard.Set_Name ?? "Unknown Set",
-                    cardText: apiCard.Body_Text ?? "",
-                    imageUrl: apiCard.Image ?? "",
+                    id: "\(apiCard.setName ?? "unknown")_\(apiCard.cardNum ?? apiCard.setNum)_\(variant.rawValue)_\(apiCard.name.replacingOccurrences(of: " ", with: "_"))",
+                    name: apiCard.name,
+                    cost: apiCard.cost ?? 0,
+                    type: apiCard.type ?? "Unknown",
+                    rarity: CardRarity.fromString(apiCard.rarity ?? ""),
+                    setName: apiCard.setName ?? "Unknown Set",
+                    cardText: apiCard.bodyText ?? "",
+                    imageUrl: apiCard.image ?? "",
                     price: nil,
                     variant: variant,
-                    cardNumber: apiCard.Card_Num,
-                    uniqueId: apiCard.Unique_ID
+                    cardNumber: apiCard.cardNum,
+                    uniqueId: apiCard.uniqueID
                 )
             }
             
@@ -77,18 +75,18 @@ class LorcanaAPIService: ObservableObject {
                 let results = apiCards.map { apiCard in
                     let variant = determineVariant(from: apiCard)
                     return LorcanaCard(
-                        id: "\(apiCard.Set_Name ?? "unknown")_\(apiCard.Card_Num ?? apiCard.Set_Num)_\(variant.rawValue)_\(apiCard.Name.replacingOccurrences(of: " ", with: "_"))",
-                        name: apiCard.Name,
-                        cost: apiCard.Cost ?? 0,
-                        type: apiCard.Type ?? "Unknown",
-                        rarity: CardRarity.fromString(apiCard.Rarity ?? ""),
-                        setName: apiCard.Set_Name ?? "Unknown Set",
-                        cardText: apiCard.Body_Text ?? "",
-                        imageUrl: apiCard.Image ?? "",
+                        id: "\(apiCard.setName ?? "unknown")_\(apiCard.cardNum ?? apiCard.setNum)_\(variant.rawValue)_\(apiCard.name.replacingOccurrences(of: " ", with: "_"))",
+                        name: apiCard.name,
+                        cost: apiCard.cost ?? 0,
+                        type: apiCard.type ?? "Unknown",
+                        rarity: CardRarity.fromString(apiCard.rarity ?? ""),
+                        setName: apiCard.setName ?? "Unknown Set",
+                        cardText: apiCard.bodyText ?? "",
+                        imageUrl: apiCard.image ?? "",
                         price: nil,
                         variant: variant,
-                        cardNumber: apiCard.Card_Num,
-                        uniqueId: apiCard.Unique_ID
+                        cardNumber: apiCard.cardNum,
+                        uniqueId: apiCard.uniqueID
                     )
                 }
                 
@@ -137,10 +135,8 @@ class LorcanaAPIService: ObservableObject {
         
         // Group by card name and pick the first variant for each unique card
         var uniqueCardsByName: [String: LorcanaCard] = [:]
-        for card in matchingCards {
-            if uniqueCardsByName[card.name] == nil {
-                uniqueCardsByName[card.name] = card
-            }
+        for card in matchingCards where uniqueCardsByName[card.name] == nil {
+            uniqueCardsByName[card.name] = card
         }
         
         // Sort by relevance
@@ -203,18 +199,18 @@ class LorcanaAPIService: ObservableObject {
         return apiCards.map { apiCard in
             let variant = determineVariant(from: apiCard)
             return LorcanaCard(
-                id: "\(apiCard.Set_Name ?? "unknown")_\(apiCard.Card_Num ?? apiCard.Set_Num)_\(variant.rawValue)_\(apiCard.Name.replacingOccurrences(of: " ", with: "_"))",
-                name: apiCard.Name,
-                cost: apiCard.Cost ?? 0,
-                type: apiCard.Type ?? "Unknown",
-                rarity: CardRarity.fromString(apiCard.Rarity ?? ""),
-                setName: apiCard.Set_Name ?? "Unknown Set",
-                cardText: apiCard.Body_Text ?? "",
-                imageUrl: apiCard.Image ?? "",
+                id: "\(apiCard.setName ?? "unknown")_\(apiCard.cardNum ?? apiCard.setNum)_\(variant.rawValue)_\(apiCard.name.replacingOccurrences(of: " ", with: "_"))",
+                name: apiCard.name,
+                cost: apiCard.cost ?? 0,
+                type: apiCard.type ?? "Unknown",
+                rarity: CardRarity.fromString(apiCard.rarity ?? ""),
+                setName: apiCard.setName ?? "Unknown Set",
+                cardText: apiCard.bodyText ?? "",
+                imageUrl: apiCard.image ?? "",
                 price: nil,
                 variant: variant,
-                cardNumber: apiCard.Card_Num,
-                uniqueId: apiCard.Unique_ID
+                cardNumber: apiCard.cardNum,
+                uniqueId: apiCard.uniqueID
             )
         }
     }
@@ -225,9 +221,9 @@ class LorcanaAPIService: ObservableObject {
     }
     
     private func determineVariant(from apiCard: APICard) -> CardVariant {
-        let rarity = apiCard.Rarity?.lowercased() ?? ""
-        let name = apiCard.Name.lowercased()
-        let classifications = apiCard.Classifications?.lowercased() ?? ""
+        let rarity = apiCard.rarity?.lowercased() ?? ""
+        let name = apiCard.name.lowercased()
+        let classifications = apiCard.classifications?.lowercased() ?? ""
         
         // Use heuristics to determine variant based on available data
         if rarity.contains("enchanted") || name.contains("enchanted") {
@@ -248,18 +244,33 @@ class LorcanaAPIService: ObservableObject {
 // MARK: - API Models
 extension LorcanaAPIService {
     struct APICard: Codable {
-        let Name: String
-        let Set_Num: Int
-        let Card_Num: Int?
-        let Unique_ID: String?
-        let Cost: Int?
-        let `Type`: String?
-        let Rarity: String?
-        let Set_Name: String?
-        let Body_Text: String?
-        let Image: String?
-        let Classifications: String?
-        let Flavor_Text: String?
+        let name: String
+        let setNum: Int
+        let cardNum: Int?
+        let uniqueID: String?
+        let cost: Int?
+        let type: String?
+        let rarity: String?
+        let setName: String?
+        let bodyText: String?
+        let image: String?
+        let classifications: String?
+        let flavorText: String?
+
+        enum CodingKeys: String, CodingKey {
+            case name = "Name"
+            case setNum = "Set_Num"
+            case cardNum = "Card_Num"
+            case uniqueID = "Unique_ID"
+            case cost = "Cost"
+            case type = "Type"
+            case rarity = "Rarity"
+            case setName = "Set_Name"
+            case bodyText = "Body_Text"
+            case image = "Image"
+            case classifications = "Classifications"
+            case flavorText = "Flavor_Text"
+        }
     }
     
     enum APIError: LocalizedError {

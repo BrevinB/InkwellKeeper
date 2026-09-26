@@ -14,7 +14,7 @@ struct TypeBreakdownCard: View {
     private var entries: [Entry] {
         let sorted = counts
             .map { Entry(type: $0.key, count: $0.value) }
-            .filter { $0.count > 0 }
+            .filter { $0.count > 0 } // swiftlint:disable:this empty_count
         return sorted.sorted { lhs, rhs in
             let lhsIndex = Self.preferredOrder.firstIndex(of: lhs.type) ?? Self.preferredOrder.count
             let rhsIndex = Self.preferredOrder.firstIndex(of: rhs.type) ?? Self.preferredOrder.count
@@ -36,7 +36,7 @@ struct TypeBreakdownCard: View {
                         y: .value("Type", entry.type)
                     )
                     .foregroundStyle(color(for: entry.type).gradient)
-                    .cornerRadius(4)
+                    .cornerRadius(4) // swiftlint:disable:this no_corner_radius
                     .annotation(position: .trailing) {
                         Text(percent(entry))
                             .font(.caption2)

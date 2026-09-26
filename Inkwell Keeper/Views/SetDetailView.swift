@@ -9,8 +9,8 @@ import SwiftUI
 
 struct SetDetailView: View {
     let set: LorcanaSet
-    @EnvironmentObject var collectionManager: CollectionManager
-    @StateObject private var dataManager = SetsDataManager.shared
+    @Environment(CollectionManager.self) var collectionManager
+    private let dataManager = SetsDataManager.shared
     @State private var cards: [LorcanaCard] = []
     @State private var selectedCard: LorcanaCard?
     @State private var selectedCardGroupForAdd: CardGroup?
@@ -50,7 +50,6 @@ struct SetDetailView: View {
         return collectionManager.getSetProgress(set.name, totalCardsInSet: totalCards)
     }
     
-
     private var progressHeader: some View {
             // Progress header
             VStack(spacing: 12) {
@@ -58,19 +57,19 @@ struct SetDetailView: View {
                     Text(set.name)
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
 
                     Spacer()
 
                     Text("\(Int(progress.percentage))% Complete")
                         .font(.headline)
-                        .foregroundColor(.lorcanaGold)
+                        .foregroundStyle(.lorcanaGold)
                 }
 
                 HStack {
                     Text("\(progress.collected) of \(progress.total) cards collected")
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.gray)
 
                     Spacer()
                 }
@@ -99,14 +98,14 @@ struct SetDetailView: View {
                                 Text(selectedCardIds.count == missingCards.count ? "Deselect All" : "Select All Missing")
                             }
                             .font(.caption)
-                            .foregroundColor(.lorcanaGold)
+                            .foregroundStyle(.lorcanaGold)
                         }
 
                         Spacer()
 
                         Text("\(selectedCardIds.count) selected")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                 }
 
@@ -150,20 +149,20 @@ struct SetDetailView: View {
                     VStack(spacing: 16) {
                         ProgressView()
                         Text("Loading \(set.name) cards...")
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if cards.isEmpty && !dataManager.hasLocalCards(for: set.name) {
                     VStack(spacing: 16) {
                         Image(systemName: "exclamationmark.triangle")
                             .font(.largeTitle)
-                            .foregroundColor(.orange)
+                            .foregroundStyle(.orange)
                         Text("Card data not available")
                             .font(.headline)
-                            .foregroundColor(.orange)
+                            .foregroundStyle(.orange)
                         Text("This set's card data hasn't been added to the app yet.")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                             .multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -172,9 +171,9 @@ struct SetDetailView: View {
                     VStack(spacing: 16) {
                         Image(systemName: filterOption == .missing ? "checkmark.circle" : "rectangle.grid.3x2")
                             .font(.largeTitle)
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                         Text(filterOption == .missing ? "All cards collected!" : "No cards found")
-                            .foregroundColor(.gray)
+                            .foregroundStyle(.gray)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
@@ -225,10 +224,10 @@ struct SetDetailView: View {
                                         Text("\(selectedCardIds.count) card\(selectedCardIds.count == 1 ? "" : "s") selected")
                                             .font(.subheadline)
                                             .fontWeight(.medium)
-                                            .foregroundColor(.white)
+                                            .foregroundStyle(.white)
                                         Text("Will be added as Normal variant")
                                             .font(.caption2)
-                                            .foregroundColor(.gray)
+                                            .foregroundStyle(.gray)
                                     }
 
                                     Spacer()
@@ -242,7 +241,7 @@ struct SetDetailView: View {
                                         }
                                         .font(.subheadline)
                                         .fontWeight(.semibold)
-                                        .foregroundColor(.lorcanaDark)
+                                        .foregroundStyle(.lorcanaDark)
                                         .padding(.horizontal, 16)
                                         .padding(.vertical, 10)
                                         .background(
@@ -293,7 +292,7 @@ struct SetDetailView: View {
                                     Text("Bulk Add")
                                         .font(.caption)
                                 }
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                             }
                         }
 
@@ -302,7 +301,7 @@ struct SetDetailView: View {
                             loadCards()
                         }) {
                             Image(systemName: "arrow.clockwise")
-                                .foregroundColor(.lorcanaGold)
+                                .foregroundStyle(.lorcanaGold)
                         }
                     }
                 }
@@ -322,7 +321,7 @@ struct SetDetailView: View {
         .onChange(of: collectionManager.collectedCards.count) { recomputeFilteredCards() }
         .sheet(item: $selectedCard) { card in
             CardDetailSheetView(card: card)
-                .environmentObject(collectionManager)
+                .environment(collectionManager)
         }
         .sheet(item: $selectedCardGroupForAdd) { cardGroup in
             AddCardGroupModal(
@@ -339,7 +338,7 @@ struct SetDetailView: View {
                 },
                 isWishlist: false
             )
-            .environmentObject(collectionManager)
+            .environment(collectionManager)
         }
         .confirmationDialog(
             bulkAddConfirmationTitle,
@@ -361,11 +360,11 @@ struct SetDetailView: View {
                 if showQuickAddBanner {
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                         Text("\(quickAddCardName) added!")
                             .font(.subheadline)
                             .fontWeight(.medium)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                         Spacer()
                     }
                     .padding(.horizontal, 16)
@@ -414,7 +413,8 @@ struct SetDetailView: View {
         // Don't leak an upcoming set's reprint into an older set's picker.
         let reprints = SpoilerSettings.shared.visibleCards(allCards).filter { $0.name == card.name &&
             $0.variant != .enchanted && $0.variant != .promo &&
-            $0.variant != .epic && $0.variant != .iconic }
+            $0.variant != .epic && $0.variant != .iconic 
+        }
 
         return CardGroup(
             id: card.name,
@@ -447,7 +447,8 @@ struct SetDetailView: View {
         collectionManager.addCard(cardToAdd, quantity: 1)
         quickAddCardName = "\(card.name) (\(variant.displayName))"
         showQuickAddBanner = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+        Task {
+            try? await Task.sleep(for: .seconds(1.5))
             showQuickAddBanner = false
         }
     }
@@ -572,8 +573,8 @@ struct SetCardView: View {
     var isBulkSelectMode: Bool = false
     var isSelected: Bool = false
     let onTap: () -> Void
-    var onQuickAdd: (() -> Void)? = nil
-    var onQuickAddFoil: (() -> Void)? = nil
+    var onQuickAdd: (() -> Void)?
+    var onQuickAddFoil: (() -> Void)?
 
     private var isSpecialVariant: Bool {
         card.variant == .enchanted || card.variant == .promo ||
@@ -585,8 +586,7 @@ struct SetCardView: View {
             ZStack {
                 AsyncImage(url: card.bestImageUrl()) { image in
                     image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
+                        .resizable().scaledToFit()
                 } placeholder: {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color.gray.opacity(0.3))
@@ -618,7 +618,7 @@ struct SetCardView: View {
                                     Image(systemName: "checkmark")
                                         .font(.caption)
                                         .fontWeight(.bold)
-                                        .foregroundColor(.lorcanaDark)
+                                        .foregroundStyle(.lorcanaDark)
                                 } else {
                                     Circle()
                                         .stroke(Color.white.opacity(0.7), lineWidth: 2)
@@ -635,7 +635,7 @@ struct SetCardView: View {
                                         Text("\(normalQuantity)")
                                             .font(.system(size: 10, weight: .bold))
                                     }
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                                     .padding(.horizontal, 5)
                                     .padding(.vertical, 2)
                                     .background(
@@ -652,7 +652,7 @@ struct SetCardView: View {
                                         Text("\(foilQuantity)")
                                             .font(.system(size: 10, weight: .bold))
                                     }
-                                    .foregroundColor(.lorcanaDark)
+                                    .foregroundStyle(.lorcanaDark)
                                     .padding(.horizontal, 5)
                                     .padding(.vertical, 2)
                                     .background(
@@ -669,7 +669,7 @@ struct SetCardView: View {
                                     Image(systemName: "xmark")
                                         .font(.caption)
                                         .fontWeight(.bold)
-                                        .foregroundColor(.white)
+                                        .foregroundStyle(.white)
                                 )
                         }
                     }
@@ -697,7 +697,7 @@ struct SetCardView: View {
                                             Image(systemName: "sparkles")
                                                 .font(.system(size: 11))
                                                 .fontWeight(.bold)
-                                                .foregroundColor(.lorcanaDark)
+                                                .foregroundStyle(.lorcanaDark)
                                         }
                                     }
                                     .buttonStyle(.plain)
@@ -714,7 +714,7 @@ struct SetCardView: View {
                                         Image(systemName: "plus")
                                             .font(.caption)
                                             .fontWeight(.bold)
-                                            .foregroundColor(.white)
+                                            .foregroundStyle(.white)
                                     }
                                 }
                                 .buttonStyle(.plain)
@@ -738,7 +738,7 @@ struct SetCardView: View {
             Text(card.name)
                 .font(.caption)
                 .fontWeight(.medium)
-                .foregroundColor(isCollected ? .white : .gray)
+                .foregroundStyle(isCollected ? .white : .gray)
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
 
@@ -763,7 +763,7 @@ struct CardDetailSheetView: View {
 
     var body: some View {
         CollectionCardDetailView(card: card, isPresented: $isPresented, showAllVariants: true)
-            .onChange(of: isPresented) { newValue in
+            .onChange(of: isPresented) { _, newValue in
                 if !newValue {
                     dismiss()
                 }
