@@ -118,6 +118,8 @@ class AIDeckService {
     private(set) var generationID = UUID()
     /// Whether the current results came from a "try again" after negative feedback.
     private(set) var isRetry = false
+    /// Whether the AI picked this deck's inks (the player left the ink picker empty).
+    private(set) var inksChosenByAI = false
 
     /// The current matched suggestions as "4x Name" lines, captured before a retry resets them.
     private var previousSuggestionLines: [String] {
@@ -257,11 +259,13 @@ class AIDeckService {
         archetype: DeckArchetype?,
         collectionOnly: Bool = false,
         ownedCardQuantities: [String: Int] = [:],
+        excludedInks: Set<InkColor> = [],
         feedback: AIDeckFeedbackReason? = nil
     ) async {
         let previousAttempt = previousSuggestionLines
         reset()
         isRetry = feedback != nil
+        inksChosenByAI = inkColors.isEmpty
         currentMaxInkColors = format.maxInkColors
         currentFormat = format
         currentAllowedInkColors = inkColors.isEmpty ? nil : Set(inkColors.map(\.rawValue))
@@ -294,7 +298,11 @@ class AIDeckService {
         if !inkColors.isEmpty {
             prompt += "- Ink Colors: \(inkColors.map { $0.rawValue }.joined(separator: " / "))\n"
         } else {
-            prompt += "- Choose the best ink colors for the strategy (up to \(format.maxInkColors))\n"
+            prompt += "- Ink Colors: your choice — pick the inks (up to \(format.maxInkColors)) that best deliver the player's description\n"
+            prompt += "- Decide your inks BEFORE writing anything else: the very first line of your response must be exactly \"[INKS] Color / Color\" (e.g. \"[INKS] Ruby / Steel\"), and every card must fit those inks\n"
+            if !excludedInks.isEmpty {
+                prompt += "- Do NOT use these inks (the player wants to try something different): \(excludedInks.map(\.rawValue).sorted().joined(separator: ", "))\n"
+            }
         }
 
         if let archetype = archetype {
@@ -308,7 +316,7 @@ class AIDeckService {
         prompt += "\nPlayer's description (THIS IS THE TOP PRIORITY — build the deck around this): \(description)"
         prompt += "\nREMINDER: Maximize the use of cards that match the player's description. Include ALL available cards that fit the theme before adding any non-themed cards."
         prompt += Self.retryNote(for: feedback, previousAttempt: previousAttempt)
-        prompt += buildCardCatalog(format: format, inkColors: inkColors, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities, description: description)
+        prompt += buildCardCatalog(format: format, inkColors: inkColors, excludedInks: inkColors.isEmpty ? excludedInks : [], collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities, description: description)
 
         await streamCompletion(apiKey: apiKey, prompt: prompt, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities)
     }
@@ -743,7 +751,7 @@ class AIDeckService {
     /// (a 6-ink Infinity catalog used to reach ~20-25K tokens).
     private static let catalogPerColorLimit = 130
 
-    private func buildCardCatalog(format: DeckFormat, inkColors: [InkColor], collectionOnly: Bool = false, ownedCardQuantities: [String: Int] = [:], description: String = "") -> String {
+    private func buildCardCatalog(format: DeckFormat, inkColors: [InkColor], excludedInks: Set<InkColor> = [], collectionOnly: Bool = false, ownedCardQuantities: [String: Int] = [:], description: String = "") -> String {
         let allCards = currentNormalCards
         let legalSetNames = format.legalSets ?? Set(allCards.map { $0.setName })
 
@@ -765,6 +773,12 @@ class AIDeckService {
             }
         }
         filteredCards = uniqueCards
+
+        // Drop inks the player ruled out ("Try different inks"), including dual-ink cards touching them
+        if !excludedInks.isEmpty {
+            let excluded = Set(excludedInks.map(\.rawValue))
+            filteredCards = filteredCards.filter { AIDeckRules.inks(of: $0.inkColor).isDisjoint(with: excluded) }
+        }
 
         // Filter to only owned cards when collection-only mode is active
         if collectionOnly && !ownedCardQuantities.isEmpty {
@@ -897,6 +911,12 @@ class AIDeckService {
         suggestions = Self.parseSuggestions(from: rawResponse)
         if !rawResponse.isEmpty {
             consumeDailyAllowance()
+        }
+        // When the AI chose the inks, hold the deck to the inks it declared up front so
+        // legality checks and filler cards follow its plan instead of guessing from the list.
+        if currentAllowedInkColors == nil,
+           let declared = AIDeckRules.declaredInks(in: rawResponse, limit: currentMaxInkColors) {
+            currentAllowedInkColors = declared
         }
         await postProcessSuggestions()
 
@@ -1669,11 +1689,22 @@ class AIDeckService {
     /// The format of the current results, for labeling.
     var resultFormat: DeckFormat { currentFormat }
 
+    /// The inks the current suggestions actually play, in picker order.
+    var resultInkColors: [InkColor] {
+        let inks = suggestions.reduce(into: Set<String>()) { $0.formUnion(AIDeckRules.inks(of: $1.matchedCard?.inkColor)) }
+        return InkColor.allCases.filter { inks.contains($0.rawValue) }
+    }
+
     /// The strategy text portion of the response (everything before the decklist),
     /// with the "Part 2" / "Deck List" header stripped out.
     var strategyText: String {
         guard let range = rawResponse.range(of: "[DECKLIST]") else { return "" }
         var text = String(rawResponse[rawResponse.startIndex..<range.lowerBound])
+
+        // The [INKS] declaration is shown as ink chips, not strategy prose
+        if let inksRange = text.range(of: #"\[INKS\][^\n]*"#, options: .regularExpression) {
+            text.removeSubrange(inksRange)
+        }
 
         // Strip "Part 2 - Deck List" style headers the AI adds before [DECKLIST]
         if let partRange = text.range(of: #"(?i)\n*\**\s*part\s*2[^\n]*"#, options: .regularExpression) {
@@ -1702,5 +1733,6 @@ class AIDeckService {
         currentExistingQuantities = [:]
         generationID = UUID()
         isRetry = false
+        inksChosenByAI = false
     }
 }

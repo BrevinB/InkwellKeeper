@@ -157,7 +157,8 @@ private let changelogEntries: [ChangelogEntry] = [
         features: [
             "AI decks now follow your format's rules: 60 cards, max 4 copies (reprints included), only your inks and legal sets, with a banner showing the result (Pro)",
             "Rate AI decks, completions, swaps, and strategy guides, then try again using your feedback (Pro)",
-            "Save share cards straight to Photos, or copy them to paste into Discord"
+            "Save share cards straight to Photos, or copy them to paste into Discord",
+            "Hyperia City cards slowly coming in, hidden by default to avoid spoilers"
         ],
         improvements: [
             "Dual-ink cards now appear in AI decks that play both of their inks",

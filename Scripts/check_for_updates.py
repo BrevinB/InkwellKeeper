@@ -13,6 +13,7 @@ For GitHub Actions (outputs in a format suitable for issue creation):
 import json
 import os
 import sys
+import uuid
 import urllib.request
 import urllib.error
 from pathlib import Path
@@ -328,9 +329,9 @@ def main():
         if github_output:
             with open(github_output, "a") as f:
                 f.write(f"has_updates={'true' if has_updates else 'false'}\n")
-                # Escape newlines for multiline output
-                escaped_report = report.replace("%", "%25").replace("\n", "%0A").replace("\r", "%0D")
-                f.write(f"report<<EOF\n{report}\nEOF\n")
+                # Random heredoc delimiter so report text can't end the value early.
+                delimiter = f"REPORT_{uuid.uuid4().hex}"
+                f.write(f"report<<{delimiter}\n{report}\n{delimiter}\n")
 
         # Exit with code 0 for no updates, 1 for updates (useful for CI)
         sys.exit(0)

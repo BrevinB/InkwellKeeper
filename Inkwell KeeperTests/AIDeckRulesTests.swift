@@ -54,6 +54,21 @@ struct AIDeckRulesTests {
         #expect(!AIDeckRules.fits(inkColor: nil, allowedColors: ["Ruby"]))
     }
 
+    @Test("The AI's declared inks are read from its [INKS] line")
+    func declaredInksParsing() {
+        let response = "Strategy text mentioning Amethyst.\n[INKS] Ruby / Steel\n\n[DECKLIST]\n4x Card\n[/DECKLIST]"
+        #expect(AIDeckRules.declaredInks(in: response, limit: 2) == ["Ruby", "Steel"])
+        #expect(AIDeckRules.declaredInks(in: "[INKS] **amber & emerald**", limit: 2) == ["Amber", "Emerald"])
+    }
+
+    @Test("Missing, empty, or over-limit ink declarations are ignored")
+    func declaredInksRejectsInvalid() {
+        #expect(AIDeckRules.declaredInks(in: "No tag here, just Ruby and Steel", limit: 2) == nil)
+        #expect(AIDeckRules.declaredInks(in: "[INKS] none\nRuby", limit: 2) == nil)
+        #expect(AIDeckRules.declaredInks(in: "[INKS] Ruby / Steel / Amber", limit: 2) == nil)
+        #expect(AIDeckRules.declaredInks(in: "[INKS] Ruby / Steel / Amber", limit: 6) == ["Ruby", "Steel", "Amber"])
+    }
+
     // MARK: - Duplicate merging
 
     @Test("Suggestions resolving to the same card merge so the copy limit sees the total")

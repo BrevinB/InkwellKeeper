@@ -16,10 +16,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.11'
 
@@ -27,11 +27,14 @@ jobs:
         id: check
         run: |
           python Scripts/check_starter_decks.py --github-action
-        continue-on-error: true
 
       - name: Create issue if decks missing
         if: steps.check.outputs.has_missing == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
+        env:
+          # Passed via env, never interpolated into the script: the report is
+          # Markdown full of backticks.
+          REPORT: ${{ steps.check.outputs.report }}
         with:
           script: |
             const title = `Missing starter decks detected - ${new Date().toISOString().split('T')[0]}`;
@@ -48,11 +51,12 @@ jobs:
               issue.title.startsWith('Missing starter decks detected')
             );
 
-            const body = `${{ steps.check.outputs.report }}
-
-            ---
-            *This issue was automatically created by the starter deck checker.*
-            `;
+            const body = [
+              process.env.REPORT,
+              '',
+              '---',
+              '*This issue was automatically created by the starter deck checker.*'
+            ].join('\n');
 
             if (existingIssue) {
               // Update existing issue

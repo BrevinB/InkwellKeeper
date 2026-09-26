@@ -68,6 +68,18 @@ enum AIDeckRules {
         return !cardInks.isEmpty && cardInks.isSubset(of: allowedColors)
     }
 
+    /// The inks the AI committed to on its `[INKS] Ruby / Steel` line, when it was left to
+    /// choose. Nil when the line is missing, names no real ink, or exceeds `limit` — callers
+    /// then fall back to inferring the inks from the decklist.
+    static func declaredInks(in response: String, limit: Int) -> Set<String>? {
+        guard let tagRange = response.range(of: "[INKS]") else { return nil }
+        let line = response[tagRange.upperBound...].prefix { $0 != "\n" }
+        let words = line.split(whereSeparator: { !$0.isLetter })
+        let inks = Set(words.compactMap { InkColor.fromString(String($0))?.rawValue })
+        guard !inks.isEmpty, inks.count <= limit else { return nil }
+        return inks
+    }
+
     /// Combines suggestions that resolved to the same card (the AI listing a card twice, or two
     /// misspellings matching one card), so the copy limit sees the real total. Keeps the first
     /// suggestion's identity and position. Unmatched suggestions pass through untouched.

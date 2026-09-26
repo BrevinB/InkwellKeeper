@@ -18,6 +18,8 @@ struct AIDeckBuilderView: View {
     @State private var deckName = ""
     @State private var selectedFormat: DeckFormat = .casual
     @State private var selectedColors: Set<InkColor> = []
+    /// Inks ruled out via "Try Different Inks" while the AI is picking inks.
+    @State private var excludedInks: Set<InkColor> = []
     @State private var selectedArchetype: DeckArchetype? = nil
     @State private var userPrompt = ""
     @State private var useCollectionOnly = false
@@ -142,7 +144,7 @@ struct AIDeckBuilderView: View {
 
                             Spacer()
 
-                            Text("pick 1-\(selectedFormat.maxInkColors)")
+                            Text("optional · up to \(selectedFormat.maxInkColors)")
                                 .font(.caption2)
                                 .foregroundStyle(.gray)
                         }
@@ -180,6 +182,12 @@ struct AIDeckBuilderView: View {
                                     .foregroundStyle(.white)
                                 }
                             }
+                        }
+
+                        if selectedColors.isEmpty {
+                            Label("AI will pick the best inks for your description", systemImage: "sparkles")
+                                .font(.caption)
+                                .foregroundStyle(.gray)
                         }
                     }
 
@@ -337,7 +345,10 @@ struct AIDeckBuilderView: View {
                 }
 
                 // Generate Button
-                Button(action: { generate() }) {
+                Button(action: {
+                    excludedInks = []
+                    generate()
+                }) {
                     HStack {
                         if aiService.isLoading {
                             ProgressView()
@@ -360,9 +371,7 @@ struct AIDeckBuilderView: View {
                 .padding(.horizontal)
 
                 Group {
-                    if selectedColors.isEmpty {
-                        Text("Choose at least one ink color to generate")
-                    } else if aiService.remainingGenerationsToday <= 5 {
+                    if aiService.remainingGenerationsToday <= 5 {
                         Text("\(aiService.remainingGenerationsToday) AI generation\(aiService.remainingGenerationsToday == 1 ? "" : "s") left today")
                     }
                 }
@@ -452,6 +461,13 @@ struct AIDeckBuilderView: View {
                         }
                     }
                     .padding(.horizontal)
+
+                    if aiService.inksChosenByAI && !aiService.resultInkColors.isEmpty {
+                        AIChosenInksBanner(
+                            inks: aiService.resultInkColors,
+                            onTryDifferentInks: aiService.resultInkColors.count < InkColor.allCases.count ? tryDifferentInks : nil
+                        )
+                    }
 
                     if let report = aiService.ruleReport {
                         AIDeckRuleCheckBanner(report: report, format: aiService.resultFormat)
@@ -626,14 +642,13 @@ struct AIDeckBuilderView: View {
     // MARK: - Helpers
     private var canGenerate: Bool {
         !userPrompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && !selectedColors.isEmpty
             && !aiService.isLoading
     }
 
     private func generate(feedback: AIDeckFeedbackReason? = nil) {
         hasGenerated = true
         Analytics.send(.aiDeckGenerated(
-            ink: selectedColors.map(\.rawValue).sorted().joined(separator: "/")
+            ink: selectedColors.isEmpty ? "auto" : selectedColors.map(\.rawValue).sorted().joined(separator: "/")
         ))
         let ownedQuantities = useCollectionOnly ? collectionManager.collectedCardQuantities : [:]
         generationTask = Task {
@@ -644,9 +659,20 @@ struct AIDeckBuilderView: View {
                 archetype: selectedArchetype,
                 collectionOnly: useCollectionOnly,
                 ownedCardQuantities: ownedQuantities,
+                excludedInks: excludedInks,
                 feedback: feedback
             )
         }
+    }
+
+    /// Rebuilds with the AI choosing again, ruling out the inks it just used. Once too few
+    /// inks would be left to build from, only the latest pair is ruled out.
+    private func tryDifferentInks() {
+        let justUsed = Set(aiService.resultInkColors)
+        let combined = excludedInks.union(justUsed)
+        let remaining = InkColor.allCases.count - combined.count
+        excludedInks = remaining >= min(2, selectedFormat.maxInkColors) ? combined : justUsed
+        generate()
     }
 
     private func cancelGeneration() {
@@ -662,7 +688,7 @@ struct AIDeckBuilderView: View {
             name: name,
             description: userPrompt,
             format: selectedFormat,
-            inkColors: Array(selectedColors),
+            inkColors: selectedColors.isEmpty ? aiService.resultInkColors : Array(selectedColors),
             archetype: selectedArchetype
         )
         aiService.applySuggestions(to: deck, deckManager: deckManager)

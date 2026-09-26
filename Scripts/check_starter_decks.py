@@ -13,6 +13,7 @@ For GitHub Actions (outputs in a format suitable for issue creation):
 import json
 import os
 import sys
+import uuid
 from pathlib import Path
 from typing import Dict, List, Tuple
 from datetime import datetime
@@ -217,7 +218,9 @@ def main():
         if github_output:
             with open(github_output, "a") as f:
                 f.write(f"has_missing={'true' if has_missing else 'false'}\n")
-                f.write(f"report<<EOF\n{report}\nEOF\n")
+                # Random heredoc delimiter so report text can't end the value early.
+                delimiter = f"REPORT_{uuid.uuid4().hex}"
+                f.write(f"report<<{delimiter}\n{report}\n{delimiter}\n")
 
         sys.exit(0)
 
