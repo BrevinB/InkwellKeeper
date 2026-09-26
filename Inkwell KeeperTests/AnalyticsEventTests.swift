@@ -44,7 +44,11 @@ struct AnalyticsEventTests {
         .importCompleted(source: "dreamborn", count: 60),
         .exportCompleted(format: "csv"),
         .shareCardPresented(type: "cardFlex"),
-        .shareCompleted(type: "cardFlex"),
+        .shareRendered(type: "cardFlex", milliseconds: 420),
+        .shareRenderFailed(type: "cardFlex"),
+        .shareActionTapped(type: "cardFlex", action: "save"),
+        .shareCompleted(type: "cardFlex", method: "shareSheet"),
+        .shareDismissed(type: "cardFlex", stage: "preview"),
         .tradeConfirmed(yourCards: 3, theirCards: 2),
         .deckSharePresented,
         .deckShareCompleted(method: "copyLink"),
@@ -65,9 +69,30 @@ struct AnalyticsEventTests {
     @Test("Share and deep-link events carry their segmentation parameter")
     func shareAndDeepLinkParametersSurvive() {
         #expect(Analytics.Event.shareCardPresented(type: "haul").parameters["shareType"] == "haul")
-        #expect(Analytics.Event.shareCompleted(type: "haul").parameters["shareType"] == "haul")
+        #expect(Analytics.Event.shareCompleted(type: "haul", method: "copy").parameters["shareType"] == "haul")
         #expect(Analytics.Event.deckShareCompleted(method: "link").parameters["method"] == "link")
         #expect(Analytics.Event.deepLinkOpened(type: "deck").parameters["linkType"] == "deck")
+    }
+
+    /// The share funnel is only readable if every step keeps the same discriminator and each
+    /// step carries the field that tells the drop-off points apart.
+    @Test("Share funnel steps carry the parameters that make the funnel readable")
+    func shareFunnelParametersSurvive() {
+        #expect(Analytics.Event.shareRendered(type: "haul", milliseconds: 1500).parameters["renderMilliseconds"] == "1500")
+        #expect(Analytics.Event.shareActionTapped(type: "haul", action: "save").parameters["action"] == "save")
+        #expect(Analytics.Event.shareCompleted(type: "haul", method: "save").parameters["method"] == "save")
+        #expect(Analytics.Event.shareDismissed(type: "haul", stage: "preparing").parameters["stage"] == "preparing")
+
+        let steps: [Analytics.Event] = [
+            .shareCardPresented(type: "haul"),
+            .shareRendered(type: "haul", milliseconds: 10),
+            .shareActionTapped(type: "haul", action: "share"),
+            .shareCompleted(type: "haul", method: "shareSheet"),
+            .shareDismissed(type: "haul", stage: "preview")
+        ]
+        for step in steps {
+            #expect(step.parameters["shareType"] == "haul", "\(step.signalName) lost its shareType")
+        }
     }
 
     @Test("Collection adds carry a source")

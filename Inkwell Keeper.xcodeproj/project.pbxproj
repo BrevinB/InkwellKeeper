@@ -210,6 +210,7 @@
 		DF308661E652BA0730B0C93C /* CostBasisCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB9FF5BA716CDC122A6450D /* CostBasisCalculator.swift */; };
 		DF539F8814044BB06BB1D68F /* PortfolioPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 051CCA2D1B21ED90B034AE8F /* PortfolioPoint.swift */; };
 		E2F3A4B5C6D7E8F9A0B1C3D5 /* MultiScanReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F3A4B5C6D7E8F9A0B1C3D4 /* MultiScanReviewView.swift */; };
+		E77357A10B44AB64A9B20A2B /* ShareActionBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA4F5F34DB50248E43428D3 /* ShareActionBar.swift */; };
 		E800550A08F26C9EE7F01479 /* OpeningHandSimulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E86DD8059DCCA4741B7F1C04 /* OpeningHandSimulator.swift */; };
 		EC289C46CFDECD9AF1BA235D /* ShareMilestone.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0C40ABB4DEDF6D9008F0E1 /* ShareMilestone.swift */; };
 		F05529C54009ACF715382289 /* PortfolioInsightsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C25AA3BAB0F557569E3E532 /* PortfolioInsightsBuilder.swift */; };
@@ -354,6 +355,7 @@
 		4995AD4B6DACCC6DDBF4ACE3 /* PaywallContextTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PaywallContextTests.swift; sourceTree = "<group>"; };
 		49C17FA3D6A4FC54BFE2CBC6 /* SetFilterModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetFilterModels.swift; sourceTree = "<group>"; };
 		4A41443E605FCC2741A01CCC /* TradeCalculatorViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TradeCalculatorViewModel.swift; sourceTree = "<group>"; };
+		4EA4F5F34DB50248E43428D3 /* ShareActionBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareActionBar.swift; sourceTree = "<group>"; };
 		51F6FB2C58AC4849856F7DB2 /* PricingInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PricingInfoView.swift; sourceTree = "<group>"; };
 		52C4C498E2208EC2CD05CBED /* PortfolioHistoryCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioHistoryCard.swift; sourceTree = "<group>"; };
 		53FCC9D910C812A33485BFD9 /* MilestoneShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MilestoneShareCardView.swift; sourceTree = "<group>"; };
@@ -456,6 +458,8 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		23CAEDD92ECEE796006786F7 /* CardImages */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = CardImages;
 			sourceTree = "<group>";
 		};
@@ -738,6 +742,7 @@
 				F6502D77B1F14DFEA73094B1 /* ValueBySetCard.swift */,
 				ACCE88E31AE5CD5995E68AC5 /* ShareCardChrome.swift */,
 				1910551A9F8E16761BC5CE33 /* ShareCardPresenter.swift */,
+				4EA4F5F34DB50248E43428D3 /* ShareActionBar.swift */,
 				23E8DB0F2FE8883400BF5EB4 /* SimpleCardSearchRow.swift */,
 				562E6A8A28051109039D43EB /* PriceHistoryChartView.swift */,
 				1DA4228D6C3310035BB99ACE /* CardTextView.swift */,
@@ -1058,6 +1063,7 @@
 				4A606643A1D9335E7A70120B /* ShareImageRenderer.swift in Sources */,
 				118D09E628E7401E65DF12BF /* ShareCardChrome.swift in Sources */,
 				1B60780DF7836064A08CE457 /* ShareCardPresenter.swift in Sources */,
+				E77357A10B44AB64A9B20A2B /* ShareActionBar.swift in Sources */,
 				EC289C46CFDECD9AF1BA235D /* ShareMilestone.swift in Sources */,
 				ABC60D042FF72BBFCD927D87 /* DeckShareCardView.swift in Sources */,
 				CDD906082FDCA9AA2B952840 /* MilestoneShareCardView.swift in Sources */,
@@ -1301,6 +1307,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Ink Well Keeper";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.reference";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Ink Well Keeper uses the camera to scan and identify your Lorcana cards for easy collection tracking.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Ink Well Keeper saves the share cards you create straight to your photo library.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Ink Well Keeper accesses your photo library to let you add card images to your collection.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -1339,6 +1346,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Ink Well Keeper";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.reference";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Ink Well Keeper uses the camera to scan and identify your Lorcana cards for easy collection tracking.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Ink Well Keeper saves the share cards you create straight to your photo library.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Ink Well Keeper accesses your photo library to let you add card images to your collection.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
