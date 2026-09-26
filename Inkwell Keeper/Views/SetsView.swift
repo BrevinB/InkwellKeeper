@@ -11,6 +11,8 @@ struct SetsView: View {
     @EnvironmentObject var collectionManager: CollectionManager
     @StateObject private var dataManager = SetsDataManager.shared
     @State private var selectedSet: LorcanaSet?
+    /// Upcoming set awaiting the "show spoilers?" confirmation.
+    @State private var spoilerPromptSet: LorcanaSet?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
@@ -61,7 +63,11 @@ struct SetsView: View {
                                     collectionManager: collectionManager,
                                     dataManager: dataManager,
                                     onTap: {
-                                        selectedSet = set
+                                        if SpoilerSettings.shared.isHidden(setName: set.name) {
+                                            spoilerPromptSet = set
+                                        } else {
+                                            selectedSet = set
+                                        }
                                     }
                                 )
                             }
@@ -86,6 +92,23 @@ struct SetsView: View {
                 }
             }
         }
+        .confirmationDialog(
+            "Show spoilers for \(spoilerPromptSet?.name ?? "this set")?",
+            isPresented: Binding(
+                get: { spoilerPromptSet != nil },
+                set: { if !$0 { spoilerPromptSet = nil } }
+            ),
+            titleVisibility: .visible,
+            presenting: spoilerPromptSet
+        ) { set in
+            Button("Show Spoilers") {
+                SpoilerSettings.shared.reveal(setName: set.name)
+                selectedSet = set
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { set in
+            Text("\(set.name) releases \(set.releaseDateFormatted). Its cards are hidden until then unless you choose to see them.")
+        }
         .sheet(item: $selectedSet) { set in
             SetDetailView(set: set)
                 .environmentObject(collectionManager)
@@ -108,69 +131,81 @@ struct SetProgressCard: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(set.name)
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .lineLimit(2)
-                    
-                    Text("\(progress.collected) of \(progress.total) cards")
-                        .font(.subheadline)
-                        .foregroundColor(.lorcanaGold)
-                }
+        if SpoilerSettings.shared.isHidden(setName: set.name) {
+            HiddenUpcomingSetCard(
+                set: set,
+                revealedCardCount: dataManager.getLocalCardCount(for: set.name),
+                onTap: onTap
+            )
+        } else {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(set.name)
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .lineLimit(2)
+
+                        if set.isUpcoming() {
+                            UpcomingSetBadge(set: set)
+                        }
+
+                        Text("\(progress.collected) of \(progress.total) cards")
+                            .font(.subheadline)
+                            .foregroundColor(.lorcanaGold)
+                    }
                 
-                Spacer()
+                    Spacer()
                 
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("\(Int(progress.percentage))%")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.lorcanaGold)
+                    VStack(alignment: .trailing, spacing: 4) {
+                        Text("\(Int(progress.percentage))%")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.lorcanaGold)
                     
-                    Text("Complete")
-                        .font(.caption)
-                        .foregroundColor(.gray)
+                        Text("Complete")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                 }
-            }
             
-            // Progress bar
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(height: 8)
+                // Progress bar
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(height: 8)
                     
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(
-                            LinearGradient(
-                                colors: [.lorcanaGold, .lorcanaGold.opacity(0.7)],
-                                startPoint: .leading,
-                                endPoint: .trailing
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(
+                                LinearGradient(
+                                    colors: [.lorcanaGold, .lorcanaGold.opacity(0.7)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
                             )
-                        )
-                        .frame(
-                            width: geometry.size.width * (progress.percentage / 100),
-                            height: 8
-                        )
+                            .frame(
+                                width: geometry.size.width * (progress.percentage / 100),
+                                height: 8
+                            )
+                    }
                 }
+                .frame(height: 8)
             }
-            .frame(height: 8)
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.lorcanaDark.opacity(0.8))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.lorcanaGold.opacity(0.3), lineWidth: 1)
-                )
-        )
-        .contentShape(Rectangle())
-        .onTapGesture {
-            onTap()
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.lorcanaDark.opacity(0.8))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.lorcanaGold.opacity(0.3), lineWidth: 1)
+                    )
+            )
+            .contentShape(Rectangle())
+            .onTapGesture {
+                onTap()
+            }
         }
     }
 }

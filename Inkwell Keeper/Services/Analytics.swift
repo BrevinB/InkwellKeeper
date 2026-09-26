@@ -55,6 +55,12 @@ enum Analytics {
         case aiRulesQuestionAsked
         case rulesAssistantOpened(source: String)
         case rulesAnswerRated(helpful: Bool)
+        /// Thumbs up/down on an AI deck result. `mode` is "build", "complete", "improve" or
+        /// "strategy"; `reason` is why a result missed ("none" on thumbs up, "unspecified" if
+        /// the user left without picking one); `ruleIssues` is how many rule violations the
+        /// deterministic audit found, so ratings can be split by legal vs. broken output;
+        /// `retry` marks results from "Try again" after a thumbs down, to see if retries land.
+        case aiDeckRated(mode: String, helpful: Bool, reason: String, format: String, ruleIssues: Int, retry: Bool)
 
         // MARK: Monetization
         case paywallShown(source: String)
@@ -66,10 +72,27 @@ enum Analytics {
         case exportCompleted(format: String)
 
         // MARK: Sharing & deep links
+        /// The share preview was opened. Fires before rendering starts, so it counts intent
+        /// to share rather than a usable card.
         case shareCardPresented(type: String)
-        case shareCompleted(type: String)
+        /// The share card finished rendering and the actions became tappable. `milliseconds`
+        /// is the wait the user actually sat through on the "Preparing your card…" spinner.
+        case shareRendered(type: String, milliseconds: Int)
+        /// Rendering produced no image, so the preview showed its error state instead.
+        case shareRenderFailed(type: String)
+        /// The user tapped one of the share actions. `action` is "share", "save" or "copy".
+        case shareActionTapped(type: String, action: String)
+        /// A share that actually happened. `method` is "shareSheet" (the system sheet reported
+        /// success), "save" (written to Photos) or "copy" (placed on the pasteboard).
+        case shareCompleted(type: String, method: String)
+        /// The preview was dismissed without any share completing. `stage` is "preparing" when
+        /// the user gave up during the render and "preview" once the card was on screen —
+        /// the pair splits a slow render from an unconvincing card.
+        case shareDismissed(type: String, stage: String)
         case tradeConfirmed(yourCards: Int, theirCards: Int)
         case deckSharePresented
+        /// A deck share that actually happened: the link activity finished or a list/link
+        /// landed on the pasteboard. Deck *image* shares go through `shareCompleted` instead.
         case deckShareCompleted(method: String)
         case deepLinkOpened(type: String)
 
@@ -102,13 +125,18 @@ enum Analytics {
             case .aiRulesQuestionAsked: "ai.rulesQuestionAsked"
             case .rulesAssistantOpened: "ai.rulesAssistantOpened"
             case .rulesAnswerRated: "ai.rulesAnswerRated"
+            case .aiDeckRated: "ai.deckRated"
             case .paywallShown: "paywall.shown"
             case .subscriptionPurchased: "subscription.purchased"
             case .tipPurchased: "tipJar.tipPurchased"
             case .importCompleted: "import.completed"
             case .exportCompleted: "export.completed"
             case .shareCardPresented: "share.cardPresented"
+            case .shareRendered: "share.rendered"
+            case .shareRenderFailed: "share.renderFailed"
+            case .shareActionTapped: "share.actionTapped"
             case .shareCompleted: "share.completed"
+            case .shareDismissed: "share.dismissed"
             case .tradeConfirmed: "trade.confirmed"
             case .deckSharePresented: "deck.sharePresented"
             case .deckShareCompleted: "deck.shareCompleted"
@@ -142,6 +170,11 @@ enum Analytics {
                 ["source": source]
             case let .rulesAnswerRated(helpful):
                 ["helpful": String(helpful)]
+            case let .aiDeckRated(mode, helpful, reason, format, ruleIssues, retry):
+                [
+                    "mode": mode, "helpful": String(helpful), "reason": reason,
+                    "format": format, "ruleIssues": String(ruleIssues), "retry": String(retry)
+                ]
             case let .deckCreated(format):
                 ["format": format]
             case let .deckImported(format):
@@ -160,11 +193,16 @@ enum Analytics {
             // at ingestion, so these keys must not be named "type".
             case let .shareCardPresented(type):
                 ["shareType": type]
-            case let .shareCompleted(type):
+            case let .shareRendered(type, milliseconds):
+                ["shareType": type, "renderMilliseconds": String(milliseconds)]
+            case let .shareRenderFailed(type):
                 ["shareType": type]
-            // A share that actually happened: the link activity finished or a
-            // copy landed on the pasteboard. Image shares are counted by the
-            // share.cardPresented/share.completed pair instead.
+            case let .shareActionTapped(type, action):
+                ["shareType": type, "action": action]
+            case let .shareCompleted(type, method):
+                ["shareType": type, "method": method]
+            case let .shareDismissed(type, stage):
+                ["shareType": type, "stage": stage]
             case let .tradeConfirmed(yourCards, theirCards):
                 ["yourCards": String(yourCards), "theirCards": String(theirCards)]
             case let .deckShareCompleted(method):
@@ -182,5 +220,15 @@ enum Analytics {
     /// Sends an event to TelemetryDeck.
     static func send(_ event: Event) {
         TelemetryDeck.signal(event.signalName, parameters: event.parameters)
+    }
+}
+
+/// Elapsed-time helper for analytics duration parameters.
+extension ContinuousClock.Instant {
+    /// Whole milliseconds between this instant and now.
+    var millisecondsElapsed: Int {
+        let elapsed = ContinuousClock.now - self
+        let components = elapsed.components
+        return Int(components.seconds * 1000 + components.attoseconds / 1_000_000_000_000_000)
     }
 }

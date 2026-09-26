@@ -152,6 +152,25 @@ struct ChangelogEntry {
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
     ChangelogEntry(
+        version: "3.4.1",
+        date: "September 2026",
+        features: [
+            "AI decks now follow your format's rules: 60 cards, max 4 copies (reprints included), only your inks and legal sets, with a banner showing the result (Pro)",
+            "Rate AI decks, completions, swaps, and strategy guides, then try again using your feedback (Pro)",
+            "Save share cards straight to Photos, or copy them to paste into Discord"
+        ],
+        improvements: [
+            "Dual-ink cards now appear in AI decks that play both of their inks",
+            "AI decks have more inkable cards and a better cost curve",
+            "Core Constructed updated for the current rotation (Fabled through Attack of the Vine!)"
+        ],
+        bugFixes: [
+            "Older printings of cards reprinted in a legal set are no longer marked illegal in Core decks",
+            "Improve Deck no longer shows an unused \"Add to Deck\" button"
+        ],
+        inProgress: ["Price alerts", "Storage tracking: Binders, Troves, Bins, etc"]
+    ),
+    ChangelogEntry(
         version: "3.4.0",
         date: "September 2026",
         features: [

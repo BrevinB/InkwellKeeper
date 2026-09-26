@@ -149,7 +149,7 @@ struct SettingsView: View {
     }
 
     private var preferencesSection: some View {
-        Section("Preferences") {
+        Section {
             Picker("Currency", selection: $preferredCurrency) {
                 Text("USD ($)").tag("USD")
                 Text("EUR (\u{20AC})").tag("EUR")
@@ -157,6 +157,12 @@ struct SettingsView: View {
             .onChange(of: preferredCurrency) { _, newValue in
                 UserDefaults.standard.set(newValue, forKey: "preferredCurrency")
             }
+
+            Toggle("Show Spoilers for Upcoming Sets", isOn: Bindable(SpoilerSettings.shared).showAllSpoilers)
+        } header: {
+            Text("Preferences")
+        } footer: {
+            Text("When off, cards from sets that haven't released yet stay hidden until release day, or until you choose to see a set.")
         }
     }
 

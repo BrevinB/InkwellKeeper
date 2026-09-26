@@ -1766,83 +1766,88 @@ struct CardGroupSearchRow: View {
     var onWishlist: (() -> Void)? = nil
     
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 12) {
-                AsyncImage(url: cardGroup.primaryCard.bestImageUrl()) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                } placeholder: {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.gray.opacity(0.3))
-                }
-                .frame(width: 60, height: 84)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(cardGroup.primaryCard.rarity.color, lineWidth: 1)
-                )
-                
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(cardGroup.name)
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .lineLimit(2)
-                    
-                    HStack(spacing: 6) {
-                        RarityBadge(rarity: cardGroup.primaryCard.rarity)
-                        if let price = cardGroup.primaryCard.price {
-                            Text(price, format: .currency(code: "USD"))
-                                .font(.caption)
-                                .bold()
-                                .foregroundStyle(.lorcanaGold)
-                        }
+        if SpoilerSettings.shared.isHidden(cardGroup.primaryCard) {
+            SpoilerPlaceholderRow(card: cardGroup.primaryCard, thumbnailWidth: 60)
+                .listRowBackground(Color.lorcanaDark.opacity(0.6))
+        } else {
+            Button(action: onTap) {
+                HStack(spacing: 12) {
+                    AsyncImage(url: cardGroup.primaryCard.bestImageUrl()) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                    } placeholder: {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.gray.opacity(0.3))
                     }
-                    
-                    HStack(spacing: 6) {
-                        Text(cardGroup.primaryCard.setName)
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                            .lineLimit(1)
-                        
-                        if cardGroup.isReprint {
-                            HStack(spacing: 3) {
-                                Image(systemName: "square.on.square")
-                                    .font(.caption2)
-                                Text("\(cardGroup.setCount) sets")
-                                    .font(.caption2)
-                            }
+                    .frame(width: 60, height: 84)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(cardGroup.primaryCard.rarity.color, lineWidth: 1)
+                    )
+                
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(cardGroup.name)
+                            .font(.headline)
                             .foregroundColor(.white)
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 2)
-                            .background(Capsule().fill(Color.blue.opacity(0.8)))
+                            .lineLimit(2)
+                    
+                        HStack(spacing: 6) {
+                            RarityBadge(rarity: cardGroup.primaryCard.rarity)
+                            if let price = cardGroup.primaryCard.price {
+                                Text(price, format: .currency(code: "USD"))
+                                    .font(.caption)
+                                    .bold()
+                                    .foregroundStyle(.lorcanaGold)
+                            }
+                        }
+                    
+                        HStack(spacing: 6) {
+                            Text(cardGroup.primaryCard.setName)
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                                .lineLimit(1)
+                        
+                            if cardGroup.isReprint {
+                                HStack(spacing: 3) {
+                                    Image(systemName: "square.on.square")
+                                        .font(.caption2)
+                                    Text("\(cardGroup.setCount) sets")
+                                        .font(.caption2)
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 2)
+                                .background(Capsule().fill(Color.blue.opacity(0.8)))
+                            }
                         }
                     }
-                }
                 
-                Spacer()
+                    Spacer()
                 
-                if let onWishlist = onWishlist {
-                    Button {
-                        onWishlist()
-                    } label: {
-                        Image(systemName: "star.fill")
-                            .font(.body)
-                            .foregroundColor(.yellow)
-                            .padding(8)
+                    if let onWishlist = onWishlist {
+                        Button {
+                            onWishlist()
+                        } label: {
+                            Image(systemName: "star.fill")
+                                .font(.body)
+                                .foregroundColor(.yellow)
+                                .padding(8)
+                        }
+                        .buttonStyle(BorderlessButtonStyle())
                     }
-                    .buttonStyle(BorderlessButtonStyle())
-                }
                 
-                Image(systemName: "chevron.right")
-                    .foregroundColor(.lorcanaGold.opacity(0.6))
-                    .font(.caption)
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.lorcanaGold.opacity(0.6))
+                        .font(.caption)
+                }
+                .padding(.vertical, 6)
+                .contentShape(Rectangle())
             }
-            .padding(.vertical, 6)
-            .contentShape(Rectangle())
+            .buttonStyle(PlainButtonStyle())
+            .listRowBackground(Color.lorcanaDark.opacity(0.6))
         }
-        .buttonStyle(PlainButtonStyle())
-        .listRowBackground(Color.lorcanaDark.opacity(0.6))
     }
 }
 

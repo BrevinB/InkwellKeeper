@@ -12,19 +12,20 @@ import CloudKit
 
 /// Loads deck rules from the public CloudKit database.
 ///
-/// Expected record (public database):
+/// Expected records (public database), newest record wins — same publishing model as
+/// `RulesDigestService` and `AIConfigService`, so `Scripts/publish_deck_rules.sh` can publish
+/// with `cktool` (which can't choose record names):
 /// - Record Type: `DeckRules`
-/// - Record Name (ID): `deckRules`
 /// - Fields (all `List<String>`):
 ///   - `coreLegalSets` — set names currently legal in Core Constructed
 ///   - `coreBannedCards` — full card names banned in Core Constructed
 ///   - `infinityBannedCards` — full card names banned in Infinity Constructed
 ///
 /// Any field that is absent leaves the corresponding cached/default value unchanged.
-final class DeckRulesService: Sendable {
+final class DeckRulesService {
     static let shared = DeckRulesService()
 
-    private let recordName = "deckRules"
+    private let recordType = "DeckRules"
 
     private init() {}
 
@@ -34,17 +35,25 @@ final class DeckRulesService: Sendable {
         Task { await refreshAsync() }
     }
 
-    /// Fetches the rules record and applies any provided overrides to `LorcanaSetRegistry`.
+    /// Fetches the newest rules record and applies any provided overrides to `LorcanaSetRegistry`.
     func refreshAsync() async {
         let database = CKContainer.default().publicCloudDatabase
-        let recordID = CKRecord.ID(recordName: recordName)
+        let query = CKQuery(recordType: recordType, predicate: NSPredicate(value: true))
 
         do {
-            let record = try await database.record(for: recordID)
+            let (results, _) = try await database.records(matching: query, resultsLimit: 25)
+            let records = results.compactMap { try? $0.1.get() }
+            guard let newest = records.max(by: {
+                ($0.modificationDate ?? .distantPast) < ($1.modificationDate ?? .distantPast)
+            }) else {
+                print("[DeckRules] No record; using cached/default rules.")
+                return
+            }
+
             LorcanaSetRegistry.applyOverrides(
-                coreLegalSets: record["coreLegalSets"] as? [String],
-                coreBannedCards: record["coreBannedCards"] as? [String],
-                infinityBannedCards: record["infinityBannedCards"] as? [String]
+                coreLegalSets: newest["coreLegalSets"] as? [String],
+                coreBannedCards: newest["coreBannedCards"] as? [String],
+                infinityBannedCards: newest["infinityBannedCards"] as? [String]
             )
             print("[DeckRules] Applied CloudKit rule overrides.")
         } catch {

@@ -108,6 +108,36 @@ class AIDeckService {
     /// Normal-variant card snapshot for the current generation, fetched once per run —
     /// `getAllCards()` re-maps prices on every call and used to be hit 4+ times per generation.
     private var currentNormalCards: [LorcanaCard] = []
+    /// Cards already in the deck being completed — they count toward copy limits and the audit.
+    private var currentExistingEntries: [AIDeckRules.Entry] = []
+    /// Existing copies per normalized card name, for per-name copy allowances.
+    private var currentExistingQuantities: [String: Int] = [:]
+
+    /// Changes whenever a new generation starts, so per-result UI (like the feedback prompt)
+    /// resets instead of carrying over to the next deck.
+    private(set) var generationID = UUID()
+    /// Whether the current results came from a "try again" after negative feedback.
+    private(set) var isRetry = false
+
+    /// The current matched suggestions as "4x Name" lines, captured before a retry resets them.
+    private var previousSuggestionLines: [String] {
+        suggestions.compactMap { suggestion in
+            suggestion.matchedCard.map { "\(suggestion.quantity)x \($0.name)" }
+        }
+    }
+
+    /// Prompt text for a retry: what the player disliked plus the rejected attempt, so the
+    /// model changes course instead of returning the same list.
+    static func retryNote(for feedback: AIDeckFeedbackReason?, previousAttempt: [String]) -> String {
+        guard let feedback else { return "" }
+        var note = "\n\nPLAYER FEEDBACK ON THE PREVIOUS ATTEMPT: \(feedback.retryGuidance)\n"
+        if !previousAttempt.isEmpty {
+            note += "The rejected attempt was:\n"
+            note += previousAttempt.map { "  \($0)" }.joined(separator: "\n")
+            note += "\nMake clearly different choices where the feedback applies.\n"
+        }
+        return note
+    }
 
     // Client-side daily cap shared across deck build, completion, and strategy — these are
     // the most expensive prompts in the app and had no limit at all. Remotely configurable.
@@ -172,10 +202,11 @@ class AIDeckService {
     IMPORTANT RULES:
     - A deck must contain exactly 60 cards
     - Use only the ink colors specified in the request. The allowed number of ink colors is given per request — never exceed it.
-    - Maximum 4 copies of any card (by full name, e.g., "Elsa - Snow Queen")
-    - Cards must be inkable to go into the inkwell
-    - A good deck should have 30-40% inkable cards
-    - Cost curve matters: a good mix of low, mid, and high cost cards
+    - Maximum 4 copies of any card (by full name, e.g., "Elsa - Snow Queen"). Reprints in different sets share the limit, so list each card only once.
+    - Dual-ink cards (listed like "[Character, Cost 3, Inkable, Ruby-Steel]") count as BOTH inks and are only legal when the deck plays both.
+    - Only inkable cards can go into the inkwell. Each card in the list is marked Inkable or Uninkable.
+    - Most competitive decks run about 70-80% inkable cards (roughly 42-48 of 60). Never go below 60% inkable.
+    - Cost curve matters: most cards at cost 1-5, only a handful at 6+
 
     DECK FORMATS:
     - Casual: All sets are legal; up to 2 ink colors.
@@ -200,7 +231,7 @@ class AIDeckService {
     - Do NOT paraphrase, shorten, reword, or invent card names. If a card is listed as "Elsa - Snow Queen" you must write exactly "Elsa - Snow Queen", not "Elsa - The Snow Queen" or "Elsa - Ice Queen".
     - Do NOT combine a character's first name with a subtitle from a different card. Each "Name - Subtitle" pair is a unique card.
     - If you are unsure whether a card exists, do NOT include it. Only use cards you can see in the provided list.
-    - When completing a partial deck, analyze what's already there and fill gaps in the strategy.
+    - When completing a partial deck, analyze what's already there and fill gaps in the strategy. Cards already in the deck count toward the 4-copy limit (a card with 3 copies can take at most 1 more).
 
     CRITICAL 60-CARD REQUIREMENT:
     - The deck list MUST add up to EXACTLY 60 cards total. Not 59, not 61 — exactly 60.
@@ -225,9 +256,12 @@ class AIDeckService {
         inkColors: [InkColor],
         archetype: DeckArchetype?,
         collectionOnly: Bool = false,
-        ownedCardQuantities: [String: Int] = [:]
+        ownedCardQuantities: [String: Int] = [:],
+        feedback: AIDeckFeedbackReason? = nil
     ) async {
+        let previousAttempt = previousSuggestionLines
         reset()
+        isRetry = feedback != nil
         currentMaxInkColors = format.maxInkColors
         currentFormat = format
         currentAllowedInkColors = inkColors.isEmpty ? nil : Set(inkColors.map(\.rawValue))
@@ -246,7 +280,13 @@ class AIDeckService {
             return
         }
 
-        currentNormalCards = dataManager.getAllCards().filter { $0.variant == .normal }
+        guard format != .coconut else {
+            errorMessage = "AI deck building doesn't support the Coconut beta yet."
+            isLoading = false
+            return
+        }
+
+        currentNormalCards = releasedNormalCards()
 
         var prompt = "Create a 60-card Disney Lorcana deck with the following requirements:\n"
         prompt += "- Format: \(format.rawValue)\n"
@@ -267,6 +307,7 @@ class AIDeckService {
 
         prompt += "\nPlayer's description (THIS IS THE TOP PRIORITY — build the deck around this): \(description)"
         prompt += "\nREMINDER: Maximize the use of cards that match the player's description. Include ALL available cards that fit the theme before adding any non-themed cards."
+        prompt += Self.retryNote(for: feedback, previousAttempt: previousAttempt)
         prompt += buildCardCatalog(format: format, inkColors: inkColors, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities, description: description)
 
         await streamCompletion(apiKey: apiKey, prompt: prompt, collectionOnly: collectionOnly, ownedCardQuantities: ownedCardQuantities)
@@ -281,9 +322,12 @@ class AIDeckService {
         targetCount: Int = 60,
         notes: String = "",
         collectionOnly: Bool = false,
-        ownedCardQuantities: [String: Int] = [:]
+        ownedCardQuantities: [String: Int] = [:],
+        feedback: AIDeckFeedbackReason? = nil
     ) async {
+        let previousAttempt = previousSuggestionLines
         reset()
+        isRetry = feedback != nil
         currentMaxInkColors = format.maxInkColors
         currentFormat = format
         currentAllowedInkColors = inkColors.isEmpty ? nil : Set(inkColors.map(\.rawValue))
@@ -324,8 +368,8 @@ class AIDeckService {
         // Detect actual ink colors from existing cards if deck metadata colors are empty
         var effectiveColors = inkColors
         if effectiveColors.isEmpty {
-            let detectedColors = Set(existingCards.compactMap { $0.inkColor })
-            effectiveColors = detectedColors.compactMap { InkColor.fromString($0) }
+            let detectedColors = existingCards.reduce(into: Set<String>()) { $0.formUnion(AIDeckRules.inks(of: $1.inkColor)) }
+            effectiveColors = detectedColors.sorted().compactMap { InkColor.fromString($0) }
         }
 
         // Without any color signal the catalog would have to include the entire card
@@ -336,7 +380,11 @@ class AIDeckService {
             return
         }
 
-        currentNormalCards = dataManager.getAllCards().filter { $0.variant == .normal }
+        // Enforce the effective colors (not just the deck's metadata, which may be empty) and
+        // let existing copies count toward each card's 4-copy limit.
+        currentAllowedInkColors = Set(effectiveColors.map(\.rawValue))
+        setExistingCards(existingCards)
+        currentNormalCards = releasedNormalCards()
 
         var prompt = "I have a partial Disney Lorcana deck and need help completing it.\n\n"
         prompt += "Format: \(format.rawValue)\n"
@@ -347,6 +395,7 @@ class AIDeckService {
         if !trimmedNotes.isEmpty {
             prompt += "Guidance from the user: \(trimmedNotes)\n"
         }
+        prompt += Self.retryNote(for: feedback, previousAttempt: previousAttempt)
 
         if let archetype = archetype {
             prompt += "Archetype: \(archetype.rawValue)\n"
@@ -379,9 +428,14 @@ class AIDeckService {
         format: DeckFormat,
         inkColors: [InkColor],
         archetype: DeckArchetype?,
-        notes: String = ""
+        notes: String = "",
+        feedback: AIDeckFeedbackReason? = nil
     ) async {
+        let previousAttempt = improveSwaps.map {
+            "OUT \($0.removeQuantity)x \($0.removeName) / IN \($0.addSuggestion.quantity)x \($0.addSuggestion.cardName)"
+        }
         reset()
+        isRetry = feedback != nil
         currentMaxInkColors = format.maxInkColors
         isLoading = true
 
@@ -405,8 +459,8 @@ class AIDeckService {
 
         var effectiveColors = inkColors
         if effectiveColors.isEmpty {
-            let detected = Set(existingCards.compactMap { $0.inkColor })
-            effectiveColors = detected.compactMap { InkColor.fromString($0) }
+            let detected = existingCards.reduce(into: Set<String>()) { $0.formUnion(AIDeckRules.inks(of: $1.inkColor)) }
+            effectiveColors = detected.sorted().compactMap { InkColor.fromString($0) }
         }
         guard !effectiveColors.isEmpty else {
             errorMessage = "Set the deck's ink colors first, so suggestions match your deck."
@@ -414,7 +468,10 @@ class AIDeckService {
             return
         }
 
-        currentNormalCards = dataManager.getAllCards().filter { $0.variant == .normal }
+        currentFormat = format
+        currentAllowedInkColors = Set(effectiveColors.map(\.rawValue))
+        setExistingCards(existingCards)
+        currentNormalCards = releasedNormalCards()
 
         var prompt = "Here is my complete Disney Lorcana deck. Suggest 3 to 6 SWAPS to make it stronger.\n\n"
         prompt += "Format: \(format.rawValue)\n"
@@ -426,18 +483,23 @@ class AIDeckService {
         if !trimmedNotes.isEmpty {
             prompt += "Guidance from the user: \(trimmedNotes)\n"
         }
+        prompt += Self.retryNote(for: feedback, previousAttempt: previousAttempt)
 
         prompt += "\nCurrent deck:\n"
         for card in existingCards.sorted(by: { $0.cost < $1.cost }) {
             prompt += "  \(card.quantity)x \(card.name) (Cost \(card.cost), \(card.type))\n"
         }
 
+        if let legalSets = format.legalSets {
+            prompt += "\nIMPORTANT: Only suggest cards from these legal sets: \(legalSets.sorted().joined(separator: ", "))."
+        }
+
         prompt += """
 
         Respond with a short explanation of the deck's weaknesses, then EXACTLY this format \
         (OUT lines name cards from the deck above; IN lines name cards from the AVAILABLE CARDS \
-        list, same ink colors, and each swap's quantities must match so the deck stays at the \
-        same size):
+        list, same ink colors, NOT already in the deck, and each swap's quantities must match \
+        so the deck stays at the same size):
         [SWAPS]
         OUT: 2x Card Name
         IN: 2x Replacement Card Name
@@ -506,20 +568,37 @@ class AIDeckService {
         )
         let deckNames = Set(existingCards.map { DeckFormat.normalizeCardName($0.name) })
 
+        // Copies still removable per card, so two swaps can't cut the same card twice over.
+        var removable = deckByNormalizedName.mapValues(\.quantity)
+        var addedNames = Set<String>()
+
         var swaps: [AIDeckSwap] = []
         for (index, pair) in parsed.enumerated() {
             let outNormalized = DeckFormat.normalizeCardName(pair.outName)
             guard let deckCard = deckByNormalizedName[outNormalized],
-                  deckCard.quantity >= pair.outQuantity else { continue }
+                  pair.outQuantity > 0,
+                  (removable[outNormalized] ?? 0) >= pair.outQuantity else { continue }
 
-            let suggestion = matched[index]
-            guard let inCard = suggestion.matchedCard,
-                  !deckNames.contains(DeckFormat.normalizeCardName(inCard.name)) else { continue }
+            // The IN card must be a legal printing in the deck's inks, new to the deck, and
+            // swapped one-for-one so the deck stays the same size.
+            guard let matchedIn = matched[index].matchedCard,
+                  let inCard = legalPrinting(of: matchedIn) else { continue }
+            let inNormalized = DeckFormat.normalizeCardName(inCard.name)
+            guard !deckNames.contains(inNormalized),
+                  !addedNames.contains(inNormalized),
+                  pair.outQuantity <= currentFormat.maxCopiesPerCard else { continue }
 
+            removable[outNormalized, default: 0] -= pair.outQuantity
+            addedNames.insert(inNormalized)
             swaps.append(AIDeckSwap(
                 removeName: deckCard.name,
                 removeQuantity: pair.outQuantity,
-                addSuggestion: suggestion
+                addSuggestion: AIDeckSuggestion(
+                    id: matched[index].id,
+                    cardName: inCard.name,
+                    quantity: pair.outQuantity,
+                    matchedCard: inCard
+                )
             ))
         }
 
@@ -700,8 +779,7 @@ class AIDeckService {
             // many-ink Infinity request can't balloon the prompt
             let colorNames = Set(inkColors.map { $0.rawValue })
             filteredCards = filteredCards.filter { card in
-                guard let inkColor = card.inkColor else { return false }
-                return colorNames.contains(inkColor)
+                AIDeckRules.fits(inkColor: card.inkColor, allowedColors: colorNames)
             }
             filteredCards = Self.capPerColor(filteredCards, limit: Self.catalogPerColorLimit)
             guard !filteredCards.isEmpty else { return "" }
@@ -854,6 +932,7 @@ class AIDeckService {
             Self.matchSuggestions(snapshot, against: cards)
         }.value
 
+        preferLegalPrintings()
         enforceFormatLegality()
         enforceColorConstraint()
         autoFixUnmatched()
@@ -1028,6 +1107,13 @@ class AIDeckService {
         return dp[rows][cols]
     }
 
+    /// The AI card pool: normal printings from released sets only. Unreleased cards aren't
+    /// tournament-legal in any format and are spoilers, so the AI never builds with them.
+    private func releasedNormalCards() -> [LorcanaCard] {
+        let upcoming = dataManager.upcomingSetNames()
+        return dataManager.getAllCards().filter { $0.variant == .normal && !upcoming.contains($0.setName) }
+    }
+
     // MARK: - Enforce Format Rules
     private func isLegalCandidate(_ card: LorcanaCard) -> Bool {
         if let legalSets = currentFormat.legalSets, !legalSets.contains(card.setName) {
@@ -1036,12 +1122,48 @@ class AIDeckService {
         if currentFormat.isBanned(card.name) {
             return false
         }
-        if let allowedColors = currentAllowedInkColors {
-            guard let inkColor = card.inkColor, allowedColors.contains(inkColor) else {
-                return false
-            }
+        if let allowedColors = currentAllowedInkColors,
+           !AIDeckRules.fits(inkColor: card.inkColor, allowedColors: allowedColors) {
+            return false
         }
         return true
+    }
+
+    /// The card itself if it's legal here, otherwise a legal reprint with the same name —
+    /// the name lookup can land on a rotated printing of a card that's still Core-legal.
+    private func legalPrinting(of card: LorcanaCard) -> LorcanaCard? {
+        if isLegalCandidate(card) { return card }
+        let name = DeckFormat.normalizeCardName(card.name)
+        return currentNormalCards.first {
+            DeckFormat.normalizeCardName($0.name) == name && isLegalCandidate($0)
+        }
+    }
+
+    private func preferLegalPrintings() {
+        for index in suggestions.indices {
+            guard let card = suggestions[index].matchedCard,
+                  let legal = legalPrinting(of: card), legal.id != card.id else { continue }
+            suggestions[index].matchedCard = legal
+        }
+    }
+
+    /// How many more copies of `card` the suggestions may contain: the format's copy limit
+    /// minus copies already in the deck, clamped to what the player owns in collection mode.
+    private func copyAllowance(for card: LorcanaCard) -> Int {
+        let existing = currentExistingQuantities[DeckFormat.normalizeCardName(card.name)] ?? 0
+        var allowance = currentFormat.maxCopiesPerCard - existing
+        if currentCollectionOnly && !currentOwnedCardQuantities.isEmpty {
+            let key = CollectionManager.cardKey(name: card.name, setName: card.setName)
+            allowance = min(allowance, currentOwnedCardQuantities[key] ?? allowance)
+        }
+        return max(0, allowance)
+    }
+
+    private func setExistingCards(_ cards: [DeckCard]) {
+        currentExistingEntries = cards.map(AIDeckRules.Entry.init(deckCard:))
+        currentExistingQuantities = cards.reduce(into: [:]) {
+            $0[DeckFormat.normalizeCardName($1.name), default: 0] += $1.quantity
+        }
     }
 
     private func enforceFormatLegality() {
@@ -1051,10 +1173,15 @@ class AIDeckService {
         }
     }
 
+    /// Merges duplicate cards, then clamps each to its remaining copy allowance — dropping
+    /// cards the deck already runs at the limit.
     private func enforceCopyLimit() {
-        let maximum = currentFormat.maxCopiesPerCard
-        for index in suggestions.indices where suggestions[index].quantity > maximum {
-            suggestions[index] = suggestions[index].withQuantity(maximum)
+        suggestions = AIDeckRules.mergeDuplicates(suggestions)
+        suggestions = suggestions.compactMap { suggestion in
+            guard let card = suggestion.matchedCard else { return suggestion }
+            let allowance = copyAllowance(for: card)
+            guard allowance > 0 else { return nil }
+            return suggestion.quantity > allowance ? suggestion.withQuantity(allowance) : suggestion
         }
     }
 
@@ -1063,8 +1190,10 @@ class AIDeckService {
         let maxInks = currentMaxInkColors
         var colorCounts: [String: Int] = [:]
         for suggestion in suggestions {
-            guard let card = suggestion.matchedCard, let inkColor = card.inkColor else { continue }
-            colorCounts[inkColor, default: 0] += suggestion.quantity
+            guard let card = suggestion.matchedCard else { continue }
+            for ink in AIDeckRules.inks(of: card.inkColor) {
+                colorCounts[ink, default: 0] += suggestion.quantity
+            }
         }
 
         guard colorCounts.count > maxInks else { return }
@@ -1074,8 +1203,8 @@ class AIDeckService {
         let removedColors = Set(colorCounts.keys).subtracting(intendedColors)
 
         suggestions = suggestions.filter { suggestion in
-            guard let card = suggestion.matchedCard, let inkColor = card.inkColor else { return true }
-            return intendedColors.contains(inkColor)
+            guard let card = suggestion.matchedCard else { return true }
+            return AIDeckRules.fits(inkColor: card.inkColor, allowedColors: intendedColors)
         }
 
         let colorList = intendedColors.sorted().joined(separator: " & ")
@@ -1098,32 +1227,31 @@ class AIDeckService {
         return Set(colorCounts.sorted { $0.value > $1.value }.prefix(limit).map { $0.key })
     }
 
+    /// Inks that filler and replacement cards may use: the requested inks when known,
+    /// otherwise whatever the matched suggestions already play.
+    private var replacementColors: Set<String> {
+        if let allowed = currentAllowedInkColors { return allowed }
+        return suggestions.reduce(into: Set<String>()) { $0.formUnion(AIDeckRules.inks(of: $1.matchedCard?.inkColor)) }
+    }
+
     // MARK: - Auto-Fix Unmatched Suggestions
     /// Replace any remaining unmatched suggestions with real cards that fit the deck's colors and cost range.
     private func autoFixUnmatched() {
         let unmatchedIndices = suggestions.indices.filter { suggestions[$0].matchedCard == nil }
         guard !unmatchedIndices.isEmpty else { return }
 
-        // Determine the deck's ink colors from matched cards
-        var deckColors = Set<String>()
-        for suggestion in suggestions {
-            if let color = suggestion.matchedCard?.inkColor {
-                deckColors.insert(color)
-            }
-        }
+        let deckColors = replacementColors
         guard !deckColors.isEmpty else { return }
 
         // Collect names already used so we don't duplicate
-        var usedNames = Set<String>()
-        for suggestion in suggestions where suggestion.matchedCard != nil {
-            usedNames.insert(suggestion.matchedCard!.name)
-        }
+        var usedNames = Set(suggestions.compactMap { $0.matchedCard?.name })
 
         // Build a pool of eligible replacement cards
         var pool = currentNormalCards.filter { card in
-            deckColors.contains(card.inkColor ?? "")
+            AIDeckRules.fits(inkColor: card.inkColor, allowedColors: deckColors)
             && !usedNames.contains(card.name)
             && isLegalCandidate(card)
+            && copyAllowance(for: card) > 0
         }
 
         // Filter to only owned cards when collection-only mode is active
@@ -1150,7 +1278,7 @@ class AIDeckService {
 
             suggestions[idx] = AIDeckSuggestion(
                 cardName: replacement.name,
-                quantity: originalQty,
+                quantity: min(originalQty, copyAllowance(for: replacement)),
                 matchedCard: replacement
             )
         }
@@ -1293,11 +1421,7 @@ class AIDeckService {
                 } else {
                     costMax = 4
                 }
-                var maxAllowed = costMax
-                if currentCollectionOnly && !currentOwnedCardQuantities.isEmpty {
-                    let key = CollectionManager.cardKey(name: matched.name, setName: matched.setName)
-                    maxAllowed = min(maxAllowed, currentOwnedCardQuantities[key] ?? maxAllowed)
-                }
+                let maxAllowed = min(costMax, copyAllowance(for: matched))
                 let increase = min(maxAllowed - current, deficit)
                 if increase > 0 {
                     suggestions[idx] = suggestions[idx].withQuantity(current + increase)
@@ -1307,20 +1431,11 @@ class AIDeckService {
 
             // Phase 2: If still short, add new cards from the pool
             if deficit > 0 {
-                var deckColors = Set<String>()
-                for suggestion in suggestions {
-                    if let color = suggestion.matchedCard?.inkColor {
-                        deckColors.insert(color)
-                    }
-                }
-
-                var usedNames = Set<String>()
-                for suggestion in suggestions where suggestion.matchedCard != nil {
-                    usedNames.insert(suggestion.matchedCard!.name)
-                }
+                let deckColors = replacementColors
+                var usedNames = Set(suggestions.compactMap { $0.matchedCard?.name })
 
                 var pool = currentNormalCards.filter { card in
-                    deckColors.contains(card.inkColor ?? "")
+                    AIDeckRules.fits(inkColor: card.inkColor, allowedColors: deckColors)
                     && !usedNames.contains(card.name)
                     && isLegalCandidate(card)
                 }
@@ -1329,16 +1444,16 @@ class AIDeckService {
                     pool = pool.filter { currentOwnedCardQuantities[CollectionManager.cardKey(name: $0.name, setName: $0.setName)] != nil }
                 }
 
-                // Sort pool by cost for a reasonable distribution
-                pool.sort { $0.cost < $1.cost }
+                // Filler should keep the deck healthy: inkable cards first, then costs near
+                // the heart of the curve rather than the cheapest cards in the pool.
+                pool.sort {
+                    ($0.inkwell == true ? 0 : 1, abs($0.cost - 3), $0.name)
+                        < ($1.inkwell == true ? 0 : 1, abs($1.cost - 3), $1.name)
+                }
 
                 for card in pool {
                     guard deficit > 0 else { break }
-                    let cardKey = CollectionManager.cardKey(name: card.name, setName: card.setName)
-                    let maxAllowed = currentCollectionOnly && !currentOwnedCardQuantities.isEmpty
-                        ? min(currentFormat.maxCopiesPerCard, currentOwnedCardQuantities[cardKey] ?? currentFormat.maxCopiesPerCard)
-                        : currentFormat.maxCopiesPerCard
-                    let qty = min(maxAllowed, deficit)
+                    let qty = min(copyAllowance(for: card), deficit)
                     if qty > 0 {
                         suggestions.append(AIDeckSuggestion(cardName: card.name, quantity: qty, matchedCard: card))
                         usedNames.insert(card.name)
@@ -1470,7 +1585,12 @@ class AIDeckService {
     private func formatCardList(_ cards: [LorcanaCard], collectionOnly: Bool, ownedCardQuantities: [String: Int]) -> String {
         var result = ""
         for card in cards.sorted(by: { $0.name < $1.name }) {
-            let info = "[\(card.type), Cost \(card.cost)]"
+            var details = [card.type, "Cost \(card.cost)", card.inkwell == true ? "Inkable" : "Uninkable"]
+            // Dual-ink cards need both inks in the deck, so spell those out
+            if AIDeckRules.inks(of: card.inkColor).count > 1, let inkColor = card.inkColor {
+                details.append(inkColor)
+            }
+            let info = "[\(details.joined(separator: ", "))]"
             if collectionOnly, let qty = ownedCardQuantities[CollectionManager.cardKey(name: card.name, setName: card.setName)] {
                 result += "- \(qty)x \(card.name) \(info)\n"
             } else {
@@ -1530,6 +1650,25 @@ class AIDeckService {
         suggestions.filter { $0.matchedCard == nil }.count
     }
 
+    /// Rule audit of the deck these suggestions would produce (existing cards included when
+    /// completing). Recomputed live, so manual replacements and removals are checked too.
+    var ruleReport: AIDeckRuleReport? {
+        guard !isLoading, matchedCount > 0 else { return nil }
+        let suggested = suggestions.compactMap { suggestion in
+            suggestion.matchedCard.map { AIDeckRules.Entry(card: $0, quantity: suggestion.quantity) }
+        }
+        let existingTotal = currentExistingEntries.reduce(0) { $0 + $1.quantity }
+        return AIDeckRules.audit(
+            currentExistingEntries + suggested,
+            format: currentFormat,
+            allowedColors: currentAllowedInkColors,
+            targetTotal: existingTotal + targetSuggestionCount
+        )
+    }
+
+    /// The format of the current results, for labeling.
+    var resultFormat: DeckFormat { currentFormat }
+
     /// The strategy text portion of the response (everything before the decklist),
     /// with the "Part 2" / "Deck List" header stripped out.
     var strategyText: String {
@@ -1559,5 +1698,9 @@ class AIDeckService {
         currentFormat = .casual
         currentAllowedInkColors = nil
         targetSuggestionCount = 60
+        currentExistingEntries = []
+        currentExistingQuantities = [:]
+        generationID = UUID()
+        isRetry = false
     }
 }

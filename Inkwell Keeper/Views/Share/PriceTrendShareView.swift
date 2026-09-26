@@ -111,7 +111,8 @@ struct PriceTrendShareView: View {
     @State private var rendered: UIImage?
     @State private var shareURL: URL?
     @State private var isPreparing = true
-    @State private var showShareSheet = false
+    /// Set once any action reports success, so dismissing afterwards isn't counted as a drop-off.
+    @State private var didComplete = false
 
     var body: some View {
         NavigationStack {
@@ -131,13 +132,9 @@ struct PriceTrendShareView: View {
                             .tint(.lorcanaGold)
                     }
 
-                    Button("Share", systemImage: "square.and.arrow.up") {
-                        showShareSheet = true
+                    ShareActionBar(analyticsType: "priceTrend", image: rendered, fileURL: shareURL) {
+                        didComplete = true
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.lorcanaGold)
-                    .foregroundStyle(.black)
-                    .disabled(rendered == nil)
                 }
                 .padding(.vertical, 24)
             }
@@ -150,25 +147,31 @@ struct PriceTrendShareView: View {
             }
         }
         .task { await prepare() }
-        .sheet(isPresented: $showShareSheet) {
-            ShareSheet(items: shareItems) { completed in
-                if completed { Analytics.send(.shareCompleted(type: "priceTrend")) }
-            }
+        .onDisappear {
+            guard !didComplete else { return }
+            Analytics.send(.shareDismissed(type: "priceTrend", stage: dismissalStage))
         }
     }
 
-    private var shareItems: [Any] {
-        if let shareURL { return [shareURL] }
-        if let rendered { return [rendered] }
-        return []
+    /// Where the user was when they walked away, which is what splits a slow render from a
+    /// card that rendered fine and simply didn't earn a share.
+    private var dismissalStage: String {
+        if isPreparing { return "preparing" }
+        return rendered == nil ? "failed" : "preview"
     }
 
     @MainActor
     private func prepare() async {
         Analytics.send(.shareCardPresented(type: "priceTrend"))
+        let start = ContinuousClock.now
         artwork = await ShareImageRenderer.loadImage(from: card.bestImageUrl())
         renderCard()
         isPreparing = false
+        if rendered == nil {
+            Analytics.send(.shareRenderFailed(type: "priceTrend"))
+        } else {
+            Analytics.send(.shareRendered(type: "priceTrend", milliseconds: start.millisecondsElapsed))
+        }
     }
 
     @MainActor

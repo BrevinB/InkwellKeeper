@@ -32,7 +32,8 @@ struct ShareCardPresenter<Card: View>: View {
     @State private var rendered: UIImage?
     @State private var shareURL: URL?
     @State private var isPreparing = true
-    @State private var showShareSheet = false
+    /// Set once any action reports success, so dismissing afterwards isn't counted as a drop-off.
+    @State private var didComplete = false
 
     var body: some View {
         NavigationStack {
@@ -61,18 +62,10 @@ struct ShareCardPresenter<Card: View>: View {
             }
         }
         .task { await prepare() }
-        .sheet(isPresented: $showShareSheet) {
-            ShareSheet(items: shareItems) { completed in
-                if completed { Analytics.send(.shareCompleted(type: analyticsType)) }
-            }
+        .onDisappear {
+            guard !didComplete else { return }
+            Analytics.send(.shareDismissed(type: analyticsType, stage: dismissalStage))
         }
-    }
-
-    /// Prefer sharing the on-disk PNG (better for Files/AirDrop); fall back to the raw image.
-    private var shareItems: [Any] {
-        if let shareURL { return [shareURL] }
-        if let rendered { return [rendered] }
-        return []
     }
 
     @ViewBuilder
@@ -90,19 +83,24 @@ struct ShareCardPresenter<Card: View>: View {
             }
             .scrollIndicators(.hidden)
 
-            Button("Share", systemImage: "square.and.arrow.up") {
-                showShareSheet = true
+            ShareActionBar(analyticsType: analyticsType, image: image, fileURL: shareURL) {
+                didComplete = true
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.lorcanaGold)
-            .foregroundStyle(.black)
         }
         .padding(.vertical, 24)
+    }
+
+    /// Where the user was when they walked away, which is what splits a slow render from a
+    /// card that rendered fine and simply didn't earn a share.
+    private var dismissalStage: String {
+        if isPreparing { return "preparing" }
+        return rendered == nil ? "failed" : "preview"
     }
 
     @MainActor
     private func prepare() async {
         Analytics.send(.shareCardPresented(type: analyticsType))
+        let start = ContinuousClock.now
         let images = preloadURLs.isEmpty ? [:] : await ShareImageRenderer.preload(preloadURLs)
         let composed = ShareCardChrome(qrPayload: qrPayload, tagline: tagline, height: canvasHeight) {
             card(images)
@@ -111,6 +109,9 @@ struct ShareCardPresenter<Card: View>: View {
         rendered = image
         if let image {
             shareURL = ShareImageRenderer.temporaryFileURL(for: image, name: fileName)
+            Analytics.send(.shareRendered(type: analyticsType, milliseconds: start.millisecondsElapsed))
+        } else {
+            Analytics.send(.shareRenderFailed(type: analyticsType))
         }
         isPreparing = false
     }

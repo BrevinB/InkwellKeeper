@@ -29,6 +29,11 @@ struct LorcanaSet: Identifiable, Codable {
         displayFormatter.dateStyle = .medium
         return displayFormatter.string(from: date)
     }
+
+    /// Whether this set hasn't reached its release day yet (see `ReleaseSchedule`).
+    func isUpcoming(asOf now: Date = .now) -> Bool {
+        ReleaseSchedule.isUpcoming(releaseDate: releaseDate, asOf: now)
+    }
 }
 
 struct SetsData: Codable {
@@ -130,6 +135,9 @@ class SetsDataManager: ObservableObject {
             "lorcana_challenge_year_3": "lorcana_challenge_year_3.json",
             "wilds_unknown": "wilds_unknown.json",
             "promo_set_pd1": "promo_set_pd1.json",
+            "hyperia_city": "hyperia_city.json",
+            "promo_set_4": "promo_set_4.json",
+            "curators_collection_heroines_edition": "curators_collection_heroines_edition.json",
             "attack_of_the_vine": "attack_of_the_vine.json"
         ]
 
@@ -177,6 +185,12 @@ class SetsDataManager: ObservableObject {
         return sets.first { $0.setCode == code }
     }
     
+    /// Names of sets whose release day hasn't arrived. Their cards aren't tournament-legal and
+    /// are hidden as spoilers until then.
+    func upcomingSetNames(asOf now: Date = .now) -> Set<String> {
+        Set(sets.filter { $0.isUpcoming(asOf: now) }.map(\.name))
+    }
+
     func hasLocalCards(for setName: String) -> Bool {
         return setCards[setName] != nil
     }

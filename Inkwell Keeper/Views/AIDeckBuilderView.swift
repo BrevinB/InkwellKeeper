@@ -337,7 +337,7 @@ struct AIDeckBuilderView: View {
                 }
 
                 // Generate Button
-                Button(action: generate) {
+                Button(action: { generate() }) {
                     HStack {
                         if aiService.isLoading {
                             ProgressView()
@@ -453,6 +453,10 @@ struct AIDeckBuilderView: View {
                     }
                     .padding(.horizontal)
 
+                    if let report = aiService.ruleReport {
+                        AIDeckRuleCheckBanner(report: report, format: aiService.resultFormat)
+                    }
+
                     // Card list
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Deck List")
@@ -524,6 +528,17 @@ struct AIDeckBuilderView: View {
                                 .fill(Color.orange.opacity(0.1))
                         )
                         .padding(.horizontal)
+                    }
+
+                    if aiService.matchedCount > 0 {
+                        AIDeckFeedbackPrompt(
+                            mode: "build",
+                            format: aiService.resultFormat,
+                            ruleIssues: aiService.ruleReport?.violations.count ?? 0,
+                            isRetry: aiService.isRetry,
+                            onRetry: { reason in generate(feedback: reason) }
+                        )
+                        .id(aiService.generationID)
                     }
 
                     // Action buttons
@@ -615,7 +630,7 @@ struct AIDeckBuilderView: View {
             && !aiService.isLoading
     }
 
-    private func generate() {
+    private func generate(feedback: AIDeckFeedbackReason? = nil) {
         hasGenerated = true
         Analytics.send(.aiDeckGenerated(
             ink: selectedColors.map(\.rawValue).sorted().joined(separator: "/")
@@ -628,7 +643,8 @@ struct AIDeckBuilderView: View {
                 inkColors: Array(selectedColors),
                 archetype: selectedArchetype,
                 collectionOnly: useCollectionOnly,
-                ownedCardQuantities: ownedQuantities
+                ownedCardQuantities: ownedQuantities,
+                feedback: feedback
             )
         }
     }
@@ -910,7 +926,7 @@ struct AIDeckCompleterView: View {
 
                 // Generate Button. Full decks are disabled honestly: the completion flow
                 // can only fill empty slots, so a 60-card deck has nothing to generate.
-                Button(action: generateCompletion) {
+                Button(action: { generateCompletion() }) {
                     HStack {
                         if aiService.isLoading {
                             ProgressView()
@@ -1013,6 +1029,10 @@ struct AIDeckCompleterView: View {
                     }
                     .padding(.horizontal)
 
+                    if let report = aiService.ruleReport {
+                        AIDeckRuleCheckBanner(report: report, format: aiService.resultFormat)
+                    }
+
                     // Suggestion list
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Suggested Additions")
@@ -1087,23 +1107,38 @@ struct AIDeckCompleterView: View {
 
                     }
 
+                    if aiService.matchedCount > 0 || !aiService.improveSwaps.isEmpty {
+                        AIDeckFeedbackPrompt(
+                            mode: aiService.improveSwaps.isEmpty ? "complete" : "improve",
+                            format: aiService.resultFormat,
+                            ruleIssues: aiService.ruleReport?.violations.count ?? 0,
+                            question: aiService.improveSwaps.isEmpty ? "How are these suggestions?" : "How are these swaps?",
+                            isRetry: aiService.isRetry,
+                            onRetry: { reason in generateCompletion(feedback: reason) }
+                        )
+                        .id(aiService.generationID)
+                    }
+
                     // Action buttons
                     VStack(spacing: 12) {
-                        Button(action: { showingApplyConfirm = true }) {
-                            HStack {
-                                Image(systemName: "plus.circle.fill")
-                                Text("Add to Deck")
-                                    .fontWeight(.bold)
+                        // Swap results carry their own Apply button
+                        if aiService.improveSwaps.isEmpty {
+                            Button(action: { showingApplyConfirm = true }) {
+                                HStack {
+                                    Image(systemName: "plus.circle.fill")
+                                    Text("Add to Deck")
+                                        .fontWeight(.bold)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(
+                                    RoundedRectangle(cornerRadius: 14)
+                                        .fill(aiService.matchedCount > 0 ? Color.lorcanaGold : Color.gray.opacity(0.4))
+                                )
+                                .foregroundStyle(aiService.matchedCount > 0 ? .black : .gray)
                             }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(
-                                RoundedRectangle(cornerRadius: 14)
-                                    .fill(aiService.matchedCount > 0 ? Color.lorcanaGold : Color.gray.opacity(0.4))
-                            )
-                            .foregroundStyle(aiService.matchedCount > 0 ? .black : .gray)
+                            .disabled(aiService.matchedCount == 0)
                         }
-                        .disabled(aiService.matchedCount == 0)
 
                         Button(action: {
                             hasGenerated = false
@@ -1214,7 +1249,7 @@ struct AIDeckCompleterView: View {
         }
     }
 
-    private func generateCompletion() {
+    private func generateCompletion(feedback: AIDeckFeedbackReason? = nil) {
         hasGenerated = true
         if deck.totalCards >= 60 {
             Task {
@@ -1223,7 +1258,8 @@ struct AIDeckCompleterView: View {
                     format: deck.deckFormat,
                     inkColors: deck.deckInkColors,
                     archetype: deck.deckArchetype,
-                    notes: additionalNotes
+                    notes: additionalNotes,
+                    feedback: feedback
                 )
             }
         } else {
@@ -1236,7 +1272,8 @@ struct AIDeckCompleterView: View {
                     archetype: deck.deckArchetype,
                     notes: additionalNotes,
                     collectionOnly: useCollectionOnly,
-                    ownedCardQuantities: ownedQuantities
+                    ownedCardQuantities: ownedQuantities,
+                    feedback: feedback
                 )
             }
         }
@@ -1268,7 +1305,7 @@ struct AISuggestionRow: View {
                     AsyncImage(url: card.bestImageUrl()) { image in
                         image
                             .resizable()
-                            .aspectRatio(contentMode: .fit)
+                            .scaledToFit()
                     } placeholder: {
                         RoundedRectangle(cornerRadius: 4)
                             .fill(Color.gray.opacity(0.3))
@@ -1417,7 +1454,7 @@ struct CardSelectionView: View {
     }
 
     private var allNormalCards: [LorcanaCard] {
-        let cards = SetsDataManager.shared.getAllCards().filter { $0.variant == .normal }
+        let cards = SpoilerSettings.shared.visibleCards(SetsDataManager.shared.getAllCards().filter { $0.variant == .normal })
         if collectionOnly, let manager = collectionManager {
             let ownedNames = Set(manager.collectedCards.map { $0.name })
             return cards.filter { ownedNames.contains($0.name) }
@@ -1489,7 +1526,7 @@ struct CardSelectionView: View {
             AsyncImage(url: card.bestImageUrl()) { image in
                 image
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
             } placeholder: {
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.gray.opacity(0.3))
@@ -1635,7 +1672,7 @@ struct CardSelectionView: View {
             AsyncImage(url: card.bestImageUrl()) { image in
                 image
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
             } placeholder: {
                 RoundedRectangle(cornerRadius: 4)
                     .fill(Color.gray.opacity(0.3))
@@ -1815,6 +1852,13 @@ struct AIDeckStrategyView: View {
                                 )
                         )
                         .padding(.horizontal)
+
+                    AIDeckFeedbackPrompt(
+                        mode: "strategy",
+                        format: deck.deckFormat,
+                        question: "Was this guide helpful?"
+                    )
+                    .id(aiService.strategyResponse)
 
                     // Regenerate button
                     Button(action: {
@@ -2021,7 +2065,7 @@ struct AIDeckSwapRow: View {
                     AsyncImage(url: card.bestImageUrl()) { image in
                         image
                             .resizable()
-                            .aspectRatio(contentMode: .fit)
+                            .scaledToFit()
                     } placeholder: {
                         RoundedRectangle(cornerRadius: 4)
                             .fill(Color.gray.opacity(0.3))

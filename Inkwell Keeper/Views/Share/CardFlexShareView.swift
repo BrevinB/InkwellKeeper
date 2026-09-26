@@ -138,7 +138,8 @@ struct CardFlexShareView: View {
     @State private var rendered: UIImage?
     @State private var shareURL: URL?
     @State private var isPreparing = true
-    @State private var showShareSheet = false
+    /// Set once any action reports success, so dismissing afterwards isn't counted as a drop-off.
+    @State private var didComplete = false
 
     init(data: CardFlexShareData) {
         self.data = data
@@ -187,13 +188,9 @@ struct CardFlexShareView: View {
                             .padding(.horizontal, 32)
                     }
 
-                    Button("Share", systemImage: "square.and.arrow.up") {
-                        showShareSheet = true
+                    ShareActionBar(analyticsType: "cardFlex", image: rendered, fileURL: shareURL) {
+                        didComplete = true
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.lorcanaGold)
-                    .foregroundStyle(.black)
-                    .disabled(rendered == nil)
                 }
                 .padding(.vertical, 24)
             }
@@ -208,30 +205,42 @@ struct CardFlexShareView: View {
         .task { await prepare() }
         .onChange(of: useUserPhoto) { _, _ in renderCard() }
         .onChange(of: includePrices) { _, _ in renderCard() }
-        .sheet(isPresented: $showShareSheet) {
-            ShareSheet(items: shareItems) { completed in
-                if completed { Analytics.send(.shareCompleted(type: "cardFlex")) }
-            }
+        .onDisappear {
+            guard !didComplete else { return }
+            Analytics.send(.shareDismissed(type: "cardFlex", stage: dismissalStage))
         }
     }
 
-    private var shareItems: [Any] {
-        if let shareURL { return [shareURL] }
-        if let rendered { return [rendered] }
-        return []
+    /// Where the user was when they walked away, which is what splits a slow render from a
+    /// card that rendered fine and simply didn't earn a share.
+    private var dismissalStage: String {
+        if isPreparing { return "preparing" }
+        return rendered == nil ? "failed" : "preview"
     }
 
     @MainActor
     private func prepare() async {
         Analytics.send(.shareCardPresented(type: "cardFlex"))
+        let start = ContinuousClock.now
         catalogImage = await ShareImageRenderer.loadImage(from: data.catalogImageURL)
-        if let sourceCard = data.sourceCard {
-            price = await PricingService.shared.getMarketPrice(for: sourceCard)
-        }
         // If there's no user photo, fall back to catalog art as the active image.
         if data.userPhoto == nil { useUserPhoto = false }
+
+        // Render and hand over the actions before touching the network. The market price is a
+        // round trip across two pricing providers, and waiting for it used to hold the whole
+        // preview on the spinner — on a cache miss with a slow connection, for tens of seconds.
         renderCard()
         isPreparing = false
+        if rendered == nil {
+            Analytics.send(.shareRenderFailed(type: "cardFlex"))
+        } else {
+            Analytics.send(.shareRendered(type: "cardFlex", milliseconds: start.millisecondsElapsed))
+        }
+
+        guard let sourceCard = data.sourceCard else { return }
+        price = await PricingService.shared.getMarketPrice(for: sourceCard)
+        // Only redraw when the price actually landed and the user wants it shown.
+        if price != nil, includePrices { renderCard() }
     }
 
     @MainActor

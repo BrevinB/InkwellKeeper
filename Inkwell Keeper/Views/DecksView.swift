@@ -781,7 +781,7 @@ struct DeckStatisticsCard: View {
                 StatItem(label: "Cards", value: "\(statistics.totalCards)", color: statistics.totalCards >= 60 ? .white : .orange)
                 StatItem(label: "Unique", value: "\(statistics.uniqueCards)", color: .white)
                 StatItem(label: "Avg Cost", value: String(format: "%.1f", statistics.averageCost), color: .white)
-                StatItem(label: "Inkable", value: "\(Int(statistics.inkableRatio * 100))%", color: statistics.inkableRatio >= 0.3 ? .white : .orange)
+                StatItem(label: "Inkable", value: "\(Int(statistics.inkableRatio * 100))%", color: statistics.inkableRatio >= AIDeckRules.minimumInkableRatio ? .white : .orange)
                 StatItem(label: "Complete", value: "\(Int(statistics.completionPercentage))%", color: statistics.completionPercentage == 100 ? .green : .lorcanaGold)
                 StatItem(label: "Value", value: PricingService.formatPrice(statistics.totalValue), color: .lorcanaGold)
             }
@@ -997,7 +997,7 @@ struct DeckCardRow: View {
                     AsyncImage(url: card.bestImageUrl()) { image in
                         image
                             .resizable()
-                            .aspectRatio(contentMode: .fit)
+                            .scaledToFit()
                     } placeholder: {
                         RoundedRectangle(cornerRadius: 6)
                             .fill(Color.gray.opacity(0.3))
@@ -1115,7 +1115,7 @@ struct DeckCardDetailView: View {
                 AsyncImage(url: card.bestImageUrl()) { image in
                     image
                         .resizable()
-                        .aspectRatio(contentMode: .fit)
+                        .scaledToFit()
                 } placeholder: {
                     RoundedRectangle(cornerRadius: 12)
                         .fill(Color.gray.opacity(0.3))
@@ -2069,7 +2069,8 @@ struct BuilderBrowser: View {
             allCards.append(contentsOf: dataManager.getCardsForSet(set.name))
         }
 
-        availableCards = allCards.map { dataManager.getCardWithCachedPrice($0) }
+        // Unreleased sets stay out of the builder grid while their spoilers are shielded.
+        availableCards = SpoilerSettings.shared.visibleCards(allCards).map { dataManager.getCardWithCachedPrice($0) }
     }
 }
 
@@ -2119,7 +2120,7 @@ struct BuilderCardView: View {
                     AsyncImage(url: card.bestImageUrl()) { image in
                         image
                             .resizable()
-                            .aspectRatio(contentMode: .fit)
+                            .scaledToFit()
                     } placeholder: {
                         RoundedRectangle(cornerRadius: 8)
                             .fill(Color.gray.opacity(0.3))

@@ -161,7 +161,8 @@ struct HaulShareView: View {
     @State private var rendered: UIImage?
     @State private var shareURL: URL?
     @State private var isPreparing = true
-    @State private var showShareSheet = false
+    /// Set once any action reports success, so dismissing afterwards isn't counted as a drop-off.
+    @State private var didComplete = false
 
     private let pricing = PricingService.shared
 
@@ -190,13 +191,9 @@ struct HaulShareView: View {
                             .padding(.horizontal, 32)
                     }
 
-                    Button("Share", systemImage: "square.and.arrow.up") {
-                        showShareSheet = true
+                    ShareActionBar(analyticsType: "haul", image: rendered, fileURL: shareURL) {
+                        didComplete = true
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.lorcanaGold)
-                    .foregroundStyle(.black)
-                    .disabled(rendered == nil)
                 }
                 .padding(.vertical, 24)
             }
@@ -210,37 +207,63 @@ struct HaulShareView: View {
         }
         .task { await prepare() }
         .onChange(of: includePrices) { _, _ in renderCard() }
-        .sheet(isPresented: $showShareSheet) {
-            ShareSheet(items: shareItems) { completed in
-                if completed { Analytics.send(.shareCompleted(type: "haul")) }
-            }
+        .onDisappear {
+            guard !didComplete else { return }
+            Analytics.send(.shareDismissed(type: "haul", stage: dismissalStage))
         }
     }
 
-    private var shareItems: [Any] {
-        if let shareURL { return [shareURL] }
-        if let rendered { return [rendered] }
-        return []
+    /// Where the user was when they walked away, which is what splits a slow render from a
+    /// card that rendered fine and simply didn't earn a share.
+    private var dismissalStage: String {
+        if isPreparing { return "preparing" }
+        return rendered == nil ? "failed" : "preview"
     }
 
     @MainActor
     private func prepare() async {
         Analytics.send(.shareCardPresented(type: "haul"))
+        let start = ContinuousClock.now
 
-        var fetched: [UUID: Double] = [:]
-        for entry in entries {
-            if let price = await pricing.getMarketPrice(for: entry.card) {
-                fetched[entry.id] = price
-            }
+        // Draw the haul immediately using the rarest card as the hero. Pricing every entry is a
+        // network round trip per card, and doing that before the first render meant a twenty-card
+        // haul sat on the spinner for twenty sequential lookups.
+        if let top = topEntry(using: [:]) {
+            topImage = await ShareImageRenderer.loadImage(from: top.card.bestImageUrl())
         }
-        prices = fetched
+        renderCard()
+        isPreparing = false
+        if rendered == nil {
+            Analytics.send(.shareRenderFailed(type: "haul"))
+        } else {
+            Analytics.send(.shareRendered(type: "haul", milliseconds: start.millisecondsElapsed))
+        }
 
+        await loadPrices()
+    }
+
+    /// Prices every entry concurrently, then upgrades the card in place: the hero becomes the
+    /// most valuable card rather than the rarest, and totals appear if the user wants them.
+    @MainActor
+    private func loadPrices() async {
+        let pricing = pricing
+        let fetched = await withTaskGroup(of: (UUID, Double?).self) { group in
+            for entry in entries {
+                group.addTask { (entry.id, await pricing.getMarketPrice(for: entry.card)) }
+            }
+            var results: [UUID: Double] = [:]
+            for await (id, price) in group {
+                if let price { results[id] = price }
+            }
+            return results
+        }
+
+        guard !fetched.isEmpty else { return }
+        prices = fetched
         if let top = topEntry(using: fetched) {
             topImage = await ShareImageRenderer.loadImage(from: top.card.bestImageUrl())
         }
-
         renderCard()
-        isPreparing = false
     }
 
     /// The card to feature: the most valuable, falling back to the rarest when nothing is priced.

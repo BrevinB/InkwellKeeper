@@ -42,6 +42,7 @@ struct DeckValidation {
 
         // Check set legality (rotation) and individually banned cards for the format
         errors.append(contentsOf: setLegalityErrors(deck, format: format))
+        errors.append(contentsOf: unreleasedCardErrors(deck, format: format))
         errors.append(contentsOf: bannedCardErrors(deck, format: format))
 
         // Format [Coconut]: a leader must be chosen, and one deck ink must match the leader's
@@ -76,8 +77,8 @@ struct DeckValidation {
         // Check inkable ratio
         let inkableCards = (deck.cards ?? []).filter { $0.inkwell }.reduce(0) { $0 + $1.quantity }
         let inkableRatio = totalCards > 0 ? Double(inkableCards) / Double(totalCards) : 0
-        if inkableRatio < 0.3 && totalCards >= 30 {
-            warnings.append("Low inkable ratio (\(Int(inkableRatio * 100))%). Recommended 30-40%.")
+        if inkableRatio < AIDeckRules.minimumInkableRatio && totalCards >= 30 {
+            warnings.append("Low inkable ratio (\(Int(inkableRatio * 100))%). Most decks run 70%+ inkable.")
         }
 
         return DeckValidation(
@@ -87,12 +88,26 @@ struct DeckValidation {
         )
     }
 
-    /// Errors for cards from sets that aren't legal in a rotating format (none if `legalSets` is nil).
+    /// Errors for cards that aren't legal in a rotating format (none if `legalSets` is nil). Old
+    /// printings of cards reprinted in a legal set are allowed.
     private static func setLegalityErrors(_ deck: Deck, format: DeckFormat) -> [String] {
         guard let legalSets = format.legalSets else { return [] }
-        let illegalSets = Set((deck.cards ?? []).map { $0.setName }).subtracting(legalSets)
+        let cards = (deck.cards ?? []).map { (name: $0.name, setName: $0.setName) }
+        // Unreleased sets get their own, clearer error from `unreleasedCardErrors`.
+        let illegalSets = FormatLegality.illegalSets(of: cards, legalSets: legalSets)
+            .subtracting(SetsDataManager.shared.upcomingSetNames())
         guard !illegalSets.isEmpty else { return [] }
         return ["Contains cards from rotated/illegal sets: \(illegalSets.sorted().joined(separator: ", "))"]
+    }
+
+    /// Errors for cards from sets that haven't reached their release day (Casual allows them).
+    private static func unreleasedCardErrors(_ deck: Deck, format: DeckFormat) -> [String] {
+        guard !format.allowsUnreleasedCards else { return [] }
+        let cards = (deck.cards ?? []).map { (name: $0.name, setName: $0.setName) }
+        return FormatLegality.unreleasedSets(of: cards).sorted().map { setName in
+            let date = SetsDataManager.shared.getSet(byName: setName)?.releaseDateFormatted ?? "its release date"
+            return "Contains cards from \(setName), which isn't legal until \(date)."
+        }
     }
 
     /// Errors for individually banned cards in the format's ban list.
