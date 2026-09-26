@@ -63,7 +63,7 @@ enum DeckFormat: String, Codable, CaseIterable {
         case .casual:
             return "All sets, up to 2 inks"
         case .coreConstructed:
-            return "Rotating format (Sets 5+)"
+            return "Rotating format (Sets 9+)"
         case .infinityConstructed:
             return "All sets, all 6 inks"
         case .tripleDeck:

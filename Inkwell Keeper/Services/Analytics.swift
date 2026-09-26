@@ -55,6 +55,12 @@ enum Analytics {
         case aiRulesQuestionAsked
         case rulesAssistantOpened(source: String)
         case rulesAnswerRated(helpful: Bool)
+        /// Thumbs up/down on an AI deck result. `mode` is "build", "complete", "improve" or
+        /// "strategy"; `reason` is why a result missed ("none" on thumbs up, "unspecified" if
+        /// the user left without picking one); `ruleIssues` is how many rule violations the
+        /// deterministic audit found, so ratings can be split by legal vs. broken output;
+        /// `retry` marks results from "Try again" after a thumbs down, to see if retries land.
+        case aiDeckRated(mode: String, helpful: Bool, reason: String, format: String, ruleIssues: Int, retry: Bool)
 
         // MARK: Monetization
         case paywallShown(source: String)
@@ -119,6 +125,7 @@ enum Analytics {
             case .aiRulesQuestionAsked: "ai.rulesQuestionAsked"
             case .rulesAssistantOpened: "ai.rulesAssistantOpened"
             case .rulesAnswerRated: "ai.rulesAnswerRated"
+            case .aiDeckRated: "ai.deckRated"
             case .paywallShown: "paywall.shown"
             case .subscriptionPurchased: "subscription.purchased"
             case .tipPurchased: "tipJar.tipPurchased"
@@ -163,6 +170,11 @@ enum Analytics {
                 ["source": source]
             case let .rulesAnswerRated(helpful):
                 ["helpful": String(helpful)]
+            case let .aiDeckRated(mode, helpful, reason, format, ruleIssues, retry):
+                [
+                    "mode": mode, "helpful": String(helpful), "reason": reason,
+                    "format": format, "ruleIssues": String(ruleIssues), "retry": String(retry)
+                ]
             case let .deckCreated(format):
                 ["format": format]
             case let .deckImported(format):

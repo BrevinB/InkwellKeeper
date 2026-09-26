@@ -38,6 +38,7 @@ struct AnalyticsEventTests {
         .aiRulesQuestionAsked,
         .rulesAssistantOpened(source: "collectionDetail"),
         .rulesAnswerRated(helpful: true),
+        .aiDeckRated(mode: "build", helpful: false, reason: "brokeRules", format: "Core Constructed", ruleIssues: 1, retry: false),
         .paywallShown(source: "scanLimit"),
         .subscriptionPurchased(product: "pro.monthly"),
         .tipPurchased(product: "tip.small"),

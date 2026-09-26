@@ -18,10 +18,11 @@ enum LorcanaSetRegistry {
     // MARK: Baked-in defaults
 
     /// Sets legal in Core Constructed by default.
-    /// Update at each rotation (Sets 1–4 rotated out Sept 2025; Year 2 sets 5–8 rotate ~mid-2026).
+    /// Update at each rotation (Sets 1–4 rotated out Sept 2025; sets 5–8 rotated out July 2026,
+    /// leaving sets 9–13 per Comprehensive Rules 2.2.0). Names must match the bundled set data
+    /// exactly — `LorcanaSetRegistryTests` checks this.
     static let defaultCoreLegalSets: Set<String> = [
-        "Shimmering Skies", "Azurite Sea", "Archazia's Island", "Reign of Jafar",
-        "Fabled", "Whispers in the Well", "Winterspell"
+        "Fabled", "Whispers in the Well", "Winterspell", "Wilds Unknown", "Attack of the Vine!"
     ]
 
     /// Cards banned in Core Constructed by default (banned 2025-04-08).

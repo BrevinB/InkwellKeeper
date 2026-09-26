@@ -1,0 +1,19 @@
+App Store Connect "What's New" — version 3.4.1
+
+AI DECKS THAT PLAY BY THE RULES 🧠
+Every deck the AI builds or completes is now checked against your format: at least 60 cards, no more than 4 copies of any card (reprints included), only your inks, and only sets legal in your format. A banner shows the result at a glance (Pro).
+
+DUAL-INK CARDS
+Dual-ink cards now show up in AI decks whenever your deck plays both of their inks.
+
+TELL US HOW IT DID 👍👎
+Rate any AI deck, completion, swap list, or strategy guide. Not quite right? Tell us what missed and try again. The AI uses your feedback on the next attempt (Pro).
+
+SAVE AND COPY SHARE CARDS
+Share cards can now go straight to Photos, or be copied to paste into Discord, right next to the usual share button.
+
+ALSO IN THIS RELEASE
+• Core Constructed updated for the current rotation (Fabled through Attack of the Vine!)
+• Older printings of cards reprinted in a legal set are no longer marked illegal in Core decks
+• Healthier AI decks: more inkable cards and a better cost curve
+• Improve Deck no longer shows an unused "Add to Deck" button
