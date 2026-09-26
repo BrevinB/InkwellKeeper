@@ -96,14 +96,21 @@ enum DeckFormat: String, Codable, CaseIterable {
         self == .coconut ? 1 : 4
     }
 
-    /// Sets legal for this format; `nil` means all sets are legal (no rotation).
+    /// Sets legal for this format; `nil` means all sets are legal (no rotation). A Core set that
+    /// hasn't reached its release day isn't legal yet — it joins automatically on that day.
     var legalSets: Set<String>? {
         switch self {
         case .coreConstructed:
-            return LorcanaSetRegistry.coreLegalSets
+            return LorcanaSetRegistry.coreLegalSets.subtracting(SetsDataManager.shared.upcomingSetNames())
         case .casual, .infinityConstructed, .tripleDeck, .coconut:
             return nil
         }
+    }
+
+    /// Whether cards from sets that haven't released yet may be played. Only Casual — every
+    /// sanctioned format starts allowing a set on its release day.
+    var allowsUnreleasedCards: Bool {
+        self == .casual
     }
 
     /// Individually banned cards (by full name) for this format. Casual and Triple Deck have no bans.

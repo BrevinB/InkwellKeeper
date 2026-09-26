@@ -337,6 +337,9 @@ class PricingService: ObservableObject {
         "Lorcana Challenge Year 3": "C2",
         "Wilds Unknown": "WU",
         "Promo Set PD1": "PD1",
+        "Hyperia City": "HYC",
+        "Promo Set 4": "P4",
+        "Curator's Collection: Heroines Edition": "CC1",
         "Attack of the Vine!": "AOV",
     ]
 

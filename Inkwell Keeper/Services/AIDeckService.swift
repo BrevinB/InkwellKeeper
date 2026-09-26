@@ -286,7 +286,7 @@ class AIDeckService {
             return
         }
 
-        currentNormalCards = dataManager.getAllCards().filter { $0.variant == .normal }
+        currentNormalCards = releasedNormalCards()
 
         var prompt = "Create a 60-card Disney Lorcana deck with the following requirements:\n"
         prompt += "- Format: \(format.rawValue)\n"
@@ -384,7 +384,7 @@ class AIDeckService {
         // let existing copies count toward each card's 4-copy limit.
         currentAllowedInkColors = Set(effectiveColors.map(\.rawValue))
         setExistingCards(existingCards)
-        currentNormalCards = dataManager.getAllCards().filter { $0.variant == .normal }
+        currentNormalCards = releasedNormalCards()
 
         var prompt = "I have a partial Disney Lorcana deck and need help completing it.\n\n"
         prompt += "Format: \(format.rawValue)\n"
@@ -471,7 +471,7 @@ class AIDeckService {
         currentFormat = format
         currentAllowedInkColors = Set(effectiveColors.map(\.rawValue))
         setExistingCards(existingCards)
-        currentNormalCards = dataManager.getAllCards().filter { $0.variant == .normal }
+        currentNormalCards = releasedNormalCards()
 
         var prompt = "Here is my complete Disney Lorcana deck. Suggest 3 to 6 SWAPS to make it stronger.\n\n"
         prompt += "Format: \(format.rawValue)\n"
@@ -1105,6 +1105,13 @@ class AIDeckService {
             }
         }
         return dp[rows][cols]
+    }
+
+    /// The AI card pool: normal printings from released sets only. Unreleased cards aren't
+    /// tournament-legal in any format and are spoilers, so the AI never builds with them.
+    private func releasedNormalCards() -> [LorcanaCard] {
+        let upcoming = dataManager.upcomingSetNames()
+        return dataManager.getAllCards().filter { $0.variant == .normal && !upcoming.contains($0.setName) }
     }
 
     // MARK: - Enforce Format Rules

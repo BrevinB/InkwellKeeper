@@ -42,6 +42,7 @@ struct DeckValidation {
 
         // Check set legality (rotation) and individually banned cards for the format
         errors.append(contentsOf: setLegalityErrors(deck, format: format))
+        errors.append(contentsOf: unreleasedCardErrors(deck, format: format))
         errors.append(contentsOf: bannedCardErrors(deck, format: format))
 
         // Format [Coconut]: a leader must be chosen, and one deck ink must match the leader's
@@ -92,9 +93,21 @@ struct DeckValidation {
     private static func setLegalityErrors(_ deck: Deck, format: DeckFormat) -> [String] {
         guard let legalSets = format.legalSets else { return [] }
         let cards = (deck.cards ?? []).map { (name: $0.name, setName: $0.setName) }
+        // Unreleased sets get their own, clearer error from `unreleasedCardErrors`.
         let illegalSets = FormatLegality.illegalSets(of: cards, legalSets: legalSets)
+            .subtracting(SetsDataManager.shared.upcomingSetNames())
         guard !illegalSets.isEmpty else { return [] }
         return ["Contains cards from rotated/illegal sets: \(illegalSets.sorted().joined(separator: ", "))"]
+    }
+
+    /// Errors for cards from sets that haven't reached their release day (Casual allows them).
+    private static func unreleasedCardErrors(_ deck: Deck, format: DeckFormat) -> [String] {
+        guard !format.allowsUnreleasedCards else { return [] }
+        let cards = (deck.cards ?? []).map { (name: $0.name, setName: $0.setName) }
+        return FormatLegality.unreleasedSets(of: cards).sorted().map { setName in
+            let date = SetsDataManager.shared.getSet(byName: setName)?.releaseDateFormatted ?? "its release date"
+            return "Contains cards from \(setName), which isn't legal until \(date)."
+        }
     }
 
     /// Errors for individually banned cards in the format's ban list.

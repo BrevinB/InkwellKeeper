@@ -2069,7 +2069,8 @@ struct BuilderBrowser: View {
             allCards.append(contentsOf: dataManager.getCardsForSet(set.name))
         }
 
-        availableCards = allCards.map { dataManager.getCardWithCachedPrice($0) }
+        // Unreleased sets stay out of the builder grid while their spoilers are shielded.
+        availableCards = SpoilerSettings.shared.visibleCards(allCards).map { dataManager.getCardWithCachedPrice($0) }
     }
 }
 

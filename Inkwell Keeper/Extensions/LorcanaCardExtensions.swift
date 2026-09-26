@@ -60,6 +60,9 @@ extension LorcanaCard {
             "EPCOT Festival of the Arts": "epcot_festival_of_the_arts",
             "Lorcana Challenge Year 3": "lorcana_challenge_year_3",
             "Wilds Unknown": "wilds_unknown",
+            "Hyperia City": "hyperia_city",
+            "Promo Set 4": "promo_set_4",
+            "Curator's Collection: Heroines Edition": "curators_collection_heroines_edition",
             "Attack of the Vine!": "attack_of_the_vine",
             "Promo Set PD1": "promo_set_pd1"
         ]

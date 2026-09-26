@@ -21,8 +21,12 @@ enum LorcanaSetRegistry {
     /// Update at each rotation (Sets 1–4 rotated out Sept 2025; sets 5–8 rotated out July 2026,
     /// leaving sets 9–13 per Comprehensive Rules 2.2.0). Names must match the bundled set data
     /// exactly — `LorcanaSetRegistryTests` checks this.
+    ///
+    /// New sets can be listed before release: `DeckFormat.legalSets` drops any set whose release
+    /// day hasn't arrived, so Hyperia City becomes Core-legal on its own on 2026-10-16.
     static let defaultCoreLegalSets: Set<String> = [
-        "Fabled", "Whispers in the Well", "Winterspell", "Wilds Unknown", "Attack of the Vine!"
+        "Fabled", "Whispers in the Well", "Winterspell", "Wilds Unknown", "Attack of the Vine!",
+        "Hyperia City"
     ]
 
     /// Cards banned in Core Constructed by default (banned 2025-04-08).

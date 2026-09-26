@@ -411,7 +411,8 @@ struct SetDetailView: View {
 
         // For Normal/Foil cards, find reprints across sets (but exclude special variants)
         let allCards = dataManager.getAllCards()
-        let reprints = allCards.filter { $0.name == card.name &&
+        // Don't leak an upcoming set's reprint into an older set's picker.
+        let reprints = SpoilerSettings.shared.visibleCards(allCards).filter { $0.name == card.name &&
             $0.variant != .enchanted && $0.variant != .promo &&
             $0.variant != .epic && $0.variant != .iconic }
 

@@ -1454,7 +1454,7 @@ struct CardSelectionView: View {
     }
 
     private var allNormalCards: [LorcanaCard] {
-        let cards = SetsDataManager.shared.getAllCards().filter { $0.variant == .normal }
+        let cards = SpoilerSettings.shared.visibleCards(SetsDataManager.shared.getAllCards().filter { $0.variant == .normal })
         if collectionOnly, let manager = collectionManager {
             let ownedNames = Set(manager.collectedCards.map { $0.name })
             return cards.filter { ownedNames.contains($0.name) }

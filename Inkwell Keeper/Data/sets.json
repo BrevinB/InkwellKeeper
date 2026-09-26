@@ -211,6 +211,36 @@
       "cardCount": 8,
       "description": "Event promo series PD1 — pre-release and event exclusive cards, beginning with the Attack of the Vine! pre-release promos.",
       "isReleased": true
+    },
+    {
+      "id": "hyperia_city",
+      "name": "Hyperia City",
+      "setCode": "HYC",
+      "setNumber": "14",
+      "releaseDate": "2026-10-16",
+      "cardCount": 57,
+      "description": "Set 14 of Disney Lorcana. Card list grows as spoilers are revealed ahead of the October 2026 release.",
+      "isReleased": true
+    },
+    {
+      "id": "promo_set_4",
+      "name": "Promo Set 4",
+      "setCode": "P4",
+      "setNumber": "P4",
+      "releaseDate": "2026-07-17",
+      "cardCount": 10,
+      "description": "The fourth numbered promo series of event and organized-play promo cards.",
+      "isReleased": true
+    },
+    {
+      "id": "curators_collection_heroines_edition",
+      "name": "Curator's Collection: Heroines Edition",
+      "setCode": "CC1",
+      "setNumber": "CC1",
+      "releaseDate": "2026-07-17",
+      "cardCount": 6,
+      "description": "A collector release spotlighting Disney heroines, including Ariel, Elsa, Jasmine, Mulan, Anna, and Tinker Bell.",
+      "isReleased": true
     }
   ]
 }

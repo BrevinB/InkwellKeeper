@@ -715,7 +715,9 @@ struct RulesInputBar: View {
         }
         .task {
             if matchCandidates.isEmpty {
-                matchCandidates = SetsDataManager.shared.getAllCards().filter { $0.variant == .normal }
+                matchCandidates = SpoilerSettings.shared.visibleCards(
+                    SetsDataManager.shared.getAllCards().filter { $0.variant == .normal }
+                )
             }
         }
         .onChange(of: inputText) { _, newValue in

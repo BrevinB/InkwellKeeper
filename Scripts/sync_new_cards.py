@@ -19,6 +19,7 @@ Usage:
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 import time
@@ -324,11 +325,9 @@ def patch_file(path: Path, anchor: str, insertion: str, already: str, label: str
 
 
 def scaffold_new_set(number: str, code: str, name: str, backend_repo: Path, ci: bool, dry_run: bool):
-    set_id = (
-        name.lower().replace("'", "").replace("!", "").replace("-", " ")
-        .replace(",", " ").split()
-    )
-    set_id = "_".join(set_id)
+    # Apostrophes vanish ("Curator's" → "curators"); any other punctuation
+    # (":", "!", ",", "-") becomes a word break so ids stay filename-safe.
+    set_id = "_".join(re.sub(r"[^a-z0-9]+", " ", name.lower().replace("'", "")).split())
     padded = number.zfill(3)
 
     print(f"\n=== Scaffolding new set: {name} (#{number}, {code}, id {set_id}) ===")
@@ -447,8 +446,9 @@ end
             result = subprocess.run(
                 ["ruby", "-e", ruby], cwd=REPO_ROOT, capture_output=True, text=True
             )
-            print(result.stdout.strip() or "  pbxproj: already registered")
-            if result.returncode != 0:
+            if result.returncode == 0:
+                print(result.stdout.strip() or "  pbxproj: already registered")
+            else:
                 print(f"  ! pbxproj registration failed — run manually:\n{result.stderr.strip()}")
 
     print(f"""

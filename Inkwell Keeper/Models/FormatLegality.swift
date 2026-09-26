@@ -45,4 +45,29 @@ enum FormatLegality {
     }
 
     private static var cachedNames: (sets: Set<String>, names: Set<String>)?
+
+    // MARK: Unreleased sets
+
+    /// Set names of the cards that can't be played yet because their set hasn't released. A
+    /// reprint is fine when the same card name was already printed in a released set.
+    static func unreleasedSets(
+        of cards: [(name: String, setName: String)],
+        upcomingSets: Set<String>,
+        releasedCardNames: Set<String>
+    ) -> Set<String> {
+        Set(cards.compactMap { card -> String? in
+            guard upcomingSets.contains(card.setName) else { return nil }
+            if releasedCardNames.contains(DeckFormat.normalizeCardName(card.name)) { return nil }
+            return card.setName
+        })
+    }
+
+    /// `unreleasedSets` using the bundled card data and today's date.
+    static func unreleasedSets(of cards: [(name: String, setName: String)]) -> Set<String> {
+        let manager = SetsDataManager.shared
+        let upcoming = manager.upcomingSetNames()
+        guard !upcoming.isEmpty, cards.contains(where: { upcoming.contains($0.setName) }) else { return [] }
+        let released = Set(manager.sets.map(\.name)).subtracting(upcoming)
+        return unreleasedSets(of: cards, upcomingSets: upcoming, releasedCardNames: legalCardNames(in: released))
+    }
 }
