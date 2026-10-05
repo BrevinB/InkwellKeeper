@@ -1,7 +1,7 @@
 {
   "setName": "Attack of the Vine!",
   "setCode": "AOV",
-  "cardCount": 245,
+  "cardCount": 247,
   "cards": [
     {
       "id": "Attack_of_the_Vine!_1_Woody___Helping_a_Friend",
@@ -4657,6 +4657,44 @@
       "lore": 3,
       "franchise": "",
       "inkColor": "Ruby"
+    },
+    {
+      "id": "Attack_of_the_Vine!_246_Christopher_Robin___Hunny_Sage",
+      "name": "Christopher Robin - Hunny Sage",
+      "cost": 6,
+      "type": "Character",
+      "rarity": "Legendary",
+      "setName": "Attack of the Vine!",
+      "cardText": "GATHER THE PARTY You can have other Hunny characters in your deck regardless of ink type.\nMAGICAL SUMMONS When you play this character, you may search your deck for a Hunny card, reveal it, and put it in your hand. If you do, shuffle your deck.",
+      "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_c9b26d2a7d1143e9a6665b33164f9028.avif?1790948254",
+      "variant": "Normal",
+      "cardNumber": 246,
+      "uniqueId": "AOV-246",
+      "inkwell": true,
+      "strength": 4,
+      "willpower": 4,
+      "lore": 2,
+      "franchise": "",
+      "inkColor": "Amethyst"
+    },
+    {
+      "id": "Attack_of_the_Vine!_247_Violet_Parr___Super_Resilient",
+      "name": "Violet Parr - Super Resilient",
+      "cost": 5,
+      "type": "Character",
+      "rarity": "Super Rare",
+      "setName": "Attack of the Vine!",
+      "cardText": "Shift 3 {I} (You may pay 3 {I} to play this on top of one of your characters named Violet Parr.)\nResist +1 (Damage dealt to this character is reduced by 1.)\nHEROIC SYNERGY Whenever you play this or another Hero character, you may draw a card, then choose and discard a card.",
+      "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_bcaffaacdc4a4d0bb26e78296a6648a3.avif?1790948258",
+      "variant": "Normal",
+      "cardNumber": 247,
+      "uniqueId": "AOV-247",
+      "inkwell": true,
+      "strength": 4,
+      "willpower": 4,
+      "lore": 2,
+      "franchise": "",
+      "inkColor": "Steel"
     }
   ]
 }
