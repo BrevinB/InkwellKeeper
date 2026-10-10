@@ -59,6 +59,20 @@ extension PaywallFeature {
         description: "Value both sides of a trade — scan cards straight in — and share the result"
     )
 
+    static let unlimitedStorage = Self(
+        id: "unlimitedStorage",
+        icon: "books.vertical.fill",
+        title: "Unlimited Binders & Boxes",
+        description: "Mirror every binder, trove and box you own, with premium cover finishes"
+    )
+
+    static let setBinders = Self(
+        id: "setBinders",
+        icon: "square.grid.3x3.square",
+        title: "Set Binders",
+        description: "A pocket for every card in a set, with ghosts showing the ones you're missing"
+    )
+
     // MARK: - AI
 
     static let rulesExpert = Self(
@@ -106,7 +120,7 @@ extension PaywallFeature {
     /// Everything Pro includes, in the order used when no context applies.
     static let all: [Self] = [
         .valueHistory, .movers, .highsAndLows, .costBasis, .foilPremium,
-        .tradeCalculator, .rulesExpert, .deckBuilder, .cardAnalysis,
+        .tradeCalculator, .unlimitedStorage, .setBinders, .rulesExpert, .deckBuilder, .cardAnalysis,
         .strategyGuides, .shareRulings, .chatHistory
     ]
 }

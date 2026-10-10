@@ -54,6 +54,12 @@ struct AnalyticsEventTests {
         .deckSharePresented,
         .deckShareCompleted(method: "copyLink"),
         .deepLinkOpened(type: "card"),
+        .storageContainerCreated(kind: "binder"),
+        .storageCardsStored(count: 4, kind: "trove", source: "detail"),
+        .storageBinderAutoFilled(count: 120, order: "setNumber"),
+        .deckBuildStarted(newBox: true),
+        .deckCardsPulled(count: 12, all: false),
+        .deckTakenApart(returnedToOrigins: true),
         .onboardingStarted,
         .onboardingCompleted,
         .loreCounterGameStarted(players: 4, mode: "Coconut")

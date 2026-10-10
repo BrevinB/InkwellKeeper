@@ -9,6 +9,7 @@ import SwiftUI
 
 struct MultiScanReviewView: View {
     @Environment(CollectionManager.self) var collectionManager
+    @Environment(StorageManager.self) private var storageManager
     var cameraManager: CameraManager
     @Binding var isPresented: Bool
 
@@ -17,6 +18,31 @@ struct MultiScanReviewView: View {
     @State private var showingExportView = false
     @State private var showingShareImage = false
     @State private var correctingTarget: CorrectingTarget?
+    /// Last binder/box chosen for scans, remembered between sessions ("" = Unsorted).
+    @AppStorage("scanDestinationContainerID") private var destinationID = ""
+    @State private var showingStoragePaywall = false
+    @State private var putAwaySummary: PutAwaySummary?
+
+    private struct PutAwaySummary {
+        let containerName: String
+        let stored: Int
+        let leftOver: Int
+    }
+
+    private let subscriptionManager = SubscriptionManager.shared
+
+    /// The remembered choice, if it still exists and the collector is subscribed.
+    private var chosenContainer: StorageContainer? {
+        guard subscriptionManager.isSubscribed, !destinationID.isEmpty else { return nil }
+        return storageManager.containers.first { $0.id.uuidString == destinationID }
+    }
+
+    /// Where scanned cards actually go: the chosen container unless it's full, in
+    /// which case they stay Unsorted rather than silently going nowhere.
+    private var destination: StorageContainer? {
+        guard let chosenContainer, !storageManager.isFull(chosenContainer) else { return nil }
+        return chosenContainer
+    }
 
     var body: some View {
         NavigationStack {
@@ -56,6 +82,9 @@ struct MultiScanReviewView: View {
             .sheet(isPresented: $showingExportView, onDismiss: dismissAfterExport) {
                 ExportView(initialDateFilter: .today)
                     .environment(collectionManager)
+            }
+            .sheet(isPresented: $showingStoragePaywall) {
+                RulesPaywallView(source: "storageScan")
             }
             .sheet(item: $correctingTarget) { target in
                 ScanCorrectionSearchView { newCard in
@@ -139,13 +168,26 @@ struct MultiScanReviewView: View {
                     .foregroundStyle(.gray)
             }
 
+            if !storageManager.containers.isEmpty && !addedAll {
+                ScanDestinationPicker(
+                    selection: chosenContainer,
+                    containers: storageManager.containers,
+                    fullContainerIds: Set(storageManager.containers.filter(storageManager.isFull).map(\.id)),
+                    isSubscribed: subscriptionManager.isSubscribed,
+                    onSelect: { destinationID = $0?.id.uuidString ?? "" },
+                    onLocked: { showingStoragePaywall = true }
+                )
+            }
+
             Button(action: addAllToCollection) {
                 HStack(spacing: 8) {
                     Image(systemName: addedAll ? "checkmark.circle.fill" : "plus.rectangle.on.folder.fill")
                         .font(.title2)
                         .contentTransition(.symbolEffect(.replace))
-                    Text(addedAll ? "Added to Collection!" : "Add All to Collection")
+                    Text(addButtonTitle)
                         .font(.headline)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
                 .foregroundStyle(addedAll ? .white : .black)
                 .frame(maxWidth: .infinity)
@@ -168,6 +210,14 @@ struct MultiScanReviewView: View {
                 Text("\(scannedCount) cards added to your collection!")
                     .font(.subheadline)
                     .foregroundStyle(.white)
+            }
+
+            if let putAwaySummary {
+                PutAwaySummaryLine(
+                    containerName: putAwaySummary.containerName,
+                    stored: putAwaySummary.stored,
+                    leftOver: putAwaySummary.leftOver
+                )
             }
 
             Text("Would you like to export these cards?")
@@ -213,6 +263,12 @@ struct MultiScanReviewView: View {
 
     @State private var scannedCount = 0
 
+    private var addButtonTitle: String {
+        if addedAll { return String(localized: "Added to Collection!") }
+        if let destination { return String(localized: "Add & Put Into \(destination.name)") }
+        return String(localized: "Add All to Collection")
+    }
+
     private func addAllToCollection() {
         scannedCount = cameraManager.totalScannedCount
 
@@ -223,6 +279,19 @@ struct MultiScanReviewView: View {
             collectionManager.addCard(card, quantity: entry.quantity, bulkImport: true, source: "scan")
         }
         collectionManager.finalizeBulkImport()
+
+        if let destination {
+            var stored = 0
+            for entry in cameraManager.scannedCards {
+                let card = entry.card.withVariant(entry.variant)
+                stored += storageManager.store(card, quantity: entry.quantity, in: destination, source: "scan")
+            }
+            putAwaySummary = PutAwaySummary(
+                containerName: destination.name,
+                stored: stored,
+                leftOver: max(0, cameraManager.totalScannedCount - stored)
+            )
+        }
 
         withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
             addedAll = true

@@ -4,6 +4,7 @@ import SwiftData
 struct ContentView: View {
     @State private var collectionManager = CollectionManager()
     @State private var deckManager = DeckManager()
+    @State private var storageManager = StorageManager()
     @Environment(\.modelContext) private var modelContext
     @State private var router = DeepLinkRouter()
     @State private var selectedTab = 0
@@ -22,6 +23,7 @@ struct ContentView: View {
             overflowTabs
         }
         .tabViewStyle(.sidebarAdaptable)
+        .environment(storageManager)
         .tint(.lorcanaGold)
         .preferredColorScheme(.dark)
         .overlay(alignment: .top) {
@@ -29,6 +31,13 @@ struct ContentView: View {
         }
         .onAppear {
             collectionManager.setModelContext(modelContext)
+            storageManager.setModelContext(modelContext)
+            collectionManager.onOwnedQuantityChanged = { [storageManager] card, owned in
+                storageManager.reconcile(card, ownedQuantity: owned)
+            }
+            collectionManager.onAllDataDeleted = { [storageManager] in
+                storageManager.loadContainers()
+            }
             deckManager.loadDecks(context: modelContext)
             checkOnboardingStatus()
             ReviewManager.shared.recordAppLaunch()
@@ -163,6 +172,11 @@ struct ContentView: View {
     /// primary tabs in the iPad sidebar.
     @TabContentBuilder<Int>
     private var overflowTabs: some TabContent<Int> {
+        Tab("Bookshelf", systemImage: "books.vertical.circle.fill", value: 11) {
+            BookshelfView()
+                .environment(collectionManager)
+        }
+
         Tab("Sets", systemImage: "books.vertical.fill", value: 2) {
             SetsView()
                 .environment(collectionManager)
@@ -210,6 +224,7 @@ struct ContentView: View {
         case 8: "Rules"
         case 9: "Play"
         case 10: "Trades"
+        case 11: "Bookshelf"
         default: "Tab\(tag)"
         }
     }

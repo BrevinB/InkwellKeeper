@@ -19,17 +19,12 @@ struct CardTile: View {
     @State private var priceChange: Double?
     @State private var priceConfidence: PricingService.PriceConfidence?
     @State private var cachedCollectedCard: CollectedCard?
-    @State private var cachedDeckAllocation: Int = 0
     @Environment(CollectionManager.self) var collectionManager
+    @Environment(StorageManager.self) private var storageManager
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let pricingService = PricingService.shared
 
-    private var availableQuantity: Int {
-        guard let collected = cachedCollectedCard else { return 0 }
-        return max(0, collected.quantity - cachedDeckAllocation)
-    }
-    
     var body: some View {
         VStack(spacing: 8) {
             HolographicCardImage(card: card, reduceMotion: reduceMotion)
@@ -41,6 +36,15 @@ struct CardTile: View {
                 )
                 .overlay(alignment: .top) {
                     cardBadgeOverlay
+                }
+                .overlay(alignment: .bottomLeading) {
+                    if !isWishlist, let collected = cachedCollectedCard {
+                        let stored = storageManager.storedQuantity(for: card)
+                        if stored > 0 {
+                            StorageTileBadge(stored: stored, owned: collected.quantity)
+                                .padding(6)
+                        }
+                    }
                 }
             
             VStack(alignment: .leading, spacing: 4) {
@@ -129,28 +133,16 @@ struct CardTile: View {
 
             Spacer()
 
-            if let collected = cachedCollectedCard, collected.quantity > 1 || cachedDeckAllocation > 0 {
-                VStack(spacing: 2) {
-                    if collected.quantity > 1 {
-                        Text("\(collected.quantity)")
-                            .font(.caption)
-                            .bold()
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Capsule().fill(Color.lorcanaGold.opacity(0.9)))
-                    }
-
-                    if cachedDeckAllocation > 0 {
-                        Text("\(availableQuantity) free")
-                            .font(.system(size: 9, weight: .bold))
-                            .foregroundStyle(availableQuantity > 0 ? .green : .red)
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 1)
-                            .background(Capsule().fill(Color.black.opacity(0.7)))
-                    }
-                }
-                .padding(6)
+            // Where copies are (including built decks) is on the storage badge, bottom left.
+            if let collected = cachedCollectedCard, collected.quantity > 1 {
+                Text("\(collected.quantity)")
+                    .font(.caption)
+                    .bold()
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Capsule().fill(Color.lorcanaGold.opacity(0.9)))
+                    .padding(6)
             }
         }
     }
@@ -178,7 +170,6 @@ struct CardTile: View {
         } else {
             cachedCollectedCard = collectionManager.getCollectedCardData(for: card)
         }
-        cachedDeckAllocation = collectionManager.getTotalDeckAllocation(for: card)
     }
 
     private func loadMarketPrice() async {

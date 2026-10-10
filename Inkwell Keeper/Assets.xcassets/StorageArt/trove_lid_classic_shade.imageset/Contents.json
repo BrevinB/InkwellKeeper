@@ -1,0 +1,15 @@
+{
+  "images": [
+    {
+      "filename": "trove_lid_classic_shade.png",
+      "idiom": "universal"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  },
+  "properties": {
+    "compression-type": "lossy"
+  }
+}

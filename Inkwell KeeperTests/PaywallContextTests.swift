@@ -20,7 +20,11 @@ struct PaywallContextTests {
         "deckCompleter",
         "deckStrategy",
         "rulesTab",
-        "cardAsk"
+        "cardAsk",
+        "storageLimit",
+        "storageTheme",
+        "storageSetBinder",
+        "storageScan"
     ]
 
     // MARK: - Routing
@@ -46,6 +50,12 @@ struct PaywallContextTests {
     @Test func bothRulesEntryPointsLeadWithTheRulesExpert() {
         for source in ["rulesTab", "cardAsk"] {
             #expect(PaywallContext.forSource(source).leadFeatures.first == .rulesExpert)
+        }
+    }
+
+    @Test func everyStorageSurfaceLeadsWithStorage() {
+        for source in ["storageLimit", "storageTheme", "storageSetBinder", "storageScan"] {
+            #expect(PaywallContext.forSource(source).leadFeatures.first == .unlimitedStorage)
         }
     }
 
