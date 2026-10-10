@@ -3,7 +3,7 @@
 //  Inkwell Keeper
 //
 //  The surface finish on a binder or box: a soft sheen, stitching, twinkling
-//  starlight, or a slowly turning holofoil. Motion stops when Reduce Motion is on.
+//  starlight, or a holofoil sheen. Starlight's twinkle stops when Reduce Motion is on.
 //
 
 import SwiftUI
@@ -31,7 +31,7 @@ struct CoverFinishOverlay: View {
             case .starlight:
                 StarlightFinish(animated: !reduceMotion)
             case .holofoil:
-                HolofoilFinish(animated: !reduceMotion)
+                HolofoilFinish()
             }
         }
     }

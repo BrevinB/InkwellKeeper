@@ -1,0 +1,84 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  html,body{margin:0;padding:0}
+  body{width:3840px;height:2560px;overflow:hidden;position:relative;
+    background:linear-gradient(135deg,#0D1A33 0%,#1A0D26 50%,#0D1A33 100%);}
+  .glow{position:absolute;border-radius:50%;filter:blur(200px)}
+  #sparkles{position:absolute;inset:0}
+
+  /* Headline block, left half */
+  #copy{position:absolute;left:330px;top:0;bottom:0;width:1700px;display:flex;flex-direction:column;justify-content:center}
+  .verb{font-family:"Avenir Next Condensed";font-weight:800;font-size:640px;line-height:.86;color:#fff;letter-spacing:6px;
+    text-shadow:0 20px 60px rgba(0,0,0,.45)}
+  .desc{font-family:"Avenir Next Condensed";font-weight:800;font-size:250px;line-height:1;color:#fff;text-transform:uppercase;margin-top:40px}
+  .accent{font-family:Baskerville;font-style:italic;font-weight:600;font-size:270px;line-height:1.05;color:#FFD700;
+    text-shadow:0 0 80px rgba(255,215,0,.35)}
+
+  /* Phone */
+  #phone{position:absolute;left:2330px;top:150px;width:1048px;height:2197px;border-radius:170px;padding:34px;box-sizing:border-box;
+    background:linear-gradient(145deg,#5b5866,#24222b 30%,#3d3a45 70%,#141218);
+    box-shadow:0 80px 160px rgba(0,0,0,.7),inset 0 0 0 4px rgba(255,255,255,.12);transform:rotate(4deg)}
+  #screen{position:relative;width:980px;height:2129px;border-radius:138px;overflow:hidden;
+    background:url(scan_full.png) top center/100% auto}
+  #status{position:absolute;left:0;right:0;top:0;height:136px;overflow:hidden}
+  #status::before{content:"";position:absolute;inset:-60px;background:url(scan_full.png) top center/980px auto;filter:blur(28px)}
+  .time{position:absolute;left:118px;top:42px;font:600 52px -apple-system,"SF Pro Text";color:#fff}
+  .island{position:absolute;left:340px;top:30px;width:300px;height:88px;border-radius:44px;background:#000}
+  .icons{position:absolute;right:92px;top:48px}
+
+  /* Recognition pill breaking out of the left bezel */
+  #pill{position:absolute;left:1700px;top:1470px;width:1660px;height:310px;border-radius:70px;
+    background:linear-gradient(135deg,#3c3842,#221f28);
+    border:5px solid rgba(255,215,0,.7);box-shadow:0 50px 120px rgba(0,0,0,.6),0 0 90px rgba(255,215,0,.22);
+    display:flex;align-items:center;gap:56px;padding:0 60px;box-sizing:border-box;transform:rotate(-2deg)}
+  #pill .thumb{width:165px;height:230px;border-radius:14px;background:url(11-223-enchanted.avif) center/cover;flex:none;
+    box-shadow:0 10px 30px rgba(0,0,0,.5)}
+  #pill .name{font:600 92px -apple-system,"SF Pro Display";color:#fff;display:flex;align-items:center;gap:30px;white-space:nowrap}
+  #pill .check{width:76px;height:76px;border-radius:50%;background:#34C759;display:grid;place-items:center;flex:none}
+  #pill .price{font:600 92px -apple-system,"SF Pro Display";color:#FFD700;margin-top:10px}
+</style></head>
+<body>
+<div class="glow" style="left:2200px;top:500px;width:1500px;height:1500px;background:#8033CC;opacity:.45"></div>
+<div class="glow" style="left:0;top:900px;width:1600px;height:1200px;background:#1f4fa8;opacity:.3"></div>
+<svg id="sparkles" viewBox="0 0 3840 2560"></svg>
+
+<div id="copy">
+  <div class="verb">SCAN</div>
+  <div class="desc">any card</div>
+  <div class="accent">in seconds</div>
+</div>
+
+<div id="phone"><div id="screen">
+  <div id="status">
+    <div class="time">9:41</div>
+    <div class="island"></div>
+    <svg class="icons" width="190" height="44" viewBox="0 0 190 44" fill="#fff">
+      <rect x="0" y="28" width="10" height="14" rx="3"/><rect x="16" y="20" width="10" height="22" rx="3"/>
+      <rect x="32" y="11" width="10" height="31" rx="3"/><rect x="48" y="2" width="10" height="40" rx="3"/>
+      <path d="M95 40 l-9-9 a13 13 0 0 1 18 0z M78 23 a25 25 0 0 1 34 0 l-5 5 a18 18 0 0 0 -24 0z M70 15 a37 37 0 0 1 50 0 l-5 5 a30 30 0 0 0 -40 0z"/>
+      <rect x="130" y="6" width="52" height="32" rx="9" fill="none" stroke="#fff" stroke-width="4" opacity=".6"/>
+      <rect x="135" y="11" width="42" height="22" rx="5"/><rect x="185" y="16" width="4" height="12" rx="2" opacity=".6"/>
+    </svg>
+  </div>
+</div></div>
+
+<div id="pill">
+  <div class="thumb"></div>
+  <div>
+    <div class="name"><span class="check"><svg width="44" height="44" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Lilo - Rock Star</div>
+    <div class="price">$157.28</div>
+  </div>
+</div>
+
+<script>
+let s=31415;const rnd=()=>{s=(s*1664525+1013904223)%4294967296;return s/4294967296};
+// Keep sparkles out of the headline block and the phone.
+const clear=(x,y)=>(x>250&&x<2100&&y>420&&y<2150)||(x>2250&&x<3500&&y>80&&y<2420);
+const S=document.getElementById('sparkles');let out='';
+for(let i=0;i<420;i++){const x=rnd()*3840,y=rnd()*2560;if(clear(x,y))continue;out+=`<circle cx="${x}" cy="${y}" r="${2+rnd()*6}" fill="#FFD700" opacity="${.1+rnd()*.25}"/>`}
+const star=(x,y,k,o)=>`<path transform="translate(${x},${y}) scale(${k})" d="M0,-40 C4,-6 6,-4 40,0 C6,4 4,6 0,40 C-4,6 -6,4 -40,0 C-6,-4 -4,-6 0,-40Z" fill="#FFE27A" opacity="${o}"/>`;
+for(let i=0;i<60;i++){const x=rnd()*3840,y=rnd()*2560;if(clear(x,y))continue;out+=star(x,y,.4+rnd()*1,.35+rnd()*.5)}
+S.innerHTML=out;
+</script>
+</body></html>
