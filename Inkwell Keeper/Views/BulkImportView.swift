@@ -6,11 +6,14 @@
 //
 
 import SwiftUI
+import SwiftData
 import UniformTypeIdentifiers
 
 struct BulkImportView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(CollectionManager.self) var collectionManager
+    @Environment(StorageManager.self) private var storageManager
+    @Environment(\.modelContext) private var modelContext
 
     @State private var importText = ""
     @State private var showingFilePicker = false
@@ -18,6 +21,8 @@ struct BulkImportView: View {
     @State private var fileName: String?
     @State private var isImporting = false
     @State private var importDone = false
+    /// Binders and boxes put back by an Inkwell Keeper backup.
+    @State private var restoredStorage: StorageManager.RestoreSummary?
     @State private var importStats = ImportService.ImportProgress()
     @State private var importResult: ImportService.ImportResult?
     @State private var showFailedDetails = false
@@ -194,6 +199,12 @@ struct BulkImportView: View {
                     Label("\(importStats.failedCards) failed", systemImage: "exclamationmark.triangle.fill")
                         .font(.caption)
                         .foregroundStyle(.orange)
+                }
+
+                if let restoredStorage, restoredStorage.containers > 0 {
+                    Label("Binders & boxes restored: \(restoredStorage.containers)", systemImage: "books.vertical.fill")
+                        .font(.caption)
+                        .foregroundStyle(.lorcanaGold)
                 }
 
                 if importDone {
@@ -542,9 +553,19 @@ struct BulkImportView: View {
         return preferredFormat
     }
 
+    /// Puts an Inkwell Keeper backup's binders and boxes back, now its cards are in.
+    private func restoreStorage(from text: String) {
+        guard let storage = InkwellBackup.decode(text)?.storage, !storage.isEmpty else { return }
+        let deckIds = Set(((try? modelContext.fetch(FetchDescriptor<Deck>())) ?? []).map(\.id))
+        restoredStorage = storageManager.restore(storage, deckExists: deckIds.contains)
+    }
+
     private func detectFormat(from text: String) -> ImportService.ImportFormat {
         if ImportService.isOfficialBackup(text) {
             return .officialBackup
+        }
+        if InkwellBackup.looksLikeBackup(text) {
+            return .inkwellBackup
         }
 
         let firstLine = text.components(separatedBy: .newlines).first?.lowercased() ?? ""
@@ -634,6 +655,9 @@ struct BulkImportView: View {
 
             await MainActor.run {
                 collectionManager.finalizeBulkImport()
+                if detectedFormat == .inkwellBackup {
+                    restoreStorage(from: importText)
+                }
             }
 
             Analytics.send(.importCompleted(

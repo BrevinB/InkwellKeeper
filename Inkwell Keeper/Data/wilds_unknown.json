@@ -1,7 +1,7 @@
 {
   "setName": "Wilds Unknown",
   "setCode": "WU",
-  "cardCount": 242,
+  "cardCount": 243,
   "cards": [
     {
       "id": "Wilds_Unknown_1_Gosalyn_Mallard___The_Quiverwing_Quack",
@@ -4600,6 +4600,25 @@
       "lore": 2,
       "franchise": "",
       "inkColor": "Steel"
+    },
+    {
+      "id": "Wilds_Unknown_243_Mr._Incredible___Super_Strong",
+      "name": "Mr. Incredible - Super Strong",
+      "cost": 5,
+      "type": "Character",
+      "rarity": "Legendary",
+      "setName": "Wilds Unknown",
+      "cardText": "Shift 3 {I} (You may pay 3 {I} to play this on top of one of your characters named Mr. Incredible.)\nALWAYS UNITED This character gets +2 {S} for each other character you have in play.\nLET'S DO THIS! Whenever one of your Super characters challenges another character, draw a card.",
+      "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_23b6a7cd2c7c4fbfa45c7a3043f41ed5.avif?1790948262",
+      "variant": "Normal",
+      "cardNumber": 243,
+      "uniqueId": "WU-243",
+      "inkwell": true,
+      "strength": 6,
+      "willpower": 4,
+      "lore": 1,
+      "franchise": "",
+      "inkColor": "Ruby"
     }
   ]
 }

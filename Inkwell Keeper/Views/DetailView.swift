@@ -83,13 +83,14 @@ struct CollectionCardDetailView: View {
     @Binding var isPresented: Bool
     var showAllVariants: Bool = false
     @Environment(CollectionManager.self) var collectionManager
+    @Environment(StorageManager.self) private var storageManager
     @State private var collectedCard: CollectedCard?
     @State private var tempQuantity: Int = 1
+    @State private var pendingStoredRemoval: PendingStoredRemoval?
     @State private var foilCollectedCard: CollectedCard?
     @State private var foilQuantity: Int = 0
     @State private var showingDeleteConfirmation = false
     @State private var showingFullscreenViewer = false
-    @State private var deckAllocations: [CollectionManager.DeckAllocation] = []
     @State private var showFoilArt = false
     @State private var imageAttachments: [Data] = []
     @State private var showingShareImage = false
@@ -234,40 +235,9 @@ struct CollectionCardDetailView: View {
                                         PurchasePriceRow(collected: collected)
                                     }
 
-                                    // Deck Usage section
-                                    if !deckAllocations.isEmpty {
-                                        VStack(alignment: .leading, spacing: 8) {
-                                            let totalAllocated = deckAllocations.reduce(0) { $0 + $1.quantity }
-                                            let totalOwned = tempQuantity + foilQuantity
-                                            let available = max(0, totalOwned - totalAllocated)
-
-                                            HStack {
-                                                Text("Deck Usage")
-                                                    .font(.headline)
-                                                    .foregroundStyle(.lorcanaGold)
-                                                Spacer()
-                                                Text("\(available) available")
-                                                    .font(.subheadline)
-                                                    .fontWeight(.semibold)
-                                                    .foregroundStyle(available > 0 ? .green : .red)
-                                            }
-
-                                            ForEach(deckAllocations, id: \.deckName) { allocation in
-                                                HStack {
-                                                    Image(systemName: "rectangle.stack.fill")
-                                                        .font(.caption)
-                                                        .foregroundStyle(.lorcanaGold.opacity(0.7))
-                                                    Text(allocation.deckName)
-                                                        .font(.subheadline)
-                                                        .foregroundStyle(.white)
-                                                    Spacer()
-                                                    Text("\(allocation.quantity) used")
-                                                        .font(.subheadline)
-                                                        .foregroundStyle(.gray)
-                                                }
-                                            }
-                                        }
-                                        .padding(.top, 4)
+                                    StoredInSection(card: showFoilSection ? card.withVariant(.normal) : card)
+                                    if showFoilSection && foilQuantity > 0 {
+                                        StoredInSection(card: card.withVariant(.foil))
                                     }
                                 }
                                 .padding(.vertical, 8)
@@ -357,6 +327,9 @@ struct CollectionCardDetailView: View {
             .background(LorcanaBackground())
             .navigationTitle("Card Details")
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(for: StorageRoute.self) { route in
+                StorageContainerScreen(route: route)
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Share", systemImage: "square.and.arrow.up") {
@@ -398,6 +371,26 @@ struct CollectionCardDetailView: View {
         .fullScreenCover(isPresented: $showingFullscreenViewer) {
             FullscreenCardViewer(card: displayCard)
         }
+        .confirmationDialog(
+            "Which copy did you take out?",
+            isPresented: Binding(
+                get: { pendingStoredRemoval != nil },
+                set: { if !$0 { pendingStoredRemoval = nil } }
+            ),
+            titleVisibility: .visible,
+            presenting: pendingStoredRemoval
+        ) { pending in
+            ForEach(pending.locations) { location in
+                Button("From \(location.containerName)") {
+                    if let container = storageManager.containers.first(where: { $0.id == location.containerId }) {
+                        storageManager.unstore(pending.card, quantity: 1, from: container)
+                    }
+                    applyDecrement(foil: pending.isFoil)
+                }
+            }
+        } message: { _ in
+            Text("All your copies are put away, so one comes out of storage too.")
+        }
     }
 
     @ViewBuilder
@@ -421,13 +414,7 @@ struct CollectionCardDetailView: View {
 
                     HStack(spacing: 12) {
                         Button("-") {
-                            if tempQuantity > 0 {
-                                tempQuantity -= 1
-                                updateQuantity()
-                                if tempQuantity == 0 && foilQuantity == 0 {
-                                    isPresented = false
-                                }
-                            }
+                            requestDecrement(foil: false)
                         }
                         .frame(width: 28, height: 28)
                         .background(Color.red.opacity(0.8))
@@ -475,13 +462,7 @@ struct CollectionCardDetailView: View {
 
                     HStack(spacing: 12) {
                         Button("-") {
-                            if foilQuantity > 0 {
-                                foilQuantity -= 1
-                                updateFoilQuantity()
-                                if tempQuantity == 0 && foilQuantity == 0 {
-                                    isPresented = false
-                                }
-                            }
+                            requestDecrement(foil: true)
                         }
                         .frame(width: 28, height: 28)
                         .background(Color.red.opacity(0.8))
@@ -525,13 +506,7 @@ struct CollectionCardDetailView: View {
                 Spacer()
                 HStack(spacing: 12) {
                     Button("-") {
-                        if tempQuantity > 0 {
-                            tempQuantity -= 1
-                            updateQuantity()
-                            if tempQuantity == 0 {
-                                isPresented = false
-                            }
-                        }
+                        requestDecrement(foil: false)
                     }
                     .frame(width: 30, height: 30)
                     .background(Color.red.opacity(0.8))
@@ -584,7 +559,6 @@ struct CollectionCardDetailView: View {
         imageAttachments = primaryCard?.imageAttachments ?? []
 
         // Load deck allocations
-        deckAllocations = collectionManager.getDeckAllocations(for: card)
     }
 
     private func saveImageAttachments() {
@@ -595,6 +569,40 @@ struct CollectionCardDetailView: View {
         } else if let foilCollected = foilCollectedCard {
             foilCollected.imageAttachments = imageAttachments
             collectionManager.saveContext()
+        }
+    }
+
+    /// Every owned copy of this card is put away somewhere, so removing one means
+    /// taking it out of a binder or box. Ask which, rather than guessing.
+    struct PendingStoredRemoval: Identifiable {
+        let card: LorcanaCard
+        let isFoil: Bool
+        let locations: [StorageAllocation]
+        var id: String { card.variantAwareId }
+    }
+
+    private func requestDecrement(foil: Bool) {
+        let target = foil ? card.withVariant(.foil) : (showFoilSection ? card.withVariant(.normal) : card)
+        let locations = storageManager.locations(for: target)
+        if !locations.isEmpty, storageManager.unsortedQuantity(for: target) == 0 {
+            pendingStoredRemoval = PendingStoredRemoval(card: target, isFoil: foil, locations: locations)
+        } else {
+            applyDecrement(foil: foil)
+        }
+    }
+
+    private func applyDecrement(foil: Bool) {
+        if foil {
+            guard foilQuantity > 0 else { return }
+            foilQuantity -= 1
+            updateFoilQuantity()
+        } else {
+            guard tempQuantity > 0 else { return }
+            tempQuantity -= 1
+            updateQuantity()
+        }
+        if tempQuantity == 0 && (!showFoilSection || foilQuantity == 0) {
+            isPresented = false
         }
     }
 

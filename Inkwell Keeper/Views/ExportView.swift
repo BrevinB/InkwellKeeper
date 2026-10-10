@@ -44,6 +44,7 @@ enum ExportField: String, CaseIterable, Identifiable {
     case condition = "Condition"
     case notes = "Notes"
     case dateAdded = "Date Added"
+    case location = "Location"
 
     var id: String { rawValue }
 
@@ -71,6 +72,7 @@ enum ExportField: String, CaseIterable, Identifiable {
         case .condition: return "checkmark.seal"
         case .notes: return "note.text"
         case .dateAdded: return "calendar"
+        case .location: return "archivebox"
         }
     }
 
@@ -98,6 +100,7 @@ enum ExportField: String, CaseIterable, Identifiable {
         case .condition: return "Card condition"
         case .notes: return "Your personal notes"
         case .dateAdded: return "When added to collection"
+        case .location: return "Binder, box or Unsorted, with pages"
         }
     }
 
@@ -124,13 +127,14 @@ enum ExportField: String, CaseIterable, Identifiable {
     }
 
     static var collectionFields: [Self] {
-        [.condition, .notes, .dateAdded]
+        [.condition, .notes, .dateAdded, .location]
     }
 }
 
 struct ExportView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(CollectionManager.self) var collectionManager
+    @Environment(StorageManager.self) private var storageManager
 
     var initialDateFilter: DateRangePreset?
 
@@ -944,7 +948,9 @@ struct ExportView: View {
             var rowColumns: [String] = []
 
             for field in orderedFields {
-                let value = getFieldValue(field: field, card: group.card, quantity: group.quantity, collectedCard: group.collectedCard)
+                let value = field == .location
+                    ? csvQuoted(StorageLocationFormatter.describe(storageManager.locations(for: group.card), owned: group.quantity))
+                    : getFieldValue(field: field, card: group.card, quantity: group.quantity, collectedCard: group.collectedCard)
                 rowColumns.append(value)
             }
 
@@ -1040,7 +1046,14 @@ struct ExportView: View {
                 return "\"\(formatter.string(from: date))\""
             }
             return ""
+        case .location:
+            // Filled in by generateStandardCSV, which has the storage manager.
+            return ""
         }
+    }
+
+    private func csvQuoted(_ value: String) -> String {
+        "\"\(value.replacing("\"", with: "\"\""))\""
     }
 
     private func generateDreambornBulkCSV(from cards: [LorcanaCard]) -> String {
@@ -1107,38 +1120,6 @@ struct ExportView: View {
     // Full data backup with all card information
 
     private func generateJSONBackup(from cards: [LorcanaCard]) -> String {
-        struct ExportCard: Codable {
-            let id: String
-            let name: String
-            let setName: String
-            let cardNumber: Int?
-            let uniqueId: String?
-            let variant: String
-            let quantity: Int
-            let rarity: String
-            let inkColor: String?
-            let cardType: String
-            let cost: Int
-            let strength: Int?
-            let willpower: Int?
-            let lore: Int?
-            let inkwell: Bool?
-            let franchise: String?
-            let price: Double?
-            let condition: String?
-            let notes: String?
-            let dateAdded: String?
-            let imageUrl: String
-        }
-
-        struct BackupData: Codable {
-            let exportDate: String
-            let appVersion: String
-            let totalCards: Int
-            let totalQuantity: Int
-            let cards: [ExportCard]
-        }
-
         // Group cards (rows prefetched once — no per-card SwiftData fetches)
         let collectedRows = collectionManager.collectedRowsByIdentity()
         var cardGroups: [String: (card: LorcanaCard, quantity: Int, collectedCard: CollectedCard?)] = [:]
@@ -1158,7 +1139,7 @@ struct ExportView: View {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
 
-        var exportCards: [ExportCard] = []
+        var exportCards: [InkwellBackup.Card] = []
 
         for group in cardGroups.values {
             let card = group.card
@@ -1171,7 +1152,7 @@ struct ExportView: View {
                 dateAddedStr = nil
             }
 
-            let exportCard = ExportCard(
+            let exportCard = InkwellBackup.Card(
                 id: card.id,
                 name: card.name,
                 setName: card.setName,
@@ -1206,12 +1187,15 @@ struct ExportView: View {
 
         let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
 
-        let backupData = BackupData(
+        let backupData = InkwellBackup(
             exportDate: dateFormatter.string(from: Date()),
             appVersion: appVersion,
             totalCards: exportCards.count,
             totalQuantity: exportCards.reduce(0) { $0 + $1.quantity },
-            cards: exportCards
+            cards: exportCards,
+            // Binders and boxes go in whole, whatever the card filter, so a restore
+            // can put every card back where it was.
+            storage: storageManager.backupContainers()
         )
 
         let encoder = JSONEncoder()

@@ -152,6 +152,32 @@ struct ChangelogEntry {
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
     ChangelogEntry(
+        version: "3.5.0",
+        date: "October 2026",
+        features: [
+            "Storage is here! Track where every card lives — binders, troves, deck boxes, storage boxes, and bulk bins — right from the Collection tab",
+            "Binders you flip through page by page, with 4, 9, or 12-pocket pages, single or double-sided, and drag-to-rearrange",
+            "Set checklist binders show the cards you're still missing in their numbered pockets, with an optional master set layout for foils (Pro)",
+            "Bookshelf: every binder and box on a wooden bookcase — tap one to pull it off the shelf and open it",
+            "Share My Bookshelf as an image",
+            "Build a deck into a deck box: a pull list shows where each card is, and taking it apart puts every card back in its pocket",
+            "Select several cards and move them to another binder, box, or back to Unsorted in one go",
+            "Scan new cards straight into a binder or box (Pro)",
+            "Starlight and Holofoil cover finishes, plus unlimited binders and boxes (Pro)"
+        ],
+        improvements: [
+            "Card details now show exactly where every copy is stored",
+            "Decks are now ideas until you build them, so a deck no longer holds on to your cards — build it into a deck box when you're ready",
+            "Export has a new Location column, and JSON backups now include your binders and boxes",
+            "Use any JSON backup from Inkwell Keeper to restore your collection, binders, and boxes from Import"
+        ],
+        bugFixes: [
+            "JSON backups can now actually be restored — Import didn't recognize them before",
+            "Fixed the Filters button squishing onto two lines on smaller iPhones"
+        ],
+        inProgress: ["Price alerts"]
+    ),
+    ChangelogEntry(
         version: "3.4.1",
         date: "September 2026",
         features: [

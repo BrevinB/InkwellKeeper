@@ -60,6 +60,7 @@ struct FilterBar: View {
                             .font(.caption)
                     }
                     .foregroundStyle(hasActiveFilters ? .lorcanaGold : .gray)
+                    .lineLimit(1)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .background(
@@ -67,29 +68,8 @@ struct FilterBar: View {
                             .fill(Color.lorcanaDark.opacity(0.6))
                     )
                 }
-
-                // Active filter pills (when collapsed)
-                if !isExpanded && hasActiveFilters {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            if selectedFilter != .all {
-                                activeFilterPill(selectedFilter.displayName, color: .blue) {
-                                    selectedFilter = .all
-                                }
-                            }
-                            if selectedInkColor != .all {
-                                activeFilterPill(selectedInkColor.displayName, color: selectedInkColor.color) {
-                                    selectedInkColor = .all
-                                }
-                            }
-                            if selectedVariant != .all {
-                                activeFilterPill(selectedVariant.displayName, color: variantColor(selectedVariant)) {
-                                    selectedVariant = .all
-                                }
-                            }
-                        }
-                    }
-                }
+                // Keep its natural width so "Filters" never wraps onto two lines.
+                .fixedSize()
 
                 Spacer()
 
@@ -114,6 +94,7 @@ struct FilterBar: View {
                             .font(.caption)
                     }
                     .foregroundStyle(.lorcanaGold)
+                    .lineLimit(1)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 8)
                     .background(
@@ -121,6 +102,33 @@ struct FilterBar: View {
                             .fill(Color.lorcanaDark.opacity(0.6))
                     )
                 }
+                .fixedSize()
+            }
+
+            // Active filter pills (when collapsed), on their own row so they never
+            // squeeze the Filters and Sort buttons on narrow phones
+            if !isExpanded && hasActiveFilters {
+                ScrollView(.horizontal) {
+                    HStack(spacing: 6) {
+                        if selectedFilter != .all {
+                            activeFilterPill(selectedFilter.displayName, color: .blue) {
+                                selectedFilter = .all
+                            }
+                        }
+                        if selectedInkColor != .all {
+                            activeFilterPill(selectedInkColor.displayName, color: selectedInkColor.color) {
+                                selectedInkColor = .all
+                            }
+                        }
+                        if selectedVariant != .all {
+                            activeFilterPill(selectedVariant.displayName, color: variantColor(selectedVariant)) {
+                                selectedVariant = .all
+                            }
+                        }
+                    }
+                }
+                .scrollIndicators(.hidden)
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
 
             // Expanded filter rows
@@ -204,6 +212,7 @@ struct FilterBar: View {
             Text(text)
                 .font(.caption)
                 .fontWeight(.medium)
+                .lineLimit(1)
 
             Button(action: onRemove) {
                 Image(systemName: "xmark.circle.fill")
@@ -320,4 +329,17 @@ struct VariantFilterChip: View {
         }
         .buttonStyle(.plain)
     }
+}
+
+/// Three active filters on the narrowest iPhone — where "Filters" used to wrap to "Fi / lt".
+#Preview("Active filters, narrow") {
+    @Previewable @State var filter = CardFilter.character
+    @Previewable @State var ink = InkColorFilter.amethyst
+    @Previewable @State var variant = VariantFilter.enchanted
+    @Previewable @State var sort = SortOption.recentlyAdded
+    FilterBar(selectedFilter: $filter, selectedInkColor: $ink, selectedVariant: $variant, sortOption: $sort)
+        .padding(.horizontal)
+        .frame(width: 320)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(LorcanaBackground())
 }

@@ -96,6 +96,18 @@ enum Analytics {
         case deckShareCompleted(method: String)
         case deepLinkOpened(type: String)
 
+        // MARK: Physical storage
+        /// A binder, trove, box or bin was created. `kind` is the `StorageKind` raw value.
+        case storageContainerCreated(kind: String)
+        /// Copies were put into a container. `source` is "detail", "picker", "autoFill" or "scan".
+        case storageCardsStored(count: Int, kind: String, source: String)
+        case storageBinderAutoFilled(count: Int, order: String)
+        /// An idea deck got a deck box. `newBox` is false when an empty box was reused.
+        case deckBuildStarted(newBox: Bool)
+        /// Copies moved into a deck box from the pull list; `all` for "Pull All".
+        case deckCardsPulled(count: Int, all: Bool)
+        case deckTakenApart(returnedToOrigins: Bool)
+
         // MARK: Lifecycle
         case onboardingStarted
         case onboardingCompleted
@@ -141,6 +153,12 @@ enum Analytics {
             case .deckSharePresented: "deck.sharePresented"
             case .deckShareCompleted: "deck.shareCompleted"
             case .deepLinkOpened: "deepLink.opened"
+            case .storageContainerCreated: "storage.containerCreated"
+            case .storageCardsStored: "storage.cardsStored"
+            case .storageBinderAutoFilled: "storage.binderAutoFilled"
+            case .deckBuildStarted: "deck.buildStarted"
+            case .deckCardsPulled: "deck.cardsPulled"
+            case .deckTakenApart: "deck.takenApart"
             case .onboardingStarted: "onboarding.started"
             case .onboardingCompleted: "onboarding.completed"
             case .loreCounterGameStarted: "loreCounter.gameStarted"
@@ -209,6 +227,18 @@ enum Analytics {
                 ["method": method]
             case let .deepLinkOpened(type):
                 ["linkType": type]
+            case let .storageContainerCreated(kind):
+                ["containerKind": kind]
+            case let .storageCardsStored(count, kind, source):
+                ["count": String(count), "containerKind": kind, "source": source]
+            case let .storageBinderAutoFilled(count, order):
+                ["count": String(count), "order": order]
+            case let .deckBuildStarted(newBox):
+                ["newBox": String(newBox)]
+            case let .deckCardsPulled(count, all):
+                ["count": String(count), "all": String(all)]
+            case let .deckTakenApart(returnedToOrigins):
+                ["returnedToOrigins": String(returnedToOrigins)]
             case let .loreCounterGameStarted(players, mode):
                 ["players": String(players), "mode": mode]
             default:

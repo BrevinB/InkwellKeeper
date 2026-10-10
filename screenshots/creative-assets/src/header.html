@@ -1,0 +1,72 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  html,body{margin:0;padding:0}
+  body{width:3840px;height:1646px;overflow:hidden;position:relative;
+    background:linear-gradient(135deg,#0D1A33 0%,#1A0D26 50%,#0D1A33 100%);}
+  .glow{position:absolute;border-radius:50%;filter:blur(180px)}
+  #inkwell{position:absolute;left:50%;top:-40px;width:1640px;height:1640px;transform:translateX(-50%);
+    background:url(inkwell.png) center/cover;
+    -webkit-mask-image:radial-gradient(closest-side,#000 62%,rgba(0,0,0,.6) 80%,transparent 100%);}
+  .card{position:absolute;width:520px;height:726px}
+  .card .halo{position:absolute;inset:-60px;border-radius:80px;filter:blur(80px);opacity:.55;background:var(--ink)}
+  .card .face{position:absolute;inset:0;border-radius:26px;background-size:cover;background-position:center;
+    box-shadow:0 40px 90px rgba(0,0,0,.7),0 0 0 3px rgba(255,215,0,.4);}
+  .ribbon{position:absolute;inset:0;pointer-events:none}
+  #sparkles{position:absolute;inset:0}
+  #floor{position:absolute;left:0;right:0;bottom:0;height:520px;
+    background:linear-gradient(to bottom,rgba(10,12,28,0) 0%,rgba(10,12,28,.55) 70%,rgba(10,12,28,.8) 100%)}
+</style></head>
+<body>
+<div class="glow" style="left:1320px;top:300px;width:1200px;height:1000px;background:#8033CC;opacity:.45"></div>
+<div class="glow" style="left:200px;top:500px;width:900px;height:700px;background:#1f4fa8;opacity:.35"></div>
+<div class="glow" style="left:2740px;top:450px;width:900px;height:700px;background:#8033CC;opacity:.3"></div>
+
+<svg class="ribbon" viewBox="0 0 3840 1646" id="ribbons" style="display:none"></svg>
+<svg id="sparkles" viewBox="0 0 3840 1646"></svg>
+<div id="inkwell"></div>
+<div id="cards"></div>
+<div id="floor"></div>
+
+<script>
+// Seeded RNG so renders are reproducible.
+let s=20261007;const rnd=()=>{s=(s*1664525+1013904223)%4294967296;return s/4294967296};
+
+// Ink ribbons sweeping from the inkwell mouth out to each card cluster.
+const ink={amber:'#F4B223',amethyst:'#8E3BB8',emerald:'#2FA84F',ruby:'#D3283B',sapphire:'#1F8FD6',steel:'#9AA5B1'};
+const R=document.getElementById('ribbons');
+const mouth=[1920,920];
+const paths=[
+  [ink.amethyst,'M1900,920 C1700,700 1300,820 1050,560 S600,420 380,520'],
+  [ink.ruby,'M1890,940 C1650,1000 1350,1080 1000,980 S520,1000 240,1180'],
+  [ink.sapphire,'M1910,900 C1750,560 1450,420 1200,300 S800,160 560,220'],
+  [ink.amber,'M1940,920 C2140,700 2540,820 2790,560 S3240,420 3460,520'],
+  [ink.emerald,'M1950,940 C2190,1000 2490,1080 2840,980 S3320,1000 3600,1180'],
+  [ink.steel,'M1930,900 C2090,560 2390,420 2640,300 S3040,160 3280,220'],
+];
+let defs='<defs><filter id="b"><feGaussianBlur stdDeviation="26"/></filter></defs>';
+R.innerHTML=defs+paths.map(([c,d])=>
+  `<path d="${d}" stroke="${c}" stroke-width="90" fill="none" stroke-linecap="round" opacity=".22" filter="url(#b)"/>
+   <path d="${d}" stroke="${c}" stroke-width="10" fill="none" stroke-linecap="round" opacity=".45"/>`).join('');
+
+// Cards fanned on each side, one ink glow per card. Kept outside the center so the
+// inkwell stays the focal point when the header is cropped on narrow devices.
+const cards=[
+  ['TFC-207-enchanted.avif',ink.sapphire, 330, 470,-14],
+  ['ITI-209-enchanted.avif',ink.amethyst, 760, 300, -6],
+  ['ROF-205-enchanted.avif',ink.ruby,    1100, 600,  5],
+  ['TFC-208-enchanted.avif',ink.amber,   2220, 600, -5],
+  ['TUR-208-enchanted.avif',ink.emerald, 2560, 300,  6],
+  ['TFC-206-enchanted.avif',ink.steel,   2990, 470, 14],
+];
+document.getElementById('cards').innerHTML=cards.map(([f,c,x,y,r])=>
+  `<div class="card" style="left:${x}px;top:${y}px;transform:rotate(${r}deg);--ink:${c}"><div class="halo"></div><div class="face" style="background-image:url(${f})"></div></div>`).join('');
+
+// Gold sparkle field: dots plus four-point stars.
+const S=document.getElementById('sparkles');let out='';
+for(let i=0;i<260;i++){const x=rnd()*3840,y=rnd()*1500,r=2+rnd()*5;out+=`<circle cx="${x}" cy="${y}" r="${r}" fill="#FFD700" opacity="${.1+rnd()*.25}"/>`}
+const star=(x,y,k,o)=>`<path transform="translate(${x},${y}) scale(${k})" d="M0,-40 C4,-6 6,-4 40,0 C6,4 4,6 0,40 C-4,6 -6,4 -40,0 C-6,-4 -4,-6 0,-40Z" fill="#FFE27A" opacity="${o}"/>`;
+for(let i=0;i<34;i++){out+=star(rnd()*3840,rnd()*1400,.35+rnd()*.9,.35+rnd()*.5)}
+S.innerHTML=out;
+</script>
+</body></html>

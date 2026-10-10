@@ -1,7 +1,7 @@
 {
   "setName": "Winterspell",
   "setCode": "UNK",
-  "cardCount": 242,
+  "cardCount": 243,
   "cards": [
     {
       "id": "Winterspell_1_Thomas___Wide_Eyed_Recruit",
@@ -4600,6 +4600,25 @@
       "lore": 2,
       "franchise": "",
       "inkColor": "Sapphire"
+    },
+    {
+      "id": "Winterspell_243_Sven___Leaping_Reindeer",
+      "name": "Sven - Leaping Reindeer",
+      "cost": 4,
+      "type": "Character",
+      "rarity": "Super Rare",
+      "setName": "Winterspell",
+      "cardText": "Rush (This character can challenge the turn they're played.)\nChallenger +3 (While challenging, this character gets +3 {S}.) \nEvasive (Only characters with Evasive can challenge this character.)",
+      "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_b0df331512374cf9b4cdf121239db55f.avif?1790948267",
+      "variant": "Normal",
+      "cardNumber": 243,
+      "uniqueId": "11-243",
+      "inkwell": false,
+      "strength": 2,
+      "willpower": 3,
+      "lore": 1,
+      "franchise": "",
+      "inkColor": "Amethyst"
     }
   ]
 }

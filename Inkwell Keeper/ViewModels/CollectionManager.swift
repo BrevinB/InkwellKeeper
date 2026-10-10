@@ -30,6 +30,13 @@ class CollectionManager {
     /// These replace per-card SwiftData fetches in hot paths such as deck-statistics calculation and
     /// card-browser filtering, which previously ran a fetch for every card on every render.
     private var ownedQuantityByCardId: [String: Int] = [:]
+
+    /// Fired after the owned count of a card changes through a quantity edit or removal,
+    /// with the new owned count. `StorageManager` uses it to trim stored copies that no
+    /// longer exist. A closure keeps the two managers from depending on each other.
+    @ObservationIgnored var onOwnedQuantityChanged: ((LorcanaCard, Int) -> Void)?
+    /// Fired after Delete All Data so storage can drop its in-memory containers.
+    @ObservationIgnored var onAllDataDeleted: (() -> Void)?
     private var ownedQuantityByNameSetVariant: [String: Int] = [:]
 
     /// Build a compound key for card quantity lookups
@@ -652,6 +659,7 @@ class CollectionManager {
             try context.save()
             Analytics.send(.collectionCardRemoved)
             updateCollectedCardsInPlace()
+            onOwnedQuantityChanged?(card, 0)
         } catch {
             // Handle error silently
         }
@@ -801,7 +809,14 @@ class CollectionManager {
                 context.delete(history)
             }
 
+            // Delete all storage containers (StoredCards cascade)
+            let storageDescriptor = FetchDescriptor<StorageContainer>()
+            for container in try context.fetch(storageDescriptor) {
+                context.delete(container)
+            }
+
             try context.save()
+            onAllDataDeleted?()
 
             self.collectedCards = []
             self.wishlistCards = []
@@ -958,6 +973,7 @@ class CollectionManager {
                 try context.save()
                 Analytics.send(.collectionQuantityChanged)
                 updateCollectedCardsInPlace()
+                onOwnedQuantityChanged?(card, max(0, newQuantity))
             }
         } catch {
             // Handle error silently
@@ -1174,21 +1190,28 @@ class CollectionManager {
         let quantity: Int
     }
 
-    /// Get all deck allocations for a card (which decks use it and how many copies)
+    /// Copies of a card in built decks — physically in a deck box linked to a deck.
+    /// Idea decks (no deck box) don't claim cards, so you can theorycraft freely.
     func getDeckAllocations(for card: LorcanaCard) -> [DeckAllocation] {
         guard let context = modelContext else { return [] }
 
         do {
             let cardName = card.name
             let cardSetName = card.setName
-            let descriptor = FetchDescriptor<DeckCard>(
-                predicate: #Predicate<DeckCard> { $0.name == cardName && $0.setName == cardSetName }
+            let descriptor = FetchDescriptor<StoredCard>(
+                predicate: #Predicate<StoredCard> { $0.name == cardName && $0.setName == cardSetName }
             )
-            let deckCards = try context.fetch(descriptor)
+            var quantityByDeck: [UUID: Int] = [:]
+            for stored in try context.fetch(descriptor) {
+                guard let deckId = stored.container?.linkedDeckId else { continue }
+                quantityByDeck[deckId, default: 0] += stored.quantity
+            }
+            guard !quantityByDeck.isEmpty else { return [] }
 
-            return deckCards.compactMap { deckCard in
-                guard let deck = deckCard.deck else { return nil }
-                return DeckAllocation(deckName: deck.name, quantity: deckCard.quantity)
+            let deckIds = Array(quantityByDeck.keys)
+            let decks = try context.fetch(FetchDescriptor<Deck>(predicate: #Predicate { deckIds.contains($0.id) }))
+            return decks.compactMap { deck in
+                quantityByDeck[deck.id].map { DeckAllocation(deckName: deck.name, quantity: $0) }
             }
         } catch {
             return []
@@ -1198,20 +1221,6 @@ class CollectionManager {
     /// Get total quantity of a card allocated across all decks
     func getTotalDeckAllocation(for card: LorcanaCard) -> Int {
         return getDeckAllocations(for: card).reduce(0) { $0 + $1.quantity }
-    }
-
-    /// Get the number of copies available (not in any deck)
-    func getAvailableQuantity(for card: LorcanaCard) -> Int {
-        let owned: Int
-        let isSpecialVariant = card.variant == .enchanted || card.variant == .epic ||
-                               card.variant == .iconic || card.variant == .promo
-        if isSpecialVariant {
-            owned = getCollectedQuantityByName(card.name, setName: card.setName, variant: card.variant)
-        } else {
-            owned = getTotalQuantityAcrossVariants(uniqueId: card.uniqueId, cardName: card.name, setName: card.setName)
-        }
-        let allocated = getTotalDeckAllocation(for: card)
-        return max(0, owned - allocated)
     }
 
     /// Get total collected quantity across Normal and Foil variants only

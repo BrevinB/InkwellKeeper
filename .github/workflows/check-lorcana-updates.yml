@@ -139,6 +139,12 @@ jobs:
         with:
           ref: auto/lorcana-card-sync
 
+      - name: Fetch app LFS assets
+        # Asset catalog PNGs live in LFS; without them actool gets pointer
+        # files and fails with "Distill failed". Pull only the app target's
+        # files so CI doesn't download the marketing media.
+        run: git lfs pull --include "Inkwell Keeper/**"
+
       - name: Select newest Xcode
         run: |
           XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)

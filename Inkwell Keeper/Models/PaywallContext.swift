@@ -36,6 +36,7 @@ extension PaywallContext {
         case "tradeCalculator": .trades
         case "deckBuilder", "deckCompleter", "deckStrategy": .deckBuilding
         case "rulesTab", "cardAsk": .rules
+        case "storageLimit", "storageTheme", "storageSetBinder", "storageScan": .storage
         default: .general
         }
     }
@@ -74,6 +75,15 @@ extension PaywallContext {
         headline: "Settle any rules question",
         subheadline: "Instant answers with rule citations, so the game keeps moving.",
         leadFeatures: [.rulesExpert, .cardAnalysis, .shareRulings]
+    )
+
+    /// Reached from binders and boxes — a collector organizing their physical cards.
+    static let storage = Self(
+        source: "storageLimit",
+        heroIcon: "books.vertical.fill",
+        headline: "Organize every card you own",
+        subheadline: "Unlimited binders and boxes, set checklists, and covers that look the part.",
+        leadFeatures: [.unlimitedStorage, .setBinders, .valueHistory]
     )
 
     /// No particular surface — lead with the collection, which is what most

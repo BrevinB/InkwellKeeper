@@ -99,13 +99,18 @@ class ImageCache {
     }
 }
 
-/// Optimized AsyncImage wrapper with built-in caching
+/// Optimized AsyncImage wrapper with built-in caching.
+///
+/// Reloads whenever `url` changes. SwiftUI reuses this view when the content it sits in
+/// changes but keeps the same shape (e.g. binder pockets after a page turn); keying the
+/// state to the URL keeps a reused view from showing the previous card's image.
 struct CachedAsyncImage<Content: View, Placeholder: View>: View {
     let url: URL?
     let content: (Image) -> Content
     let placeholder: () -> Placeholder
 
-    @State private var phase: AsyncImagePhase = .empty
+    @State private var loaded: (url: URL, image: UIImage)?
+    @State private var failedURL: URL?
 
     init(
         url: URL?,
@@ -117,29 +122,33 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
         self.placeholder = placeholder
     }
 
+    /// The image for the current URL only — never a leftover from a previous URL.
+    private var currentImage: UIImage? {
+        guard let url else { return nil }
+        if let loaded, loaded.url == url { return loaded.image }
+        return DecodedImageCache.shared.object(forKey: url as NSURL)
+    }
+
     var body: some View {
         ZStack {
-            switch phase {
-            case .empty:
-                placeholder()
-                    .task {
-                        await loadImage()
-                    }
-            case .success(let image):
-                content(image)
-            case .failure:
-                placeholder()
-            @unknown default:
+            if let currentImage {
+                content(Image(uiImage: currentImage))
+            } else {
                 placeholder()
             }
+        }
+        .task(id: url) {
+            await loadImage()
         }
     }
 
     private func loadImage() async {
-        guard let url = url else {
-            phase = .failure(URLError(.badURL))
+        guard let url else { return }
+        if let cached = DecodedImageCache.shared.object(forKey: url as NSURL) {
+            loaded = (url, cached)
             return
         }
+        guard failedURL != url else { return }
 
         // Use optimized cache request
         var request = URLRequest(url: url)
@@ -147,14 +156,15 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
 
         do {
             let (data, _) = try await URLSession.shared.data(for: request)
-
+            guard !Task.isCancelled else { return }
             if let uiImage = UIImage(data: data) {
-                phase = .success(Image(uiImage: uiImage))
+                DecodedImageCache.shared.setObject(uiImage, forKey: url as NSURL)
+                loaded = (url, uiImage)
             } else {
-                phase = .failure(URLError(.cannotDecodeContentData))
+                failedURL = url
             }
         } catch {
-            phase = .failure(error)
+            if !Task.isCancelled { failedURL = url }
         }
     }
 }

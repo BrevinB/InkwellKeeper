@@ -55,6 +55,7 @@ struct InkwellKeeperApp: App {
             let container = try ModelContainer(
                 for: CollectedCard.self, CardSet.self, CollectionStats.self,
                 PriceHistory.self, Deck.self, DeckCard.self,
+                StorageContainer.self, StoredCard.self,
                 configurations: config
             )
             return container
@@ -75,6 +76,7 @@ struct InkwellKeeperApp: App {
             let container = try ModelContainer(
                 for: CollectedCard.self, CardSet.self, CollectionStats.self,
                 PriceHistory.self, Deck.self, DeckCard.self,
+                StorageContainer.self, StoredCard.self,
                 configurations: config
             )
             return container

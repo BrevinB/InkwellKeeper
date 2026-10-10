@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CollectionView: View {
     @Environment(CollectionManager.self) var collectionManager
+    @Environment(StorageManager.self) private var storageManager
     @Binding var selectedTab: Int
     @State private var searchText = ""
     @State private var selectedFilter: CardFilter = .all
@@ -23,6 +24,9 @@ struct CollectionView: View {
     @State private var showingSupportThanks = false
     @State private var supportThanksMessage = ""
     @State private var filteredCards: [LorcanaCard] = []
+    @State private var showUnsortedOnly = false
+    @State private var unsortedCount = 0
+    @Namespace private var storageTransition
 
     var body: some View {
         NavigationStack {
@@ -36,6 +40,14 @@ struct CollectionView: View {
                         selectedVariant: $selectedVariant,
                         sortOption: $sortOption
                     )
+                    if !collectionManager.collectedCards.isEmpty {
+                        StorageShelfView(
+                            unsortedCount: unsortedCount,
+                            showUnsortedOnly: $showUnsortedOnly,
+                            transitionNamespace: storageTransition
+                        )
+                        .padding(.bottom, 8)
+                    }
                 }
                 .padding(.horizontal)
                 .background(Color.lorcanaDark.opacity(0.3))
@@ -58,6 +70,10 @@ struct CollectionView: View {
             .background(LorcanaBackground())
             .navigationTitle("My Collection")
             .navigationBarTitleDisplayMode(.large)
+            .navigationDestination(for: StorageRoute.self) { route in
+                StorageContainerScreen(route: route)
+                    .navigationTransition(.zoom(sourceID: route.container.id, in: storageTransition))
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingCardSearch = true }) {
@@ -104,6 +120,8 @@ struct CollectionView: View {
         .onChange(of: selectedInkColor) { recomputeFilteredCards() }
         .onChange(of: selectedVariant) { recomputeFilteredCards() }
         .onChange(of: sortOption) { recomputeFilteredCards() }
+        .onChange(of: showUnsortedOnly) { recomputeFilteredCards() }
+        .onChange(of: storageManager.storedQuantityByIdentity) { recomputeFilteredCards() }
         .onChange(of: collectionManager.collectedCards.count) { recomputeFilteredCards() }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ImportCompleted"))) { notification in
             if let cardsCount = notification.userInfo?["cardsCount"] as? Int {
@@ -144,6 +162,12 @@ struct CollectionView: View {
     
     private func recomputeFilteredCards() {
         var cards = collectionManager.collectedCards
+
+        let unsortedByIdentity = storageManager.unsortedQuantitiesByIdentity()
+        unsortedCount = unsortedByIdentity.values.reduce(0, +)
+        if showUnsortedOnly {
+            cards = cards.filter { unsortedByIdentity[CollectionManager.identityKey(for: $0)] != nil }
+        }
         
         if !searchText.isEmpty {
             cards = cards.filter { card in

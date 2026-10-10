@@ -302,6 +302,8 @@ struct SettingsView: View {
                     .foregroundStyle(.orange)
             }
 
+            CloudKitSchemaDebugRow()
+
             if isAddingCards {
                 HStack {
                     ProgressView()

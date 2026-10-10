@@ -1,0 +1,133 @@
+Script started on Fri Oct  9 20:42:07 2026
+[0m[49m[39m[27m[24m[K
+[1A7[0m[49m[39m[0m[49m[38;5;236m░▒▓[0m[38;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;31m  [1m[38;5;31m[48;5;236m[38;5;39m~[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[38;5;103mDev[0m[38;5;103m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mInkwell Keeper[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m[0m[38;5;31m[48;5;236m[48;5;236m[38;5;31m [0m[38;5;31m[48;5;236m[49m[38;5;236m[0m[38;5;236m[49m[39m [0m[49m[39m[?2004h[?25l8[0m[49m[39m[27m[24m[J]2;brevin@MacBook-Pro-2:~/Developer/Inkwell Keeper]1;..nkwell Keeper]7;file://MacBook-Pro-2.local/Users/brevin/Developer/Inkwell%20Keeper\[0m[38;5;31m[49m[39m[27m[24m[1m[7m%[27m[1m[0m                                                                               [0m[49m[39m[27m[24m[K[0m[27m[24m[J[0m[49m[39m[0m[49m[38;5;236m░▒▓[0m[38;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;31m  [1m[38;5;31m[48;5;236m[38;5;39m~[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[38;5;103mDev[0m[38;5;103m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mInkwell Keeper[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m[0m[38;5;31m[48;5;236m[48;5;236m[38;5;31m [0m[38;5;31m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[30m [0m[30m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[30m [38;5;244m main [38;5;244m*8[0m[38;5;244m[48;5;236m[48;5;236m[30m [0m[30m[48;5;236m[49m[38;5;236m[0m[38;5;236m[49m[39m [0m[49m[39m[K[?1h=[?25h[?2004h[?25l[0m[27m[24m[J[0m[49m[39m[0m[49m[38;5;236m░▒▓[0m[38;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;31m  [1m[38;5;31m[48;5;236m[38;5;39m~[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[38;5;103mDev[0m[38;5;103m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mInkwell Keeper[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m[0m[38;5;31m[48;5;236m[48;5;236m[38;5;31m [0m[38;5;31m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;178m [0m[38;5;178m[48;5;236m[48;5;236m[38;5;76m[0m[38;5;76m[48;5;236m[48;5;236m[38;5;178m [38;5;76m main [38;5;76m*8 [38;5;178m!29 [38;5;39m?187[0m[38;5;39m[48;5;236m[48;5;236m[38;5;178m [0m[38;5;178m[48;5;236m[49m[38;5;236m[0m[38;5;236m[49m[39m [0m[49m[39m[K[?25hScript    S  ccd scr   Scripts/[?1l>[?25l[?2004l[0m[27m[24m[J[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m cd Scripts/[K[?25h
+]2;cd Scripts/]1;cd[1m[7m%[27m[1m[0m                                                                                ]2;brevin@MacBook-Pro-2:~/Developer/Inkwell Keeper/Scripts]1;..eeper/Scripts]7;file://MacBook-Pro-2.local/Users/brevin/Developer/Inkwell%20Keeper/Scripts\[0m[27m[24m[J[0m[49m[39m
+[0m[49m[38;5;236m░▒▓[0m[38;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;31m  [1m[38;5;31m[48;5;236m[38;5;39m~[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[38;5;103mDev[0m[38;5;103m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mInkwell Keeper[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mScripts[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m[0m[38;5;31m[48;5;236m[48;5;236m[38;5;31m [0m[38;5;31m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[30m [0m[30m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[30m [38;5;244m main [38;5;244m*8 [38;5;244m!29 [38;5;244m?187[0m[38;5;244m[48;5;236m[48;5;236m[30m [0m[30m[48;5;236m[49m[38;5;236m[0m[38;5;236m[49m[39m [0m[49m[39m[K[?1h=[?2004h[?25l[A[0m[27m[24m[J[0m[49m[39m
+[0m[49m[38;5;236m░▒▓[0m[38;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;31m  [1m[38;5;31m[48;5;236m[38;5;39m~[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[38;5;103mDev[0m[38;5;103m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mInkwell Keeper[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mScripts[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m[0m[38;5;31m[48;5;236m[48;5;236m[38;5;31m [0m[38;5;31m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;178m [0m[38;5;178m[48;5;236m[48;5;236m[38;5;76m[0m[38;5;76m[48;5;236m[48;5;236m[38;5;178m [38;5;76m main [38;5;76m*8 [38;5;178m!29 [38;5;39m?187[0m[38;5;39m[48;5;236m[48;5;236m[38;5;178m [0m[38;5;178m[48;5;236m[49m[38;5;236m[0m[38;5;236m[49m[39m [0m[49m[39m[K[?25hlls[?1l>[?25l[?2004l[A[0m[27m[24m[J[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m ls[K[?25h
+]2;ls -G]1;ls[1m[36m__pycache__[39;49m[0m                [31mpublish_deck_rules.sh[39;49m[0m
+check_for_updates.py       [31mpublish_rules_digest.sh[39;49m[0m
+check_starter_decks.py     [1m[36mstorage_art[39;49m[0m
+dedupe_card_images.py      sync_new_cards.py
+generate_web_card_index.py [31mweekly_drafts.sh[39;49m[0m
+market_report.py           weekly_market_reel.py
+[1m[7m%[27m[1m[0m                                                                                ]2;brevin@MacBook-Pro-2:~/Developer/Inkwell Keeper/Scripts]1;..eeper/Scripts]7;file://MacBook-Pro-2.local/Users/brevin/Developer/Inkwell%20Keeper/Scripts\[0m[27m[24m[J[0m[49m[39m
+[0m[49m[38;5;236m░▒▓[0m[38;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;31m  [1m[38;5;31m[48;5;236m[38;5;39m~[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[38;5;103mDev[0m[38;5;103m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mInkwell Keeper[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mScripts[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m[0m[38;5;31m[48;5;236m[48;5;236m[38;5;31m [0m[38;5;31m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;178m [0m[38;5;178m[48;5;236m[48;5;236m[38;5;76m[0m[38;5;76m[48;5;236m[48;5;236m[38;5;178m [38;5;76m main [38;5;76m*8 [38;5;178m!29 [38;5;39m?187[0m[38;5;39m[48;5;236m[48;5;236m[38;5;178m [0m[38;5;178m[48;5;236m[49m[38;5;236m[0m[38;5;236m[49m[39m [0m[49m[39m[K[?1h=[?2004hppython3 check_fo [Krr_updates.py[1m [0m[0m [?1l>[?25l[?2004l[A[A[0m[27m[24m[J[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m python3 check_for_updates.py[K[?25h
+]2;python3 check_for_updates.py]1;python3Fetching data from LorCast API...
+  Checking Promo Set 1...
+  Checking The First Chapter...
+  Checking Rise of the Floodborn...
+  Checking Into the Inklands...
+  Checking Ursula's Return...
+  Checking Challenge Promo...
+  Checking Shimmering Skies...
+  Checking D23 Collection...
+  Checking Promo Set 2...
+  Checking Azurite Sea...
+  Checking Archazia's Island...
+  Checking Reign of Jafar...
+  Checking Promo Set 3...
+  Checking Fabled...
+  Checking Whispers in the Well...
+  Checking EPCOT Festival of the Arts...
+  Checking Lorcana Challenge Year 3...
+  Checking Winterspell...
+  Checking Wilds Unknown...
+  Checking Attack of the Vine!...
+  Checking Curator's Collection: Heroines Edition...
+  Checking Promo Set 4...
+  Checking Format Coconut...
+  Checking PD1...
+  Checking Hunny Rescue – Illumineer's Quest...
+  Checking Hyperia City...
+# Lorcana Card Data Update Check
+
+**API Source:** LorCast API (https://api.lorcast.com/v0)
+**Local Data:** /Users/brevin/Developer/Inkwell Keeper/Inkwell Keeper/Data
+
+## Set Comparison
+
+| Set | LorCast Cards | Local Cards | Difference |
+|-----|---------------|-------------|------------|
+| Promo Set 1 | 41 | 41 | 0 |
+| The First Chapter | 216 | 216 | 0 |
+| Rise of the Floodborn | 216 | 216 | 0 |
+| Into the Inklands | 227 | 227 | 0 |
+| Ursula's Return | 225 | 225 | 0 |
+| Challenge Promo | 9 | 9 | 0 |
+| Shimmering Skies | 223 | 223 | 0 |
+| D23 Collection | 16 | 16 | 0 |
+| Promo Set 2 | 39 | 39 | 0 |
+| Azurite Sea | 222 | 222 | 0 |
+| Archazia's Island | 224 | 224 | 0 |
+| Reign of Jafar | 229 | 229 | 0 |
+| Promo Set 3 | 56 | 56 | 0 |
+| Fabled | 243 | 243 | 0 |
+| Whispers in the Well | 242 | 242 | 0 |
+| EPCOT Festival of the Arts | 3 | 3 | 0 |
+| Lorcana Challenge Year 3 | 14 | 14 | 0 |
+| Winterspell | 243 | 243 | 0 |
+| Wilds Unknown | 243 | 243 | 0 |
+| Attack of the Vine! | 247 | 247 | 0 |
+| Curator's Collection: Heroines Edition | 6 | 6 | 0 |
+| Promo Set 4 | 10 | 10 | 0 |
+| **Format Coconut** | 24 | **Missing** | **+24** |
+| **PD1** | 8 | **Missing** | **+8** |
+| **Hunny Rescue – Illumineer's Quest** | 37 | **Missing** | **+37** |
+| Hyperia City | 206 | 206 | 0 |
+
+**Total:** LorCast has 3469 cards, Local has 3400 cards
+
+## Updates Available
+
+### New Sets Detected
+- **Format Coconut** (Coconut): 24 cards
+- **PD1** (PD1): 8 cards
+- **Hunny Rescue – Illumineer's Quest** (Q3): 37 cards
+
+### Recommended Actions
+1. Run the card download script to update local data
+2. Review new cards for any data quality issues
+3. Update app version and release
+[1m[7m%[27m[1m[0m                                                                                ]2;brevin@MacBook-Pro-2:~/Developer/Inkwell Keeper/Scripts]1;..eeper/Scripts]7;file://MacBook-Pro-2.local/Users/brevin/Developer/Inkwell%20Keeper/Scripts\[0m[27m[24m[J[0m[49m[39m
+[0m[49m[38;5;236m░▒▓[0m[38;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;31m  [1m[38;5;31m[48;5;236m[38;5;39m~[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[38;5;103mDev[0m[38;5;103m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mInkwell Keeper[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mScripts[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m[0m[38;5;31m[48;5;236m[48;5;236m[38;5;31m [0m[38;5;31m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;178m [0m[38;5;178m[48;5;236m[48;5;236m[38;5;76m[0m[38;5;76m[48;5;236m[48;5;236m[38;5;178m [38;5;76m main [38;5;76m*8 [38;5;178m!30 [38;5;39m?189[0m[38;5;39m[48;5;236m[48;5;236m[38;5;178m [0m[38;5;178m[48;5;236m[49m[38;5;236m[0m[38;5;236m[49m[39m [0m[49m[39m[K[?1h=[?2004hggit status[?1l>[?25l[?2004l[A[0m[27m[24m[J[0m[49m[27m[24m[38;5;196m❯[0m[38;5;196m[49m[39m[27m[24m git status[K[?25h
+]2;git status]1;gitOn branch feature/3.5.0-storage
+Your branch is up to date with 'origin/feature/3.5.0-storage'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	[31mmodified:   ../Inkwell Keeper.xcodeproj/project.xcworkspace/xcuserdata/brevin.xcuserdatad/UserInterfaceState.xcuserstate[m
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	[31m../screenshots/creative-assets/[m
+	[31m../screenshots/in-app-event/[m
+	[31m../typescript[m
+
+no changes added to commit (use "git add" and/or "git commit -a")
+[1m[7m%[27m[1m[0m                                                                                ]2;brevin@MacBook-Pro-2:~/Developer/Inkwell Keeper/Scripts]1;..eeper/Scripts]7;file://MacBook-Pro-2.local/Users/brevin/Developer/Inkwell%20Keeper/Scripts\[0m[27m[24m[J[0m[49m[39m
+[0m[49m[38;5;236m░▒▓[0m[38;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;31m  [1m[38;5;31m[48;5;236m[38;5;39m~[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[38;5;103mDev[0m[38;5;103m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mInkwell Keeper[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mScripts[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m[0m[38;5;31m[48;5;236m[48;5;236m[38;5;31m [0m[38;5;31m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[30m [0m[30m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[30m [38;5;244m main [38;5;244m*8 [38;5;244m!30 [38;5;244m?189[0m[38;5;244m[48;5;236m[48;5;236m[30m [0m[30m[48;5;236m[49m[38;5;236m[0m[38;5;236m[49m[39m [0m[49m[39m[K[?1h=[?2004h[?25l[A[0m[27m[24m[J[0m[49m[39m
+[0m[49m[38;5;236m░▒▓[0m[38;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;31m  [1m[38;5;31m[48;5;236m[38;5;39m~[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[38;5;103mDev[0m[38;5;103m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mInkwell Keeper[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mScripts[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m[0m[38;5;31m[48;5;236m[48;5;236m[38;5;31m [0m[38;5;31m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;178m [0m[38;5;178m[48;5;236m[48;5;236m[38;5;76m[0m[38;5;76m[48;5;236m[48;5;236m[38;5;178m [38;5;76m feature/3.5.0-storage [38;5;76m*8 [38;5;178m!1 [38;5;39m?3[0m[38;5;39m[48;5;236m[48;5;236m[38;5;178m [0m[38;5;178m[48;5;236m[49m[38;5;236m[0m[38;5;236m[49m[39m [0m[49m[39m[K[?25hccd [K  ../[?1l>[?25l[?2004l[A[A[0m[27m[24m[J[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m cd ../[K[?25h
+]2;cd ../]1;cd[1m[7m%[27m[1m[0m                                                                                ]2;brevin@MacBook-Pro-2:~/Developer/Inkwell Keeper]1;..nkwell Keeper]7;file://MacBook-Pro-2.local/Users/brevin/Developer/Inkwell%20Keeper\[0m[27m[24m[J[0m[49m[39m
+[0m[49m[38;5;236m░▒▓[0m[38;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;31m  [1m[38;5;31m[48;5;236m[38;5;39m~[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[38;5;103mDev[0m[38;5;103m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mInkwell Keeper[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m[0m[38;5;31m[48;5;236m[48;5;236m[38;5;31m [0m[38;5;31m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;178m [0m[38;5;178m[48;5;236m[48;5;236m[38;5;76m[0m[38;5;76m[48;5;236m[48;5;236m[38;5;178m [38;5;76m feature/3.5.0-storage [38;5;76m*8 [38;5;178m!1 [38;5;39m?3[0m[38;5;39m[48;5;236m[48;5;236m[38;5;178m [0m[38;5;178m[48;5;236m[49m[38;5;236m[0m[38;5;236m[49m[39m [0m[49m[39m[K[?1h=[?2004hggit status [K[K[?1l>[?25l[?2004l[A[A[0m[27m[24m[J[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m git status[K[?25h
+]2;git status]1;gitOn branch feature/3.5.0-storage
+Your branch is up to date with 'origin/feature/3.5.0-storage'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	[31mmodified:   Inkwell Keeper.xcodeproj/project.xcworkspace/xcuserdata/brevin.xcuserdatad/UserInterfaceState.xcuserstate[m
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	[31mscreenshots/creative-assets/[m
+	[31mscreenshots/in-app-event/[m
+	[31mtypescript[m
+
+no changes added to commit (use "git add" and/or "git commit -a")
+[1m[7m%[27m[1m[0m                                                                                ]2;brevin@MacBook-Pro-2:~/Developer/Inkwell Keeper]1;..nkwell Keeper]7;file://MacBook-Pro-2.local/Users/brevin/Developer/Inkwell%20Keeper\[0m[27m[24m[J[0m[49m[39m
+[0m[49m[38;5;236m░▒▓[0m[38;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;31m  [1m[38;5;31m[48;5;236m[38;5;39m~[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[38;5;103mDev[0m[38;5;103m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mInkwell Keeper[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m[0m[38;5;31m[48;5;236m[48;5;236m[38;5;31m [0m[38;5;31m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;178m [0m[38;5;178m[48;5;236m[48;5;236m[38;5;76m[0m[38;5;76m[48;5;236m[48;5;236m[38;5;178m [38;5;76m feature/3.5.0-storage [38;5;76m*8 [38;5;178m!1 [38;5;39m?3[0m[38;5;39m[48;5;236m[48;5;236m[38;5;178m [0m[38;5;178m[48;5;236m[49m[38;5;236m[0m[38;5;236m[49m[39m [0m[49m[39m[K[?1h=[?2004hggit push[?1l>[?25l[?2004l[A[0m[27m[24m[J[0m[49m[27m[24m[38;5;76m❯[0m[38;5;76m[49m[39m[27m[24m git push[K[?25h
+]2;git push]1;gitEverything up-to-date
+[1m[7m%[27m[1m[0m                                                                                ]2;brevin@MacBook-Pro-2:~/Developer/Inkwell Keeper]1;..nkwell Keeper]7;file://MacBook-Pro-2.local/Users/brevin/Developer/Inkwell%20Keeper\[0m[27m[24m[J[0m[49m[39m
+[0m[49m[38;5;236m░▒▓[0m[38;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;31m  [1m[38;5;31m[48;5;236m[38;5;39m~[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[38;5;103mDev[0m[38;5;103m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mInkwell Keeper[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m[0m[38;5;31m[48;5;236m[48;5;236m[38;5;31m [0m[38;5;31m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[30m [0m[30m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[30m [38;5;244m feature/3.5.0-storage [38;5;244m*8 [38;5;244m!1 [38;5;244m?3[0m[38;5;244m[48;5;236m[48;5;236m[30m [0m[30m[48;5;236m[49m[38;5;236m[0m[38;5;236m[49m[39m [0m[49m[39m[K[?1h=[?2004h[?25l[A[0m[27m[24m[J[0m[49m[39m
+[0m[49m[38;5;236m░▒▓[0m[38;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;255m [0m[38;5;255m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;31m  [1m[38;5;31m[48;5;236m[38;5;39m~[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m/[38;5;103mDev[0m[38;5;103m[48;5;236m[48;5;236m[38;5;31m/[1m[38;5;31m[48;5;236m[38;5;39mInkwell Keeper[0m[38;5;39m[48;5;236m[48;5;236m[38;5;31m[0m[38;5;31m[48;5;236m[48;5;236m[38;5;31m [0m[38;5;31m[48;5;236m[48;5;236m[38;5;244m[0m[38;5;244m[48;5;236m[48;5;236m[38;5;178m [0m[38;5;178m[48;5;236m[48;5;236m[38;5;76m[0m[38;5;76m[48;5;236m[48;5;236m[38;5;178m [38;5;76m feature/3.5.0-storage [38;5;76m*8 [38;5;178m!1 [38;5;39m?3[0m[38;5;39m[48;5;236m[48;5;236m[38;5;178m [0m[38;5;178m[48;5;236m[49m[38;5;236m[0m[38;5;236m[49m[39m [0m[49m[39m[K[?25h

@@ -74,6 +74,7 @@ class ImportService {
         case lorcanaHQ        // Lorcana HQ format
         case collectr         // Collectr export (header-mapped CSV)
         case officialBackup   // Official Lorcana app backup (JSON)
+        case inkwellBackup    // This app's own JSON backup (cards + binders and boxes)
 
         var description: String {
             switch self {
@@ -83,6 +84,7 @@ class ImportService {
             case .lorcanaHQ: return "Lorcana HQ"
             case .collectr: return "Collectr"
             case .officialBackup: return "Official App Backup"
+            case .inkwellBackup: return "Inkwell Keeper Backup"
             }
         }
     }
@@ -241,8 +243,10 @@ class ImportService {
         await waitForCardDatabase()
         let cardIndex = CardIndex(cards: dataManager.getAllCards())
 
-        if format == .officialBackup {
-            let result = matchOfficialBackup(text, cardIndex: cardIndex)
+        if format == .officialBackup || format == .inkwellBackup {
+            let result = format == .officialBackup
+                ? matchOfficialBackup(text, cardIndex: cardIndex)
+                : matchInkwellBackup(text, cardIndex: cardIndex)
             for item in result.successful {
                 stats.totalCards += item.quantity
                 stats.uniqueCards += 1
@@ -484,7 +488,7 @@ class ImportService {
         case .collectr:
             // Collectr rows need the header column map — handled directly in matchLine
             return nil
-        case .officialBackup:
+        case .officialBackup, .inkwellBackup:
             // JSON documents aren't line-based — handled before the line loop
             return nil
         }
@@ -765,6 +769,31 @@ class ImportService {
     /// Import a collection backup from the official Disney Lorcana app: each owned
     /// entry carries an official card id, which the bundled mapping resolves to
     /// set + card number for matching against the local database.
+    /// Cards from one of this app's own backups. Binders and boxes are restored
+    /// separately, once these cards are in the collection.
+    private func matchInkwellBackup(_ text: String, cardIndex: CardIndex) -> ImportResult {
+        guard let backup = InkwellBackup.decode(text) else {
+            let failure = FailedImport(originalLine: "Backup file", reason: "Couldn't read the Inkwell Keeper backup file")
+            return ImportResult(successful: [], failed: [failure], duplicates: [])
+        }
+
+        var successful: [ImportedCard] = []
+        var failed: [FailedImport] = []
+        for entry in backup.cards where entry.quantity > 0 {
+            let variant = CardVariant(rawValue: entry.variant) ?? .normal
+            let label = "\(entry.name) — \(entry.setName)"
+            let matched = entry.cardNumber.flatMap {
+                matchBySetAndNumber(setName: entry.setName, number: $0, csvVariant: variant, cardIndex: cardIndex)
+            } ?? findCard(name: entry.name, setName: entry.setName, variant: variant, cardIndex: cardIndex)
+            if let matched {
+                successful.append(ImportedCard(card: matched, quantity: entry.quantity, originalLine: label))
+            } else {
+                failed.append(FailedImport(originalLine: label, reason: "Card not found: '\(entry.name)'"))
+            }
+        }
+        return ImportResult(successful: successful, failed: failed, duplicates: [])
+    }
+
     private func matchOfficialBackup(_ text: String, cardIndex: CardIndex) -> ImportResult {
         var successful: [ImportedCard] = []
         var failed: [FailedImport] = []

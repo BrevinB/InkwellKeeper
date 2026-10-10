@@ -18,6 +18,8 @@ struct DecksView: View {
     @State private var showingCreateDeck = false
     @State private var newlyCreatedDeck: Deck?
     @State private var path: [Deck] = []
+    /// One-time explainer that decks are ideas until built into a deck box.
+    @AppStorage("hasSeenDeckIdeasNotice") private var hasSeenDeckIdeasNotice = false
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
@@ -32,6 +34,13 @@ struct DecksView: View {
                         .environment(collectionManager)
                 } else {
                     ScrollView {
+                        if !hasSeenDeckIdeasNotice {
+                            DeckIdeasNotice {
+                                withAnimation(.snappy) { hasSeenDeckIdeasNotice = true }
+                            }
+                            .padding([.horizontal, .top])
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                        }
                         LazyVGrid(columns: [GridItem(horizontalSizeClass == .compact || dynamicTypeSize.isAccessibilitySize ? .flexible() : .adaptive(minimum: 340), spacing: 16)], spacing: 16) {
                             ForEach(deckManager.decks) { deck in
                                 DeckRow(deck: deck)
@@ -214,6 +223,7 @@ struct DeckRow: View {
     let deck: Deck
     @Environment(CollectionManager.self) var collectionManager
     @Environment(DeckManager.self) var deckManager
+    @Environment(StorageManager.self) private var storageManager
 
     var statistics: DeckStatistics {
         deckManager.calculateStatistics(for: deck, collectionManager: collectionManager)
@@ -233,9 +243,21 @@ struct DeckRow: View {
                             .font(.headline)
                             .foregroundStyle(.white)
 
-                        Text(deck.deckFormat.rawValue)
-                            .font(.caption)
-                            .foregroundStyle(.gray)
+                        HStack(spacing: 6) {
+                            Text(deck.deckFormat.rawValue)
+                                .font(.caption)
+                                .foregroundStyle(.gray)
+                            if let box = storageManager.deckBox(for: deck.id) {
+                                Label("Built", systemImage: "shippingbox.fill")
+                                    .font(.caption2)
+                                    .bold()
+                                    .foregroundStyle(Color.lorcanaDark)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Capsule().fill(box.coverColor.highlight))
+                                    .accessibilityLabel("Built, in \(box.name)")
+                            }
+                        }
                     }
 
                     Spacer()
@@ -1494,8 +1516,11 @@ struct DeckWorkspaceView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(DeckManager.self) var deckManager
     @Environment(CollectionManager.self) var collectionManager
+    @Environment(StorageManager.self) private var storageManager
 
     @State private var mode: WorkspaceMode
+    @State private var showingBuild = false
+    @State private var showingTakeApart = false
 
     init(deck: Deck) {
         self.deck = deck
@@ -1582,6 +1607,15 @@ struct DeckWorkspaceView: View {
                 hasCards: deckCardCount > 0,
                 coconutLeader: deck.coconutLeaderInfo,
                 onTap: { withAnimation { mode = .deck } }
+            )
+
+            let deckBox = storageManager.deckBox(for: deck.id)
+            let progress = deckBox.map { storageManager.deckProgress(deck, in: $0) }
+            DeckBuildStatusBar(
+                box: deckBox,
+                inBox: progress?.inBox ?? 0,
+                total: progress?.total ?? deckCardCount,
+                onBuild: { showingBuild = true }
             )
 
             GeometryReader { geometry in
@@ -1675,6 +1709,22 @@ struct DeckWorkspaceView: View {
 
                     Divider()
 
+                    if storageManager.isBuilt(deck) {
+                        Button(action: { showingBuild = true }) {
+                            Label("Pull Cards", systemImage: "tray.and.arrow.down")
+                        }
+                        Button(action: { showingTakeApart = true }) {
+                            Label("Take Deck Apart", systemImage: "rectangle.stack.badge.minus")
+                        }
+                    } else {
+                        Button(action: { showingBuild = true }) {
+                            Label("Build This Deck", systemImage: "shippingbox")
+                        }
+                        .disabled(deckCardCount == 0)
+                    }
+
+                    Divider()
+
                     Button(role: .destructive, action: { showingDeleteConfirm = true }) {
                         Label("Delete Deck", systemImage: "trash")
                     }
@@ -1740,6 +1790,15 @@ struct DeckWorkspaceView: View {
         .sheet(isPresented: $showingOpeningHand) {
             OpeningHandView(deck: deck)
         }
+        .sheet(isPresented: $showingBuild) {
+            BuildDeckSheet(deck: deck)
+        }
+        .confirmationDialog("Take \(deck.name) apart?", isPresented: $showingTakeApart, titleVisibility: .visible) {
+            Button("Put Cards Back Where They Came From") { takeApart(returnToOrigins: true) }
+            Button("Move All to Unsorted") { takeApart(returnToOrigins: false) }
+        } message: {
+            Text("The deck stays as an idea. Cards go back to their binder pockets and boxes when there's room; the rest go to Unsorted.")
+        }
         .alert("Rename Deck", isPresented: $showingRename) {
             TextField("Deck name", text: $renameText)
             Button("Save") {
@@ -1754,12 +1813,26 @@ struct DeckWorkspaceView: View {
         .alert("Delete Deck?", isPresented: $showingDeleteConfirm) {
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {
+                // A built deck's cards stay in its box, which just stops holding a deck.
+                storageManager.unlinkDeck(deck.id)
                 deckManager.deleteDeck(deck)
                 dismiss()
             }
         } message: {
-            Text("Are you sure you want to delete \"\(deck.name)\"? This action cannot be undone.")
+            if storageManager.isBuilt(deck) {
+                Text("Are you sure you want to delete \"\(deck.name)\"? Its cards stay in the deck box. This action cannot be undone.")
+            } else {
+                Text("Are you sure you want to delete \"\(deck.name)\"? This action cannot be undone.")
+            }
         }
+    }
+
+    private func takeApart(returnToOrigins: Bool) {
+        guard let box = storageManager.deckBox(for: deck.id) else { return }
+        withAnimation(.snappy) {
+            storageManager.takeApart(box, returnToOrigins: returnToOrigins)
+        }
+        Analytics.send(.deckTakenApart(returnedToOrigins: returnToOrigins))
     }
 
 }
