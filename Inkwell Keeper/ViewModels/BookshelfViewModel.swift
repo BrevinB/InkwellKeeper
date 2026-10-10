@@ -69,12 +69,12 @@ final class BookshelfViewModel {
             return
         }
         let stages = Self.stages(for: container, in: viewSize, spreads: usesSpreads)
-        let snapshot = renderer.flatMap { snapshot(for: container, renderer: $0) }
+        let pullSnapshot = renderer.flatMap { snapshot(for: container, renderer: $0) }
         pull = Pull(
             container: container,
             source: source,
             stage: stages.page,
-            snapshot: snapshot,
+            snapshot: pullSnapshot,
             spreadWidth: stages.spread?.width
         )
         travel = 0
