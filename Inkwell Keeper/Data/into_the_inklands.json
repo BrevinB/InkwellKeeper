@@ -1,7 +1,7 @@
 {
   "setName": "Into the Inklands",
   "setCode": "ITI",
-  "cardCount": 226,
+  "cardCount": 227,
   "cards": [
     {
       "id": "Into_the_Inklands_1_Baloo___von_Bruinwald_XIII",
@@ -4201,6 +4201,25 @@
       "lore": null,
       "franchise": "",
       "inkColor": "Steel"
+    },
+    {
+      "id": "Into_the_Inklands_223_Piglet___Pooh_Pirate_Captain",
+      "name": "Piglet - Pooh Pirate Captain",
+      "cost": 2,
+      "type": "Character",
+      "rarity": "Super Rare",
+      "setName": "Into the Inklands",
+      "cardText": "AND I'M THE CAPTAIN! While you have 2 or more other characters in play, this character gets +2 {L}.\n\n\"Ahoy! There's lore out there, and I'm g-gonna find it!\"",
+      "imageUrl": "https://cards.lorcast.io/card/digital/large/crd_318c41d06e2340debaba878e3c926cdc.avif?1790949286",
+      "variant": "Normal",
+      "cardNumber": 223,
+      "uniqueId": "ITI-223",
+      "inkwell": true,
+      "strength": 2,
+      "willpower": 2,
+      "lore": 1,
+      "franchise": "",
+      "inkColor": "Amber"
     },
     {
       "id": "Into_the_Inklands_0_Dalmatian_Puppy___Tail_Wagger",
