@@ -770,8 +770,6 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		23CAEDD92ECEE796006786F7 /* CardImages */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = CardImages;
 			sourceTree = "<group>";
 		};
@@ -820,7 +818,6 @@
 				8FD92AE6BEFA0C7519790777 /* BookshelfView.swift */,
 				AB024A4D84321D129BBCAAFB /* BookshelfOpenContainer.swift */,
 			);
-			name = Bookshelf;
 			path = Bookshelf;
 			sourceTree = "<group>";
 		};
@@ -1158,7 +1155,6 @@
 				FB7C812E9FEE8EB997A057D4 /* DeckPullListView.swift */,
 				EA738027A8F3F3E567DF0D99 /* MoveCardsSheet.swift */,
 			);
-			name = Storage;
 			path = Storage;
 			sourceTree = "<group>";
 		};
@@ -1227,7 +1223,6 @@
 				9F3C9DECA99612DB829BD60B /* PullSnapshotCache.swift */,
 				39F6F63DF9A2278D5D5ED6A6 /* BinderOpeningInsideCover.swift */,
 			);
-			name = Bookshelf;
 			path = Bookshelf;
 			sourceTree = "<group>";
 		};
@@ -1250,7 +1245,6 @@
 				51779335A1E8396FC961D7CD /* BookcaseLayout.swift */,
 				3CDE0CA3678DA9DD88D5822D /* BookshelfShareSummary.swift */,
 			);
-			name = Storage;
 			path = Storage;
 			sourceTree = "<group>";
 		};
@@ -1323,7 +1317,6 @@
 				B53FA64A3550664DA6CF3971 /* SelectionMark.swift */,
 				2B5885785DD6FC73EE079420 /* BinderFillPrompt.swift */,
 			);
-			name = Storage;
 			path = Storage;
 			sourceTree = "<group>";
 		};
@@ -1988,7 +1981,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.5.0;
+				MARKETING_VERSION = 3.5.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -2027,7 +2020,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.5.0;
+				MARKETING_VERSION = 3.5.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

@@ -152,6 +152,18 @@ struct ChangelogEntry {
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
     ChangelogEntry(
+        version: "3.5.1",
+        date: "October 2026",
+        features: [
+            "Hyperia City is complete: all 18 Epics and 18 Enchanteds are in, ready to scan and collect on release day"
+        ],
+        improvements: [
+            "Corrected card text on a couple of Hyperia City cards"
+        ],
+        bugFixes: [],
+        inProgress: ["Price alerts"]
+    ),
+    ChangelogEntry(
         version: "3.5.0",
         date: "October 2026",
         features: [

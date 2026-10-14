@@ -1,0 +1,14 @@
+App Store Connect "What's New in This Version" — 3.5.0
+
+Storage is here! Track where every card lives — binders, troves, deck boxes, storage boxes and bulk bins.
+
+• Binders you flip through page by page, with 4, 9 or 12-pocket pages
+• Set checklist binders show the cards you're still missing, with a master set option for foils
+• The new Bookshelf: pull a binder off the shelf and open it, then share your bookshelf as an image
+• Build a deck into a deck box with a pull list that tells you where each card is
+• Select several cards and move them between binders and boxes in one go
+• Card details now show exactly where every copy is stored
+
+Decks are now ideas until you build them, so a deck no longer holds on to your cards.
+
+Also: backups now include your binders and boxes and can be restored from Import, plus a fix for the Filters button on smaller iPhones.
