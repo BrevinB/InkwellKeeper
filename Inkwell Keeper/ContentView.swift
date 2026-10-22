@@ -61,6 +61,15 @@ struct ContentView: View {
             } else {
                 print("IWK-FILM: no deeplink arg; args=\(ProcessInfo.processInfo.arguments)")
             }
+            #if targetEnvironment(simulator)
+            Task {
+                await DemoCollectionSeeder.seedIfRequested(
+                    collectionManager: collectionManager,
+                    storageManager: storageManager,
+                    context: modelContext
+                )
+            }
+            #endif
             #endif
         }
         .onChange(of: selectedTab) { _, newTab in

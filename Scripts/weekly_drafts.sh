@@ -95,13 +95,12 @@ git add "$OUT" && git commit -q -m "Weekly marketing drafts $DATE" && git push -
 
 # Weekly Instagram market reel (reels outperform statics — see PLAYBOOK.md).
 # Non-fatal: a missing Chrome/ffmpeg or a blip-only week just skips the reel.
+# Rendered media is gitignored (regenerable, and it bloated LFS), so the reel
+# and chart stay local on this Mac — nothing to commit.
 REEL="marketing/drafts/reels/$DATE/reel-market.mp4"
 CHART="marketing/drafts/images/$DATE/ig-market-chart.png"
 if python3 Scripts/weekly_market_reel.py --out "$REEL" --static-out "$CHART"; then
-    git add "$(dirname "$REEL")" "$(dirname "$CHART")" \
-        && git commit -q -m "Weekly market reel + IG chart $DATE" && git push -q \
-        && echo "reel + chart committed and pushed" \
-        || echo "WARN: reel commit/push failed — assets are local"
+    echo "reel + chart written locally: $REEL, $CHART"
 else
     echo "WARN: market reel generation skipped/failed"
 fi

@@ -2,8 +2,12 @@
 
 This pack runs alongside `LAUNCH_POSTS.md`, which covers the storage launch. Those posts lead with binders. These lead with **the set itself**, because on release weekend people search for the cards, not for apps.
 
-**Assets.** Images are in `marketing/drafts/images/2026-10-16/` and the reel is in `marketing/drafts/reels/2026-10-16/`. To regenerate them:
-`python3 marketing/3.5/src/make_hyperia_images.py <card-image-dir>` followed by `zsh marketing/3.5/src/make_hyperia_reel.sh`. Card art comes from Lorcast (`/v0/sets/14/cards`, large images named `<collector number>.avif`, plus a `meta.json`).
+**Phone kit.** The weekend schedule (Fri 16 – Mon 19) lives in a posting kit page: `kit/index.html`, published as an artifact. Each post has save-to-Photos buttons and copy-caption buttons. The kit is split by platform (Instagram, TikTok, X, Reddit), with days listed under each, and runs Thu Oct 15 – Mon Oct 19 including the half-price Pro promo (code HYPERIA, assets from `src/make_promo.py`). It is the source of truth for the weekend schedule. The sections below are the original plan and the copy reference; the kit's Reddit post has the corrected 242-card page math.
+
+**Assets.** Images and story frames are in `marketing/drafts/images/2026-10-16/`. Reels are in `marketing/drafts/reels/2026-10-16/`: Enchanted, Legendary, Epic and the Pro covers. To regenerate them, run:
+- `python3 marketing/3.5/src/make_hyperia_images.py`, which reads card data and art from the app bundle.
+- `zsh marketing/3.5/src/make_hyperia_reel.sh`, which builds the card reels.
+- `python3 marketing/3.5/src/make_covers_reel.py`, which renders the Starlight/Holofoil reel frame by frame from the app's finish code.
 
 **Set facts (Lorcast, Oct 14):**
 - 242 cards: 204 in the main set (72 C / 54 U / 48 R / 18 SR / 12 L) plus 38 specials (18 Epic #205–222, 18 Enchanted #223–240, 2 Iconic #241–242).
@@ -18,7 +22,7 @@ This pack runs alongside `LAUNCH_POSTS.md`, which covers the storage launch. Tho
 
 These replace the Fri–Mon slots in `drafts/ig-week-2026-10-13.md`. The storage statics they push out (`ig-02-binder-page.png` and the Bookshelf share) move to next week.
 
-**Fri 16, morning: reel `reels/2026-10-16/reel-hyc-enchanteds.mp4`** (feed + Reels). Add trending audio in the composer.
+**Fri 16, morning: reel `reels/2026-10-16/reel-hyc-enchanted.mp4`** (feed + Reels). Add trending audio in the composer.
 > Every Hyperia City Enchanted 🏙️✨ Which one did you pull? 👇
 > Scan your pulls in seconds and keep the whole set in one place. **[needs data update]** fallback: *Scan your pulls in seconds and file them straight into a binder.*
 > Free on iOS · link in bio

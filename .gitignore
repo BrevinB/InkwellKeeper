@@ -1,2 +1,11 @@
 __pycache__/
 *.pyc
+marketing/3.5/Hyperia City Weekend/
+
+# Rendered marketing media: regenerable from the scripts in marketing/*/src and
+# Scripts/, and too heavy for LFS. Source assets (brand/, press/) stay tracked.
+marketing/drafts/images/
+marketing/drafts/reels/
+marketing/drafts/*.mp4
+marketing/drafts/*.mov
+marketing/3.5/kit/

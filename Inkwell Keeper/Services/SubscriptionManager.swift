@@ -64,6 +64,36 @@ class SubscriptionManager {
         }
     }
 
+    /// Keeps `isSubscribed` current for changes that happen outside the app.
+    ///
+    /// The launch check alone misses a subscription started while the app is
+    /// suspended, such as an offer code redeemed in the App Store. Without
+    /// this, someone switching back after redeeming stays locked until they
+    /// tap Restore or relaunch. RevenueCat emits on every customer-info change,
+    /// including transactions it sees from StoreKit and refreshes on foreground.
+    ///
+    /// Call once, after `Purchases` is configured.
+    func observeCustomerInfo() {
+        guard customerInfoTask == nil else { return }
+        customerInfoTask = Task { [weak self] in
+            for await customerInfo in Purchases.shared.customerInfoStream {
+                self?.apply(customerInfo)
+            }
+        }
+    }
+
+    private var customerInfoTask: Task<Void, Never>?
+
+    private func apply(_ customerInfo: CustomerInfo) {
+        #if DEBUG
+        if debugPremiumOverride {
+            isSubscribed = true
+            return
+        }
+        #endif
+        isSubscribed = customerInfo.entitlements[Self.entitlementID]?.isActive == true
+    }
+
     func loadOfferings() async {
         await MainActor.run { isLoading = true }
         defer { Task { @MainActor in isLoading = false } }
