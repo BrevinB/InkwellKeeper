@@ -11,6 +11,8 @@ struct AddCandidateTile: View {
     let card: LorcanaCard
     let selected: Int
     let available: Int
+    /// Copies owned, shown when picking from the whole catalog; nil for unsorted picks.
+    var owned: Int?
     /// Choosing this foil replaces the normal copy already in its checklist pocket.
     var isUpgrade = false
     let onTap: () -> Void
@@ -49,7 +51,7 @@ struct AddCandidateTile: View {
                         .font(.caption2)
                         .foregroundStyle(.lorcanaGold)
                 } else {
-                    Text("\(available) unsorted")
+                    Text(availabilityText)
                         .font(.caption2)
                         .foregroundStyle(.gray)
                 }
@@ -58,8 +60,15 @@ struct AddCandidateTile: View {
         .buttonStyle(.plain)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(card.name), \(card.variant.displayName)")
-        .accessibilityValue(selected > 0 ? "\(selected) of \(available) selected" : "\(available) unsorted")
+        .accessibilityValue(selected > 0 ? "\(selected) selected, \(availabilityText)" : availabilityText)
         .accessibilityHint(isUpgrade ? "Replaces the normal copy in its pocket" : "")
         .accessibilityAddTraits(selected > 0 ? .isSelected : [])
+    }
+
+    private var availabilityText: String {
+        guard let owned, available == 0 else {
+            return String(localized: "\(available) unsorted")
+        }
+        return owned > 0 ? String(localized: "\(owned) owned") : String(localized: "Not owned")
     }
 }

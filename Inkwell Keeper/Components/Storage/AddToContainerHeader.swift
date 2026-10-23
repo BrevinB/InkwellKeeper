@@ -14,6 +14,8 @@ struct AddToContainerHeader: View {
     let selectedCount: Int
     /// Room left after the selection; nil for containers without a limit.
     let roomLeft: Int?
+    /// Picking from the whole catalog rather than unsorted copies.
+    var isBrowsingAllCards = false
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -33,7 +35,7 @@ struct AddToContainerHeader: View {
                 Text(container.name)
                     .font(.headline)
                     .foregroundStyle(.white)
-                Text(storedCount > 0 ? "Added ^[\(storedCount) card](inflect: true)" : "Choose unsorted cards to put here")
+                Text(storedCount > 0 ? "Added ^[\(storedCount) card](inflect: true)" : isBrowsingAllCards ? "Choose any card to put here" : "Choose unsorted cards to put here")
                     .font(.subheadline)
                     .foregroundStyle(storedCount > 0 ? .green : .gray)
                     .contentTransition(.numericText())

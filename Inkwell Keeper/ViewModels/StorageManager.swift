@@ -292,6 +292,46 @@ final class StorageManager {
         return stored
     }
 
+    /// Puts cards away even when the collector has no unsorted copies of them: copies
+    /// beyond what's unsorted are added to the collection first. Only copies that will
+    /// actually fit are added, so a full binder never leaves stray copies in Unsorted.
+    /// Returns how many copies were stored and how many were added to the collection.
+    @discardableResult
+    func storeAddingToCollection(
+        _ picks: [(card: LorcanaCard, quantity: Int)],
+        in container: StorageContainer,
+        collection: CollectionManager
+    ) -> (stored: Int, added: Int) {
+        var room = freeSpace(in: container)
+        var claimedPockets: Set<Int> = []
+        var plan: [(card: LorcanaCard, quantity: Int)] = []
+        var added = 0
+
+        for pick in picks {
+            guard canAccept(pick.card, in: container) else { continue }
+            var take = min(pick.quantity, room ?? pick.quantity)
+            if let pocket = setPocket(for: pick.card, in: container) {
+                // A checklist pocket holds one card, and two picks can't share it.
+                guard claimedPockets.insert(pocket).inserted else { continue }
+                take = min(take, 1)
+            }
+            guard take > 0 else { continue }
+            let missing = max(0, take - unsortedQuantity(for: pick.card))
+            if missing > 0 {
+                collection.addCard(pick.card, quantity: missing, bulkImport: true, source: "storage")
+                added += missing
+            }
+            room = room.map { $0 - take }
+            plan.append((pick.card, take))
+        }
+
+        if added > 0 {
+            collection.finalizeBulkImport()
+        }
+        let stored = plan.reduce(0) { $0 + store($1.card, quantity: $1.quantity, in: container, source: "catalog") }
+        return (stored, added)
+    }
+
     /// Inserts without the owned-quantity check or a save; callers must validate that.
     /// Room is enforced here, so no path can overfill a binder or box.
     private func insert(_ card: LorcanaCard, quantity requested: Int, into container: StorageContainer) -> Int {
@@ -550,6 +590,24 @@ final class StorageManager {
         save()
         Analytics.send(.storageCardsStored(count: 1, kind: binder.kind.rawValue, source: "pocket"))
         return true
+    }
+
+    /// Fills one pocket from the catalog, adding a copy to the collection first when
+    /// none is unsorted. Nothing is added unless the card can go in this pocket.
+    @discardableResult
+    func placeAddingToCollection(
+        _ card: LorcanaCard,
+        atSlot slot: Int,
+        in binder: StorageContainer,
+        collection: CollectionManager
+    ) -> Bool {
+        guard binder.binderLayout.contains(slot: slot),
+              item(atSlot: slot, in: binder) == nil,
+              binder.linkedSetName == nil || setPocket(for: card, in: binder) == slot else { return false }
+        if unsortedQuantity(for: card) == 0 {
+            collection.addCard(card, source: "storage")
+        }
+        return place(card, atSlot: slot, in: binder)
     }
 
     /// Moves a pocket's card to another pocket, swapping if that pocket is occupied.
