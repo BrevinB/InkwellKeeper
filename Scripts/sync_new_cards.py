@@ -46,6 +46,76 @@ def fetch_json(url: str):
         return json.loads(response.read())
 
 
+_lorcanajson_cache: dict | None = None
+
+
+def lorcanajson() -> dict:
+    """LorcanaJSON allCards, fetched once per run (it's ~20MB)."""
+    global _lorcanajson_cache
+    if _lorcanajson_cache is None:
+        _lorcanajson_cache = fetch_json(LORCANAJSON_ALLCARDS)
+    return _lorcanajson_cache
+
+
+def _unwrap(text: str) -> str:
+    """LorcanaJSON keeps the printed card's line wraps; join them back into prose."""
+    return re.sub(r"\n(?!—)", " ", text or "").strip()
+
+
+def lorcanajson_to_app_card(card: dict, set_code: str, set_name: str) -> dict:
+    """Convert a LorcanaJSON card to the app schema (mirrors ucd.to_app_card).
+
+    Used for sets LorCast doesn't carry, like the early Illumineer's Quests.
+    Their "Special" rarity is treated as Promo, matching how LorCast labels Q3.
+    """
+    number = card.get("number")
+    rarity = card.get("rarity") or "Common"
+    rarity = "Promo" if rarity == "Special" else rarity.replace("_", " ").title()
+    variant = ucd.detect_variant({"rarity": rarity}, set_name)
+
+    full_name = card.get("fullName") or card.get("name", "")
+    name_part = full_name.replace(" ", "_").replace("-", "_").replace("'", "")
+    card_id = f"{set_name.replace(' ', '_')}_{number if number is not None else '0'}_{name_part}"
+    if variant != "Normal":
+        card_id += f"_{variant}"
+
+    text = "\n".join(_unwrap(s) for s in card.get("fullTextSections") or [])
+    flavor = _unwrap(card.get("flavorText") or "")
+    if flavor:
+        text = f"{text}\n\n{flavor}" if text else flavor
+
+    return {
+        "id": card_id,
+        "name": full_name,
+        "cost": card.get("cost"),
+        "type": card.get("type", ""),
+        "rarity": rarity,
+        "setName": set_name,
+        "cardText": text,
+        "imageUrl": (card.get("images") or {}).get("full", ""),
+        "variant": variant,
+        "cardNumber": number,
+        "uniqueId": f"{set_code}-{number:03d}" if isinstance(number, int) else None,
+        "inkwell": card.get("inkwell", False),
+        "strength": card.get("strength"),
+        "willpower": card.get("willpower"),
+        "lore": card.get("lore"),
+        "franchise": "",
+        "inkColor": card.get("color") or "",
+    }
+
+
+def fetch_converted_prints(target: dict) -> list:
+    """A set's prints in app format — from LorCast, or LorcanaJSON when LorCast
+    doesn't carry the set (Illumineer's Quest: Deep Trouble / Palace Heist)."""
+    remote = ucd.fetch_set_prints(target["query"])
+    if remote:
+        return [ucd.to_app_card(c, target["set_code"], target["set_name"]) for c in remote]
+    code = target["query"].upper()
+    return [lorcanajson_to_app_card(c, target["set_code"], target["set_name"])
+            for c in lorcanajson()["cards"] if str(c.get("setCode")) == code]
+
+
 def load_sets_json() -> dict:
     with open(DATA_DIR / "sets.json", encoding="utf-8") as f:
         return json.load(f)
@@ -111,12 +181,9 @@ def refresh_target(target: dict, dry_run: bool) -> int:
     if not path.exists():
         return 0
 
-    remote = ucd.fetch_set_prints(target["query"])
-    if not remote:
+    converted = {c["uniqueId"]: c for c in fetch_converted_prints(target) if c.get("uniqueId")}
+    if not converted:
         return 0
-    converted = {c["uniqueId"]: c for c in
-                 (ucd.to_app_card(r, target["set_code"], target["set_name"]) for r in remote)
-                 if c.get("uniqueId")}
 
     with open(path, encoding="utf-8") as f:
         doc = json.load(f)
@@ -146,12 +213,10 @@ def refresh_target(target: dict, dry_run: bool) -> int:
 def sync_target(target: dict, dry_run: bool) -> int:
     """Merge missing LorCast prints into one local set file. Returns cards added."""
     path = DATA_DIR / target["filename"]
-    remote = ucd.fetch_set_prints(target["query"])
-    if not remote:
-        print(f"  {target['set_name']}: no results from LorCast (query '{target['query']}')")
+    converted = fetch_converted_prints(target)
+    if not converted:
+        print(f"  {target['set_name']}: no results from LorCast or LorcanaJSON (query '{target['query']}')")
         return 0
-
-    converted = [ucd.to_app_card(c, target["set_code"], target["set_name"]) for c in remote]
 
     if not path.exists():
         print(f"  {target['set_name']}: local file missing — creating with {len(converted)} cards")
@@ -192,7 +257,7 @@ def regen_official_ids(dry_run: bool) -> bool:
     """Rebuild official_card_ids.json (official app backup imports) from LorcanaJSON."""
     path = DATA_DIR / "official_card_ids.json"
     try:
-        cards = fetch_json(LORCANAJSON_ALLCARDS)["cards"]
+        cards = lorcanajson()["cards"]
     except Exception as e:
         print(f"  ! couldn't fetch LorcanaJSON allCards: {e}")
         return False
@@ -275,7 +340,16 @@ def download_missing_images(dry_run: bool) -> int:
                     req = urllib.request.Request(url, headers={"User-Agent": "InkwellKeeper/1.0"})
                     with urllib.request.urlopen(req, timeout=30) as r:
                         data = r.read()
-                dest.write_bytes(data)
+                if data[4:12] in (b"ftypavif", b"ftypavis"):
+                    dest.write_bytes(data)
+                else:
+                    # Non-LorCast sources (Ravensburger JPGs via LorcanaJSON) — the
+                    # bundle is AVIF-only, so convert at LorCast's 674x940 size.
+                    tmp = dest.with_suffix(".jpg")
+                    tmp.write_bytes(data)
+                    subprocess.run(["sips", "-Z", "940", str(tmp)], check=True, capture_output=True)
+                    subprocess.run(["avifenc", "-q", "60", str(tmp), str(dest)], check=True, capture_output=True)
+                    tmp.unlink()
                 downloaded += 1
                 if downloaded % 25 == 0:
                     print(f"  ...{downloaded} downloaded")
@@ -328,7 +402,8 @@ def scaffold_new_set(number: str, code: str, name: str, backend_repo: Path, ci: 
     # Apostrophes vanish ("Curator's" → "curators"); any other punctuation
     # (":", "!", ",", "-") becomes a word break so ids stay filename-safe.
     set_id = "_".join(re.sub(r"[^a-z0-9]+", " ", name.lower().replace("'", "")).split())
-    padded = number.zfill(3)
+    # Dreamborn zero-pads numeric set numbers only ("014"); codes like Q1/PD1 pass through.
+    padded = number.zfill(3) if number.isdigit() else number
 
     print(f"\n=== Scaffolding new set: {name} (#{number}, {code}, id {set_id}) ===")
 
@@ -354,7 +429,8 @@ def scaffold_new_set(number: str, code: str, name: str, backend_repo: Path, ci: 
             "name": name,
             "setCode": code,
             "setNumber": number,
-            "releaseDate": lorcast_set.get("released_at", ""),
+            "releaseDate": lorcast_set.get("released_at")
+                           or (lorcanajson()["sets"].get(number) or {}).get("releaseDate", ""),
             "cardCount": added,
             "description": "",
             "isReleased": True,
@@ -408,7 +484,8 @@ def scaffold_new_set(number: str, code: str, name: str, backend_repo: Path, ci: 
     # 5. PricingService setCodeMap
     patch_file(
         APP_DIR / "Services" / "PricingService.swift",
-        anchor='        "Attack of the Vine!": "AOV",',
+        # No trailing comma: AOV is the dictionary's last entry
+        anchor='        "Attack of the Vine!": "AOV"',
         insertion=f'        "{name}": "{code}",\n',
         already=f'"{name}": "{code}"',
         label="PricingService.setCodeMap",

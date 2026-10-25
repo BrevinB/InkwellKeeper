@@ -25,6 +25,20 @@ struct LorcanaSetRegistryTests {
         let unknown = LorcanaSetRegistry.defaultCoreLegalSets.subtracting(bundledSets)
         #expect(unknown.isEmpty, "Unknown Core set names: \(unknown.sorted())")
     }
+
+    @Test("Every non-constructed (Illumineer's Quest) set matches a bundled set name")
+    func nonConstructedSetsExist() async throws {
+        let manager = SetsDataManager.shared
+        var attempts = 0
+        while !manager.isDataLoaded && attempts < 100 {
+            try await Task.sleep(for: .milliseconds(100))
+            attempts += 1
+        }
+        let bundledSets = Set(manager.getAllCards().map(\.setName))
+        try #require(!bundledSets.isEmpty)
+        let unknown = LorcanaSetRegistry.nonConstructedSets.subtracting(bundledSets)
+        #expect(unknown.isEmpty, "Unknown Illumineer's Quest set names: \(unknown.sorted())")
+    }
 }
 
 @MainActor
@@ -52,5 +66,16 @@ struct FormatLegalityTests {
             legalCardNames: ["elsa - snow queen"]
         )
         #expect(illegal == ["Ursula's Return"])
+    }
+
+    @Test("Illumineer's Quest cards are flagged; ordinary sets are not")
+    func questCardsAreNonConstructed() {
+        let sets = FormatLegality.nonConstructedSets(of: [
+            (name: "Anna - Ensnared Sister", setName: "Illumineer's Quest: Deep Trouble"),
+            (name: "Elsa - Snow Queen", setName: "Fabled")
+        ])
+        #expect(sets == ["Illumineer's Quest: Deep Trouble"])
+        #expect(DeckFormat.casual.allowsNonConstructedCards)
+        #expect(!DeckFormat.infinityConstructed.allowsNonConstructedCards)
     }
 }

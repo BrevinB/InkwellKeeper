@@ -46,6 +46,17 @@ enum FormatLegality {
 
     private static var cachedNames: (sets: Set<String>, names: Set<String>)?
 
+    // MARK: Non-constructed sets
+
+    /// Set names of the cards that come from non-constructed products (Illumineer's Quest),
+    /// which no sanctioned format allows. No reprint exception: their names are unique to them.
+    static func nonConstructedSets(
+        of cards: [(name: String, setName: String)],
+        nonConstructedSets: Set<String> = LorcanaSetRegistry.nonConstructedSets
+    ) -> Set<String> {
+        Set(cards.map(\.setName)).intersection(nonConstructedSets)
+    }
+
     // MARK: Unreleased sets
 
     /// Set names of the cards that can't be played yet because their set hasn't released. A

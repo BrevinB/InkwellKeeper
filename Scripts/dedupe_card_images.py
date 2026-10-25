@@ -72,6 +72,9 @@ SET_FOLDER_MAP = {
     "Hyperia City": "hyperia_city",
     "Promo Set 4": "promo_set_4",
     "Curator's Collection: Heroines Edition": "curators_collection_heroines_edition",
+    "Illumineer's Quest: Deep Trouble": "illumineers_quest_deep_trouble",
+    "Illumineer's Quest: Palace Heist": "illumineers_quest_palace_heist",
+    "Illumineer's Quest: The Great Hunny Rescue": "illumineers_quest_the_great_hunny_rescue",
     "Attack of the Vine!": "attack_of_the_vine",
     "Promo Set PD1": "promo_set_pd1",
 }

@@ -139,6 +139,9 @@ class SetsDataManager {
             "hyperia_city": "hyperia_city.json",
             "promo_set_4": "promo_set_4.json",
             "curators_collection_heroines_edition": "curators_collection_heroines_edition.json",
+            "illumineers_quest_deep_trouble": "illumineers_quest_deep_trouble.json",
+            "illumineers_quest_palace_heist": "illumineers_quest_palace_heist.json",
+            "illumineers_quest_the_great_hunny_rescue": "illumineers_quest_the_great_hunny_rescue.json",
             "attack_of_the_vine": "attack_of_the_vine.json"
         ]
 

@@ -339,6 +339,9 @@ class PricingService {
         "Hyperia City": "HYC",
         "Promo Set 4": "P4",
         "Curator's Collection: Heroines Edition": "CC1",
+        "Illumineer's Quest: Deep Trouble": "Q1",
+        "Illumineer's Quest: Palace Heist": "Q2",
+        "Illumineer's Quest: The Great Hunny Rescue": "Q3",
         "Attack of the Vine!": "AOV"
     ]
 
