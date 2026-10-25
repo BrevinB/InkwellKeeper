@@ -241,6 +241,36 @@
       "cardCount": 6,
       "description": "A collector release spotlighting Disney heroines, including Ariel, Elsa, Jasmine, Mulan, Anna, and Tinker Bell.",
       "isReleased": true
+    },
+    {
+      "id": "illumineers_quest_deep_trouble",
+      "name": "Illumineer's Quest: Deep Trouble",
+      "setCode": "Q1",
+      "setNumber": "Q1",
+      "releaseDate": "2024-05-31",
+      "cardCount": 31,
+      "description": "Co-op Illumineer's Quest box: team up against Ursula's boss deck in Deep Trouble. Not legal in sanctioned formats.",
+      "isReleased": true
+    },
+    {
+      "id": "illumineers_quest_palace_heist",
+      "name": "Illumineer's Quest: Palace Heist",
+      "setCode": "Q2",
+      "setNumber": "Q2",
+      "releaseDate": "2025-06-06",
+      "cardCount": 35,
+      "description": "Co-op Illumineer's Quest box: break into Jafar's palace in Palace Heist. Not legal in sanctioned formats.",
+      "isReleased": true
+    },
+    {
+      "id": "illumineers_quest_the_great_hunny_rescue",
+      "name": "Illumineer's Quest: The Great Hunny Rescue",
+      "setCode": "Q3",
+      "setNumber": "Q3",
+      "releaseDate": "2026-10-02",
+      "cardCount": 37,
+      "description": "Co-op Illumineer's Quest box: battle the Vine to save the Hundred Acre Wood's hunny in The Great Hunny Rescue. Not legal in sanctioned formats.",
+      "isReleased": true
     }
   ]
 }

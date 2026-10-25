@@ -42,6 +42,7 @@ struct DeckValidation {
 
         // Check set legality (rotation) and individually banned cards for the format
         errors.append(contentsOf: setLegalityErrors(deck, format: format))
+        errors.append(contentsOf: nonConstructedCardErrors(deck, format: format))
         errors.append(contentsOf: unreleasedCardErrors(deck, format: format))
         errors.append(contentsOf: bannedCardErrors(deck, format: format))
 
@@ -98,6 +99,15 @@ struct DeckValidation {
             .subtracting(SetsDataManager.shared.upcomingSetNames())
         guard !illegalSets.isEmpty else { return [] }
         return ["Contains cards from rotated/illegal sets: \(illegalSets.sorted().joined(separator: ", "))"]
+    }
+
+    /// Errors for Illumineer's Quest cards, which only Casual allows.
+    private static func nonConstructedCardErrors(_ deck: Deck, format: DeckFormat) -> [String] {
+        guard !format.allowsNonConstructedCards else { return [] }
+        let cards = (deck.cards ?? []).map { (name: $0.name, setName: $0.setName) }
+        let sets = FormatLegality.nonConstructedSets(of: cards)
+        guard !sets.isEmpty else { return [] }
+        return ["Contains Illumineer's Quest cards, which are only playable in Casual: \(sets.sorted().joined(separator: ", "))"]
     }
 
     /// Errors for cards from sets that haven't reached their release day (Casual allows them).

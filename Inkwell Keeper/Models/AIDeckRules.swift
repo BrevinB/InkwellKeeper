@@ -138,6 +138,13 @@ enum AIDeckRules {
             }
         }
 
+        if !format.allowsNonConstructedCards {
+            let questSets = FormatLegality.nonConstructedSets(of: entries.map { (name: $0.name, setName: $0.setName) })
+            if !questSets.isEmpty {
+                violations.append("Illumineer's Quest cards aren't legal in \(format.rawValue): \(questSets.sorted().joined(separator: ", ")).")
+            }
+        }
+
         let banned = Set(entries.map(\.name).filter { format.isBanned($0) })
         if !banned.isEmpty {
             violations.append("Banned in \(format.rawValue): \(banned.sorted().joined(separator: ", ")).")

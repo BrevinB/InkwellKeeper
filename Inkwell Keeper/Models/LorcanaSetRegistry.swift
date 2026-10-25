@@ -29,6 +29,14 @@ enum LorcanaSetRegistry {
         "Hyperia City"
     ]
 
+    /// Illumineer's Quest boxes: co-op boss decks played against the game itself. They're
+    /// collectible, so they stay in the catalog, but they aren't legal in any sanctioned
+    /// format — only Casual decks may include them.
+    static let nonConstructedSets: Set<String> = [
+        "Illumineer's Quest: Deep Trouble", "Illumineer's Quest: Palace Heist",
+        "Illumineer's Quest: The Great Hunny Rescue"
+    ]
+
     /// Cards banned in Core Constructed by default (banned 2025-04-08).
     static let defaultCoreBannedCards: [String] = [
         "Hiram Flaversham - Toymaker", "Fortisphere"

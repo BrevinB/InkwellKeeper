@@ -113,6 +113,12 @@ enum DeckFormat: String, Codable, CaseIterable {
         self == .casual
     }
 
+    /// Whether cards from `LorcanaSetRegistry.nonConstructedSets` (Illumineer's Quest) may be
+    /// played. Only Casual — they aren't legal in any sanctioned format, rotating or not.
+    var allowsNonConstructedCards: Bool {
+        self == .casual
+    }
+
     /// Individually banned cards (by full name) for this format. Casual and Triple Deck have no bans.
     var bannedCards: [String] {
         switch self {

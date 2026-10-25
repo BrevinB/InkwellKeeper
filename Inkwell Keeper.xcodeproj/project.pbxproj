@@ -20,6 +20,7 @@
 		09CBFA613F6AA714CBEA2A2E /* BoxSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55CD6BFC55FC17258360F8A3 /* BoxSectionHeader.swift */; };
 		09E7CCED7FB465A17BAA2526 /* CardTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA4228D6C3310035BB99ACE /* CardTextView.swift */; };
 		0A0D87AE3CEEA847872D2F36 /* DeckPullListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB7C812E9FEE8EB997A057D4 /* DeckPullListView.swift */; };
+		0AF7EFE7E2F2BF5E874CDF26 /* illumineers_quest_the_great_hunny_rescue.json in Resources */ = {isa = PBXBuildFile; fileRef = 56C426043D76001059A10D97 /* illumineers_quest_the_great_hunny_rescue.json */; };
 		0BF184E0F04FD7CACE48B394 /* StorageLocationFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A199D6693CFF31AF4EFD83AF /* StorageLocationFormatterTests.swift */; };
 		0BF2568AA99B1BB7807ED0E0 /* BookshelfSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF04F990119D5D205450C3FA /* BookshelfSummary.swift */; };
 		0C63B6E4867B828185BD730C /* PortfolioValueChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57EC37194A3A038F6F9E8A65 /* PortfolioValueChart.swift */; };
@@ -30,6 +31,7 @@
 		13DB352EB38B9F92267B95EA /* PortfolioHistoryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C4C498E2208EC2CD05CBED /* PortfolioHistoryCard.swift */; };
 		1425F4D6A3AD47C8AE488CD3 /* DeckPullSourceHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD745F2F0553A299876475DB /* DeckPullSourceHeader.swift */; };
 		14F5073C7D1DF35BDB2D4DCF /* TradeSide.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFDF65526189A1F0BCA8B520 /* TradeSide.swift */; };
+		15487A8F2E10068A34964DBF /* illumineers_quest_deep_trouble.json in Resources */ = {isa = PBXBuildFile; fileRef = AEE454D47D979AE97AD4FB95 /* illumineers_quest_deep_trouble.json */; };
 		15D695A61F7B3D69E87C867D /* StorageRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D44200552A5D9028EE8A53 /* StorageRoute.swift */; };
 		1735290F6F3CBA98CEC27B09 /* AddToContainerHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13E4E3504356CA5A41096F88 /* AddToContainerHeader.swift */; };
 		17A82960A577DB0067D8528A /* CardHeap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99E096AE0F5D784B418FBD1F /* CardHeap.swift */; };
@@ -351,6 +353,7 @@
 		E298D428D18DC2E6C87326AF /* PulledCoverFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FBB3CB2523772A0EF5B2BB3 /* PulledCoverFace.swift */; };
 		E2F3A4B5C6D7E8F9A0B1C3D5 /* MultiScanReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F3A4B5C6D7E8F9A0B1C3D4 /* MultiScanReviewView.swift */; };
 		E376E1628D3ACD1985B9E96D /* FullBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04BF21CF440AEB410B6794B5 /* FullBadge.swift */; };
+		E3FBE6AFE675E679FE0F941D /* illumineers_quest_palace_heist.json in Resources */ = {isa = PBXBuildFile; fileRef = 40D352A3B1A0C1FB93C31CAC /* illumineers_quest_palace_heist.json */; };
 		E662314B1142E83C68A41625 /* AIDeckRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = D308EF10E35F2261EF1A1B23 /* AIDeckRules.swift */; };
 		E77357A10B44AB64A9B20A2B /* ShareActionBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA4F5F34DB50248E43428D3 /* ShareActionBar.swift */; };
 		E7953977176EB0CDF128294A /* CoverStylePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6076BE2BE59C2C04146159D3 /* CoverStylePicker.swift */; };
@@ -559,6 +562,7 @@
 		3E0416C4BA7D5BEB997B4DC5 /* SetFilterEngineTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetFilterEngineTests.swift; sourceTree = "<group>"; };
 		3F47E7DA593CBCD1ADC13431 /* CapacityMeter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CapacityMeter.swift; sourceTree = "<group>"; };
 		40A1198A827C589B87EBB410 /* PricingSelectionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PricingSelectionTests.swift; sourceTree = "<group>"; };
+		40D352A3B1A0C1FB93C31CAC /* illumineers_quest_palace_heist.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = illumineers_quest_palace_heist.json; sourceTree = "<group>"; };
 		41F904F6589D32CF7AE1C322 /* ImportServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ImportServiceTests.swift; sourceTree = "<group>"; };
 		43F8356509903F4AFC2FCF9E /* DeckPullHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckPullHeader.swift; sourceTree = "<group>"; };
 		4443B3280ED4450783544968 /* StatsCardContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsCardContainer.swift; sourceTree = "<group>"; };
@@ -580,6 +584,7 @@
 		55CD6BFC55FC17258360F8A3 /* BoxSectionHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BoxSectionHeader.swift; sourceTree = "<group>"; };
 		562E6A8A28051109039D43EB /* PriceHistoryChartView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceHistoryChartView.swift; sourceTree = "<group>"; };
 		56849DD8BC4C8C56AF2A8D66 /* DeckPullPlan.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckPullPlan.swift; sourceTree = "<group>"; };
+		56C426043D76001059A10D97 /* illumineers_quest_the_great_hunny_rescue.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = illumineers_quest_the_great_hunny_rescue.json; sourceTree = "<group>"; };
 		575CB775C89158C8A42ED69B /* BookcaseShelf.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BookcaseShelf.swift; sourceTree = "<group>"; };
 		57EC37194A3A038F6F9E8A65 /* PortfolioValueChart.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioValueChart.swift; sourceTree = "<group>"; };
 		5B89D012EEFA30E3FC4DC9E4 /* AddCandidateTile.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AddCandidateTile.swift; sourceTree = "<group>"; };
@@ -674,6 +679,7 @@
 		AC255A6FA06BE883022B5424 /* PortfolioInsights.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioInsights.swift; sourceTree = "<group>"; };
 		ACCE88E31AE5CD5995E68AC5 /* ShareCardChrome.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareCardChrome.swift; sourceTree = "<group>"; };
 		ADCF3A14F34D035AD1A31C84 /* BinderAutoFillSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BinderAutoFillSheet.swift; sourceTree = "<group>"; };
+		AEE454D47D979AE97AD4FB95 /* illumineers_quest_deep_trouble.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = illumineers_quest_deep_trouble.json; sourceTree = "<group>"; };
 		AF04F990119D5D205450C3FA /* BookshelfSummary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BookshelfSummary.swift; sourceTree = "<group>"; };
 		B157168B7FC08A5BA2FC96A4 /* CloudKitSchemaInitializer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudKitSchemaInitializer.swift; sourceTree = "<group>"; };
 		B233214EF4D2EEEDCB5C75D7 /* TradeCalculatorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TradeCalculatorTests.swift; sourceTree = "<group>"; };
@@ -778,8 +784,6 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		23CAEDD92ECEE796006786F7 /* CardImages */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = CardImages;
 			sourceTree = "<group>";
 		};
@@ -890,6 +894,9 @@
 				27BF6FCD75E011DDA53BA414 /* hyperia_city.json */,
 				6B933D6736A8C5C357B20864 /* promo_set_4.json */,
 				B802ED11183A973EE6318DE0 /* curators_collection_heroines_edition.json */,
+				AEE454D47D979AE97AD4FB95 /* illumineers_quest_deep_trouble.json */,
+				40D352A3B1A0C1FB93C31CAC /* illumineers_quest_palace_heist.json */,
+				56C426043D76001059A10D97 /* illumineers_quest_the_great_hunny_rescue.json */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -1470,6 +1477,9 @@
 				DA722FFA98E39DC1939C9229 /* hyperia_city.json in Resources */,
 				BD26196973D135377BDE11E9 /* promo_set_4.json in Resources */,
 				770967643AFE49049B9E052F /* curators_collection_heroines_edition.json in Resources */,
+				15487A8F2E10068A34964DBF /* illumineers_quest_deep_trouble.json in Resources */,
+				E3FBE6AFE675E679FE0F941D /* illumineers_quest_palace_heist.json in Resources */,
+				0AF7EFE7E2F2BF5E874CDF26 /* illumineers_quest_the_great_hunny_rescue.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
