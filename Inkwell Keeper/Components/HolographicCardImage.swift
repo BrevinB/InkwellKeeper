@@ -3,8 +3,8 @@
 //  Inkwell Keeper
 //
 //  Isolated view for card images with holographic effects.
-//  Observes MotionManager internally so motion updates only rebuild
-//  this small view — not the entire CardTile parent.
+//  Reads FoilMotion once per frame inside a TimelineView, so motion
+//  only redraws this image — never the CardTile around it.
 //
 
 import SwiftUI
@@ -13,22 +13,28 @@ struct HolographicCardImage: View {
     let card: LorcanaCard
     let reduceMotion: Bool
 
-    private let motionManager = MotionManager.shared
     @Environment(\.scenePhase) private var scenePhase
     @State private var isVisible = false
     @State private var ownsMotionUpdates = false
+
+    private var needsMotion: Bool {
+        isVisible && !reduceMotion && scenePhase == .active && [.foil, .enchanted, .epic, .iconic].contains(card.variant)
+    }
 
     var body: some View {
         AsyncImage(url: card.bestImageUrl()) { phase in
             switch phase {
             case .success(let image):
-                image
-                    .resizable().scaledToFit()
-                    .interactiveHolographicEffect(
-                        pitch: reduceMotion ? 0 : motionManager.pitch,
-                        roll: reduceMotion ? 0 : motionManager.roll,
-                        variant: card.variant
-                    )
+                TimelineView(.animation(minimumInterval: 1 / 30, paused: !needsMotion)) { timeline in
+                    let tilt = needsMotion ? FoilMotion.shared.tilt(at: timeline.date).foil : .zero
+                    image
+                        .resizable().scaledToFit()
+                        .interactiveHolographicEffect(
+                            pitch: tilt.y,
+                            roll: tilt.x,
+                            variant: card.variant
+                        )
+                }
             case .failure:
                 cardPlaceholder
             case .empty:
@@ -51,13 +57,12 @@ struct HolographicCardImage: View {
     }
 
     private func updateMotionSubscription() {
-        let needsMotion = isVisible && !reduceMotion && scenePhase == .active && [.foil, .enchanted, .epic, .iconic].contains(card.variant)
         guard needsMotion != ownsMotionUpdates else { return }
         ownsMotionUpdates = needsMotion
         if needsMotion {
-            motionManager.start()
+            FoilMotion.shared.begin()
         } else {
-            motionManager.stop()
+            FoilMotion.shared.end()
         }
     }
 

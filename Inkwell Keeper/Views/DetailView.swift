@@ -1208,10 +1208,16 @@ struct AddCardGroupModal: View {
         }
     }
 
-    /// Copies of this card (any variant) already in the collection — shown so the
-    /// add-quantity steppers can't be mistaken for owned quantity.
+    /// Copies of this printing already in the collection — shown so the
+    /// add-quantity steppers can't be mistaken for owned quantity. Regular cards
+    /// count Normal + Foil; special variants (Epic/Enchanted/Iconic/Promo) are
+    /// distinct cards that share a name + set with the regular printing, so they
+    /// only count their own variant.
     private var ownedTotal: Int {
-        CardVariant.allCases.reduce(0) {
+        let variants: [CardVariant] = supportsMultiVariant
+            ? [.normal, .foil]
+            : [cardGroup.primaryCard.variant]
+        return variants.reduce(0) {
             $0 + collectionManager.getCollectedQuantityByName(
                 displayCard.name,
                 setName: displayCard.setName,

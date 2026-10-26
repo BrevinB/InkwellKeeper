@@ -2,15 +2,17 @@
 //  PocketView.swift
 //  Inkwell Keeper
 //
-//  One plastic pocket on a binder page: a sleeved card, a faded "missing" ghost in
-//  set binders, or an empty dashed slot. Cards drop in with a springy cascade, and
+//  One plastic pocket on a binder page: a sleeved card (with a count when several
+//  copies share the pocket), a faded "missing" ghost in set binders, or an empty
+//  dashed slot. Cards drop in with a springy cascade, and
 //  a picked-up card lifts and tilts in arrange mode.
 //
 
 import SwiftUI
 
 struct PocketView: View {
-    let item: StoredCard?
+    /// The pocket's copies, top card first; empty for an empty pocket.
+    let stack: [StoredCard]
     /// The card that belongs here in a set binder, shown faded when the pocket is empty.
     let ghost: LorcanaCard?
     /// Position on the page, used to stagger the drop-in cascade.
@@ -25,6 +27,8 @@ struct PocketView: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    private var item: StoredCard? { stack.first }
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 5)
@@ -34,6 +38,15 @@ struct PocketView: View {
             if let item {
                 StorageCardThumbnail(card: item.toLorcanaCard)
                     .padding(2)
+                    .background {
+                        // The edge of the next card peeking out behind the top one.
+                        if stack.count > 1 {
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color.white.opacity(0.18))
+                                .padding(2)
+                                .offset(x: 2, y: -2)
+                        }
+                    }
                     .matchedGeometryEffect(id: item.id, in: namespace)
                     .transition(reduceMotion ? .opacity : .dropIntoPocket)
             } else if let ghost {
@@ -66,6 +79,13 @@ struct PocketView: View {
             .allowsHitTesting(false)
         }
         .aspectRatio(63 / 88, contentMode: .fit)
+        .overlay(alignment: .topTrailing) {
+            if stack.count > 1 {
+                PocketStackBadge(count: stack.count, hasFoil: stack.contains { $0.cardVariant == .foil })
+                    .padding(3)
+                    .transition(.scale.combined(with: .opacity))
+            }
+        }
         .overlay(alignment: .bottomTrailing) {
             if canUpgrade {
                 Image(systemName: "sparkles")

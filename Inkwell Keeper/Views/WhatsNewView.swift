@@ -152,6 +152,24 @@ struct ChangelogEntry {
 // Add new versions at the top of this array
 private let changelogEntries: [ChangelogEntry] = [
     ChangelogEntry(
+        version: "3.6.0",
+        date: "October 2026",
+        features: [
+            "All-new foil: a rainbow sheen, highlight, and glitter that catch the light as you tilt your phone, however you're holding it",
+            "Stack several copies in one binder pocket, like three normals and a foil, and set how many of each are in it",
+            "Price and collection value charts: zoom from 1 week to all time, drag across the line to see any day's value, and spot the high and low at a glance",
+            "Illumineer's Quest: Deep Trouble, Palace Heist, and The Great Hunny Rescue are here to collect"
+        ],
+        improvements: [
+            "Charts now show where the value started and say what happened, like when it peaked and how far it's moved since",
+            "Smoother, more battery-friendly card effects"
+        ],
+        bugFixes: [
+            "The owned count when adding Enchanted, Epic, Iconic, and Promo cards now only counts that printing"
+        ],
+        inProgress: ["Price alerts"]
+    ),
+    ChangelogEntry(
         version: "3.5.1",
         date: "October 2026",
         features: [

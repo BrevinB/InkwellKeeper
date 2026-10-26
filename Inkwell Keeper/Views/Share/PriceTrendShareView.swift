@@ -93,7 +93,7 @@ struct PriceTrendShareCardView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            PriceTrendChart(points: points)
+            PriceTrendChart(points: points, isInteractive: false)
                 .frame(height: 150)
         }
         .frame(maxWidth: .infinity)

@@ -13,6 +13,8 @@ struct PortfolioHistoryCard: View {
     let isSubscribed: Bool
     let onUnlock: () -> Void
 
+    @State private var range: ChartRange = .all
+
     private var subtitle: String {
         guard isSubscribed, let change = viewModel.weeklyChange else {
             return "How your collection's value has moved"
@@ -41,11 +43,17 @@ struct PortfolioHistoryCard: View {
                         : "Loading price history…"
                 )
             } else {
+                let visible = range.filter(viewModel.points)
+                let ranges = ChartRange.available(for: viewModel.points)
+                if !ranges.isEmpty {
+                    ChartRangePicker(ranges: ranges, selection: $range)
+                }
                 PortfolioSummaryHeader(
-                    summary: viewModel.summary,
-                    since: viewModel.points.first?.date
+                    summary: PortfolioHistoryBuilder.summary(for: visible),
+                    since: visible.first?.date
                 )
-                PortfolioValueChart(points: viewModel.points)
+                PortfolioValueChart(points: visible)
+                ChartStoryline(points: visible, formatValue: PricingService.formatPrice)
             }
         }
     }
