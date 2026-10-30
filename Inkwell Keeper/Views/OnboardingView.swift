@@ -115,7 +115,7 @@ struct OnboardingView: View {
                 )
 
                 featureRow(
-                    icon: "books.vertical.fill",
+                    icon: "checklist",
                     title: "Browse Sets",
                     description: "Explore all Lorcana sets and track your progress"
                 )

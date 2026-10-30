@@ -43,6 +43,11 @@ struct ContentView: View {
             ReviewManager.shared.recordAppLaunch()
             Analytics.send(.screenViewed(name: Self.tabName(for: selectedTab)))
             #if DEBUG
+            // Layout checks: `simctl launch … -tab 10` opens that tab (values as in
+            // tabName(for:)), for screens the deep links don't reach.
+            if UserDefaults.standard.object(forKey: "tab") != nil {
+                selectedTab = UserDefaults.standard.integer(forKey: "tab")
+            }
             // Filming rig: `simctl launch … -deeplink "inkwellkeeper://…"` navigates
             // straight to a screen without the SpringBoard confirmation dialog.
             // Deferred so the card catalog is loaded before the route resolves.
@@ -181,12 +186,13 @@ struct ContentView: View {
     /// primary tabs in the iPad sidebar.
     @TabContentBuilder<Int>
     private var overflowTabs: some TabContent<Int> {
-        Tab("Bookshelf", systemImage: "books.vertical.circle.fill", value: 11) {
+        // Icons stay distinct when shown alone, as in the iPhone Duo's side tab rail.
+        Tab("Bookshelf", systemImage: "books.vertical.fill", value: 11) {
             BookshelfView()
                 .environment(collectionManager)
         }
 
-        Tab("Sets", systemImage: "books.vertical.fill", value: 2) {
+        Tab("Sets", systemImage: "checklist", value: 2) {
             SetsView()
                 .environment(collectionManager)
         }

@@ -27,6 +27,9 @@ struct TradeCalculatorView: View {
                     TradeCalculatorLockedView { showingPaywall = true }
                 }
             }
+            // The locked view is only as wide as its text; fill the screen so the
+            // background spans wide displays like the unfolded iPhone Duo.
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(LorcanaBackground())
             .navigationTitle("Trade Calculator")
             .toolbar {

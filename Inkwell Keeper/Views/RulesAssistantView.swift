@@ -22,6 +22,10 @@ struct RulesAssistantView: View {
     /// Set when opened via "Ask About This Card" and the question hasn't fired yet —
     /// it may have to wait for the subscription check or the availability probe.
     @State private var pendingCardAsk = false
+    #if DEBUG && targetEnvironment(simulator)
+    /// Screenshot rig: a `-rulesQuestion` launch argument waiting to be asked.
+    @State private var pendingRigQuestion = ScreenshotRig.rulesQuestion
+    #endif
     @FocusState private var isInputFocused: Bool
 
     var initialCard: LorcanaCard?
@@ -125,6 +129,9 @@ struct RulesAssistantView: View {
                 pendingCardAsk = true
                 fireCardAskIfReady()
             }
+            #if DEBUG && targetEnvironment(simulator)
+            fireCardAskIfReady()
+            #endif
         }
         .onChange(of: service.availability) {
             fireCardAskIfReady()
@@ -139,6 +146,17 @@ struct RulesAssistantView: View {
     /// lands in context — the service is a singleton and an old chat would otherwise
     /// swallow the tap.
     private func fireCardAskIfReady() {
+        #if DEBUG && targetEnvironment(simulator)
+        if let question = pendingRigQuestion,
+           subscriptionManager.isSubscribed,
+           service.availability == .available,
+           !service.isLoading {
+            pendingRigQuestion = nil
+            service.startNewChat()
+            service.send(question)
+            return
+        }
+        #endif
         guard pendingCardAsk,
               let card = initialCard,
               subscriptionManager.isSubscribed,

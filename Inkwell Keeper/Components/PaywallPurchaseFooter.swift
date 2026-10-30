@@ -44,7 +44,7 @@ struct PaywallPurchaseFooter: View {
                     if isPurchasing {
                         ProgressView().tint(.black)
                     } else {
-                        Text("Subscribe Now").bold()
+                        Text(selectedPackage?.isLifetime == true ? "Unlock Lifetime" : "Subscribe Now").bold()
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -67,6 +67,7 @@ struct PaywallPurchaseFooter: View {
             // tall enough to clip the pitch above it.
             PaywallSecondaryActions(
                 isPurchasing: isPurchasing,
+                isLifetimeSelected: selectedPackage?.isLifetime == true,
                 onRestore: onRestore,
                 onPrivacyPolicy: onPrivacyPolicy
             )
@@ -96,6 +97,7 @@ private struct PaywallTapTarget: ViewModifier {
 /// so the footer stays short, which would otherwise leave three 13pt tap targets.
 private struct PaywallSecondaryActions: View {
     let isPurchasing: Bool
+    let isLifetimeSelected: Bool
     let onRestore: () -> Void
     let onPrivacyPolicy: () -> Void
 
@@ -120,7 +122,13 @@ private struct PaywallSecondaryActions: View {
             .buttonStyle(.plain)
             .frame(maxWidth: .infinity)
 
-            Text("Auto-renews until cancelled at least 24 hours before the period ends. Manage in Settings.")
+            // The terms follow the selected option: a lifetime unlock never
+            // renews, so the auto-renew wording would misdescribe it.
+            Text(
+                isLifetimeSelected
+                    ? "One-time purchase. No subscription, nothing renews."
+                    : "Auto-renews until cancelled at least 24 hours before the period ends. Manage in Settings."
+            )
                 .font(.caption2)
                 .foregroundStyle(.gray.opacity(0.8))
                 .multilineTextAlignment(.center)

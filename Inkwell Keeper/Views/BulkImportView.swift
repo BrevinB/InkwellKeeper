@@ -92,6 +92,16 @@ struct BulkImportView: View {
             ) { result in
                 handleFileImport(result)
             }
+            #if DEBUG && targetEnvironment(simulator)
+            .task {
+                guard ScreenshotRig.opensDemoImport, !isImporting, !importDone else { return }
+                try? await Task.sleep(for: .seconds(1))
+                importText = ScreenshotRig.demoImportCSV(from: collectionManager.collectedCards)
+                isFileImport = true
+                fileName = "dreamborn_collection.csv"
+                processImport()
+            }
+            #endif
             .sheet(isPresented: $showingShareCard) {
                 ShareCardPresenter(
                     analyticsType: "import",
