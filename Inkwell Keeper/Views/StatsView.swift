@@ -25,7 +25,7 @@ struct StatsView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVGrid(columns: [GridItem(horizontalSizeClass == .compact || dynamicTypeSize.isAccessibilitySize ? .flexible() : .adaptive(minimum: 340), spacing: 20)], alignment: .leading, spacing: 20) {
+                LazyVGrid(columns: [GridItem(horizontalSizeClass == .compact || dynamicTypeSize.isAccessibilitySize ? .flexible() : .adaptive(minimum: 340), spacing: 20, alignment: .top)], alignment: .leading, spacing: 20) {
                     let snapshot = viewModel.snapshot
 
                     StatsOverviewCard(snapshot: snapshot)

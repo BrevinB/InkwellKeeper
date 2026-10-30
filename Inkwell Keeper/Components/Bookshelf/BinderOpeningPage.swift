@@ -26,7 +26,7 @@ struct BinderOpeningPage: View {
         BinderPageView(
             page: 0,
             layout: container.binderLayout,
-            itemsBySlot: BinderView.itemsBySlot(container.items ?? []),
+            stacksBySlot: BinderView.stacksBySlot(container.items ?? []),
             ghostsBySlot: ghostsBySlot,
             model: model,
             namespace: pocketNamespace,

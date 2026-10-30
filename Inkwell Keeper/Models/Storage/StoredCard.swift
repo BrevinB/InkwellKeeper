@@ -7,7 +7,9 @@
 //  a relationship, so it survives CollectedCard duplicate-merges and keeps the
 //  CloudKit schema simple.
 //
-//  In a binder, one row is one pocket (quantity 1, `slotIndex` set).
+//  In a binder, one row is one copy (quantity 1, `slotIndex` set). A pocket can hold
+//  a stack of rows sharing a `slotIndex`, as long as they're the same card (see
+//  `stackKey`) — e.g. three normals and a foil in one pocket.
 //  In a box, one row holds every copy of that card (`slotIndex` nil).
 //
 
@@ -52,6 +54,11 @@ final class StoredCard {
             return "\(uniqueId)|\(variant)"
         }
         return "\(name)|\(setName)|\(variant)"
+    }
+
+    /// Rows with the same stack key may share a binder pocket.
+    var stackKey: String {
+        StorageManager.stackKey(for: toLorcanaCard)
     }
 
     init(from card: LorcanaCard, quantity: Int = 1, slotIndex: Int? = nil) {

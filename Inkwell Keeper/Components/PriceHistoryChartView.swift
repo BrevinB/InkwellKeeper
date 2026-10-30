@@ -13,11 +13,22 @@ struct PriceHistoryChartView: View {
     let card: LorcanaCard
 
     @State private var points: [PricingService.RemotePricePoint] = []
+    @State private var range: ChartRange = .all
     @State private var isLoading = true
     @State private var showingShare = false
 
+    private var allPoints: [PortfolioPoint] {
+        points.map { PortfolioPoint(date: $0.date, value: $0.price) }
+    }
+
+    /// The points inside the chosen range.
+    private var visiblePoints: [PricingService.RemotePricePoint] {
+        range.filter(points, date: \.date)
+    }
+
     private var change: Double? {
-        guard let first = points.first?.price, let last = points.last?.price, first > 0 else { return nil }
+        let visible = visiblePoints
+        guard let first = visible.first?.price, let last = visible.last?.price, first > 0 else { return nil }
         return last - first
     }
 
@@ -64,19 +75,29 @@ struct PriceHistoryChartView: View {
         )
         .task(id: card.variantAwareId) {
             isLoading = true
-            let fetched = await PricingService.shared.fetchPriceHistory(for: card)
+            // The same window as the collection chart, so "All" goes back as far.
+            let fetched = await PricingService.shared.fetchPriceHistory(for: card, days: PortfolioHistoryViewModel.windowDays)
             guard !Task.isCancelled else { return }
             points = fetched
             isLoading = false
         }
         .sheet(isPresented: $showingShare) {
-            PriceTrendShareView(card: card, points: points)
+            PriceTrendShareView(card: card, points: visiblePoints)
         }
     }
 
     private var historyChart: some View {
-        PriceTrendChart(points: points)
-            .frame(minHeight: 140, maxHeight: 200)
+        VStack(alignment: .leading, spacing: 10) {
+            let ranges = ChartRange.available(for: allPoints)
+            if !ranges.isEmpty {
+                ChartRangePicker(ranges: ranges, selection: $range)
+            }
+            PriceTrendChart(points: visiblePoints)
+                .frame(minHeight: 160, maxHeight: 210)
+            ChartStoryline(points: visiblePoints.map { PortfolioPoint(date: $0.date, value: $0.price) }) {
+                $0.formatted(.currency(code: "USD"))
+            }
+        }
     }
 }
 

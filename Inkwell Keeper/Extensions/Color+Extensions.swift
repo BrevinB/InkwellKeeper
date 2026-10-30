@@ -29,8 +29,9 @@ struct AdaptiveGridHelper {
     }
 
     /// Let the actual container width decide density, including sheets and resized windows.
+    /// Regular width covers iPhones with iPad-sized screens, like the unfolded iPhone Duo.
     private func columns(phoneCount: Int, minimumWidth: CGFloat, spacing: CGFloat) -> [GridItem] {
-        if isIPad {
+        if isIPad || horizontalSizeClass == .regular {
             return [GridItem(.adaptive(minimum: minimumWidth), spacing: spacing)]
         }
         return Array(repeating: GridItem(.flexible(), spacing: spacing), count: phoneCount)

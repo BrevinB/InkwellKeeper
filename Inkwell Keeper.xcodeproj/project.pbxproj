@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0112465F69AD22ADB97D4613 /* PaywallSupportingFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C1BB6D55FA7FD1EB540693B /* PaywallSupportingFeatures.swift */; };
+		01204B703FE33AD4706530D1 /* ScreenshotRig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B41D32DD0BC1397E7FACA3 /* ScreenshotRig.swift */; };
 		0350181A6138F3E22B5BDEB7 /* PutAwaySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826A7D780D8AFB8DDBC49DF0 /* PutAwaySheet.swift */; };
 		0440D3DF3D995E2F20F8361D /* BookcaseLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51779335A1E8396FC961D7CD /* BookcaseLayout.swift */; };
 		0465417773ED023BF104993B /* DeckBuildStatusBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40BE6DB92A340B148CCD430 /* DeckBuildStatusBar.swift */; };
@@ -30,6 +31,7 @@
 		138266185F9281921E9C316F /* SpineShadow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FE064D459E933C25DF25BB /* SpineShadow.swift */; };
 		13DB352EB38B9F92267B95EA /* PortfolioHistoryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C4C498E2208EC2CD05CBED /* PortfolioHistoryCard.swift */; };
 		1425F4D6A3AD47C8AE488CD3 /* DeckPullSourceHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD745F2F0553A299876475DB /* DeckPullSourceHeader.swift */; };
+		148D7DDFB8503949DFBB7BD6 /* FoilTiltFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E370BC75265AAF0B2A78DF /* FoilTiltFilter.swift */; };
 		14F5073C7D1DF35BDB2D4DCF /* TradeSide.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFDF65526189A1F0BCA8B520 /* TradeSide.swift */; };
 		15487A8F2E10068A34964DBF /* illumineers_quest_deep_trouble.json in Resources */ = {isa = PBXBuildFile; fileRef = AEE454D47D979AE97AD4FB95 /* illumineers_quest_deep_trouble.json */; };
 		15D695A61F7B3D69E87C867D /* StorageRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D44200552A5D9028EE8A53 /* StorageRoute.swift */; };
@@ -151,6 +153,7 @@
 		2AC9FFFCDBF4EEB519047F3B /* AIChosenInksBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1E3E99C0670865724FC03C /* AIChosenInksBanner.swift */; };
 		2D368609246258D6A36CAB5D /* TradeExchangeAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E019A5353E22A19B7A111BDD /* TradeExchangeAnimation.swift */; };
 		2D8953874A7404C59278820B /* SetFilterModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C17FA3D6A4FC54BFE2CBC6 /* SetFilterModels.swift */; };
+		2DE538D6ED7B8E8C251DBB45 /* TiltingCardFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = F488A42AE37F1803A29194F9 /* TiltingCardFace.swift */; };
 		2E0772201946BDCF11BDACF7 /* AddCandidateTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B89D012EEFA30E3FC4DC9E4 /* AddCandidateTile.swift */; };
 		2E2FCB338F7B01F60E32017F /* LeafCastShadow.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDEB2D2E03442B48FCF620AB /* LeafCastShadow.swift */; };
 		2E8C230A7C7346CDB8139B7D /* StatsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF2A26313064CEB985D1463 /* StatsViewModel.swift */; };
@@ -158,12 +161,14 @@
 		307D4C4F11CBE5EC3666A461 /* ShelfSlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58272E242BA935C138E0E7D /* ShelfSlot.swift */; };
 		31E06CF370A79588CB5C8306 /* PulledObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FE9A850F4FEA62C76CD0FF1 /* PulledObject.swift */; };
 		32E91E465EEE6EF8F9524BB9 /* PortfolioHistoryBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6643E2C5A509EC56A7C571 /* PortfolioHistoryBuilder.swift */; };
+		3314E019793B44FEDCD5CA21 /* PocketCopyStepper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1FF5DB0FB13A6DF3D77513 /* PocketCopyStepper.swift */; };
 		33BC6BA59BCB415FB26BED1B /* TypeBreakdownCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFF6B0A02D74D5DBDDBD4B1 /* TypeBreakdownCard.swift */; };
 		346DAC07477678DB8D6C9E12 /* CoconutLeaders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ACED7C31A38BCCA848C5847 /* CoconutLeaders.swift */; };
 		356E57F596D91866630AF243 /* PortfolioHolding.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4671877777D1EC2B5B2ECD5 /* PortfolioHolding.swift */; };
 		3591C033984D8B6A4A4728B6 /* TintedRenderLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E466CCD5A0B0C6133D071FD1 /* TintedRenderLayer.swift */; };
 		37F53A8D316BC6838A0EBEDC /* CoconutLeaderImageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C9167D9C7B02CC2C3A728DC /* CoconutLeaderImageService.swift */; };
 		3804378E10008D62CD8B1B53 /* BoxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062AEFC9EAE3A922BC206148 /* BoxView.swift */; };
+		38DEC4D8DEB337AE9D73E660 /* ChartSelectionCallout.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9349B18725198073ECAC37 /* ChartSelectionCallout.swift */; };
 		3B4C0CDA2EEC18AE775B8913 /* AIConfigService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDAA2A981A2AB40DE2E0CE43 /* AIConfigService.swift */; };
 		3E0B1044516EF171D95380B1 /* TradeCardPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F47E94E47E0150CF52D3320C /* TradeCardPicker.swift */; };
 		3FCE3CB4BFACCA902E617655 /* AIDeckFeedbackPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287217E6FCCB16A2D24F29EE /* AIDeckFeedbackPrompt.swift */; };
@@ -172,6 +177,7 @@
 		41644361C146B5E5AD85B481 /* BookTurnView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80DC760DB8B78D93ED55511 /* BookTurnView.swift */; };
 		4206170DA69A2A1D84FBB191 /* BookcaseItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35322599272AEDCD58EDB4D9 /* BookcaseItemView.swift */; };
 		420C84C42DF482530606B948 /* BinderSortOrder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70B08FD9DF5490F1EB992575 /* BinderSortOrder.swift */; };
+		42A0454EF378EA752F93A488 /* ChartStoryline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00C284F2EE4BF50188CB7BAA /* ChartStoryline.swift */; };
 		43CA201C402A46964A675661 /* TradeSideTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC5483000A417BA10C98784A /* TradeSideTests.swift */; };
 		451383FE0095A4184B165BAF /* BrowseAllCardsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9FB8FC1EFC087642A3270CC /* BrowseAllCardsButton.swift */; };
 		454B79D5D7DDD029C170CF62 /* PortfolioExtremesCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF7ED060E8A3BFCE3474008 /* PortfolioExtremesCard.swift */; };
@@ -196,6 +202,8 @@
 		5BE81B0B3804D3B31601A169 /* AIDeckRuleCheckBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1570D6C80F30584344166061 /* AIDeckRuleCheckBanner.swift */; };
 		5C35188FB6BB83B5C2960A4A /* ReleaseSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D863EE54A0C3633D9AB7DD /* ReleaseSchedule.swift */; };
 		5CD69852ECD039E2975AADFA /* CostBasisSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A19CE19939AA33FF7A74C0 /* CostBasisSummary.swift */; };
+		5D8B6E5EA772AE73A318B5F3 /* ValueHistoryChartModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1433B5315A8D8A0152B9E0A8 /* ValueHistoryChartModelTests.swift */; };
+		5FBF39D75B91C540D9D726BE /* ValueHistoryChartModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37797EEEBD2986967A6EFAE /* ValueHistoryChartModel.swift */; };
 		6008EFAB6E9773D3A99F5CDE /* TradeVerdictCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C792A95769EC446748404EA1 /* TradeVerdictCard.swift */; };
 		601436EC59814D10F0D1A07B /* AddToContainerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB7AD2CE4D089373FC28C5D /* AddToContainerSheet.swift */; };
 		603D06B419552E6D3171DF34 /* BulkSelectionBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DED60A0897B7ADE469E0A21 /* BulkSelectionBar.swift */; };
@@ -217,6 +225,7 @@
 		6C370ED912E2D552CB6172F5 /* LeatherStitching.swift in Sources */ = {isa = PBXBuildFile; fileRef = E104E2DD7BDCEB5B67B927C4 /* LeatherStitching.swift */; };
 		6C8C6444F34A271966DF81EA /* CardFlexShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C98BE20946FE8394E530FD /* CardFlexShareView.swift */; };
 		6CAF3A477987BEF57CD4CFE3 /* BookshelfShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160076CD99D052739E896880 /* BookshelfShareCardView.swift */; };
+		6DC5E88228647387F3183EB8 /* ChartRangePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B3E5CA101035662470791D /* ChartRangePicker.swift */; };
 		703F4ADFEA72BFEA8DA5242B /* PurchasePriceRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EA166CCA83A0A9D8E1C7A3 /* PurchasePriceRow.swift */; };
 		70AF80E05EB991A02B74E21E /* CostBasisCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BD8A44359FC13EEFF2BDD23 /* CostBasisCard.swift */; };
 		70C69BAD7F7099B33D9D52E1 /* PriceTrendShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451422815F2CFF03E10ECAEF /* PriceTrendShareView.swift */; };
@@ -225,6 +234,8 @@
 		72B561367FA08CE34FB94ABB /* BookshelfView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD92AE6BEFA0C7519790777 /* BookshelfView.swift */; };
 		73A22599ABA5468E8C7CEBBA /* RulesDigestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EA333A30F84D7A69E490050 /* RulesDigestService.swift */; };
 		73A291B34FE3480D8FD364D5 /* StorageShelfView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B9E7AD6E4D4968083FA8AED /* StorageShelfView.swift */; };
+		749A7511E12A743EF23E6CA7 /* FoilShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 6EB621C704905D21573660FB /* FoilShader.metal */; };
+		769217F2D2B6C1561EA0BEE7 /* PocketStackBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 580004F8802791E263BF0AF9 /* PocketStackBadge.swift */; };
 		770967643AFE49049B9E052F /* curators_collection_heroines_edition.json in Resources */ = {isa = PBXBuildFile; fileRef = B802ED11183A973EE6318DE0 /* curators_collection_heroines_edition.json */; };
 		78F3F157E7FA419F04B06384 /* DeckToolsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E105E89F1FF43FD4CBC90929 /* DeckToolsTests.swift */; };
 		799691E257836627A543D0FC /* BookshelfEmptyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25918CD7D53061FB65EE883E /* BookshelfEmptyState.swift */; };
@@ -232,6 +243,7 @@
 		7CD4AFAC046A0022D8CC548A /* SeededGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95C330AA1E1245DD80DE62F0 /* SeededGenerator.swift */; };
 		7DE6372DC58081F4EEA78C6E /* StoredCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F63B768B734C8FF47DB5744 /* StoredCard.swift */; };
 		7FB598F92EAF0DF1D384A974 /* PortfolioHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B789324D52EF1FA51374D4A4 /* PortfolioHistoryTests.swift */; };
+		80489A0F4A9F253AD9BA6AC0 /* PocketStackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB5A030DA953BFBC1584CB8E /* PocketStackTests.swift */; };
 		80C0A7DBBA05FCA036421B83 /* ShareMilestoneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E624D8ABE9C6EC90741C35EC /* ShareMilestoneTests.swift */; };
 		8156D2B786BA1B2EC53B6DE8 /* PriceHistoryChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562E6A8A28051109039D43EB /* PriceHistoryChartView.swift */; };
 		8232BC4571DA0D347BAC2575 /* PageLeaf.swift in Sources */ = {isa = PBXBuildFile; fileRef = B49817DB6D9AEA9F7CB555FF /* PageLeaf.swift */; };
@@ -279,6 +291,7 @@
 		A3D4E3A3BC7792235C3EF2F8 /* DemoCollectionSeeder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98FCBE0384227CBB565C054C /* DemoCollectionSeeder.swift */; };
 		A61C930F3B8AF6B224CEDA79 /* RenderedArtworkMetrics+Generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10CD1D348FA629BA80B2FBF /* RenderedArtworkMetrics+Generated.swift */; };
 		A69FBA461A52EE570C17A37F /* StorageContainerScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322C5D95D7B11F95103B4212 /* StorageContainerScreen.swift */; };
+		A71C222C2F4EA2ED0CF346FF /* FoilTiltFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2859DA56BCDC5313E652DB3C /* FoilTiltFilterTests.swift */; };
 		A8162C03DC46152D3854C756 /* PortfolioHistoryCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D1654312FC31BF013A4A7B /* PortfolioHistoryCache.swift */; };
 		A89F1C50BFDCD0547AD9A14B /* ScanDestinationPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3899CD44116C113531714373 /* ScanDestinationPicker.swift */; };
 		A90FCDE7934EA0BB4D3B8580 /* CoconutFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0642DCC4EC0C5EFC8AAFDD4F /* CoconutFormatTests.swift */; };
@@ -293,6 +306,7 @@
 		AC2F230374A7A27B18647F44 /* BinderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B444BB13691B64494DB5326 /* BinderView.swift */; };
 		AC8AC085B681FC4C09B2DC4A /* DeepLinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBF2768C59BF899E8F824C35 /* DeepLinkRouter.swift */; };
 		ADD6FB27289A2779AC92B5EA /* BookcaseShelf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 575CB775C89158C8A42ED69B /* BookcaseShelf.swift */; };
+		AFC58253F50561EF0649A060 /* PocketContentsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7E969742B3D4D27C1B7FBA /* PocketContentsSheet.swift */; };
 		B00DDECBF05D944A9EC4D7ED /* UnsortedPileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 135FBC706A55D010B0FBE771 /* UnsortedPileView.swift */; };
 		B09434B3B5474951C97AC0A5 /* ContainerDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C0925348B23F5C4982ECE0 /* ContainerDraft.swift */; };
 		B106EA07B46AC0DF1E134973 /* CardsRising.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1934B1D469EA3AABD7A82319 /* CardsRising.swift */; };
@@ -309,12 +323,12 @@
 		BE3193C73906C7B9CD0DAF37 /* StoredInRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3236C3DA0DE7F5B85D1B4126 /* StoredInRow.swift */; };
 		BF694AC2893B440FAD2DF586 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AA815C9650049DB84CB04F7 /* OnboardingView.swift */; };
 		C008192458E4CC44EA2088E2 /* BinderPageScrubber.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBD212391B8B369C7B36166B /* BinderPageScrubber.swift */; };
-		C1D2E3F4A5B6C7D8E9F0A1B2 /* MotionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6C7D8E9F0A1B1 /* MotionManager.swift */; };
 		C1D2E3F4A5B6C7D8E9F0A1B4 /* InteractiveHolographicEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6C7D8E9F0A1B3 /* InteractiveHolographicEffect.swift */; };
 		C1D2E3F4A5B6C7D8E9F0A1B6 /* InteractiveCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6C7D8E9F0A1B5 /* InteractiveCardView.swift */; };
 		C1D2E3F4A5B6C7D8E9F0A1B8 /* FullscreenCardViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6C7D8E9F0A1B7 /* FullscreenCardViewer.swift */; };
 		C454EE237967C02DF44B3625 /* AddContainerTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6CAB4C54930D72C639C5DFA /* AddContainerTile.swift */; };
 		C51D41807CDF408640ACC94B /* BinderPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA45D4DC50150F804569F952 /* BinderPageView.swift */; };
+		C6781447D17F164334DB44BB /* ChartRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = F673C68743D6A91C7FDE698D /* ChartRange.swift */; };
 		C76B10048CD297A7DD6F7B90 /* SwayEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E18F445024FA61CB0285B5E /* SwayEffect.swift */; };
 		C7D86777CCE70BCA5548EF43 /* MoveCardsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA738027A8F3F3E567DF0D99 /* MoveCardsSheet.swift */; };
 		C81AD68ADA37B556BF3F1CA8 /* FocusPulse.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5EDEA13FC6F09389F4259CE /* FocusPulse.swift */; };
@@ -367,9 +381,11 @@
 		F05529C54009ACF715382289 /* PortfolioInsightsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C25AA3BAB0F557569E3E532 /* PortfolioInsightsBuilder.swift */; };
 		F1CARD5EB6A63F /* CardSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1CARD5EA3181D /* CardSearchView.swift */; };
 		F2B4169890855F2991A59376 /* BulkMoveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2279510BB1CE000F76E1897E /* BulkMoveTests.swift */; };
+		F2C69B4242B624BFFFB248BB /* ValueHistoryChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB560447CF9BBC1736730A8 /* ValueHistoryChart.swift */; };
 		F48A23DA677A4ED793CF6952 /* FormatLegality.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFBD1F113A0B7EA4AA374642 /* FormatLegality.swift */; };
 		F5113FA0DE262727BC9C5DA4 /* BookshelfOpenContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB024A4D84321D129BBCAAFB /* BookshelfOpenContainer.swift */; };
 		F6605D76AD429CFF576770ED /* PullSnapshotCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F3C9DECA99612DB829BD60B /* PullSnapshotCache.swift */; };
+		F6D4ACF8062396D401C8A42A /* FoilMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = C80369F0C23823FA8BF52155 /* FoilMotion.swift */; };
 		F752CD3BCA5B479CBEF391EB /* StatsCardContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4443B3280ED4450783544968 /* StatsCardContainer.swift */; };
 		F7B6A8BECA69BFABEF2EE3E2 /* AskAIRulesButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65D42F1B409CF4A8D4EEA6CB /* AskAIRulesButton.swift */; };
 		F7BF36DE7DD87DED06407B2E /* StorageChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD3069F481FAC2207635DED0 /* StorageChip.swift */; };
@@ -400,6 +416,7 @@
 
 /* Begin PBXFileReference section */
 		00A0DC199D804E5399BF0EE9 /* InkableRatioCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkableRatioCard.swift; sourceTree = "<group>"; };
+		00C284F2EE4BF50188CB7BAA /* ChartStoryline.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChartStoryline.swift; sourceTree = "<group>"; };
 		00CE0F56046C6FDFAC8C6CB0 /* MiniBookcase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MiniBookcase.swift; sourceTree = "<group>"; };
 		01C342E3971A0FDEDF2CED36 /* AnimatableContainerArtwork.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnimatableContainerArtwork.swift; sourceTree = "<group>"; };
 		023D902E0E918D092C180DA2 /* WoodGrain.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WoodGrain.swift; sourceTree = "<group>"; };
@@ -409,12 +426,14 @@
 		051CCA2D1B21ED90B034AE8F /* PortfolioPoint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioPoint.swift; sourceTree = "<group>"; };
 		062AEFC9EAE3A922BC206148 /* BoxView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BoxView.swift; sourceTree = "<group>"; };
 		0642DCC4EC0C5EFC8AAFDD4F /* CoconutFormatTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoconutFormatTests.swift; sourceTree = "<group>"; };
+		06B41D32DD0BC1397E7FACA3 /* ScreenshotRig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScreenshotRig.swift; sourceTree = "<group>"; };
 		06F51216821FF17628653B7C /* PortfolioHistoryViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioHistoryViewModel.swift; sourceTree = "<group>"; };
 		08F6B9426BDA39639602BA0D /* DeckBoxChooser.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckBoxChooser.swift; sourceTree = "<group>"; };
 		0E384140541123A316B26E34 /* ShelfPlank.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShelfPlank.swift; sourceTree = "<group>"; };
 		10573FFE9E607B3E6207E90D /* HiddenUpcomingSetCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HiddenUpcomingSetCard.swift; sourceTree = "<group>"; };
 		135FBC706A55D010B0FBE771 /* UnsortedPileView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UnsortedPileView.swift; sourceTree = "<group>"; };
 		13E4E3504356CA5A41096F88 /* AddToContainerHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AddToContainerHeader.swift; sourceTree = "<group>"; };
+		1433B5315A8D8A0152B9E0A8 /* ValueHistoryChartModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ValueHistoryChartModelTests.swift; sourceTree = "<group>"; };
 		1570D6C80F30584344166061 /* AIDeckRuleCheckBanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIDeckRuleCheckBanner.swift; sourceTree = "<group>"; };
 		15D5E3F6A5C8783670C2B5F0 /* PopEffect.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PopEffect.swift; sourceTree = "<group>"; };
 		15F50C364FAAE00764832474 /* promo_set_pd1.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = promo_set_pd1.json; sourceTree = "<group>"; };
@@ -533,6 +552,7 @@
 		26ADB96680DCCAA51B1B1CB4 /* DeckBuildTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckBuildTests.swift; sourceTree = "<group>"; };
 		27BF6FCD75E011DDA53BA414 /* hyperia_city.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = hyperia_city.json; sourceTree = "<group>"; };
 		282AAE9D0E6DFD4DB49ACF8B /* CoconutLeaderPicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoconutLeaderPicker.swift; sourceTree = "<group>"; };
+		2859DA56BCDC5313E652DB3C /* FoilTiltFilterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FoilTiltFilterTests.swift; sourceTree = "<group>"; };
 		287217E6FCCB16A2D24F29EE /* AIDeckFeedbackPrompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIDeckFeedbackPrompt.swift; sourceTree = "<group>"; };
 		28A19CE19939AA33FF7A74C0 /* CostBasisSummary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CostBasisSummary.swift; sourceTree = "<group>"; };
 		29EEBA866EF31E4C1D9C09CA /* PaywallContext.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PaywallContext.swift; sourceTree = "<group>"; };
@@ -587,6 +607,7 @@
 		56C426043D76001059A10D97 /* illumineers_quest_the_great_hunny_rescue.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = illumineers_quest_the_great_hunny_rescue.json; sourceTree = "<group>"; };
 		575CB775C89158C8A42ED69B /* BookcaseShelf.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BookcaseShelf.swift; sourceTree = "<group>"; };
 		57EC37194A3A038F6F9E8A65 /* PortfolioValueChart.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioValueChart.swift; sourceTree = "<group>"; };
+		580004F8802791E263BF0AF9 /* PocketStackBadge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PocketStackBadge.swift; sourceTree = "<group>"; };
 		5B89D012EEFA30E3FC4DC9E4 /* AddCandidateTile.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AddCandidateTile.swift; sourceTree = "<group>"; };
 		5B9E7AD6E4D4968083FA8AED /* StorageShelfView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StorageShelfView.swift; sourceTree = "<group>"; };
 		5CA7F430112A28FB4022621C /* ShareImageRenderer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareImageRenderer.swift; sourceTree = "<group>"; };
@@ -612,6 +633,7 @@
 		6CF733AA1540C942E1C3D751 /* TradeScannerSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TradeScannerSheet.swift; sourceTree = "<group>"; };
 		6DE0AB0F1A7D355455BC9557 /* StorageLocationFormatter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StorageLocationFormatter.swift; sourceTree = "<group>"; };
 		6E5BBDF7C9F7EFF1324E0E01 /* CardBackDrawing.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardBackDrawing.swift; sourceTree = "<group>"; };
+		6EB621C704905D21573660FB /* FoilShader.metal */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.metal; path = FoilShader.metal; sourceTree = "<group>"; };
 		6EDBB90C6B278018EFD27ECA /* BookcaseBackdrop.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BookcaseBackdrop.swift; sourceTree = "<group>"; };
 		6F281DF5C7B88E62FEDF540C /* SetFilterBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetFilterBar.swift; sourceTree = "<group>"; };
 		6F563B3E0A2A73C9FA17CEDD /* CardTextParsingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardTextParsingTests.swift; sourceTree = "<group>"; };
@@ -670,12 +692,16 @@
 		A1A1A1A1000000010000A001 /* Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Analytics.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6789012345678 /* winterspell.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = winterspell.json; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* HolographicCardImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolographicCardImage.swift; sourceTree = "<group>"; };
+		A2E370BC75265AAF0B2A78DF /* FoilTiltFilter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FoilTiltFilter.swift; sourceTree = "<group>"; };
 		A4830599C05F8B109EEDFDFD /* Inkwell KeeperTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Inkwell KeeperTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A58272E242BA935C138E0E7D /* ShelfSlot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShelfSlot.swift; sourceTree = "<group>"; };
+		A8B3E5CA101035662470791D /* ChartRangePicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChartRangePicker.swift; sourceTree = "<group>"; };
 		AA1B2C3D4E5F678901234560 /* LoreCounterModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoreCounterModels.swift; sourceTree = "<group>"; };
 		AA1B2C3D4E5F678901234562 /* PlayerLoreCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerLoreCard.swift; sourceTree = "<group>"; };
 		AA1B2C3D4E5F678901234564 /* LoreCounterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoreCounterView.swift; sourceTree = "<group>"; };
+		AA7E969742B3D4D27C1B7FBA /* PocketContentsSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PocketContentsSheet.swift; sourceTree = "<group>"; };
 		AB024A4D84321D129BBCAAFB /* BookshelfOpenContainer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BookshelfOpenContainer.swift; sourceTree = "<group>"; };
+		AB5A030DA953BFBC1584CB8E /* PocketStackTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PocketStackTests.swift; sourceTree = "<group>"; };
 		AC255A6FA06BE883022B5424 /* PortfolioInsights.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioInsights.swift; sourceTree = "<group>"; };
 		ACCE88E31AE5CD5995E68AC5 /* ShareCardChrome.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareCardChrome.swift; sourceTree = "<group>"; };
 		ADCF3A14F34D035AD1A31C84 /* BinderAutoFillSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BinderAutoFillSheet.swift; sourceTree = "<group>"; };
@@ -704,7 +730,6 @@
 		BCD7B7D3D53A754F91108715 /* CollectionEmptyStateContent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CollectionEmptyStateContent.swift; sourceTree = "<group>"; };
 		BD3069F481FAC2207635DED0 /* StorageChip.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StorageChip.swift; sourceTree = "<group>"; };
 		C10CD1D348FA629BA80B2FBF /* RenderedArtworkMetrics+Generated.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "RenderedArtworkMetrics+Generated.swift"; sourceTree = "<group>"; };
-		C1D2E3F4A5B6C7D8E9F0A1B1 /* MotionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionManager.swift; sourceTree = "<group>"; };
 		C1D2E3F4A5B6C7D8E9F0A1B3 /* InteractiveHolographicEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractiveHolographicEffect.swift; sourceTree = "<group>"; };
 		C1D2E3F4A5B6C7D8E9F0A1B5 /* InteractiveCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractiveCardView.swift; sourceTree = "<group>"; };
 		C1D2E3F4A5B6C7D8E9F0A1B7 /* FullscreenCardViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullscreenCardViewer.swift; sourceTree = "<group>"; };
@@ -718,6 +743,7 @@
 		C6CE5A40C7678D952970AD42 /* StorageTileBadge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StorageTileBadge.swift; sourceTree = "<group>"; };
 		C6FC7F1F0BC094A65F23D38F /* OpeningHandView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OpeningHandView.swift; sourceTree = "<group>"; };
 		C792A95769EC446748404EA1 /* TradeVerdictCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TradeVerdictCard.swift; sourceTree = "<group>"; };
+		C80369F0C23823FA8BF52155 /* FoilMotion.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FoilMotion.swift; sourceTree = "<group>"; };
 		CADBF51089A4AEF69988CA81 /* BinderViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BinderViewModel.swift; sourceTree = "<group>"; };
 		CB087B5E53F5C7CAB42B5727 /* PortfolioMoversCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioMoversCard.swift; sourceTree = "<group>"; };
 		CBB7AD2CE4D089373FC28C5D /* AddToContainerSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AddToContainerSheet.swift; sourceTree = "<group>"; };
@@ -733,6 +759,7 @@
 		D1E2F3A4B5C6D7E8F9A0B1E1 /* LorcanaSetRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LorcanaSetRegistry.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C6D7E8F9A0B1F1 /* DeckValidation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckValidation.swift; sourceTree = "<group>"; };
 		D308EF10E35F2261EF1A1B23 /* AIDeckRules.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIDeckRules.swift; sourceTree = "<group>"; };
+		D37797EEEBD2986967A6EFAE /* ValueHistoryChartModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ValueHistoryChartModel.swift; sourceTree = "<group>"; };
 		D3F932B4B946EA58B9D03BB8 /* attack_of_the_vine.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = attack_of_the_vine.json; sourceTree = "<group>"; };
 		D4671877777D1EC2B5B2ECD5 /* PortfolioHolding.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioHolding.swift; sourceTree = "<group>"; };
 		D5EDEA13FC6F09389F4259CE /* FocusPulse.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FocusPulse.swift; sourceTree = "<group>"; };
@@ -740,6 +767,7 @@
 		D9FB8FC1EFC087642A3270CC /* BrowseAllCardsButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowseAllCardsButton.swift; sourceTree = "<group>"; };
 		DA1E3E99C0670865724FC03C /* AIChosenInksBanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIChosenInksBanner.swift; sourceTree = "<group>"; };
 		DA45D4DC50150F804569F952 /* BinderPageView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BinderPageView.swift; sourceTree = "<group>"; };
+		DA9349B18725198073ECAC37 /* ChartSelectionCallout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChartSelectionCallout.swift; sourceTree = "<group>"; };
 		DAEEB20B891FCF92541EDBA3 /* StorageCatalogAddTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StorageCatalogAddTests.swift; sourceTree = "<group>"; };
 		DBFF6B0A02D74D5DBDDBD4B1 /* TypeBreakdownCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeBreakdownCard.swift; sourceTree = "<group>"; };
 		DC5483000A417BA10C98784A /* TradeSideTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TradeSideTests.swift; sourceTree = "<group>"; };
@@ -763,6 +791,7 @@
 		EA738027A8F3F3E567DF0D99 /* MoveCardsSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MoveCardsSheet.swift; sourceTree = "<group>"; };
 		EB6643E2C5A509EC56A7C571 /* PortfolioHistoryBuilder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioHistoryBuilder.swift; sourceTree = "<group>"; };
 		ECB3857A2307770C22BB78A0 /* DeckListTextCodec.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckListTextCodec.swift; sourceTree = "<group>"; };
+		EDB560447CF9BBC1736730A8 /* ValueHistoryChart.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ValueHistoryChart.swift; sourceTree = "<group>"; };
 		EEF7ED060E8A3BFCE3474008 /* PortfolioExtremesCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioExtremesCard.swift; sourceTree = "<group>"; };
 		EF9147572B7F30FE0481FBE1 /* CloudKitSchemaDebugRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudKitSchemaDebugRow.swift; sourceTree = "<group>"; };
 		EFDF65526189A1F0BCA8B520 /* TradeSide.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TradeSide.swift; sourceTree = "<group>"; };
@@ -770,10 +799,13 @@
 		F134BB82C7119A25C87B0A74 /* DeckPullRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckPullRow.swift; sourceTree = "<group>"; };
 		F1CARD5EA3181D /* CardSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSearchView.swift; sourceTree = "<group>"; };
 		F47E94E47E0150CF52D3320C /* TradeCardPicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TradeCardPicker.swift; sourceTree = "<group>"; };
+		F488A42AE37F1803A29194F9 /* TiltingCardFace.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TiltingCardFace.swift; sourceTree = "<group>"; };
 		F4B4064556E01D4299D347B7 /* SetChecklistLayoutTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetChecklistLayoutTests.swift; sourceTree = "<group>"; };
 		F6502D77B1F14DFEA73094B1 /* ValueBySetCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValueBySetCard.swift; sourceTree = "<group>"; };
+		F673C68743D6A91C7FDE698D /* ChartRange.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChartRange.swift; sourceTree = "<group>"; };
 		F6EE2E6F48389BEED0AA273D /* ContainerPreview.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContainerPreview.swift; sourceTree = "<group>"; };
 		F80DC760DB8B78D93ED55511 /* BookTurnView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BookTurnView.swift; sourceTree = "<group>"; };
+		FA1FF5DB0FB13A6DF3D77513 /* PocketCopyStepper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PocketCopyStepper.swift; sourceTree = "<group>"; };
 		FB788689F2C446D1C83170C7 /* SparkleShape.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkleShape.swift; sourceTree = "<group>"; };
 		FB7C812E9FEE8EB997A057D4 /* DeckPullListView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckPullListView.swift; sourceTree = "<group>"; };
 		FBDD9F9BF2B86C0C9E2444DF /* PortfolioLockedPreview.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioLockedPreview.swift; sourceTree = "<group>"; };
@@ -954,6 +986,9 @@
 				E3D863EE54A0C3633D9AB7DD /* ReleaseSchedule.swift */,
 				904CE7A490E5C4F62EE9DBA1 /* Storage */,
 				B3BF8F88327810421D4A263B /* InkwellBackup.swift */,
+				D37797EEEBD2986967A6EFAE /* ValueHistoryChartModel.swift */,
+				F673C68743D6A91C7FDE698D /* ChartRange.swift */,
+				A2E370BC75265AAF0B2A78DF /* FoilTiltFilter.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -965,7 +1000,6 @@
 				23D9D44B2EA3FF210089D552 /* DeckManager.swift */,
 				23B90B382E66338B00214C40 /* CollectionManager.swift */,
 				23B90B3A2E6633A600214C40 /* CameraManager.swift */,
-				C1D2E3F4A5B6C7D8E9F0A1B1 /* MotionManager.swift */,
 				7CF2A26313064CEB985D1463 /* StatsViewModel.swift */,
 				725A18D9BE0D05A991CB6FD8 /* CloudSyncMonitor.swift */,
 				06F51216821FF17628653B7C /* PortfolioHistoryViewModel.swift */,
@@ -973,6 +1007,7 @@
 				049AAB6BA33234B1681D566B /* StorageManager.swift */,
 				CADBF51089A4AEF69988CA81 /* BinderViewModel.swift */,
 				8774183BFE415943F90705A2 /* BookshelfViewModel.swift */,
+				C80369F0C23823FA8BF52155 /* FoilMotion.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -1011,6 +1046,7 @@
 				C42207F8A3C31774ACBE517B /* DecodedImageCache.swift */,
 				B157168B7FC08A5BA2FC96A4 /* CloudKitSchemaInitializer.swift */,
 				98FCBE0384227CBB565C054C /* DemoCollectionSeeder.swift */,
+				06B41D32DD0BC1397E7FACA3 /* ScreenshotRig.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -1130,6 +1166,12 @@
 				10573FFE9E607B3E6207E90D /* HiddenUpcomingSetCard.swift */,
 				94295198B2AC0C596B985079 /* Storage */,
 				885DCC32B302C83F9ECAB566 /* Bookshelf */,
+				EDB560447CF9BBC1736730A8 /* ValueHistoryChart.swift */,
+				A8B3E5CA101035662470791D /* ChartRangePicker.swift */,
+				DA9349B18725198073ECAC37 /* ChartSelectionCallout.swift */,
+				00C284F2EE4BF50188CB7BAA /* ChartStoryline.swift */,
+				6EB621C704905D21573660FB /* FoilShader.metal */,
+				F488A42AE37F1803A29194F9 /* TiltingCardFace.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -1172,6 +1214,7 @@
 				08F6B9426BDA39639602BA0D /* DeckBoxChooser.swift */,
 				FB7C812E9FEE8EB997A057D4 /* DeckPullListView.swift */,
 				EA738027A8F3F3E567DF0D99 /* MoveCardsSheet.swift */,
+				AA7E969742B3D4D27C1B7FBA /* PocketContentsSheet.swift */,
 			);
 			path = Storage;
 			sourceTree = "<group>";
@@ -1214,6 +1257,9 @@
 				31DD183C2F184E9E80E1AEA9 /* StorageBackupTests.swift */,
 				2279510BB1CE000F76E1897E /* BulkMoveTests.swift */,
 				DAEEB20B891FCF92541EDBA3 /* StorageCatalogAddTests.swift */,
+				AB5A030DA953BFBC1584CB8E /* PocketStackTests.swift */,
+				1433B5315A8D8A0152B9E0A8 /* ValueHistoryChartModelTests.swift */,
+				2859DA56BCDC5313E652DB3C /* FoilTiltFilterTests.swift */,
 			);
 			path = "Inkwell KeeperTests";
 			sourceTree = "<group>";
@@ -1337,6 +1383,8 @@
 				B53FA64A3550664DA6CF3971 /* SelectionMark.swift */,
 				2B5885785DD6FC73EE079420 /* BinderFillPrompt.swift */,
 				D9FB8FC1EFC087642A3270CC /* BrowseAllCardsButton.swift */,
+				580004F8802791E263BF0AF9 /* PocketStackBadge.swift */,
+				FA1FF5DB0FB13A6DF3D77513 /* PocketCopyStepper.swift */,
 			);
 			path = Storage;
 			sourceTree = "<group>";
@@ -1581,7 +1629,6 @@
 				23B90D1F2E6CCB7900214C40 /* PricingService.swift in Sources */,
 				23CB6DCF2EB8544500630416 /* BulkImportView.swift in Sources */,
 				BF694AC2893B440FAD2DF586 /* OnboardingView.swift in Sources */,
-				C1D2E3F4A5B6C7D8E9F0A1B2 /* MotionManager.swift in Sources */,
 				C1D2E3F4A5B6C7D8E9F0A1B4 /* InteractiveHolographicEffect.swift in Sources */,
 				C1D2E3F4A5B6C7D8E9F0A1B6 /* InteractiveCardView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E1F3 /* HolographicCardImage.swift in Sources */,
@@ -1804,6 +1851,20 @@
 				A3D4E3A3BC7792235C3EF2F8 /* DemoCollectionSeeder.swift in Sources */,
 				D4227E89E07EB42D8C880591 /* AddCardsSource.swift in Sources */,
 				451383FE0095A4184B165BAF /* BrowseAllCardsButton.swift in Sources */,
+				769217F2D2B6C1561EA0BEE7 /* PocketStackBadge.swift in Sources */,
+				3314E019793B44FEDCD5CA21 /* PocketCopyStepper.swift in Sources */,
+				AFC58253F50561EF0649A060 /* PocketContentsSheet.swift in Sources */,
+				5FBF39D75B91C540D9D726BE /* ValueHistoryChartModel.swift in Sources */,
+				C6781447D17F164334DB44BB /* ChartRange.swift in Sources */,
+				F2C69B4242B624BFFFB248BB /* ValueHistoryChart.swift in Sources */,
+				6DC5E88228647387F3183EB8 /* ChartRangePicker.swift in Sources */,
+				38DEC4D8DEB337AE9D73E660 /* ChartSelectionCallout.swift in Sources */,
+				42A0454EF378EA752F93A488 /* ChartStoryline.swift in Sources */,
+				749A7511E12A743EF23E6CA7 /* FoilShader.metal in Sources */,
+				F6D4ACF8062396D401C8A42A /* FoilMotion.swift in Sources */,
+				148D7DDFB8503949DFBB7BD6 /* FoilTiltFilter.swift in Sources */,
+				2DE538D6ED7B8E8C251DBB45 /* TiltingCardFace.swift in Sources */,
+				01204B703FE33AD4706530D1 /* ScreenshotRig.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1846,6 +1907,9 @@
 				C94BDFE92650392E29FFA7B6 /* StorageBackupTests.swift in Sources */,
 				F2B4169890855F2991A59376 /* BulkMoveTests.swift in Sources */,
 				485C01711D3D18261F9ABF78 /* StorageCatalogAddTests.swift in Sources */,
+				80489A0F4A9F253AD9BA6AC0 /* PocketStackTests.swift in Sources */,
+				5D8B6E5EA772AE73A318B5F3 /* ValueHistoryChartModelTests.swift in Sources */,
+				A71C222C2F4EA2ED0CF346FF /* FoilTiltFilterTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2002,14 +2066,14 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.5.1;
+				MARKETING_VERSION = 3.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -2041,14 +2105,14 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.5.1;
+				MARKETING_VERSION = 3.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "co.brevinb.Inkwell-Keeper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

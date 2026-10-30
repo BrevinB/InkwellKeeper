@@ -11,13 +11,16 @@ import SwiftUI
 struct BinderPageView: View {
     let page: Int
     let layout: BinderLayout
-    let itemsBySlot: [Int: StoredCard]
+    /// Every pocket's copies, top card first.
+    let stacksBySlot: [Int: [StoredCard]]
     let ghostsBySlot: [Int: LorcanaCard]
     let model: BinderViewModel
     let namespace: Namespace.ID
     let onTap: (_ slot: Int, _ occupant: StoredCard?) -> Void
     let onDrop: (_ itemId: UUID, _ slot: Int) -> Void
     let onRemove: (StoredCard) -> Void
+    var onEditPocket: (_ slot: Int) -> Void = { _ in }
+    var onShowDetails: (StoredCard) -> Void = { _ in }
     /// The foil that could replace a normal copy in a checklist pocket, if one is unsorted.
     var upgradeableFoil: (StoredCard) -> LorcanaCard? = { _ in nil }
     var onUpgrade: (StoredCard) -> Void = { _ in }
@@ -61,21 +64,22 @@ struct BinderPageView: View {
 
     private func pocketButton(pocket: Int) -> some View {
         let slot = layout.slot(page: page, pocket: pocket)
-        let item = itemsBySlot[slot]
+        let stack = stacksBySlot[slot] ?? []
+        let item = stack.first
         let ghost = item == nil ? ghostsBySlot[slot] : nil
 
         return Button {
             onTap(slot, item)
         } label: {
             PocketView(
-                item: item,
+                stack: stack,
                 ghost: ghost,
                 pocketIndex: pocket,
                 isPickedUp: item != nil && item?.id == model.pickedUpItemId,
                 isFocused: model.focusedSlot == slot,
                 namespace: namespace,
                 canUpgrade: item.map { upgradeableFoil($0) != nil } ?? false,
-                isSelected: model.isSelecting ? item.map { model.selectedItemIds.contains($0.id) } : nil
+                isSelected: model.isSelecting && item != nil ? stack.allSatisfy { model.selectedItemIds.contains($0.id) } : nil
             )
         }
         .buttonStyle(.plain)
@@ -92,15 +96,18 @@ struct BinderPageView: View {
         }
         .contextMenu {
             if let item {
+                Button("Edit Pocket", systemImage: "square.stack") {
+                    onEditPocket(slot)
+                }
                 Button("Card Details", systemImage: "info.circle") {
-                    onTap(slot, item)
+                    onShowDetails(item)
                 }
                 if upgradeableFoil(item) != nil {
                     Button("Upgrade to Foil", systemImage: "sparkles") {
                         onUpgrade(item)
                     }
                 }
-                Button("Take Out of Binder", systemImage: "tray.and.arrow.up", role: .destructive) {
+                Button(stack.count > 1 ? "Take All Out of Binder" : "Take Out of Binder", systemImage: "tray.and.arrow.up", role: .destructive) {
                     onRemove(item)
                 }
             } else {
@@ -109,7 +116,7 @@ struct BinderPageView: View {
                 }
             }
         }
-        .accessibilityLabel(pocketLabel(pocket: pocket, item: item, ghost: ghost))
+        .accessibilityLabel(pocketLabel(pocket: pocket, stack: stack, ghost: ghost))
         .accessibilityActions {
             if let item, upgradeableFoil(item) != nil {
                 Button("Upgrade to Foil") { onUpgrade(item) }
@@ -118,11 +125,18 @@ struct BinderPageView: View {
         .accessibilityHint(pocketHint(item: item))
     }
 
-    private func pocketLabel(pocket: Int, item: StoredCard?, ghost: LorcanaCard?) -> String {
+    private func pocketLabel(pocket: Int, stack: [StoredCard], ghost: LorcanaCard?) -> String {
         let position = "Page \(page + 1), pocket \(pocket + 1)"
-        if let item {
-            let variant = item.cardVariant == .normal ? "" : ", \(item.variant)"
-            return "\(position), \(item.name)\(variant)"
+        if let item = stack.first {
+            guard stack.count > 1 else {
+                let variant = item.cardVariant == .normal ? "" : ", \(item.variant)"
+                return "\(position), \(item.name)\(variant)"
+            }
+            let counts = Dictionary(grouping: stack, by: \.variant)
+                .sorted { $0.key == CardVariant.normal.rawValue || ($1.key != CardVariant.normal.rawValue && $0.key < $1.key) }
+                .map { "\($0.value.count) \($0.key.lowercased())" }
+                .joined(separator: ", ")
+            return "\(position), \(item.name), \(counts)"
         }
         if let ghost {
             return "\(position), empty, missing \(ghost.name)"
@@ -135,6 +149,6 @@ struct BinderPageView: View {
             if model.pickedUpItemId != nil { return "Moves the picked-up card here" }
             return item == nil ? "Choose a card for this pocket" : "Picks up this card to move it"
         }
-        return item == nil ? "Choose a card for this pocket" : "Shows card details"
+        return item == nil ? "Choose a card for this pocket" : "Shows the copies in this pocket"
     }
 }
