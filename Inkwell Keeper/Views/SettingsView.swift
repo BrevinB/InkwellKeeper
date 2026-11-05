@@ -21,6 +21,7 @@ struct SettingsView: View {
     @State private var showingTipJar = false
     @State private var showingWhatsNew = false
     @State private var showingPricingInfo = false
+    @State private var showingPriceAlerts = false
 
     // Debug options
     @State private var showingAddSomeConfirmation = false
@@ -81,6 +82,9 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showingPricingInfo) {
                 PricingInfoView()
+            }
+            .sheet(isPresented: $showingPriceAlerts) {
+                PriceAlertsView()
             }
             .sheet(isPresented: $showingWhatsNew) {
                 WhatsNewView()
@@ -168,6 +172,12 @@ struct SettingsView: View {
 
     private var statsSection: some View {
         Section("Collection") {
+            Button {
+                showingPriceAlerts = true
+            } label: {
+                Label("Price Alerts", systemImage: "bell.badge")
+            }
+
             HStack {
                 Label("Total Cards", systemImage: "rectangle.stack.fill")
                 Spacer()

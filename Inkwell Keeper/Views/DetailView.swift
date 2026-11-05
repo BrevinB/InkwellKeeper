@@ -48,6 +48,7 @@ struct CardDetailView: View {
                         }
 
                         AsyncPriceWithConfidenceView(card: card, style: .detailed)
+                        PriceAlertCallout(card: card)
                     }
                     .padding()
 
@@ -68,6 +69,9 @@ struct CardDetailView: View {
             .navigationTitle("Card Details")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    PriceAlertToolbarButton(card: card)
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
                         isPresented = false
@@ -255,6 +259,7 @@ struct CollectionCardDetailView: View {
                             }
                         
                             AsyncPriceWithConfidenceView(card: card, style: .detailed)
+                            PriceAlertCallout(card: card)
                         }
                         .padding()
                         .background(
@@ -335,6 +340,9 @@ struct CollectionCardDetailView: View {
                     Button("Share", systemImage: "square.and.arrow.up") {
                         showingShareImage = true
                     }
+                }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    PriceAlertToolbarButton(card: card)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -695,6 +703,7 @@ struct WishlistCardDetailView: View {
                             }
 
                             AsyncPriceWithConfidenceView(card: card, style: .detailed)
+                            PriceAlertCallout(card: card)
                         }
                         .padding()
                         .background(
@@ -739,6 +748,9 @@ struct WishlistCardDetailView: View {
                 .navigationTitle("Wishlist Card")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        PriceAlertToolbarButton(card: card)
+                    }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button("Done") {
                             isPresented = false
@@ -1233,6 +1245,11 @@ struct AddCardGroupModal: View {
                     // Card image and basic info
                     CardGroupInfoHeader(displayCard: displayCard, isImageExpanded: $isImageExpanded)
 
+                    // Sets, search and manual add all land here for cards the
+                    // user doesn't own — the ones most worth watching.
+                    PriceAlertCallout(card: displayCard)
+                        .padding(.horizontal)
+
                     // Ownership status — the add steppers below default to 1, which
                     // otherwise reads as "you own 1" for cards not yet collected
                     HStack(spacing: 6) {
@@ -1456,6 +1473,9 @@ struct AddCardGroupModal: View {
                     Button("Cancel") {
                         isPresented = false
                     }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    PriceAlertToolbarButton(card: displayCard)
                 }
             }
             .overlay(

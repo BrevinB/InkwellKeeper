@@ -62,7 +62,13 @@ struct AnalyticsEventTests {
         .deckTakenApart(returnedToOrigins: true),
         .onboardingStarted,
         .onboardingCompleted,
-        .loreCounterGameStarted(players: 4, mode: "Coconut")
+        .loreCounterGameStarted(players: 4, mode: "Coconut"),
+        .priceAlertCreated(direction: "below", foil: true),
+        .priceAlertDeleted,
+        .priceAlertRearmed,
+        .priceAlertLimitHit,
+        .collectionAlertToggled(kind: "moves", enabled: true),
+        .priceAlertOpened(kind: "price-targets")
     ]
 
     @Test("No event uses a TelemetryDeck reserved parameter key")

@@ -55,6 +55,7 @@ import co.brevinb.inkwellkeeper.ui.theme.LorcanaDark
 import co.brevinb.inkwellkeeper.ui.theme.LorcanaGold
 import com.revenuecat.purchases.Package
 import com.revenuecat.purchases.PackageType
+import com.revenuecat.purchases.ProductType
 import com.revenuecat.purchases.models.Period
 import kotlinx.coroutines.launch
 
@@ -212,7 +213,7 @@ private fun PurchaseFooter(
         }
         LorcanaPrimaryButton(onClick = onSubscribe, enabled = selected != null && !purchasing, modifier = Modifier.fillMaxWidth()) {
             if (purchasing) CircularProgressIndicator(Modifier.size(20.dp), color = Color.Black, strokeWidth = 2.dp)
-            else Text("Subscribe Now", fontWeight = FontWeight.Bold)
+            else Text(if (selected?.isLifetime == true) "Unlock Lifetime" else "Subscribe Now", fontWeight = FontWeight.Bold)
         }
         Row(horizontalArrangement = Arrangement.Center) {
             TextButton(onClick = onRestore, enabled = !purchasing && SubscriptionManager.isConfigured, modifier = Modifier.heightIn(min = 44.dp)) {
@@ -223,7 +224,9 @@ private fun PurchaseFooter(
             }
         }
         Text(
-            "Auto-renews until cancelled. Cancel anytime in Google Play → Subscriptions.",
+            // The terms follow the selected option: a lifetime unlock never renews.
+            if (selected?.isLifetime == true) "One-time purchase. No subscription, nothing renews."
+            else "Auto-renews until cancelled. Cancel anytime in Google Play → Subscriptions.",
             style = MaterialTheme.typography.labelSmall, color = Color.Gray.copy(alpha = 0.8f), textAlign = TextAlign.Center,
         )
     }
@@ -240,7 +243,7 @@ private fun SubscriptionOptionCard(pkg: Package, isSelected: Boolean, onTap: () 
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(periodLabel(pkg), style = MaterialTheme.typography.titleMedium, color = Color.White)
-            introText(pkg)?.let { Text(it, style = MaterialTheme.typography.labelMedium, color = LorcanaGold) }
+            (if (pkg.isLifetime) "Pay once, keep Pro forever" else introText(pkg))?.let { Text(it, style = MaterialTheme.typography.labelMedium, color = LorcanaGold) }
         }
         if (isSelected) Icon(Icons.Filled.CheckCircle, null, tint = LorcanaGold, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(8.dp))
@@ -270,6 +273,13 @@ private fun periodTitle(period: Period): String = when (period.unit) {
     Period.Unit.YEAR -> if (period.value == 1) "Yearly" else "${period.value}-Year"
     else -> "Subscription"
 }
+
+/**
+ * A one-time purchase rather than a renewing subscription: the Lifetime package slot, or a one-time
+ * Play product placed in a custom slot (matches iOS `Package.isLifetime`).
+ */
+private val Package.isLifetime: Boolean
+    get() = packageType == PackageType.LIFETIME || product.type == ProductType.INAPP
 
 private fun introText(pkg: Package): String? {
     val option = pkg.product.defaultOption ?: return null

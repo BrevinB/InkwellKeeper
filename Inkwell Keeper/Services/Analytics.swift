@@ -62,6 +62,19 @@ enum Analytics {
         /// `retry` marks results from "Try again" after a thumbs down, to see if retries land.
         case aiDeckRated(mode: String, helpful: Bool, reason: String, format: String, ruleIssues: Int, retry: Bool)
 
+        // MARK: Price alerts
+        /// `direction` is "above" or "below".
+        case priceAlertCreated(direction: String, foil: Bool)
+        case priceAlertDeleted
+        case priceAlertRearmed
+        /// A free user tried to create an alert past the free limit.
+        case priceAlertLimitHit
+        /// `kind` is "moves" or "digest".
+        case collectionAlertToggled(kind: String, enabled: Bool)
+        /// A price-alert push was tapped. `kind` is its thread: "price-targets",
+        /// "collection-moves" or "weekly-digest".
+        case priceAlertOpened(kind: String)
+
         // MARK: Monetization
         case paywallShown(source: String)
         case subscriptionPurchased(product: String)
@@ -138,6 +151,12 @@ enum Analytics {
             case .rulesAssistantOpened: "ai.rulesAssistantOpened"
             case .rulesAnswerRated: "ai.rulesAnswerRated"
             case .aiDeckRated: "ai.deckRated"
+            case .priceAlertCreated: "priceAlert.created"
+            case .priceAlertDeleted: "priceAlert.deleted"
+            case .priceAlertRearmed: "priceAlert.rearmed"
+            case .priceAlertLimitHit: "priceAlert.limitHit"
+            case .collectionAlertToggled: "priceAlert.collectionToggled"
+            case .priceAlertOpened: "priceAlert.opened"
             case .paywallShown: "paywall.shown"
             case .subscriptionPurchased: "subscription.purchased"
             case .tipPurchased: "tipJar.tipPurchased"
@@ -197,6 +216,12 @@ enum Analytics {
                 ["format": format]
             case let .deckImported(format):
                 ["format": format]
+            case let .priceAlertCreated(direction, foil):
+                ["direction": direction, "foil": String(foil)]
+            case let .collectionAlertToggled(kind, enabled):
+                ["alertKind": kind, "enabled": String(enabled)]
+            case let .priceAlertOpened(kind):
+                ["alertKind": kind]
             case let .paywallShown(source):
                 ["source": source]
             case let .subscriptionPurchased(product):

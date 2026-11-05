@@ -16,6 +16,7 @@ struct ContentView: View {
     @State private var deckImportCode: String?
     @State private var deckImportName = ""
     @State private var deepLinkedCard: LorcanaCard?
+    @State private var showingPriceAlerts = false
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -82,6 +83,16 @@ struct ContentView: View {
         }
         .onOpenURL { router.handle($0) }
         .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { router.handle($0) }
+        .onChange(of: PriceAlertService.shared.pendingNotificationURL, initial: true) { _, url in
+            // A tapped price-alert push routes like any other deep link.
+            if let url {
+                router.handle(url)
+                PriceAlertService.shared.pendingNotificationURL = nil
+            }
+        }
+        .sheet(isPresented: $showingPriceAlerts) {
+            PriceAlertsView()
+        }
         .onChange(of: router.pendingRoute) { _, route in
             if let route {
                 handleDeepLink(route)
@@ -113,6 +124,8 @@ struct ContentView: View {
                 )
             )
             .environment(collectionManager)
+            // Sheets here sit outside the TabView that injects this.
+            .environment(storageManager)
         }
         .alert("Import Deck", isPresented: Binding(
             get: { deckImportCode != nil },
@@ -145,8 +158,11 @@ struct ContentView: View {
                 selectedTab = 0
                 deepLinkedCard = card
             }
-        case .set:
+        case .set, .stats:
             selectedTab = route.tab
+        case .priceAlerts:
+            selectedTab = route.tab
+            showingPriceAlerts = true
         }
     }
 

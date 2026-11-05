@@ -14,8 +14,10 @@
 		0465417773ED023BF104993B /* DeckBuildStatusBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40BE6DB92A340B148CCD430 /* DeckBuildStatusBar.swift */; };
 		0487FF4F499FF20017F50E9F /* PortfolioLockedPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDD9F9BF2B86C0C9E2444DF /* PortfolioLockedPreview.swift */; };
 		066A6108C3D2DB95A132CFFE /* PortfolioMoverRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39EF5EE08B75718B1E6E8683 /* PortfolioMoverRow.swift */; };
+		06E0E138D30A42D5E8A6933B /* PriceAlertDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9264EBC5105649CFDDCD209D /* PriceAlertDirection.swift */; };
 		07A14C930B524568A97F915A /* RarityDonutCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 201FD86CB7074B36B57EA57E /* RarityDonutCard.swift */; };
 		07CE1D350BFCFE44CBDF7929 /* BinderFillPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5885785DD6FC73EE079420 /* BinderFillPrompt.swift */; };
+		0879D426ADBFDDB10AE2F7ED /* PriceAlertTargetChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = C71FE4B39FB0ED6BD77EB23B /* PriceAlertTargetChart.swift */; };
 		0965C503228462B0DCA948E9 /* BinderLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E85F3016F710EE207072AE7D /* BinderLayoutTests.swift */; };
 		09AB4C113A7BBE2D6CAA763B /* StorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 049AAB6BA33234B1681D566B /* StorageManager.swift */; };
 		09CBFA613F6AA714CBEA2A2E /* BoxSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55CD6BFC55FC17258360F8A3 /* BoxSectionHeader.swift */; };
@@ -26,8 +28,11 @@
 		0BF2568AA99B1BB7807ED0E0 /* BookshelfSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF04F990119D5D205450C3FA /* BookshelfSummary.swift */; };
 		0C63B6E4867B828185BD730C /* PortfolioValueChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57EC37194A3A038F6F9E8A65 /* PortfolioValueChart.swift */; };
 		0DED8C4A16449418D1EB2DC4 /* CloudSyncMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 725A18D9BE0D05A991CB6FD8 /* CloudSyncMonitor.swift */; };
+		0F61DB701934CBDDE957DE2A /* PriceAlertToolbarButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 219331CC5A93FCD6708694AE /* PriceAlertToolbarButton.swift */; };
 		0FE14AAD4D53F9B975BE17B7 /* BookcaseLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F651080B122A27C1CCC745D /* BookcaseLayoutTests.swift */; };
 		118D09E628E7401E65DF12BF /* ShareCardChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCE88E31AE5CD5995E68AC5 /* ShareCardChrome.swift */; };
+		12C513B64A27DA95ED665508 /* PriceAlertDirectionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960D5730C8BDCFEF5ED6D15B /* PriceAlertDirectionPicker.swift */; };
+		130D5136A5E19134F90293A2 /* CollectionAlertsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7611FE484C6B596EB434FF7D /* CollectionAlertsSection.swift */; };
 		138266185F9281921E9C316F /* SpineShadow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FE064D459E933C25DF25BB /* SpineShadow.swift */; };
 		13DB352EB38B9F92267B95EA /* PortfolioHistoryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C4C498E2208EC2CD05CBED /* PortfolioHistoryCard.swift */; };
 		1425F4D6A3AD47C8AE488CD3 /* DeckPullSourceHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD745F2F0553A299876475DB /* DeckPullSourceHeader.swift */; };
@@ -43,12 +48,14 @@
 		1B60780DF7836064A08CE457 /* ShareCardPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1910551A9F8E16761BC5CE33 /* ShareCardPresenter.swift */; };
 		1C23426724F8DC6ACE72D018 /* TradeShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82AA95DA3BCDED0AFB0DE135 /* TradeShareCardView.swift */; };
 		1D0323DA18724F3992A05FDF /* StorageCoverStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17789AFD42D30A705E8578ED /* StorageCoverStyle.swift */; };
+		1DB74D20B14C57709417E954 /* PriceAlertCallout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5C82105E9A7CF950C06B00 /* PriceAlertCallout.swift */; };
 		1E16122A6580F336561E915A /* PortfolioSummaryHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6F4855D4AFB01FE7B400283 /* PortfolioSummaryHeader.swift */; };
 		1E34BEC4FE724210B4368238 /* ValueBySetCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6502D77B1F14DFEA73094B1 /* ValueBySetCard.swift */; };
 		1FD7B6E3D492B2FE4151BABF /* ScanCardMatchingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26A5F418A5ABA797A4DF64C0 /* ScanCardMatchingTests.swift */; };
 		2030608686C882B4ED380504 /* StorageKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD22BDFE25B4054B8DFED05F /* StorageKind.swift */; };
 		2071960A0B803DF1DE4324FA /* SpoilerPlaceholderRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55843056A9672CC82C85B8E9 /* SpoilerPlaceholderRow.swift */; };
 		20A761589D8F9899B97D8140 /* DeckPullRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F134BB82C7119A25C87B0A74 /* DeckPullRow.swift */; };
+		2107D838DBF193D2A74DAD77 /* PriceAlertSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 365A16576032A739893AC5EC /* PriceAlertSync.swift */; };
 		2110C0D6B12E1F3471F6598C /* DeckBoxChooser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08F6B9426BDA39639602BA0D /* DeckBoxChooser.swift */; };
 		21B089C1E42CC3E9A0094048 /* PricingSelectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A1198A827C589B87EBB410 /* PricingSelectionTests.swift */; };
 		21C877CEAB1D3D427AE25BF4 /* CoverColorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4453589B8DADFF2D9257018 /* CoverColorPicker.swift */; };
@@ -147,6 +154,7 @@
 		24F006AF660D446BAA2A4898 /* PricingInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F6FB2C58AC4849856F7DB2 /* PricingInfoView.swift */; };
 		27A345B145C2F65F518680C5 /* CloudSyncingPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78E531191161FBB262195AB8 /* CloudSyncingPlaceholderView.swift */; };
 		27B72DD6CD3BB181CA40330D /* CloudSyncBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9BB03867D8A4F4D71320AF8 /* CloudSyncBanner.swift */; };
+		27D79645BF129ED54CEEDF66 /* PriceAlertDistanceBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B7F6916F23AE148967B616F /* PriceAlertDistanceBadge.swift */; };
 		283E240622ABFBFA374426A8 /* StorageKindPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B1A4BE7F10C9E5BE2B6C900 /* StorageKindPicker.swift */; };
 		2911A81AE0AA67228B9E4C8F /* BinderOpeningPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B2971251F4E995C615ED897 /* BinderOpeningPage.swift */; };
 		2A7322B47E49298FA3205CE2 /* PutAwayContainerRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A01FE174597A36743E94BA2 /* PutAwayContainerRow.swift */; };
@@ -159,10 +167,12 @@
 		2E8C230A7C7346CDB8139B7D /* StatsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF2A26313064CEB985D1463 /* StatsViewModel.swift */; };
 		2FE722132A9DE259A5FFADE0 /* BinderCoverOrnaments.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10DE1BE732D3A9A6A58D23A /* BinderCoverOrnaments.swift */; };
 		307D4C4F11CBE5EC3666A461 /* ShelfSlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58272E242BA935C138E0E7D /* ShelfSlot.swift */; };
+		31B81AC4DC7C38B5CD64B248 /* InstallIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60059B13A3EF85CEC2F15E4 /* InstallIdentifier.swift */; };
 		31E06CF370A79588CB5C8306 /* PulledObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FE9A850F4FEA62C76CD0FF1 /* PulledObject.swift */; };
 		32E91E465EEE6EF8F9524BB9 /* PortfolioHistoryBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6643E2C5A509EC56A7C571 /* PortfolioHistoryBuilder.swift */; };
 		3314E019793B44FEDCD5CA21 /* PocketCopyStepper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1FF5DB0FB13A6DF3D77513 /* PocketCopyStepper.swift */; };
 		33BC6BA59BCB415FB26BED1B /* TypeBreakdownCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFF6B0A02D74D5DBDDBD4B1 /* TypeBreakdownCard.swift */; };
+		343143A4D3DC7C69F03DC487 /* PriceAlertRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8C940D9F64033ECA834BE4F /* PriceAlertRow.swift */; };
 		346DAC07477678DB8D6C9E12 /* CoconutLeaders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ACED7C31A38BCCA848C5847 /* CoconutLeaders.swift */; };
 		356E57F596D91866630AF243 /* PortfolioHolding.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4671877777D1EC2B5B2ECD5 /* PortfolioHolding.swift */; };
 		3591C033984D8B6A4A4728B6 /* TintedRenderLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E466CCD5A0B0C6133D071FD1 /* TintedRenderLayer.swift */; };
@@ -184,10 +194,12 @@
 		455B13B88603FCCDA1776DB8 /* KeywordGlossaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EE48EA871367379E4A82D6F /* KeywordGlossaryView.swift */; };
 		466F5A41BF962CA037C6BBE6 /* StorageContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B59F81968A79D19B18D5B5C /* StorageContainer.swift */; };
 		46D00402CEB0F9EA17C95D95 /* PutAwaySummaryLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 625D6562C6B786A5DFAD5C35 /* PutAwaySummaryLine.swift */; };
+		46EFB90E83204D648015BD8D /* PriceAlertTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66C4C78772FB1A725F028A98 /* PriceAlertTests.swift */; };
 		485C01711D3D18261F9ABF78 /* StorageCatalogAddTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEB20B891FCF92541EDBA3 /* StorageCatalogAddTests.swift */; };
 		49B8C1F420F980D57F1E343A /* StoragePreviewFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94E37DF157FD8BB5A6F35481 /* StoragePreviewFixture.swift */; };
 		4A606643A1D9335E7A70120B /* ShareImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA7F430112A28FB4022621C /* ShareImageRenderer.swift */; };
 		4E2517F4FD307C3DF1EAA542 /* CloudKitSchemaInitializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B157168B7FC08A5BA2FC96A4 /* CloudKitSchemaInitializer.swift */; };
+		4E828086B9D10700893E1F95 /* PriceAlertCardPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4163A77904ACAC4424EE8FEC /* PriceAlertCardPicker.swift */; };
 		501AAF3C2545DF55235693A7 /* PortfolioHistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06F51216821FF17628653B7C /* PortfolioHistoryViewModel.swift */; };
 		50597E11048AF006F8F845F8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 93242F4A5019C1D04A3502E5 /* PrivacyInfo.xcprivacy */; };
 		529DE4583C4BFDF9D263E7D3 /* TradeSideSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBE0EB3B25D0218BC93A2F63 /* TradeSideSection.swift */; };
@@ -201,7 +213,9 @@
 		59F3877E7AB0B16A94EC71FE /* CollectionEmptyStateContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCD7B7D3D53A754F91108715 /* CollectionEmptyStateContent.swift */; };
 		5BE81B0B3804D3B31601A169 /* AIDeckRuleCheckBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1570D6C80F30584344166061 /* AIDeckRuleCheckBanner.swift */; };
 		5C35188FB6BB83B5C2960A4A /* ReleaseSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D863EE54A0C3633D9AB7DD /* ReleaseSchedule.swift */; };
+		5C6F50BC731E9E5F087E7E83 /* PriceAlertEditTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286A16DADEB4166103FF9FA6 /* PriceAlertEditTarget.swift */; };
 		5CD69852ECD039E2975AADFA /* CostBasisSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A19CE19939AA33FF7A74C0 /* CostBasisSummary.swift */; };
+		5CF5D3AE3912ADBFF1FB1DB2 /* NotificationsOffSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1228D742F2C5CDF8436E6F /* NotificationsOffSection.swift */; };
 		5D8B6E5EA772AE73A318B5F3 /* ValueHistoryChartModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1433B5315A8D8A0152B9E0A8 /* ValueHistoryChartModelTests.swift */; };
 		5FBF39D75B91C540D9D726BE /* ValueHistoryChartModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37797EEEBD2986967A6EFAE /* ValueHistoryChartModel.swift */; };
 		6008EFAB6E9773D3A99F5CDE /* TradeVerdictCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C792A95769EC446748404EA1 /* TradeVerdictCard.swift */; };
@@ -212,6 +226,8 @@
 		619FE9C581D341F19C942405 /* BinderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CADBF51089A4AEF69988CA81 /* BinderViewModel.swift */; };
 		61E6300DD18C96C509B6904B /* HiddenUpcomingSetCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10573FFE9E607B3E6207E90D /* HiddenUpcomingSetCard.swift */; };
 		61F5DCEDA7360CB19A7DD199 /* PaywallFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA67147C9C216DF1423B6B3 /* PaywallFeature.swift */; };
+		6216B9E4A21DD1448B82CD99 /* PriceAlertEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B86130667E61F45983F8125 /* PriceAlertEditorView.swift */; };
+		62C2CC516008846B46DA468D /* PriceAlertRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D8DBCC688E96419461123 /* PriceAlertRules.swift */; };
 		62F9CC422C34616C96525024 /* DeckShareCodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 540D1DF38A5CB4BFAB840E60 /* DeckShareCodeTests.swift */; };
 		62FBCFD398DF39202A7B9D43 /* DeckListTextCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECB3857A2307770C22BB78A0 /* DeckListTextCodec.swift */; };
 		6398E1067664D9CE4DE7AB35 /* CapacityMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F47E7DA593CBCD1ADC13431 /* CapacityMeter.swift */; };
@@ -235,6 +251,7 @@
 		73A22599ABA5468E8C7CEBBA /* RulesDigestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EA333A30F84D7A69E490050 /* RulesDigestService.swift */; };
 		73A291B34FE3480D8FD364D5 /* StorageShelfView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B9E7AD6E4D4968083FA8AED /* StorageShelfView.swift */; };
 		749A7511E12A743EF23E6CA7 /* FoilShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 6EB621C704905D21573660FB /* FoilShader.metal */; };
+		74C095E299D588FBC1B961D7 /* PriceAlertService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1158DCDA83AF0ED4CEDFB711 /* PriceAlertService.swift */; };
 		769217F2D2B6C1561EA0BEE7 /* PocketStackBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 580004F8802791E263BF0AF9 /* PocketStackBadge.swift */; };
 		770967643AFE49049B9E052F /* curators_collection_heroines_edition.json in Resources */ = {isa = PBXBuildFile; fileRef = B802ED11183A973EE6318DE0 /* curators_collection_heroines_edition.json */; };
 		78F3F157E7FA419F04B06384 /* DeckToolsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E105E89F1FF43FD4CBC90929 /* DeckToolsTests.swift */; };
@@ -245,11 +262,13 @@
 		7FB598F92EAF0DF1D384A974 /* PortfolioHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B789324D52EF1FA51374D4A4 /* PortfolioHistoryTests.swift */; };
 		80489A0F4A9F253AD9BA6AC0 /* PocketStackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB5A030DA953BFBC1584CB8E /* PocketStackTests.swift */; };
 		80C0A7DBBA05FCA036421B83 /* ShareMilestoneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E624D8ABE9C6EC90741C35EC /* ShareMilestoneTests.swift */; };
+		80E2FBBF30282D88D8B9D978 /* PriceAlertClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 883D4EC9149B71E6DFB86F22 /* PriceAlertClient.swift */; };
 		8156D2B786BA1B2EC53B6DE8 /* PriceHistoryChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562E6A8A28051109039D43EB /* PriceHistoryChartView.swift */; };
 		8232BC4571DA0D347BAC2575 /* PageLeaf.swift in Sources */ = {isa = PBXBuildFile; fileRef = B49817DB6D9AEA9F7CB555FF /* PageLeaf.swift */; };
 		83CB800C340611D2FD3E6DC2 /* PortfolioInsightsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EA349F02123A2A816BD595A /* PortfolioInsightsTests.swift */; };
 		8524C3E300288E5D393A7C19 /* RulesCardDetectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AF59884E10538C70058F6CB /* RulesCardDetectionTests.swift */; };
 		85F4804B7AD7698777A1234A /* RenderedContainerArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2654D67AE6252CC7FC5EF811 /* RenderedContainerArtwork.swift */; };
+		861B672A383314C8911CEE78 /* PriceAlertTargetPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF99C5EBD79EA1CE5CF57D8 /* PriceAlertTargetPanel.swift */; };
 		86864222B8FF2693A0BDEDCD /* PortfolioSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 548FB2014A6E368E567EBB39 /* PortfolioSummary.swift */; };
 		869E157845B8C1C006046754 /* BuildDeckSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1951A2DC93C6BC3F9B29B1 /* BuildDeckSheet.swift */; };
 		884B9D336CE494DA2F93673F /* TradeConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93A8ADADEA4B71A8B17CAC8 /* TradeConfirmationView.swift */; };
@@ -311,15 +330,20 @@
 		B09434B3B5474951C97AC0A5 /* ContainerDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C0925348B23F5C4982ECE0 /* ContainerDraft.swift */; };
 		B106EA07B46AC0DF1E134973 /* CardsRising.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1934B1D469EA3AABD7A82319 /* CardsRising.swift */; };
 		B3C488B05CCEA65B24A7DE71 /* BookshelfShareSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CDE0CA3678DA9DD88D5822D /* BookshelfShareSummary.swift */; };
+		B3D963D197DCB9BAB8E956D3 /* PriceAlertsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3340E1A1EA634987F9242042 /* PriceAlertsView.swift */; };
 		B3FA2E0710E5469DB952C448 /* InkableRatioCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A0DC199D804E5399BF0EE9 /* InkableRatioCard.swift */; };
 		B456330C5438972CE6FC76A8 /* PortfolioMoversCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB087B5E53F5C7CAB42B5727 /* PortfolioMoversCard.swift */; };
 		B49808CE1AED1327214187F4 /* MiniBookcase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CE0F56046C6FDFAC8C6CB0 /* MiniBookcase.swift */; };
 		B5B6C8EA60DD41180D912AE0 /* PopEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15D5E3F6A5C8783670C2B5F0 /* PopEffect.swift */; };
+		B6904BF6EBBBB47F1B3B6304 /* PriceAlertPresetChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94C5C235043DD6B9B872AED6 /* PriceAlertPresetChip.swift */; };
+		B71841B2C476B1329FED6EDB /* PriceAlertEditorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C0398C19E3E5D346C95498 /* PriceAlertEditorModel.swift */; };
 		B8CF7221CCA091A0FBF7B974 /* DeepLinkRouteParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B37C07890E73D6D436720FA5 /* DeepLinkRouteParsingTests.swift */; };
 		B998B99272F72A8B8D844DDD /* PortfolioProTeaser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68FB9047DAB4A5EDA0C47607 /* PortfolioProTeaser.swift */; };
 		BAB5F67CCE4E4CB1957A5C74 /* DataMigrationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3D652CBA4843E9BA303B2E /* DataMigrationService.swift */; };
+		BCA2457780156F761C2302D4 /* PriceAlertSaveBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2259A50247B48602DA7AA1D7 /* PriceAlertSaveBar.swift */; };
 		BD0907CB8EF4B414BDE45F1D /* ImportServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41F904F6589D32CF7AE1C322 /* ImportServiceTests.swift */; };
 		BD26196973D135377BDE11E9 /* promo_set_4.json in Resources */ = {isa = PBXBuildFile; fileRef = 6B933D6736A8C5C357B20864 /* promo_set_4.json */; };
+		BD9892555F031A88DD5DABE9 /* PriceAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E37D677C76E9B9D7FE5FBDD /* PriceAlert.swift */; };
 		BE3193C73906C7B9CD0DAF37 /* StoredInRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3236C3DA0DE7F5B85D1B4126 /* StoredInRow.swift */; };
 		BF694AC2893B440FAD2DF586 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AA815C9650049DB84CB04F7 /* OnboardingView.swift */; };
 		C008192458E4CC44EA2088E2 /* BinderPageScrubber.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBD212391B8B369C7B36166B /* BinderPageScrubber.swift */; };
@@ -332,6 +356,7 @@
 		C76B10048CD297A7DD6F7B90 /* SwayEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E18F445024FA61CB0285B5E /* SwayEffect.swift */; };
 		C7D86777CCE70BCA5548EF43 /* MoveCardsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA738027A8F3F3E567DF0D99 /* MoveCardsSheet.swift */; };
 		C81AD68ADA37B556BF3F1CA8 /* FocusPulse.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5EDEA13FC6F09389F4259CE /* FocusPulse.swift */; };
+		C8987A81980FA888DE2141E6 /* PriceAlertCardHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BBD5E4066A898953276A39A /* PriceAlertCardHeader.swift */; };
 		C94BDFE92650392E29FFA7B6 /* StorageBackupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31DD183C2F184E9E80E1AEA9 /* StorageBackupTests.swift */; };
 		C9D9BA5217EB39C3EBE5F9A4 /* BoxCardCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CBBFA7A585CD75F783EF5FF /* BoxCardCell.swift */; };
 		CB7425D2E402E7D040D2ACCA /* BinderAutoFillSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADCF3A14F34D035AD1A31C84 /* BinderAutoFillSheet.swift */; };
@@ -339,6 +364,7 @@
 		CCF089A4ACA9D74D57C31A4C /* PriceTrendChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6C6843F930C81EC46FE103 /* PriceTrendChart.swift */; };
 		CDD906082FDCA9AA2B952840 /* MilestoneShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53FCC9D910C812A33485BFD9 /* MilestoneShareCardView.swift */; };
 		CE01BB96E1F9537F3D3D76AE /* PageSheetBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 954754D5B37011046752D8A6 /* PageSheetBackground.swift */; };
+		CF9C63740D31448870E8E36B /* PriceAlertEditorFooter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAEFA594C282F7C0C65C2AB3 /* PriceAlertEditorFooter.swift */; };
 		D137E2A35380E883B7D67316 /* ArrangeHint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A181D1CC4DF26CBE6067F0C /* ArrangeHint.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C2 /* CloudKitKeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C1 /* CloudKitKeyService.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C4 /* OpenAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C3 /* OpenAIService.swift */; };
@@ -352,9 +378,11 @@
 		D5AFAA68E38E6F1854E66A0E /* StoredInSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 943AD2408A114FABB63581CF /* StoredInSection.swift */; };
 		D713553E04644B5A986AC5C2 /* TopValuableCardsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C326BEDCB4F436483894B4D /* TopValuableCardsCard.swift */; };
 		D7FB430756749C1A90B90EC2 /* StorageCoverColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25C0A1D447C20EA83C97A91B /* StorageCoverColor.swift */; };
+		D89FE1FC962AF716556375BA /* PriceAlertNudgeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EAEFCC16C37AA1B23FBE8DB /* PriceAlertNudgeButton.swift */; };
 		D9787F10C8890B6FB1267BFF /* CloudKitSchemaDebugRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF9147572B7F30FE0481FBE1 /* CloudKitSchemaDebugRow.swift */; };
 		DA0D4853F617ADE268D9BE39 /* OpeningHandView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6FC7F1F0BC094A65F23D38F /* OpeningHandView.swift */; };
 		DA722FFA98E39DC1939C9229 /* hyperia_city.json in Resources */ = {isa = PBXBuildFile; fileRef = 27BF6FCD75E011DDA53BA414 /* hyperia_city.json */; };
+		DB9AEF30B4AB756A799C2BCF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5CC1718D5AC57A8E6B79F5 /* AppDelegate.swift */; };
 		DB9D68C7EA7E83651A2C958D /* BrassTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7295B562D40AB2ECCE98D62E /* BrassTag.swift */; };
 		DBC03F974A434FEAA071F27B /* CostCurveCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3744E1396FD647F29C30135B /* CostCurveCard.swift */; };
 		DBF26E31CEBF6320A28F7321 /* HaulShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E761EA81FCE34454D43AFF1 /* HaulShareView.swift */; };
@@ -377,6 +405,8 @@
 		EC289C46CFDECD9AF1BA235D /* ShareMilestone.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0C40ABB4DEDF6D9008F0E1 /* ShareMilestone.swift */; };
 		EF1ED0B1FE0DBE2B3B55AC01 /* StorageTileBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6CE5A40C7678D952970AD42 /* StorageTileBadge.swift */; };
 		EF30F02132892FF45F898ACE /* SparkleShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB788689F2C446D1C83170C7 /* SparkleShape.swift */; };
+		EF3A4CAC844AA78A365036CC /* PriceAlertMarketPrice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644292F877D52A5E138B58BC /* PriceAlertMarketPrice.swift */; };
+		EFC42ED63C397DF20C925FC6 /* PriceAlertDirectionTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70CCB36AFCE2E95BD07D0FCE /* PriceAlertDirectionTile.swift */; };
 		EFD251974ED8DAC109F9F206 /* DeckBoxChecklist.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97BDA7C68AFA9AA15C27C49 /* DeckBoxChecklist.swift */; };
 		F05529C54009ACF715382289 /* PortfolioInsightsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C25AA3BAB0F557569E3E532 /* PortfolioInsightsBuilder.swift */; };
 		F1CARD5EB6A63F /* CardSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1CARD5EA3181D /* CardSearchView.swift */; };
@@ -429,8 +459,10 @@
 		06B41D32DD0BC1397E7FACA3 /* ScreenshotRig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScreenshotRig.swift; sourceTree = "<group>"; };
 		06F51216821FF17628653B7C /* PortfolioHistoryViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioHistoryViewModel.swift; sourceTree = "<group>"; };
 		08F6B9426BDA39639602BA0D /* DeckBoxChooser.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckBoxChooser.swift; sourceTree = "<group>"; };
+		0B86130667E61F45983F8125 /* PriceAlertEditorView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertEditorView.swift; sourceTree = "<group>"; };
 		0E384140541123A316B26E34 /* ShelfPlank.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShelfPlank.swift; sourceTree = "<group>"; };
 		10573FFE9E607B3E6207E90D /* HiddenUpcomingSetCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HiddenUpcomingSetCard.swift; sourceTree = "<group>"; };
+		1158DCDA83AF0ED4CEDFB711 /* PriceAlertService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertService.swift; sourceTree = "<group>"; };
 		135FBC706A55D010B0FBE771 /* UnsortedPileView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UnsortedPileView.swift; sourceTree = "<group>"; };
 		13E4E3504356CA5A41096F88 /* AddToContainerHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AddToContainerHeader.swift; sourceTree = "<group>"; };
 		1433B5315A8D8A0152B9E0A8 /* ValueHistoryChartModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ValueHistoryChartModelTests.swift; sourceTree = "<group>"; };
@@ -443,17 +475,23 @@
 		17D86640C172B326246B3F17 /* ContainerArtwork.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContainerArtwork.swift; sourceTree = "<group>"; };
 		1910551A9F8E16761BC5CE33 /* ShareCardPresenter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareCardPresenter.swift; sourceTree = "<group>"; };
 		1934B1D469EA3AABD7A82319 /* CardsRising.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardsRising.swift; sourceTree = "<group>"; };
+		1A1228D742F2C5CDF8436E6F /* NotificationsOffSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationsOffSection.swift; sourceTree = "<group>"; };
 		1AE7627851E11350D5D87289 /* BoxHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BoxHeader.swift; sourceTree = "<group>"; };
+		1B7F6916F23AE148967B616F /* PriceAlertDistanceBadge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertDistanceBadge.swift; sourceTree = "<group>"; };
 		1BD8A44359FC13EEFF2BDD23 /* CostBasisCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CostBasisCard.swift; sourceTree = "<group>"; };
+		1D5CC1718D5AC57A8E6B79F5 /* AppDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1DA4228D6C3310035BB99ACE /* CardTextView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardTextView.swift; sourceTree = "<group>"; };
 		1DED60A0897B7ADE469E0A21 /* BulkSelectionBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BulkSelectionBar.swift; sourceTree = "<group>"; };
 		1E18F445024FA61CB0285B5E /* SwayEffect.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SwayEffect.swift; sourceTree = "<group>"; };
+		1E37D677C76E9B9D7FE5FBDD /* PriceAlert.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlert.swift; sourceTree = "<group>"; };
 		1E3D652CBA4843E9BA303B2E /* DataMigrationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataMigrationService.swift; sourceTree = "<group>"; };
 		1E5ECE8969A316AA84595FF5 /* official_card_ids.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = official_card_ids.json; sourceTree = "<group>"; };
 		1EA349F02123A2A816BD595A /* PortfolioInsightsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioInsightsTests.swift; sourceTree = "<group>"; };
 		1FFCAC7870EF33D4FD0810F3 /* BinderRings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BinderRings.swift; sourceTree = "<group>"; };
 		201FD86CB7074B36B57EA57E /* RarityDonutCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RarityDonutCard.swift; sourceTree = "<group>"; };
+		219331CC5A93FCD6708694AE /* PriceAlertToolbarButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertToolbarButton.swift; sourceTree = "<group>"; };
 		21D780BDD3B53A5516E6038D /* BinderSettingsSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BinderSettingsSection.swift; sourceTree = "<group>"; };
+		2259A50247B48602DA7AA1D7 /* PriceAlertSaveBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertSaveBar.swift; sourceTree = "<group>"; };
 		2279510BB1CE000F76E1897E /* BulkMoveTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BulkMoveTests.swift; sourceTree = "<group>"; };
 		230352EE2E66220700CA8AA3 /* Inkwell Keeper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Inkwell Keeper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		230F91D22EA89E65006E5A70 /* StarterDecksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarterDecksView.swift; sourceTree = "<group>"; };
@@ -553,23 +591,29 @@
 		27BF6FCD75E011DDA53BA414 /* hyperia_city.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = hyperia_city.json; sourceTree = "<group>"; };
 		282AAE9D0E6DFD4DB49ACF8B /* CoconutLeaderPicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoconutLeaderPicker.swift; sourceTree = "<group>"; };
 		2859DA56BCDC5313E652DB3C /* FoilTiltFilterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FoilTiltFilterTests.swift; sourceTree = "<group>"; };
+		286A16DADEB4166103FF9FA6 /* PriceAlertEditTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertEditTarget.swift; sourceTree = "<group>"; };
 		287217E6FCCB16A2D24F29EE /* AIDeckFeedbackPrompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIDeckFeedbackPrompt.swift; sourceTree = "<group>"; };
 		28A19CE19939AA33FF7A74C0 /* CostBasisSummary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CostBasisSummary.swift; sourceTree = "<group>"; };
 		29EEBA866EF31E4C1D9C09CA /* PaywallContext.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PaywallContext.swift; sourceTree = "<group>"; };
 		2A181D1CC4DF26CBE6067F0C /* ArrangeHint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ArrangeHint.swift; sourceTree = "<group>"; };
 		2B2BCF1748D759AF61A25411 /* HolofoilFinish.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HolofoilFinish.swift; sourceTree = "<group>"; };
 		2B5885785DD6FC73EE079420 /* BinderFillPrompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BinderFillPrompt.swift; sourceTree = "<group>"; };
+		2BBD5E4066A898953276A39A /* PriceAlertCardHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertCardHeader.swift; sourceTree = "<group>"; };
 		2D677BE93D1570C58B66FAD6 /* PaywallPurchaseFooter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PaywallPurchaseFooter.swift; sourceTree = "<group>"; };
+		2E5C82105E9A7CF950C06B00 /* PriceAlertCallout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertCallout.swift; sourceTree = "<group>"; };
 		2F1B8FB605BA4901A05BB709 /* InkColorChartCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkColorChartCard.swift; sourceTree = "<group>"; };
 		2FBB3CB2523772A0EF5B2BB3 /* PulledCoverFace.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PulledCoverFace.swift; sourceTree = "<group>"; };
 		31DD183C2F184E9E80E1AEA9 /* StorageBackupTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StorageBackupTests.swift; sourceTree = "<group>"; };
 		322C5D95D7B11F95103B4212 /* StorageContainerScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StorageContainerScreen.swift; sourceTree = "<group>"; };
 		3236C3DA0DE7F5B85D1B4126 /* StoredInRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StoredInRow.swift; sourceTree = "<group>"; };
 		33233037A62E8C2037FE8F37 /* ContainerDraftTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContainerDraftTests.swift; sourceTree = "<group>"; };
+		3340E1A1EA634987F9242042 /* PriceAlertsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertsView.swift; sourceTree = "<group>"; };
 		34FE064D459E933C25DF25BB /* SpineShadow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpineShadow.swift; sourceTree = "<group>"; };
 		35322599272AEDCD58EDB4D9 /* BookcaseItemView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BookcaseItemView.swift; sourceTree = "<group>"; };
 		35D8B68085381593D16E6E33 /* BookshelfStat.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BookshelfStat.swift; sourceTree = "<group>"; };
+		365A16576032A739893AC5EC /* PriceAlertSync.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertSync.swift; sourceTree = "<group>"; };
 		3744E1396FD647F29C30135B /* CostCurveCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CostCurveCard.swift; sourceTree = "<group>"; };
+		37C0398C19E3E5D346C95498 /* PriceAlertEditorModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertEditorModel.swift; sourceTree = "<group>"; };
 		3899CD44116C113531714373 /* ScanDestinationPicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScanDestinationPicker.swift; sourceTree = "<group>"; };
 		39EF5EE08B75718B1E6E8683 /* PortfolioMoverRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioMoverRow.swift; sourceTree = "<group>"; };
 		39F6F63DF9A2278D5D5ED6A6 /* BinderOpeningInsideCover.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BinderOpeningInsideCover.swift; sourceTree = "<group>"; };
@@ -580,9 +624,11 @@
 		3CDE0CA3678DA9DD88D5822D /* BookshelfShareSummary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BookshelfShareSummary.swift; sourceTree = "<group>"; };
 		3DB9FF5BA716CDC122A6450D /* CostBasisCalculator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CostBasisCalculator.swift; sourceTree = "<group>"; };
 		3E0416C4BA7D5BEB997B4DC5 /* SetFilterEngineTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetFilterEngineTests.swift; sourceTree = "<group>"; };
+		3EAEFCC16C37AA1B23FBE8DB /* PriceAlertNudgeButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertNudgeButton.swift; sourceTree = "<group>"; };
 		3F47E7DA593CBCD1ADC13431 /* CapacityMeter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CapacityMeter.swift; sourceTree = "<group>"; };
 		40A1198A827C589B87EBB410 /* PricingSelectionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PricingSelectionTests.swift; sourceTree = "<group>"; };
 		40D352A3B1A0C1FB93C31CAC /* illumineers_quest_palace_heist.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = illumineers_quest_palace_heist.json; sourceTree = "<group>"; };
+		4163A77904ACAC4424EE8FEC /* PriceAlertCardPicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertCardPicker.swift; sourceTree = "<group>"; };
 		41F904F6589D32CF7AE1C322 /* ImportServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ImportServiceTests.swift; sourceTree = "<group>"; };
 		43F8356509903F4AFC2FCF9E /* DeckPullHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckPullHeader.swift; sourceTree = "<group>"; };
 		4443B3280ED4450783544968 /* StatsCardContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsCardContainer.swift; sourceTree = "<group>"; };
@@ -618,8 +664,10 @@
 		6076BE2BE59C2C04146159D3 /* CoverStylePicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoverStylePicker.swift; sourceTree = "<group>"; };
 		625D6562C6B786A5DFAD5C35 /* PutAwaySummaryLine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PutAwaySummaryLine.swift; sourceTree = "<group>"; };
 		62B893B8E6EECDC960A44D4D /* CloudSyncOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncOverlay.swift; sourceTree = "<group>"; };
+		644292F877D52A5E138B58BC /* PriceAlertMarketPrice.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertMarketPrice.swift; sourceTree = "<group>"; };
 		645B4477BD0071F7CE5CD3D0 /* DeckListTextCodecTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckListTextCodecTests.swift; sourceTree = "<group>"; };
 		65D42F1B409CF4A8D4EEA6CB /* AskAIRulesButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AskAIRulesButton.swift; sourceTree = "<group>"; };
+		66C4C78772FB1A725F028A98 /* PriceAlertTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertTests.swift; sourceTree = "<group>"; };
 		68DF9B1BA73264E709BA4ACD /* StorageCardThumbnail.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StorageCardThumbnail.swift; sourceTree = "<group>"; };
 		68E1A3B64B05128A909D6E76 /* StorageAllocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StorageAllocation.swift; sourceTree = "<group>"; };
 		68FB9047DAB4A5EDA0C47607 /* PortfolioProTeaser.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioProTeaser.swift; sourceTree = "<group>"; };
@@ -638,11 +686,13 @@
 		6F281DF5C7B88E62FEDF540C /* SetFilterBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetFilterBar.swift; sourceTree = "<group>"; };
 		6F563B3E0A2A73C9FA17CEDD /* CardTextParsingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardTextParsingTests.swift; sourceTree = "<group>"; };
 		70B08FD9DF5490F1EB992575 /* BinderSortOrder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BinderSortOrder.swift; sourceTree = "<group>"; };
+		70CCB36AFCE2E95BD07D0FCE /* PriceAlertDirectionTile.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertDirectionTile.swift; sourceTree = "<group>"; };
 		725A18D9BE0D05A991CB6FD8 /* CloudSyncMonitor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncMonitor.swift; sourceTree = "<group>"; };
 		728546B082CD29A9A5C250A3 /* LorcanaSetRegistryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LorcanaSetRegistryTests.swift; sourceTree = "<group>"; };
 		7295B562D40AB2ECCE98D62E /* BrassTag.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrassTag.swift; sourceTree = "<group>"; };
 		743BC434F4468BCA6DBF2609 /* ShelfMetrics.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShelfMetrics.swift; sourceTree = "<group>"; };
 		7604DCFB6FA45F47A3674BC6 /* StatsSummaryShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StatsSummaryShareCardView.swift; sourceTree = "<group>"; };
+		7611FE484C6B596EB434FF7D /* CollectionAlertsSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CollectionAlertsSection.swift; sourceTree = "<group>"; };
 		770CE68925B488AA713845E7 /* QRCodeGenerator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
 		78E531191161FBB262195AB8 /* CloudSyncingPlaceholderView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncingPlaceholderView.swift; sourceTree = "<group>"; };
 		79EDF86A714E2B9F14B809B7 /* AddCardsSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AddCardsSource.swift; sourceTree = "<group>"; };
@@ -658,19 +708,24 @@
 		85899EFD0A7AFA5E8801ED4C /* BinderInsideCover.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BinderInsideCover.swift; sourceTree = "<group>"; };
 		8768D4EDD8718201F02F42BD /* DeckIdeasNotice.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckIdeasNotice.swift; sourceTree = "<group>"; };
 		8774183BFE415943F90705A2 /* BookshelfViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BookshelfViewModel.swift; sourceTree = "<group>"; };
+		883D4EC9149B71E6DFB86F22 /* PriceAlertClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertClient.swift; sourceTree = "<group>"; };
 		89519F22B58DB9D4382018D4 /* PullSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PullSnapshot.swift; sourceTree = "<group>"; };
 		8A01FE174597A36743E94BA2 /* PutAwayContainerRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PutAwayContainerRow.swift; sourceTree = "<group>"; };
 		8B59F81968A79D19B18D5B5C /* StorageContainer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StorageContainer.swift; sourceTree = "<group>"; };
 		8BC5E99291C14403243A9D67 /* RulingShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RulingShareCardView.swift; sourceTree = "<group>"; };
+		8EF99C5EBD79EA1CE5CF57D8 /* PriceAlertTargetPanel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertTargetPanel.swift; sourceTree = "<group>"; };
 		8F12F07E00850F61DCC7ACE3 /* ContainerEditorSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContainerEditorSheet.swift; sourceTree = "<group>"; };
 		8F63B768B734C8FF47DB5744 /* StoredCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StoredCard.swift; sourceTree = "<group>"; };
 		8FD92AE6BEFA0C7519790777 /* BookshelfView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BookshelfView.swift; sourceTree = "<group>"; };
+		9264EBC5105649CFDDCD209D /* PriceAlertDirection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertDirection.swift; sourceTree = "<group>"; };
 		93242F4A5019C1D04A3502E5 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		943AD2408A114FABB63581CF /* StoredInSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StoredInSection.swift; sourceTree = "<group>"; };
+		94C5C235043DD6B9B872AED6 /* PriceAlertPresetChip.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertPresetChip.swift; sourceTree = "<group>"; };
 		94E35994408A8A4644781AD6 /* RenderedArtworkTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RenderedArtworkTests.swift; sourceTree = "<group>"; };
 		94E37DF157FD8BB5A6F35481 /* StoragePreviewFixture.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StoragePreviewFixture.swift; sourceTree = "<group>"; };
 		954754D5B37011046752D8A6 /* PageSheetBackground.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PageSheetBackground.swift; sourceTree = "<group>"; };
 		95C330AA1E1245DD80DE62F0 /* SeededGenerator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SeededGenerator.swift; sourceTree = "<group>"; };
+		960D5730C8BDCFEF5ED6D15B /* PriceAlertDirectionPicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertDirectionPicker.swift; sourceTree = "<group>"; };
 		970237FE7983AAD42D22CE47 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		986264D1FC458204909C9BFB /* AppLinks.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppLinks.swift; sourceTree = "<group>"; };
 		98C98BE20946FE8394E530FD /* CardFlexShareView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardFlexShareView.swift; sourceTree = "<group>"; };
@@ -696,6 +751,7 @@
 		A4830599C05F8B109EEDFDFD /* Inkwell KeeperTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Inkwell KeeperTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A58272E242BA935C138E0E7D /* ShelfSlot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShelfSlot.swift; sourceTree = "<group>"; };
 		A8B3E5CA101035662470791D /* ChartRangePicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChartRangePicker.swift; sourceTree = "<group>"; };
+		A8C940D9F64033ECA834BE4F /* PriceAlertRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertRow.swift; sourceTree = "<group>"; };
 		AA1B2C3D4E5F678901234560 /* LoreCounterModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoreCounterModels.swift; sourceTree = "<group>"; };
 		AA1B2C3D4E5F678901234562 /* PlayerLoreCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerLoreCard.swift; sourceTree = "<group>"; };
 		AA1B2C3D4E5F678901234564 /* LoreCounterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoreCounterView.swift; sourceTree = "<group>"; };
@@ -742,6 +798,7 @@
 		C4453589B8DADFF2D9257018 /* CoverColorPicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoverColorPicker.swift; sourceTree = "<group>"; };
 		C6CE5A40C7678D952970AD42 /* StorageTileBadge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StorageTileBadge.swift; sourceTree = "<group>"; };
 		C6FC7F1F0BC094A65F23D38F /* OpeningHandView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OpeningHandView.swift; sourceTree = "<group>"; };
+		C71FE4B39FB0ED6BD77EB23B /* PriceAlertTargetChart.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertTargetChart.swift; sourceTree = "<group>"; };
 		C792A95769EC446748404EA1 /* TradeVerdictCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TradeVerdictCard.swift; sourceTree = "<group>"; };
 		C80369F0C23823FA8BF52155 /* FoilMotion.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FoilMotion.swift; sourceTree = "<group>"; };
 		CADBF51089A4AEF69988CA81 /* BinderViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BinderViewModel.swift; sourceTree = "<group>"; };
@@ -761,8 +818,10 @@
 		D308EF10E35F2261EF1A1B23 /* AIDeckRules.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIDeckRules.swift; sourceTree = "<group>"; };
 		D37797EEEBD2986967A6EFAE /* ValueHistoryChartModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ValueHistoryChartModel.swift; sourceTree = "<group>"; };
 		D3F932B4B946EA58B9D03BB8 /* attack_of_the_vine.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = attack_of_the_vine.json; sourceTree = "<group>"; };
+		D40D8DBCC688E96419461123 /* PriceAlertRules.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertRules.swift; sourceTree = "<group>"; };
 		D4671877777D1EC2B5B2ECD5 /* PortfolioHolding.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioHolding.swift; sourceTree = "<group>"; };
 		D5EDEA13FC6F09389F4259CE /* FocusPulse.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FocusPulse.swift; sourceTree = "<group>"; };
+		D60059B13A3EF85CEC2F15E4 /* InstallIdentifier.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InstallIdentifier.swift; sourceTree = "<group>"; };
 		D97BDA7C68AFA9AA15C27C49 /* DeckBoxChecklist.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckBoxChecklist.swift; sourceTree = "<group>"; };
 		D9FB8FC1EFC087642A3270CC /* BrowseAllCardsButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowseAllCardsButton.swift; sourceTree = "<group>"; };
 		DA1E3E99C0670865724FC03C /* AIChosenInksBanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIChosenInksBanner.swift; sourceTree = "<group>"; };
@@ -789,6 +848,7 @@
 		E9BB03867D8A4F4D71320AF8 /* CloudSyncBanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudSyncBanner.swift; sourceTree = "<group>"; };
 		EA6C6843F930C81EC46FE103 /* PriceTrendChart.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceTrendChart.swift; sourceTree = "<group>"; };
 		EA738027A8F3F3E567DF0D99 /* MoveCardsSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MoveCardsSheet.swift; sourceTree = "<group>"; };
+		EAEFA594C282F7C0C65C2AB3 /* PriceAlertEditorFooter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertEditorFooter.swift; sourceTree = "<group>"; };
 		EB6643E2C5A509EC56A7C571 /* PortfolioHistoryBuilder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PortfolioHistoryBuilder.swift; sourceTree = "<group>"; };
 		ECB3857A2307770C22BB78A0 /* DeckListTextCodec.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckListTextCodec.swift; sourceTree = "<group>"; };
 		EDB560447CF9BBC1736730A8 /* ValueHistoryChart.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ValueHistoryChart.swift; sourceTree = "<group>"; };
@@ -816,6 +876,8 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		23CAEDD92ECEE796006786F7 /* CardImages */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = CardImages;
 			sourceTree = "<group>";
 		};
@@ -856,6 +918,34 @@
 				160076CD99D052739E896880 /* BookshelfShareCardView.swift */,
 			);
 			path = Share;
+			sourceTree = "<group>";
+		};
+		0FBC6C8C62D83BFE1A50F00D /* PriceAlerts */ = {
+			isa = PBXGroup;
+			children = (
+				3340E1A1EA634987F9242042 /* PriceAlertsView.swift */,
+				0B86130667E61F45983F8125 /* PriceAlertEditorView.swift */,
+				EAEFA594C282F7C0C65C2AB3 /* PriceAlertEditorFooter.swift */,
+				A8C940D9F64033ECA834BE4F /* PriceAlertRow.swift */,
+				7611FE484C6B596EB434FF7D /* CollectionAlertsSection.swift */,
+				1A1228D742F2C5CDF8436E6F /* NotificationsOffSection.swift */,
+				286A16DADEB4166103FF9FA6 /* PriceAlertEditTarget.swift */,
+				2BBD5E4066A898953276A39A /* PriceAlertCardHeader.swift */,
+				644292F877D52A5E138B58BC /* PriceAlertMarketPrice.swift */,
+				960D5730C8BDCFEF5ED6D15B /* PriceAlertDirectionPicker.swift */,
+				70CCB36AFCE2E95BD07D0FCE /* PriceAlertDirectionTile.swift */,
+				8EF99C5EBD79EA1CE5CF57D8 /* PriceAlertTargetPanel.swift */,
+				1B7F6916F23AE148967B616F /* PriceAlertDistanceBadge.swift */,
+				3EAEFCC16C37AA1B23FBE8DB /* PriceAlertNudgeButton.swift */,
+				94C5C235043DD6B9B872AED6 /* PriceAlertPresetChip.swift */,
+				C71FE4B39FB0ED6BD77EB23B /* PriceAlertTargetChart.swift */,
+				2259A50247B48602DA7AA1D7 /* PriceAlertSaveBar.swift */,
+				2E5C82105E9A7CF950C06B00 /* PriceAlertCallout.swift */,
+				4163A77904ACAC4424EE8FEC /* PriceAlertCardPicker.swift */,
+				219331CC5A93FCD6708694AE /* PriceAlertToolbarButton.swift */,
+			);
+			name = PriceAlerts;
+			path = PriceAlerts;
 			sourceTree = "<group>";
 		};
 		145AE2F6AB31554EB10AB3DE /* Bookshelf */ = {
@@ -989,6 +1079,7 @@
 				D37797EEEBD2986967A6EFAE /* ValueHistoryChartModel.swift */,
 				F673C68743D6A91C7FDE698D /* ChartRange.swift */,
 				A2E370BC75265AAF0B2A78DF /* FoilTiltFilter.swift */,
+				39FB3F2C05064EA5ED83318D /* PriceAlerts */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1008,6 +1099,7 @@
 				CADBF51089A4AEF69988CA81 /* BinderViewModel.swift */,
 				8774183BFE415943F90705A2 /* BookshelfViewModel.swift */,
 				C80369F0C23823FA8BF52155 /* FoilMotion.swift */,
+				37C0398C19E3E5D346C95498 /* PriceAlertEditorModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -1047,6 +1139,7 @@
 				B157168B7FC08A5BA2FC96A4 /* CloudKitSchemaInitializer.swift */,
 				98FCBE0384227CBB565C054C /* DemoCollectionSeeder.swift */,
 				06B41D32DD0BC1397E7FACA3 /* ScreenshotRig.swift */,
+				2B4E9960A8A2ACA9CD9F246E /* PriceAlerts */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -1096,6 +1189,7 @@
 				544D0B2E4CC311BDB096FF9F /* Storage */,
 				145AE2F6AB31554EB10AB3DE /* Bookshelf */,
 				EF9147572B7F30FE0481FBE1 /* CloudKitSchemaDebugRow.swift */,
+				0FBC6C8C62D83BFE1A50F00D /* PriceAlerts */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1194,6 +1288,30 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		2B4E9960A8A2ACA9CD9F246E /* PriceAlerts */ = {
+			isa = PBXGroup;
+			children = (
+				1D5CC1718D5AC57A8E6B79F5 /* AppDelegate.swift */,
+				D60059B13A3EF85CEC2F15E4 /* InstallIdentifier.swift */,
+				883D4EC9149B71E6DFB86F22 /* PriceAlertClient.swift */,
+				1158DCDA83AF0ED4CEDFB711 /* PriceAlertService.swift */,
+			);
+			name = PriceAlerts;
+			path = PriceAlerts;
+			sourceTree = "<group>";
+		};
+		39FB3F2C05064EA5ED83318D /* PriceAlerts */ = {
+			isa = PBXGroup;
+			children = (
+				1E37D677C76E9B9D7FE5FBDD /* PriceAlert.swift */,
+				9264EBC5105649CFDDCD209D /* PriceAlertDirection.swift */,
+				D40D8DBCC688E96419461123 /* PriceAlertRules.swift */,
+				365A16576032A739893AC5EC /* PriceAlertSync.swift */,
+			);
+			name = PriceAlerts;
+			path = PriceAlerts;
+			sourceTree = "<group>";
+		};
 		544D0B2E4CC311BDB096FF9F /* Storage */ = {
 			isa = PBXGroup;
 			children = (
@@ -1260,6 +1378,7 @@
 				AB5A030DA953BFBC1584CB8E /* PocketStackTests.swift */,
 				1433B5315A8D8A0152B9E0A8 /* ValueHistoryChartModelTests.swift */,
 				2859DA56BCDC5313E652DB3C /* FoilTiltFilterTests.swift */,
+				66C4C78772FB1A725F028A98 /* PriceAlertTests.swift */,
 			);
 			path = "Inkwell KeeperTests";
 			sourceTree = "<group>";
@@ -1865,6 +1984,35 @@
 				148D7DDFB8503949DFBB7BD6 /* FoilTiltFilter.swift in Sources */,
 				2DE538D6ED7B8E8C251DBB45 /* TiltingCardFace.swift in Sources */,
 				01204B703FE33AD4706530D1 /* ScreenshotRig.swift in Sources */,
+				BD9892555F031A88DD5DABE9 /* PriceAlert.swift in Sources */,
+				06E0E138D30A42D5E8A6933B /* PriceAlertDirection.swift in Sources */,
+				62C2CC516008846B46DA468D /* PriceAlertRules.swift in Sources */,
+				2107D838DBF193D2A74DAD77 /* PriceAlertSync.swift in Sources */,
+				DB9AEF30B4AB756A799C2BCF /* AppDelegate.swift in Sources */,
+				31B81AC4DC7C38B5CD64B248 /* InstallIdentifier.swift in Sources */,
+				80E2FBBF30282D88D8B9D978 /* PriceAlertClient.swift in Sources */,
+				74C095E299D588FBC1B961D7 /* PriceAlertService.swift in Sources */,
+				B3D963D197DCB9BAB8E956D3 /* PriceAlertsView.swift in Sources */,
+				6216B9E4A21DD1448B82CD99 /* PriceAlertEditorView.swift in Sources */,
+				CF9C63740D31448870E8E36B /* PriceAlertEditorFooter.swift in Sources */,
+				343143A4D3DC7C69F03DC487 /* PriceAlertRow.swift in Sources */,
+				130D5136A5E19134F90293A2 /* CollectionAlertsSection.swift in Sources */,
+				5CF5D3AE3912ADBFF1FB1DB2 /* NotificationsOffSection.swift in Sources */,
+				5C6F50BC731E9E5F087E7E83 /* PriceAlertEditTarget.swift in Sources */,
+				B71841B2C476B1329FED6EDB /* PriceAlertEditorModel.swift in Sources */,
+				C8987A81980FA888DE2141E6 /* PriceAlertCardHeader.swift in Sources */,
+				EF3A4CAC844AA78A365036CC /* PriceAlertMarketPrice.swift in Sources */,
+				12C513B64A27DA95ED665508 /* PriceAlertDirectionPicker.swift in Sources */,
+				EFC42ED63C397DF20C925FC6 /* PriceAlertDirectionTile.swift in Sources */,
+				861B672A383314C8911CEE78 /* PriceAlertTargetPanel.swift in Sources */,
+				27D79645BF129ED54CEEDF66 /* PriceAlertDistanceBadge.swift in Sources */,
+				D89FE1FC962AF716556375BA /* PriceAlertNudgeButton.swift in Sources */,
+				B6904BF6EBBBB47F1B3B6304 /* PriceAlertPresetChip.swift in Sources */,
+				0879D426ADBFDDB10AE2F7ED /* PriceAlertTargetChart.swift in Sources */,
+				BCA2457780156F761C2302D4 /* PriceAlertSaveBar.swift in Sources */,
+				1DB74D20B14C57709417E954 /* PriceAlertCallout.swift in Sources */,
+				4E828086B9D10700893E1F95 /* PriceAlertCardPicker.swift in Sources */,
+				0F61DB701934CBDDE957DE2A /* PriceAlertToolbarButton.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1910,6 +2058,7 @@
 				80489A0F4A9F253AD9BA6AC0 /* PocketStackTests.swift in Sources */,
 				5D8B6E5EA772AE73A318B5F3 /* ValueHistoryChartModelTests.swift in Sources */,
 				A71C222C2F4EA2ED0CF346FF /* FoilTiltFilterTests.swift in Sources */,
+				46EFB90E83204D648015BD8D /* PriceAlertTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

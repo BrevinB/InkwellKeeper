@@ -1,6 +1,8 @@
 package co.brevinb.inkwellkeeper
 
 import android.app.Application
+import android.os.Build
+import co.brevinb.inkwellkeeper.data.AvifDecoder
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
@@ -32,6 +34,10 @@ class InkwellKeeperApp : Application(), SingletonImageLoader.Factory {
             .memoryCache { MemoryCache.Builder().maxSizePercent(context, 0.25).build() }
             .diskCache { DiskCache.Builder().directory(cacheDir.resolve("card_images")).maxSizeBytes(1024L * 1024 * 1024).build() }
             .crossfade(true)
+            .components {
+                // Android 12+ decodes AVIF natively; older versions need the bundled libavif decoder.
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) add(AvifDecoder.Factory())
+            }
             .build()
 
     companion object {

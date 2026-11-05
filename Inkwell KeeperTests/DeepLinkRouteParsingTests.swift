@@ -52,5 +52,14 @@ struct DeepLinkRouteParsingTests {
         #expect(DeepLinkRoute.deck(code: "x").tab == 3)
         #expect(DeepLinkRoute.card(id: "x").tab == 0)
         #expect(DeepLinkRoute.set(name: "x").tab == 2)
+        #expect(DeepLinkRoute.stats.tab == 4)
+        #expect(DeepLinkRoute.priceAlerts.tab == 4)
+    }
+
+    /// Price-alert pushes link to Stats (collection moves, weekly recap) and
+    /// to the alert list (several alerts at once).
+    @Test func parsesPriceAlertPushLinks() {
+        #expect(DeepLinkRouter.parse(URL(string: "inkwellkeeper://stats")!) == .stats)
+        #expect(DeepLinkRouter.parse(URL(string: "inkwellkeeper://alerts")!) == .priceAlerts)
     }
 }

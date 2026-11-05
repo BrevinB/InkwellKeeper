@@ -153,8 +153,10 @@ struct ChangelogEntry {
 private let changelogEntries: [ChangelogEntry] = [
     ChangelogEntry(
         version: "3.6.0",
-        date: "October 2026",
+        date: "November 2026",
         features: [
+            "Price alerts: tap the bell on any card to hear when it drops to a price you'd buy at or rises to one you'd sell at. Set your target with quick picks or by dragging it across the price chart",
+            "Pro: get a heads-up when cards you own make a big move, plus a Sunday summary of how your collection's value changed that week",
             "All-new foil: a rainbow sheen, highlight, and glitter that catch the light as you tilt your phone, however you're holding it",
             "Stack several copies in one binder pocket, like three normals and a foil, and set how many of each are in it",
             "Price and collection value charts: zoom from 1 week to all time, drag across the line to see any day's value, and spot the high and low at a glance",
@@ -165,9 +167,10 @@ private let changelogEntries: [ChangelogEntry] = [
             "Smoother, more battery-friendly card effects"
         ],
         bugFixes: [
-            "The owned count when adding Enchanted, Epic, Iconic, and Promo cards now only counts that printing"
+            "The owned count when adding Enchanted, Epic, Iconic, and Promo cards now only counts that printing",
+            "Opening a card from a shared link no longer closes the app"
         ],
-        inProgress: ["Price alerts"]
+        inProgress: []
     ),
     ChangelogEntry(
         version: "3.5.1",

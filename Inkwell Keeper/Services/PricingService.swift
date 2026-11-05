@@ -277,7 +277,9 @@ class PricingService {
     
     // MARK: - Inkwell Keeper Backend API
 
-    private let inkwellAPIBaseURL = "https://29kwvipys3.execute-api.us-east-2.amazonaws.com"
+    /// The Inkwell pricing backend, which also hosts price-alert registration.
+    static let inkwellAPIBaseURL = "https://29kwvipys3.execute-api.us-east-2.amazonaws.com"
+    private let inkwellAPIBaseURL = PricingService.inkwellAPIBaseURL
 
     private struct InkwellPriceResponse: Codable {
         let uniqueId: String
@@ -347,6 +349,13 @@ class PricingService {
 
     private static func setCode(for setName: String) -> String {
         setCodeMap[setName] ?? String(setName.prefix(3)).uppercased()
+    }
+
+    /// The key the backend uses for one printing in bulk history and price
+    /// alerts: "TFC-1" for normal printings, "TFC-1|foil" for every other variant.
+    func priceKey(for card: LorcanaCard) -> String {
+        let uniqueId = buildUniqueId(for: card)
+        return card.variant == .normal ? uniqueId : "\(uniqueId)|foil"
     }
 
     private func buildUniqueId(for card: LorcanaCard) -> String {

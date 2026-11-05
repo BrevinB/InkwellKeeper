@@ -7,6 +7,7 @@
 //  normal market.
 //
 
+import SwiftData
 import SwiftUI
 
 struct PriceHistoryChartView: View {
@@ -16,6 +17,14 @@ struct PriceHistoryChartView: View {
     @State private var range: ChartRange = .all
     @State private var isLoading = true
     @State private var showingShare = false
+    @State private var showingAlertEditor = false
+    @Query private var alerts: [PriceAlert]
+
+    /// This printing's alert, if one exists — editing it beats adding a duplicate.
+    private var existingAlert: PriceAlert? {
+        let key = PricingService.shared.priceKey(for: card)
+        return alerts.first { $0.priceKey == key }
+    }
 
     private var allPoints: [PortfolioPoint] {
         points.map { PortfolioPoint(date: $0.date, value: $0.price) }
@@ -44,6 +53,16 @@ struct PriceHistoryChartView: View {
                 if let change, points.count >= 2 {
                     PriceChangeBadge(change: change)
                 }
+
+                let alert = existingAlert
+                Button(
+                    alert == nil ? "Set Price Alert" : "Edit Price Alert",
+                    systemImage: alert.map { $0.isTriggered ? "bell.badge.fill" : "bell.fill" } ?? "bell"
+                ) {
+                    showingAlertEditor = true
+                }
+                .labelStyle(.iconOnly)
+                .foregroundStyle(Color.lorcanaGold)
 
                 if points.count >= 2 {
                     Button("Share Trend", systemImage: "square.and.arrow.up") {
@@ -83,6 +102,9 @@ struct PriceHistoryChartView: View {
         }
         .sheet(isPresented: $showingShare) {
             PriceTrendShareView(card: card, points: visiblePoints)
+        }
+        .sheet(isPresented: $showingAlertEditor) {
+            PriceAlertEditorView(card: card, alert: existingAlert)
         }
     }
 

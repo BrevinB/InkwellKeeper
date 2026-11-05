@@ -288,6 +288,7 @@ private suspend fun recognizeStill(bitmap: android.graphics.Bitmap): CardRecogni
  * Auto mode: OCR a frame about every 0.7s. A card is added once, then auto re-arms only after
  * a few frames with no readable card — i.e. when the card leaves the frame, like iOS.
  */
+@androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
 private fun analyzeFrame(
     proxy: ImageProxy,
     session: ScanSession,

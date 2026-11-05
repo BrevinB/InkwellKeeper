@@ -29,9 +29,9 @@ android {
     defaultConfig {
         applicationId = "co.brevinb.inkwellkeeper"
         // AVIF card art decodes natively through ImageDecoder from Android 12.
-        minSdk = 31
+        minSdk = 29
         targetSdk = 36
-        versionCode = 1
+        versionCode = 2
         versionName = "3.5.1"
         buildConfigField("String", "AI_PROXY_URL", "\"${localProps.getProperty("ai.proxyUrl", "")}\"")
         buildConfigField("String", "REVENUECAT_API_KEY", "\"${localProps.getProperty("revenuecat.googleKey", "")}\"")
@@ -105,6 +105,8 @@ dependencies {
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    // AVIF decoding for Android 10–11 (the platform decoder only handles AVIF from Android 12).
+    implementation("io.github.awxkee:avif-coder:3.0.0")
 
     // Subscriptions through Google Play Billing, sharing the iOS app's RevenueCat project and entitlement.
     implementation("com.revenuecat.purchases:purchases:10.26.0")

@@ -19,6 +19,7 @@ struct StatsView: View {
     @State private var showingPaywall = false
     @State private var isRefreshingPrices = false
     @State private var showingShareImage = false
+    @State private var showingPriceAlerts = false
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
@@ -95,6 +96,11 @@ struct StatsView: View {
                     .disabled(viewModel.snapshot.totalCards == 0)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
+                    Button("Price Alerts", systemImage: "bell") {
+                        showingPriceAlerts = true
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
                     Button("Refresh prices", systemImage: "arrow.clockwise", action: refreshPrices)
                         .disabled(isRefreshingPrices || collectionManager.collectedCards.isEmpty)
                 }
@@ -110,6 +116,9 @@ struct StatsView: View {
             }
             .sheet(isPresented: $showingPaywall) {
                 RulesPaywallView(source: "portfolioHistory")
+            }
+            .sheet(isPresented: $showingPriceAlerts) {
+                PriceAlertsView()
             }
             .onChange(of: collectionManager.collectedCards.count) { _, _ in
                 refreshStats()

@@ -38,6 +38,13 @@ extension PaywallFeature {
         description: "Spot the cards sitting at the top or bottom of their price range"
     )
 
+    static let priceAlerts = Self(
+        id: "priceAlerts",
+        icon: "bell.badge",
+        title: "Unlimited Price Alerts",
+        description: "Get notified when your cards move, plus a weekly value recap"
+    )
+
     static let costBasis = Self(
         id: "costBasis",
         icon: "tag",
@@ -119,7 +126,7 @@ extension PaywallFeature {
 
     /// Everything Pro includes, in the order used when no context applies.
     static let all: [Self] = [
-        .valueHistory, .movers, .highsAndLows, .costBasis, .foilPremium,
+        .valueHistory, .movers, .priceAlerts, .highsAndLows, .costBasis, .foilPremium,
         .tradeCalculator, .unlimitedStorage, .setBinders, .rulesExpert, .deckBuilder, .cardAnalysis,
         .strategyGuides, .shareRulings, .chatHistory
     ]

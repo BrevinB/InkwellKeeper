@@ -18,6 +18,10 @@ enum DeepLinkRoute: Equatable {
     case card(id: String)
     /// Open a set's completion screen by name.
     case set(name: String)
+    /// Open Stats (collection-move and weekly-digest notifications).
+    case stats
+    /// Open the price-alert list (several alerts fired at once).
+    case priceAlerts
 
     /// Tab index the route should select (matches `ContentView`'s tags).
     var tab: Int {
@@ -25,6 +29,7 @@ enum DeepLinkRoute: Equatable {
         case .deck: 3   // Decks
         case .card: 0   // Collection
         case .set: 2    // Sets
+        case .stats, .priceAlerts: 4  // Stats
         }
     }
 
@@ -34,6 +39,8 @@ enum DeepLinkRoute: Equatable {
         case .deck: "deck"
         case .card: "card"
         case .set: "set"
+        case .stats: "stats"
+        case .priceAlerts: "priceAlerts"
         }
     }
 }
@@ -91,6 +98,10 @@ final class DeepLinkRouter {
         case "set":
             guard let name = query("name"), !name.isEmpty else { return nil }
             return .set(name: name)
+        case "stats":
+            return .stats
+        case "alerts":
+            return .priceAlerts
         default:
             return nil
         }
