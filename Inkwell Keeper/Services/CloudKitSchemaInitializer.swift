@@ -30,7 +30,8 @@ enum CloudKitSchemaInitializer {
     nonisolated static let modelTypes: [any PersistentModel.Type] = [
         CollectedCard.self, CardSet.self, CollectionStats.self,
         PriceHistory.self, Deck.self, DeckCard.self,
-        StorageContainer.self, StoredCard.self
+        StorageContainer.self, StoredCard.self,
+        PriceAlert.self
     ]
 
     nonisolated static let containerIdentifier = "iCloud.co.brevinb.Inkwell-Keeper"

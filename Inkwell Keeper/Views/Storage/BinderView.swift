@@ -25,7 +25,8 @@ struct BinderView: View {
     @State private var coverAngle: Double?
     @State private var ghostsBySlot: [Int: LorcanaCard] = [:]
     @State private var detailCard: LorcanaCard?
-    @State private var fillSlot: FillTarget?
+    @State private var fillSlot: SlotTarget?
+    @State private var openPocket: PocketTarget?
     @State private var showingAddCards = false
     @State private var showingAutoFill = false
     @State private var showingEditor = false
@@ -37,8 +38,14 @@ struct BinderView: View {
     @State private var bulkMoveResult: StorageManager.BulkMoveResult?
     @Namespace private var pocketNamespace
 
-    private struct FillTarget: Identifiable {
+    private struct SlotTarget: Identifiable {
         let slot: Int
+        var id: Int { slot }
+    }
+
+    private struct PocketTarget: Identifiable {
+        let slot: Int
+        let card: LorcanaCard
         var id: Int { slot }
     }
 
@@ -56,7 +63,7 @@ struct BinderView: View {
     }
 
     var body: some View {
-        let itemsBySlot = Self.itemsBySlot(container.items ?? [])
+        let stacksBySlot = Self.stacksBySlot(container.items ?? [])
 
         VStack(spacing: 12) {
             if model.isEditing {
@@ -75,13 +82,15 @@ struct BinderView: View {
                         BinderPageView(
                             page: page,
                             layout: model.layout,
-                            itemsBySlot: itemsBySlot,
+                            stacksBySlot: stacksBySlot,
                             ghostsBySlot: ghostsBySlot,
                             model: model,
                             namespace: pocketNamespace,
                             onTap: handleTap,
                             onDrop: moveItem,
                             onRemove: remove,
+                            onEditPocket: editPocket,
+                            onShowDetails: { detailCard = $0.toLorcanaCard },
                             upgradeableFoil: upgradeableFoil,
                             onUpgrade: upgrade
                         )
@@ -89,7 +98,7 @@ struct BinderView: View {
                         BinderInsideCover(
                             container: container,
                             value: storageManager.value(of: container),
-                            setProgress: setProgress(itemsBySlot: itemsBySlot)
+                            setProgress: setProgress(stacksBySlot: stacksBySlot)
                         )
                     }
                 },
@@ -165,6 +174,10 @@ struct BinderView: View {
                 isPresented: Binding(get: { detailCard != nil }, set: { if !$0 { detailCard = nil } })
             )
             .presentationSizing(.page)
+        }
+        .sheet(item: $openPocket) { target in
+            PocketContentsSheet(container: container, slot: target.slot, card: target.card)
+                .presentationDetents([.medium, .large])
         }
         .sheet(item: $fillSlot) { target in
             AddToContainerSheet(container: container, targetSlot: target.slot, suggestedCard: ghostsBySlot[target.slot])
@@ -276,17 +289,18 @@ struct BinderView: View {
         model.focusedSlot = nil
         switch model.action(forTapOnSlot: slot, occupant: occupant?.id) {
         case .open:
-            detailCard = occupant?.toLorcanaCard
+            editPocket(slot)
         case .fill(let slot):
-            fillSlot = FillTarget(slot: slot)
+            fillSlot = SlotTarget(slot: slot)
         case .pickUp(let id):
             model.pickedUpItemId = id
         case .putDown:
             model.pickedUpItemId = nil
         case .move(let id, let slot):
             moveItem(id, toSlot: slot)
-        case .toggleSelection(let id):
-            model.toggleSelection(id)
+        case .toggleSelection:
+            // A stacked pocket is chosen or unchosen as a whole.
+            model.toggleSelection(storageManager.items(atSlot: slot, in: container).map(\.id))
         case .none:
             break
         }
@@ -316,27 +330,30 @@ struct BinderView: View {
         moveFeedback += 1
     }
 
+    private func editPocket(_ slot: Int) {
+        guard let card = storageManager.item(atSlot: slot, in: container)?.toLorcanaCard else { return }
+        openPocket = PocketTarget(slot: slot, card: card)
+    }
+
+    /// Takes the pocket's whole stack out of the binder.
     private func remove(_ item: StoredCard) {
+        guard let slot = item.slotIndex else { return }
         withAnimation(.snappy) {
-            storageManager.remove(item)
+            storageManager.emptyPocket(atSlot: slot, in: container)
         }
     }
 
     // MARK: - Derived data
 
-    static func itemsBySlot(_ items: [StoredCard]) -> [Int: StoredCard] {
-        var bySlot: [Int: StoredCard] = [:]
-        for item in items {
-            if let slot = item.slotIndex, bySlot[slot] == nil {
-                bySlot[slot] = item
-            }
-        }
-        return bySlot
+    /// Each pocket's copies, top card first.
+    static func stacksBySlot(_ items: [StoredCard]) -> [Int: [StoredCard]] {
+        Dictionary(grouping: items.filter { $0.slotIndex != nil }) { $0.slotIndex ?? 0 }
+            .mapValues(StorageManager.stackOrder)
     }
 
-    private func setProgress(itemsBySlot: [Int: StoredCard]) -> (filled: Int, total: Int)? {
+    private func setProgress(stacksBySlot: [Int: [StoredCard]]) -> (filled: Int, total: Int)? {
         guard container.linkedSetName != nil, !ghostsBySlot.isEmpty else { return nil }
-        let filled = ghostsBySlot.keys.filter { itemsBySlot[$0] != nil }.count
+        let filled = ghostsBySlot.keys.filter { stacksBySlot[$0] != nil }.count
         return (filled, ghostsBySlot.count)
     }
 }

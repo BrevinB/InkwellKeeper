@@ -33,6 +33,7 @@ extension PaywallContext {
     static func forSource(_ source: String) -> Self {
         switch source {
         case "portfolioHistory": .portfolio
+        case "priceAlerts": .priceAlerts
         case "tradeCalculator": .trades
         case "deckBuilder", "deckCompleter", "deckStrategy": .deckBuilding
         case "rulesTab", "cardAsk": .rules
@@ -48,6 +49,15 @@ extension PaywallContext {
         headline: "Know what your collection is worth",
         subheadline: "Track its value over time, see what moved this week, and what you're up on.",
         leadFeatures: [.valueHistory, .movers, .costBasis]
+    )
+
+    /// Reached from price alerts — a collector who wants to hear when prices move.
+    static let priceAlerts = Self(
+        source: "priceAlerts",
+        heroIcon: "bell.badge.fill",
+        headline: "Never miss a price move",
+        subheadline: "Unlimited alerts, a heads-up when your cards jump or drop, and a weekly recap.",
+        leadFeatures: [.priceAlerts, .movers, .valueHistory]
     )
 
     /// Reached from the trade calculator — someone mid-deal.

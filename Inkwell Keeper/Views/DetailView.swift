@@ -48,6 +48,7 @@ struct CardDetailView: View {
                         }
 
                         AsyncPriceWithConfidenceView(card: card, style: .detailed)
+                        PriceAlertCallout(card: card)
                     }
                     .padding()
 
@@ -68,6 +69,9 @@ struct CardDetailView: View {
             .navigationTitle("Card Details")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    PriceAlertToolbarButton(card: card)
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
                         isPresented = false
@@ -255,6 +259,7 @@ struct CollectionCardDetailView: View {
                             }
                         
                             AsyncPriceWithConfidenceView(card: card, style: .detailed)
+                            PriceAlertCallout(card: card)
                         }
                         .padding()
                         .background(
@@ -335,6 +340,9 @@ struct CollectionCardDetailView: View {
                     Button("Share", systemImage: "square.and.arrow.up") {
                         showingShareImage = true
                     }
+                }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    PriceAlertToolbarButton(card: card)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -695,6 +703,7 @@ struct WishlistCardDetailView: View {
                             }
 
                             AsyncPriceWithConfidenceView(card: card, style: .detailed)
+                            PriceAlertCallout(card: card)
                         }
                         .padding()
                         .background(
@@ -739,6 +748,9 @@ struct WishlistCardDetailView: View {
                 .navigationTitle("Wishlist Card")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        PriceAlertToolbarButton(card: card)
+                    }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button("Done") {
                             isPresented = false
@@ -780,6 +792,7 @@ struct AddToWishlistView: View {
     @State private var searchResults: [CardGroup] = []
     @State private var searchTask: Task<Void, Never>?
     @State private var selectedCardGroupForWishlist: CardGroup?
+    @State private var alertOfferCard: LorcanaCard?
     
     var body: some View {
         NavigationStack {
@@ -856,12 +869,16 @@ struct AddToWishlistView: View {
                     for _ in 0..<quantity {
                         collectionManager.addToWishlist(selectedCard)
                     }
+                        if alertOfferCard == nil {
+                            alertOfferCard = PriceAlertService.shared.wishlistOfferCandidate(selectedCard)
+                        }
                     selectedCardGroupForWishlist = nil
                 },
                 isWishlist: true
             )
             .environment(collectionManager)
         }
+        .priceAlertOffer(for: $alertOfferCard)
     }
     
     private func searchCards(query: String) {
@@ -1208,10 +1225,16 @@ struct AddCardGroupModal: View {
         }
     }
 
-    /// Copies of this card (any variant) already in the collection — shown so the
-    /// add-quantity steppers can't be mistaken for owned quantity.
+    /// Copies of this printing already in the collection — shown so the
+    /// add-quantity steppers can't be mistaken for owned quantity. Regular cards
+    /// count Normal + Foil; special variants (Epic/Enchanted/Iconic/Promo) are
+    /// distinct cards that share a name + set with the regular printing, so they
+    /// only count their own variant.
     private var ownedTotal: Int {
-        CardVariant.allCases.reduce(0) {
+        let variants: [CardVariant] = supportsMultiVariant
+            ? [.normal, .foil]
+            : [cardGroup.primaryCard.variant]
+        return variants.reduce(0) {
             $0 + collectionManager.getCollectedQuantityByName(
                 displayCard.name,
                 setName: displayCard.setName,
@@ -1226,6 +1249,11 @@ struct AddCardGroupModal: View {
                 VStack(spacing: 20) {
                     // Card image and basic info
                     CardGroupInfoHeader(displayCard: displayCard, isImageExpanded: $isImageExpanded)
+
+                    // Sets, search and manual add all land here for cards the
+                    // user doesn't own — the ones most worth watching.
+                    PriceAlertCallout(card: displayCard)
+                        .padding(.horizontal)
 
                     // Ownership status — the add steppers below default to 1, which
                     // otherwise reads as "you own 1" for cards not yet collected
@@ -1450,6 +1478,9 @@ struct AddCardGroupModal: View {
                     Button("Cancel") {
                         isPresented = false
                     }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    PriceAlertToolbarButton(card: displayCard)
                 }
             }
             .overlay(

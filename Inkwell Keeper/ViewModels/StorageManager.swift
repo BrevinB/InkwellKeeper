@@ -189,7 +189,8 @@ final class StorageManager {
             let held = items.filter { $0.container?.id == container.id }
             guard !held.isEmpty else { return nil }
             let layout = container.binderLayout
-            let pockets = held.compactMap(\.slotIndex).sorted().map { slot in
+            // Stacked copies share a pocket; list it once.
+            let pockets = Set(held.compactMap(\.slotIndex)).sorted().map { slot in
                 let position = layout.position(of: slot)
                 return StorageAllocation.BinderPocket(page: position.page + 1, pocket: position.pocket + 1)
             }
@@ -406,8 +407,24 @@ final class StorageManager {
     func moveItems(_ items: [StoredCard], to destination: StorageContainer?) -> BulkMoveResult {
         var result = BulkMoveResult()
         // Binder pockets first-to-last, so they arrive in the same order.
-        let ordered = items.sorted { ($0.slotIndex ?? 0) < ($1.slotIndex ?? 0) }
-        for item in ordered where item.container?.id != destination?.id {
+        var ordered = items.sorted { ($0.slotIndex ?? 0) < ($1.slotIndex ?? 0) }
+            .filter { $0.container?.id != destination?.id }
+
+        // A stacked pocket moving into another binder stays together in one pocket.
+        if let destination, destination.kind.usesSlots {
+            let stacks = Dictionary(grouping: ordered.filter { $0.slotIndex != nil }) {
+                "\($0.container?.id.uuidString ?? "")|\($0.slotIndex ?? 0)"
+            }
+            for stack in stacks.values where stack.count > 1 {
+                guard insertStack(stack.map(\.toLorcanaCard), into: destination) else { continue }
+                removeCopies(stack.count, from: stack)
+                result.moved += stack.count
+                let ids = Set(stack.map(\.id))
+                ordered.removeAll { ids.contains($0.id) }
+            }
+        }
+
+        for item in ordered {
             let copies = item.quantity
             let moved = destination.map { insert(item.toLorcanaCard, quantity: copies, into: $0) } ?? copies
             removeCopies(moved, from: [item])
@@ -451,8 +468,24 @@ final class StorageManager {
         Set((binder.items ?? []).compactMap(\.slotIndex))
     }
 
+    /// The card shown on top of a pocket (its first normal copy, if any).
     func item(atSlot slot: Int, in binder: StorageContainer) -> StoredCard? {
-        (binder.items ?? []).first { $0.slotIndex == slot }
+        items(atSlot: slot, in: binder).first
+    }
+
+    /// Every copy in one pocket, normal copies first, then by when they went in.
+    func items(atSlot slot: Int, in binder: StorageContainer) -> [StoredCard] {
+        Self.stackOrder((binder.items ?? []).filter { $0.slotIndex == slot })
+    }
+
+    /// Display order for a pocket's stack: normal copies on top, then oldest first.
+    static func stackOrder(_ rows: [StoredCard]) -> [StoredCard] {
+        rows.sorted {
+            let lhsNormal = $0.cardVariant == .normal
+            let rhsNormal = $1.cardVariant == .normal
+            if lhsNormal != rhsNormal { return lhsNormal }
+            return $0.dateStored < $1.dateStored
+        }
     }
 
     /// Set binders reserve pocket (number − 1) for each card of their set; everything
@@ -515,6 +548,8 @@ final class StorageManager {
         guard card.variant == .foil,
               !binder.hasFoilPockets,
               let slot = setPocket(for: card, in: binder),
+              // A stacked pocket is edited from the pocket sheet instead.
+              items(atSlot: slot, in: binder).count == 1,
               let occupant = item(atSlot: slot, in: binder),
               occupant.cardVariant == .normal,
               unsortedQuantity(for: card) > 0 else { return nil }
@@ -610,21 +645,26 @@ final class StorageManager {
         return place(card, atSlot: slot, in: binder)
     }
 
-    /// Moves a pocket's card to another pocket, swapping if that pocket is occupied.
+    /// Moves a pocket's cards (the whole stack) to another pocket, swapping if that
+    /// pocket is occupied.
     func moveItem(_ item: StoredCard, toSlot slot: Int) {
         guard let binder = item.container, binder.binderLayout.contains(slot: slot),
-              item.slotIndex != slot else { return }
-        if let occupant = self.item(atSlot: slot, in: binder) {
-            occupant.slotIndex = item.slotIndex
+              let origin = item.slotIndex, origin != slot else { return }
+        let moving = items(atSlot: origin, in: binder)
+        for occupant in items(atSlot: slot, in: binder) {
+            occupant.slotIndex = origin
         }
-        item.slotIndex = slot
+        for copy in moving {
+            copy.slotIndex = slot
+        }
         save()
     }
 
     /// Closes every gap so cards sit in consecutive pockets, preserving order.
     func compact(_ binder: StorageContainer) {
         let items = binder.items ?? []
-        let map = BinderLayout.compactionMap(occupied: items.compactMap(\.slotIndex))
+        // One entry per pocket, so a stack doesn't count as several pockets.
+        let map = BinderLayout.compactionMap(occupied: Array(Set(items.compactMap(\.slotIndex))))
         for item in items {
             if let slot = item.slotIndex, let newSlot = map[slot] {
                 item.slotIndex = newSlot
@@ -675,21 +715,25 @@ final class StorageManager {
     }
 
     /// After a binder shrinks, moves cards from pockets that no longer exist into free
-    /// pockets, or back to Unsorted if there's no room.
+    /// pockets (a stack stays together), or back to Unsorted if there's no room.
     private func relocateOutOfRangeItems(in binder: StorageContainer) {
         guard let context = modelContext else { return }
         let layout = binder.binderLayout
         let items = binder.items ?? []
         var occupied = Set(items.compactMap(\.slotIndex).filter { layout.contains(slot: $0) })
-        for item in items {
-            guard let slot = item.slotIndex, !layout.contains(slot: slot) else { continue }
+        let stranded = Dictionary(grouping: items.filter { $0.slotIndex.map { !layout.contains(slot: $0) } ?? false }) {
+            $0.slotIndex ?? 0
+        }
+        for slot in stranded.keys.sorted() {
+            let stack = stranded[slot] ?? []
             // A checklist card has exactly one valid pocket, so it goes back to Unsorted.
             if binder.linkedSetName == nil, let free = layout.firstEmptySlot(occupied: occupied) {
-                item.slotIndex = free
+                stack.forEach { $0.slotIndex = free }
                 occupied.insert(free)
             } else {
-                binder.items?.removeAll { $0.id == item.id }
-                context.delete(item)
+                let ids = Set(stack.map(\.id))
+                binder.items?.removeAll { ids.contains($0.id) }
+                stack.forEach { context.delete($0) }
             }
         }
     }
@@ -756,8 +800,9 @@ final class StorageManager {
 
     /// Two devices storing the same card while offline can leave duplicate rows once
     /// CloudKit merges them. In boxes, duplicates of one card fold into the larger count
-    /// (matching `DeckManager.mergeDuplicateDeckCards`). In binders, two rows claiming one
-    /// pocket keep the earliest; the later one moves to a free pocket.
+    /// (matching `DeckManager.mergeDuplicateDeckCards`). In binders, copies of the same
+    /// card may share a pocket (a stack), but when two different cards claim one pocket
+    /// the earliest keeps it and the later card's copies move to a free pocket together.
     func mergeDuplicateStoredCards() {
         guard let context = modelContext,
               let allContainers = try? context.fetch(FetchDescriptor<StorageContainer>()) else { return }
@@ -769,20 +814,28 @@ final class StorageManager {
 
             if container.kind.usesSlots {
                 let layout = container.binderLayout
-                var occupied = Set<Int>()
+                var stackBySlot: [Int: String] = [:]
+                // Where each displaced stack went, so its other copies follow it.
+                var relocated: [String: Int] = [:]
+                var allOccupied = Set(items.compactMap(\.slotIndex))
                 for item in items.sorted(by: { $0.dateStored < $1.dateStored }) {
                     guard let slot = item.slotIndex else { continue }
-                    if occupied.contains(slot) {
-                        if let free = layout.firstEmptySlot(occupied: occupied.union(items.compactMap(\.slotIndex))) {
-                            item.slotIndex = free
-                            occupied.insert(free)
-                        } else {
-                            container.items?.removeAll { $0.id == item.id }
-                            context.delete(item)
-                        }
-                        didChange = true
+                    let key = item.stackKey
+                    guard let owner = stackBySlot[slot] else {
+                        stackBySlot[slot] = key
+                        continue
+                    }
+                    guard owner != key else { continue }
+                    didChange = true
+                    let displaced = "\(slot)|\(key)"
+                    if let target = relocated[displaced] ?? layout.firstEmptySlot(occupied: allOccupied) {
+                        item.slotIndex = target
+                        relocated[displaced] = target
+                        stackBySlot[target] = key
+                        allOccupied.insert(target)
                     } else {
-                        occupied.insert(slot)
+                        container.items?.removeAll { $0.id == item.id }
+                        context.delete(item)
                     }
                 }
             } else {
@@ -817,6 +870,117 @@ final class StorageManager {
         }
         containers = []
         save()
+    }
+}
+
+// MARK: - Pocket stacks
+
+/// A binder pocket can hold several copies of one card — e.g. "3 normal, 1 foil" —
+/// for collectors who don't give each copy its own pocket. Auto-fill, scans and Put
+/// Away still take empty pockets; stacking is only ever done from the pocket itself.
+extension StorageManager {
+    /// Cards with the same key may share a pocket: normal and foil copies of one card
+    /// stack together; any other printing only stacks with itself.
+    nonisolated static func stackKey(for card: LorcanaCard) -> String {
+        let base = card.uniqueId.flatMap { $0.isEmpty ? nil : $0 } ?? "\(card.name)|\(card.setName)"
+        switch card.variant {
+        case .normal, .foil: return "\(base)|standard"
+        default: return "\(base)|\(card.variant.rawValue)"
+        }
+    }
+
+    /// The printings of `card` that may go in this pocket: normal and foil for a
+    /// standard card (unless a set binder gives the foil its own pocket), otherwise
+    /// just the card's own printing.
+    func stackPrintings(of card: LorcanaCard, atSlot slot: Int, in binder: StorageContainer) -> [LorcanaCard] {
+        let candidates: [LorcanaCard] = switch card.variant {
+        case .normal, .foil: [card.withVariant(.normal), card.withVariant(.foil)]
+        default: [card]
+        }
+        return candidates.filter { binder.linkedSetName == nil || setPocket(for: $0, in: binder) == slot }
+    }
+
+    /// Copies of exactly this printing in one pocket.
+    func stackCount(of card: LorcanaCard, atSlot slot: Int, in binder: StorageContainer) -> Int {
+        let key = CollectionManager.identityKey(for: card)
+        return items(atSlot: slot, in: binder).filter { $0.identityKey == key }.count
+    }
+
+    /// Sets how many copies of one printing sit in a pocket. Copies come from (and go
+    /// back to) Unsorted, so the count can't exceed what's in the pocket plus what's
+    /// unsorted. A pocket holding a different card is left alone. Returns the new count.
+    @discardableResult
+    func setStackCount(_ count: Int, of card: LorcanaCard, atSlot slot: Int, in binder: StorageContainer) -> Int {
+        let current = stackCount(of: card, atSlot: slot, in: binder)
+        guard let context = modelContext,
+              binder.kind.usesSlots,
+              binder.binderLayout.contains(slot: slot),
+              stackPrintings(of: card, atSlot: slot, in: binder).contains(where: { $0.variant == card.variant }),
+              items(atSlot: slot, in: binder).allSatisfy({ $0.stackKey == Self.stackKey(for: card) }) else { return current }
+
+        let target = min(max(0, count), current + unsortedQuantity(for: card))
+        guard target != current else { return current }
+
+        if target > current {
+            for _ in current..<target {
+                let copy = StoredCard(from: card, quantity: 1, slotIndex: slot)
+                context.insert(copy)
+                copy.container = binder
+            }
+        } else {
+            let key = CollectionManager.identityKey(for: card)
+            let newestFirst = items(atSlot: slot, in: binder)
+                .filter { $0.identityKey == key }
+                .sorted { $0.dateStored > $1.dateStored }
+            removeCopies(current - target, from: newestFirst)
+        }
+        save()
+        if target > current {
+            Analytics.send(.storageCardsStored(count: target - current, kind: binder.kind.rawValue, source: "pocketStack"))
+        }
+        return target
+    }
+
+    /// Takes every copy out of one pocket (they become Unsorted).
+    func emptyPocket(atSlot slot: Int, in binder: StorageContainer) {
+        let stack = items(atSlot: slot, in: binder)
+        guard !stack.isEmpty else { return }
+        removeCopies(stack.count, from: stack)
+        save()
+    }
+
+    /// The card each occupied pocket holds, keyed by slot.
+    func stackKeysBySlot(in binder: StorageContainer) -> [Int: String] {
+        var keys: [Int: String] = [:]
+        for item in binder.items ?? [] {
+            if let slot = item.slotIndex, keys[slot] == nil {
+                keys[slot] = item.stackKey
+            }
+        }
+        return keys
+    }
+
+    /// Puts a whole stack (one row per copy, all the same card) into a single empty
+    /// pocket. All or nothing: false when no one pocket can take every copy, and then
+    /// nothing is inserted. Doesn't save.
+    func insertStack(_ cards: [LorcanaCard], into binder: StorageContainer) -> Bool {
+        guard let context = modelContext, binder.kind.usesSlots, let first = cards.first else { return false }
+        let occupied = occupiedSlots(in: binder)
+        let slot: Int?
+        if binder.linkedSetName != nil {
+            slot = setPocket(for: first, in: binder).flatMap { pocket in
+                !occupied.contains(pocket) && cards.allSatisfy { setPocket(for: $0, in: binder) == pocket } ? pocket : nil
+            }
+        } else {
+            slot = binder.binderLayout.firstEmptySlot(occupied: occupied)
+        }
+        guard let slot else { return false }
+        for card in cards {
+            let copy = StoredCard(from: card, quantity: 1, slotIndex: slot)
+            context.insert(copy)
+            copy.container = binder
+        }
+        return true
     }
 }
 
@@ -959,7 +1123,8 @@ extension StorageManager {
                         plan.pulls.append(.init(
                             card: candidate, sourceId: container.id, sourceName: container.name,
                             sourceKind: container.kind, quantity: free.count, slots: slots,
-                            pockets: slots.map {
+                            // Copies from one stacked pocket share a pocket label.
+                            pockets: Array(Set(slots)).sorted().map {
                                 let position = layout.position(of: $0)
                                 return .init(page: position.page + 1, pocket: position.pocket + 1)
                             }
@@ -1078,16 +1243,23 @@ extension StorageManager {
                origin.id != box.id {
                 let card = item.toLorcanaCard
                 if origin.kind.usesSlots {
-                    var occupied = occupiedSlots(in: origin)
+                    var stackBySlot = stackKeysBySlot(in: origin)
+                    let key = Self.stackKey(for: card)
                     while copies > 0 {
-                        let preferred = item.originSlot.flatMap { occupied.contains($0) || !origin.binderLayout.contains(slot: $0) ? nil : $0 }
+                        // The original pocket takes it back if it's empty or holds the
+                        // rest of the same card's stack.
+                        let preferred = item.originSlot.flatMap { slot in
+                            origin.binderLayout.contains(slot: slot) && (stackBySlot[slot] ?? key) == key ? slot : nil
+                        }
                         // Checklist binders only take a card back into its own pocket.
-                        let fallback = origin.linkedSetName == nil ? origin.binderLayout.firstEmptySlot(occupied: occupied) : nil
+                        let fallback = origin.linkedSetName == nil
+                            ? origin.binderLayout.firstEmptySlot(occupied: Set(stackBySlot.keys))
+                            : nil
                         guard let slot = preferred ?? fallback else { break }
                         let restored = StoredCard(from: card, quantity: 1, slotIndex: slot)
                         context.insert(restored)
                         restored.container = origin
-                        occupied.insert(slot)
+                        stackBySlot[slot] = key
                         copies -= 1
                         returned += 1
                     }
@@ -1158,16 +1330,17 @@ extension StorageManager {
             summary.containers += 1
 
             let totalSlots = container.binderLayout.totalSlots
-            var usedSlots = Set<Int>()
+            var stackBySlot: [Int: String] = [:]
             for item in saved.items {
                 let card = item.card
                 let key = CollectionManager.identityKey(for: card)
                 let copies = min(item.quantity, room[key, default: 0])
                 guard copies > 0 else { continue }
                 if container.kind.usesSlots {
-                    // A pocket that no longer exists or is already taken can't be refilled.
-                    guard let slot = item.slotIndex, slot < totalSlots, !usedSlots.contains(slot) else { continue }
-                    usedSlots.insert(slot)
+                    // A pocket that no longer exists, or holds a different card, can't be refilled.
+                    let stack = Self.stackKey(for: card)
+                    guard let slot = item.slotIndex, slot < totalSlots, (stackBySlot[slot] ?? stack) == stack else { continue }
+                    stackBySlot[slot] = stack
                 }
                 let row = StoredCard(from: card, quantity: copies, slotIndex: container.kind.usesSlots ? item.slotIndex : nil)
                 row.originContainerId = item.originContainerId

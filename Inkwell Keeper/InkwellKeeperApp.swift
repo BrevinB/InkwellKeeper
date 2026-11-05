@@ -6,12 +6,15 @@
 //
 
 import SwiftUI
+import TipKit
 import SwiftData
 import RevenueCat
 import TelemetryDeck
 
 @main
 struct InkwellKeeperApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @Environment(\.scenePhase) private var scenePhase
     let container: ModelContainer
 
     init() {
@@ -29,6 +32,13 @@ struct InkwellKeeperApp: App {
         // Pick up subscriptions started outside the app (e.g. offer codes)
         SubscriptionManager.shared.observeCustomerInfo()
 
+        // One-time feature tips. Kept out of screenshot and filming runs, which
+        // launch with these rig arguments, so a tip doesn't cover the shot.
+        let rigKeys = ["deeplink", "tab", "seedDemo", "demoImport", "demoAIDeck", "rulesQuestion"]
+        if !rigKeys.contains(where: { UserDefaults.standard.object(forKey: $0) != nil }) {
+            try? Tips.configure()
+        }
+
         // Refresh deck-construction rules (rotation + banned lists) from CloudKit
         DeckRulesService.shared.refresh()
 
@@ -42,6 +52,7 @@ struct InkwellKeeperApp: App {
         CoconutLeaderImageService.shared.refresh()
 
         container = Self.makeContainer()
+        PriceAlertService.shared.configure(container: container)
     }
 
     /// Creates the SwiftData ModelContainer with iCloud (CloudKit) sync enabled.
@@ -59,6 +70,7 @@ struct InkwellKeeperApp: App {
                 for: CollectedCard.self, CardSet.self, CollectionStats.self,
                 PriceHistory.self, Deck.self, DeckCard.self,
                 StorageContainer.self, StoredCard.self,
+                PriceAlert.self,
                 configurations: config
             )
             return container
@@ -80,6 +92,7 @@ struct InkwellKeeperApp: App {
                 for: CollectedCard.self, CardSet.self, CollectionStats.self,
                 PriceHistory.self, Deck.self, DeckCard.self,
                 StorageContainer.self, StoredCard.self,
+                PriceAlert.self,
                 configurations: config
             )
             return container
@@ -93,5 +106,13 @@ struct InkwellKeeperApp: App {
             ContentView()
         }
         .modelContainer(container)
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            // Pick up fires since the last visit and any collection changes.
+            Task {
+                await PriceAlertService.shared.refreshAuthorizationStatus()
+                await PriceAlertService.shared.sync()
+            }
+        }
     }
 }

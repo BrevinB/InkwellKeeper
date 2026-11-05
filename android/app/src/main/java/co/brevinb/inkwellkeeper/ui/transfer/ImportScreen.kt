@@ -81,6 +81,7 @@ fun ImportScreen() {
     var result by remember { mutableStateOf<ImportService.Result?>(null) }
     var storageNote by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
+    val scrollState = rememberScrollState()
 
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         uri ?: return@rememberLauncherForActivityResult
@@ -112,12 +113,14 @@ fun ImportScreen() {
             Analytics.send("import.completed", mapOf("format" to format.name, "cards" to "${r.totalCardsCount}"))
             result = r
             importing = false
+            // The summary sits below the button, often off-screen; bring it into view.
+            scrollState.animateScrollTo(scrollState.maxValue)
         }
     }
 
     InkwellScaffold("Bulk Import", showBack = true) { padding ->
         Column(
-            Modifier.padding(padding).verticalScroll(rememberScrollState()).navigationBarsPadding().padding(16.dp),
+            Modifier.padding(padding).verticalScroll(scrollState).navigationBarsPadding().padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -146,14 +149,14 @@ fun ImportScreen() {
                     }
                 }
                 ImportMethod.PASTE -> OutlinedTextField(
-                    text, { text = it; format = ImportService.detectFormat(it) },
+                    text, { text = it; format = ImportService.detectFormat(it); result = null },
                     placeholder = { Text("4 Elsa - Snow Queen\n2x Mickey Mouse - True Friend (Foil)") },
                     textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                     modifier = Modifier.fillMaxWidth().heightIn(min = 160.dp),
                     colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = LorcanaGold, cursorColor = LorcanaGold),
                 )
                 ImportMethod.OFFICIAL -> OutlinedTextField(
-                    link, { link = it }, singleLine = true,
+                    link, { link = it; result = null }, singleLine = true,
                     placeholder = { Text("https://…ravensburger.com/…") },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = LorcanaGold, cursorColor = LorcanaGold),
@@ -186,7 +189,8 @@ fun ImportScreen() {
                             runImport(text)
                         }
                     },
-                    enabled = ready && !importing,
+                    // Disabled after a successful import so a second tap can't add every card again.
+                    enabled = ready && !importing && result == null,
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text(if (importing) "Importing…" else "Import Cards") }
             }

@@ -20,7 +20,9 @@ struct PortfolioSummaryHeader: View {
                 $0.formatted(.percent.precision(.fractionLength(1)))
             }
         }
-        let month = since.formatted(.dateTime.month(.abbreviated).year())
+        // A short range names the day ("since Oct 18"); a long one the month.
+        let isRecent = Date.now.timeIntervalSince(since) < 45 * 86_400
+        let month = since.formatted(isRecent ? .dateTime.month(.abbreviated).day() : .dateTime.month(.abbreviated).year())
         guard let percent = summary.percentChange else { return "since \(month)" }
         let formatted = (percent / 100).formatted(.percent.precision(.fractionLength(1)))
         return "\(formatted) since \(month)"

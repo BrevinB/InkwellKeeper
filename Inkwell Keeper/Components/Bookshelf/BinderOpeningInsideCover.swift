@@ -24,8 +24,8 @@ struct BinderOpeningInsideCover: View {
                 value = storageManager.value(of: container)
                 let ghosts = storageManager.checklistGhosts(for: container)
                 if container.linkedSetName != nil, !ghosts.isEmpty {
-                    let itemsBySlot = BinderView.itemsBySlot(container.items ?? [])
-                    setProgress = (ghosts.keys.filter { itemsBySlot[$0] != nil }.count, ghosts.count)
+                    let stacksBySlot = BinderView.stacksBySlot(container.items ?? [])
+                    setProgress = (ghosts.keys.filter { stacksBySlot[$0] != nil }.count, ghosts.count)
                 }
             }
     }

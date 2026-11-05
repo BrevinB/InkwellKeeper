@@ -75,16 +75,18 @@ struct CollectionView: View {
                     .navigationTransition(.zoom(sourceID: route.container.id, in: storageTransition))
             }
             .toolbar {
+                // Distinct symbols, not magnifyingglass/ellipsis: on iPhone Duo these
+                // sit in the side tab rail beside the tab bar's own "More" (•••) and
+                // the in-page collection search field.
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showingCardSearch = true }) {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundStyle(.lorcanaGold)
+                    Button("Search All Cards", systemImage: "plus.magnifyingglass") {
+                        showingCardSearch = true
                     }
-                    .accessibilityLabel("Search card catalog")
+                    .foregroundStyle(.lorcanaGold)
                     .keyboardShortcut("f", modifiers: .command)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
+                    Menu("Import, Export & Settings", systemImage: "square.and.arrow.up.on.square") {
                         Button(action: { showingBulkImport = true }) {
                             Label("Bulk Import", systemImage: "square.and.arrow.down")
                         }
@@ -104,16 +106,17 @@ struct CollectionView: View {
                         Button(action: { showingSettings = true }) {
                             Label("Settings", systemImage: "gear")
                         }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                            .foregroundStyle(.lorcanaGold)
                     }
+                    .foregroundStyle(.lorcanaGold)
                 }
             }
         }
         .onAppear {
             collectionManager.loadCollection()
             recomputeFilteredCards()
+            #if DEBUG && targetEnvironment(simulator)
+            if ScreenshotRig.opensDemoImport { showingBulkImport = true }
+            #endif
         }
         .onChange(of: searchText) { recomputeFilteredCards() }
         .onChange(of: selectedFilter) { recomputeFilteredCards() }

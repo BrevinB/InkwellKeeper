@@ -97,6 +97,13 @@ struct DecksView: View {
         }
         .onAppear {
             deckManager.loadDecks(context: modelContext)
+            #if DEBUG && targetEnvironment(simulator)
+            Task {
+                if path.isEmpty, let deck = await ScreenshotRig.demoAIDeck(deckManager: deckManager) {
+                    path = [deck]
+                }
+            }
+            #endif
         }
         .sheet(isPresented: $showingStarterDecks) {
             StarterDecksView()

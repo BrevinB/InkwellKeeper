@@ -19,59 +19,27 @@ struct FoilEffect: ViewModifier {
 
     func body(content: Content) -> some View {
         let animates = isAnimated && !reduceMotion && scenePhase == .active
-        content
-            .overlay {
-                TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: !animates)) { timeline in
-                    let phase = animates ? timeline.date.timeIntervalSinceReferenceDate
-                        .truncatingRemainder(dividingBy: 8) * .pi / 4 : 0
-                    Color.clear
-                        .interactiveHolographicEffect(
-                            pitch: animates ? sin(phase) * 0.45 : 0,
-                            roll: animates ? cos(phase) * 0.6 : 0,
-                            variant: .foil
-                        )
-                }
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
-            }
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: !animates)) { timeline in
+            let phase = animates ? timeline.date.timeIntervalSinceReferenceDate
+                .truncatingRemainder(dividingBy: 8) * .pi / 4 : 0
+            content
+                .interactiveHolographicEffect(
+                    pitch: animates ? sin(phase) * 0.45 : 0,
+                    roll: animates ? cos(phase) * 0.6 : 0,
+                    variant: .foil
+                )
+        }
     }
 }
 
-/// Simple static foil effect without animation (for lists/grids)
+/// A still foil sheen at a fixed angle, for cards shown many at a time.
 struct StaticFoilEffect: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .overlay(
-                // Static rainbow gradient
-                Group {
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color.clear,
-                            Color.purple.opacity(0.2),
-                            Color.cyan.opacity(0.2),
-                            Color.yellow.opacity(0.2),
-                            Color.clear
-                        ]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                }
-                .blendMode(.screen)
-            )
-            .overlay(
-                // Subtle shine
-                Group {
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color.white.opacity(0.0),
-                            Color.white.opacity(0.15),
-                            Color.white.opacity(0.0)
-                        ]),
-                        startPoint: .topLeading,
-                        endPoint: .center
-                    )
-                }
-                .blendMode(.screen)
+            .interactiveHolographicEffect(
+                pitch: InteractiveHolographicEffect.stillPitch,
+                roll: InteractiveHolographicEffect.stillRoll,
+                variant: .foil
             )
     }
 }

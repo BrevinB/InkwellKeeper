@@ -1,0 +1,49 @@
+Ink Well Keeper is your all-in-one companion for your Disney Lorcana TCG collection. Scan cards in seconds, see what your collection is worth, complete sets, build decks, and show off your best pulls.
+
+📸 SCAN ANY CARD IN SECONDS
+Point your camera at a Lorcana card, or work through a whole stack. Batch scanning recognizes card after card, then lets you review and add everything at once. Foils, Enchanteds and promos included.
+
+🎴 TRACK EVERY SET
+Every main Lorcana set from The First Chapter to Hyperia City, plus promos, Illumineer's Quest and special sets. Set completion bars, missing-card filters and search by collector number make finishing a set genuinely satisfying.
+
+💰 KNOW WHAT IT'S WORTH
+Live market pricing shows your total collection value, individual card prices and your most valuable cards.
+
+📦 KNOW WHERE EVERY CARD LIVES
+Track your binders and boxes, page through a binder like the real thing, and see exactly which copies are where.
+
+🎉 SHARE YOUR PULLS
+Just ripped a box? Generate a share card of your haul (top pull, card count, total value) and post it anywhere. Single-card flexes, deck showcases and collection stats too, each with a QR code friends can scan.
+
+🃏 BUILD AND SHARE DECKS
+Build decks with validation for Core, Infinity and Casual formats. See your cost curve, inkable ratio and which cards you still need. Share any deck as a QR code or link, or import deck lists in the standard text format.
+
+🔁 TRADE WITH CONFIDENCE (PRO)
+Line up both sides of a trade and see instantly whether it's fair, using live prices.
+
+🤖 AI TOOLS (PRO)
+• AI Deck Builder: describe the deck you want and get a legal 60-card list built around your collection and format rules.
+• Rules Assistant: ask about card interactions and get clear answers with your card in context.
+
+📊 STATISTICS
+Rarity breakdown, ink colors, cost curve, value by set, recent additions and more.
+
+⭐ WISHLIST & IMPORTS
+Track the cards you're hunting, with prices. Import your existing collection from Dreamborn CSV or plain card lists in minutes.
+
+PERFECT FOR
+✓ Collectors completing sets
+✓ Players building competitive decks
+✓ Traders watching card values
+✓ Anyone opening boosters on set weekend
+
+FREE TO USE
+Collection tracking, scanning, pricing, sets, decks and sharing are free. Ink Well Keeper Pro is an optional subscription that unlocks the AI tools, the trade calculator, value history and unlimited binders and boxes.
+
+PRIVACY
+Your collection lives on your device. No ads, no account, and we never sell your data.
+
+LEGAL
+This app uses trademarks and/or copyrights associated with Disney Lorcana TCG, under Ravensburger's Community Code Policy. It is not published, endorsed, or specifically approved by Disney or Ravensburger.
+
+Questions or feedback? support@inkwellkeeper.app

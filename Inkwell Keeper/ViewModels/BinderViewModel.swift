@@ -141,4 +141,15 @@ final class BinderViewModel {
     func toggleSelection(_ id: UUID) {
         selectedItemIds.formSymmetricDifference([id])
     }
+
+    /// Chooses or unchooses several copies together (a stacked pocket): all of them
+    /// become chosen unless they already all were.
+    func toggleSelection(_ ids: [UUID]) {
+        let stack = Set(ids)
+        if stack.isSubset(of: selectedItemIds) {
+            selectedItemIds.subtract(stack)
+        } else {
+            selectedItemIds.formUnion(stack)
+        }
+    }
 }

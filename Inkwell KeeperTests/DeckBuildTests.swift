@@ -227,10 +227,12 @@ struct DeckBuildTests {
 
         let result = fixture.storage.takeApart(box, returnToOrigins: true)
 
-        // The pocket is taken and a checklist card has no other valid pocket.
-        #expect(result.returned == 0)
-        #expect(result.unsorted == 1)
+        // A checklist card has no other valid pocket, but its own pocket holds the
+        // same card, so the copy goes back in as a stack.
+        #expect(result.returned == 1)
+        #expect(result.unsorted == 0)
         #expect(fixture.storage.occupiedSlots(in: binder) == [0])
+        #expect(fixture.storage.items(atSlot: 0, in: binder).count == 2)
     }
 
     @Test func takingApartToUnsortedEmptiesTheBox() throws {

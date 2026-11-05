@@ -12,32 +12,20 @@ struct InteractiveCardView: View {
     let imageURL: URL?
     var onTap: (() -> Void)?
 
-    private let motionManager = MotionManager.shared
     @Environment(\.scenePhase) private var scenePhase
     @State private var isVisible = false
     @State private var ownsMotionUpdates = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    // Touch-based interaction state
-    @State private var isTouching = false
+    // Touch-based interaction state, added on top of the device tilt
     @State private var touchPitch: Double = 0
     @State private var touchRoll: Double = 0
     @State private var dragDistance: CGFloat = 0
 
-    // 3D rotation parameters
-    private let maxRotationDegrees: Double = 15.0
-    private let perspective: CGFloat = 0.5
     private let tapThreshold: CGFloat = 10  // Max movement to count as tap
 
-    // Active pitch/roll values - uses touch when touching, motion otherwise
-    private var activePitch: Double {
-        if reduceMotion { return 0 }
-        return isTouching ? touchPitch : motionManager.pitch
-    }
-
-    private var activeRoll: Double {
-        if reduceMotion { return 0 }
-        return isTouching ? touchRoll : motionManager.roll
+    private var needsMotion: Bool {
+        isVisible && !reduceMotion && scenePhase == .active
     }
 
     init(card: LorcanaCard, onTap: (() -> Void)? = nil) {
@@ -48,61 +36,18 @@ struct InteractiveCardView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let rotationX = activePitch * maxRotationDegrees
-            let rotationY = activeRoll * maxRotationDegrees
-
-            // Shadow offset moves opposite to tilt direction
-            let shadowOffsetX = -activeRoll * 20
-            let shadowOffsetY = -activePitch * 20
-
-            AsyncImage(url: imageURL) { phase in
-                switch phase {
-                case .success(let image):
-                    image
-                        .resizable().scaledToFit()
-                        .interactiveHolographicEffect(
-                            pitch: activePitch,
-                            roll: activeRoll,
-                            variant: card.variant
-                        )
-                case .failure:
-                    cardPlaceholder
-                case .empty:
-                    cardPlaceholder
-                        .overlay(
-                            ProgressView()
-                                .tint(.white)
-                        )
-                @unknown default:
-                    cardPlaceholder
-                }
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .shadow(
-                color: .black.opacity(0.4),
-                radius: 20,
-                x: shadowOffsetX,
-                y: shadowOffsetY + 10
-            )
-            .rotation3DEffect(
-                .degrees(rotationX),
-                axis: (x: 1.0, y: 0.0, z: 0.0),
-                anchor: .center,
-                perspective: perspective
-            )
-            .rotation3DEffect(
-                .degrees(-rotationY),
-                axis: (x: 0.0, y: 1.0, z: 0.0),
-                anchor: .center,
-                perspective: perspective
+            TiltingCardFace(
+                card: card,
+                imageURL: imageURL,
+                tracksMotion: ownsMotionUpdates,
+                touchPitch: touchPitch,
+                touchRoll: touchRoll
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
                         // Track drag distance from start
-                        isTouching = true
-
                         let dx = value.location.x - value.startLocation.x
                         let dy = value.location.y - value.startLocation.y
                         dragDistance = max(dragDistance, hypot(dx, dy))
@@ -124,9 +69,8 @@ struct InteractiveCardView: View {
                             onTap?()
                         }
 
-                        // Animate back to neutral when touch ends
+                        // Spring back to the device tilt when touch ends
                         withAnimation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.7)) {
-                            isTouching = false
                             touchPitch = 0
                             touchRoll = 0
                         }
@@ -141,7 +85,6 @@ struct InteractiveCardView: View {
         }
         .onChange(of: reduceMotion) { updateMotionSubscription() }
         .onChange(of: scenePhase) { updateMotionSubscription() }
-        .onChange(of: card.variant) { updateMotionSubscription() }
         .onDisappear {
             isVisible = false
             updateMotionSubscription()
@@ -149,25 +92,12 @@ struct InteractiveCardView: View {
     }
 
     private func updateMotionSubscription() {
-        let needsMotion = isVisible && !reduceMotion && scenePhase == .active
         guard needsMotion != ownsMotionUpdates else { return }
         ownsMotionUpdates = needsMotion
         if needsMotion {
-            motionManager.start()
+            FoilMotion.shared.begin()
         } else {
-            motionManager.stop()
+            FoilMotion.shared.end()
         }
-    }
-
-    private var cardPlaceholder: some View {
-        RoundedRectangle(cornerRadius: 16)
-            .fill(
-                LinearGradient(
-                    colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.2)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .aspectRatio(5.0 / 7.0, contentMode: .fit)  // Standard card aspect ratio
     }
 }

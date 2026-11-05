@@ -24,7 +24,8 @@ struct PaywallContextTests {
         "storageLimit",
         "storageTheme",
         "storageSetBinder",
-        "storageScan"
+        "storageScan",
+        "priceAlerts"
     ]
 
     // MARK: - Routing

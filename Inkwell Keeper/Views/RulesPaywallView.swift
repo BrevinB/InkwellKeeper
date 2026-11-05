@@ -190,7 +190,7 @@ struct RulesPaywallView: View {
             // Restoring nothing is the common case and used to look like the
             // button was dead, which is a thing App Review checks.
             restoreMessage = subscriptionManager.isSubscribed
-                ? "Your subscription has been restored."
+                ? "Your Pro access has been restored."
                 : "No previous purchases were found for this Apple Account."
         } catch {
             showError = true
@@ -234,7 +234,11 @@ struct SubscriptionOptionCard: View {
                         .font(.headline)
                         .foregroundStyle(.white)
 
-                    if let intro = package.storeProduct.introductoryDiscount {
+                    if package.isLifetime {
+                        Text("Pay once, keep Pro forever")
+                            .font(.caption)
+                            .foregroundStyle(.lorcanaGold)
+                    } else if let intro = package.storeProduct.introductoryDiscount {
                         Text(introText(for: intro))
                             .font(.caption)
                             .foregroundStyle(.lorcanaGold)
@@ -271,6 +275,17 @@ struct SubscriptionOptionCard: View {
         @unknown default:
             return ""
         }
+    }
+}
+
+// MARK: - Lifetime Package
+
+extension Package {
+    /// A one-time purchase rather than a renewing subscription. RevenueCat tags
+    /// it `.lifetime` when it sits in the Lifetime slot of the offering; the
+    /// product type catches a non-consumable placed in a custom slot.
+    var isLifetime: Bool {
+        packageType == .lifetime || storeProduct.productType == .nonConsumable
     }
 }
 
