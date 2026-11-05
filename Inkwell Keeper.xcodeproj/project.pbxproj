@@ -51,6 +51,7 @@
 		1DB74D20B14C57709417E954 /* PriceAlertCallout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5C82105E9A7CF950C06B00 /* PriceAlertCallout.swift */; };
 		1E16122A6580F336561E915A /* PortfolioSummaryHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6F4855D4AFB01FE7B400283 /* PortfolioSummaryHeader.swift */; };
 		1E34BEC4FE724210B4368238 /* ValueBySetCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6502D77B1F14DFEA73094B1 /* ValueBySetCard.swift */; };
+		1F55F435C7C077C7A49AA9A3 /* PriceAlertOfferBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD1CC9F89D64754BB8908561 /* PriceAlertOfferBanner.swift */; };
 		1FD7B6E3D492B2FE4151BABF /* ScanCardMatchingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26A5F418A5ABA797A4DF64C0 /* ScanCardMatchingTests.swift */; };
 		2030608686C882B4ED380504 /* StorageKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD22BDFE25B4054B8DFED05F /* StorageKind.swift */; };
 		2071960A0B803DF1DE4324FA /* SpoilerPlaceholderRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55843056A9672CC82C85B8E9 /* SpoilerPlaceholderRow.swift */; };
@@ -269,6 +270,7 @@
 		8524C3E300288E5D393A7C19 /* RulesCardDetectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AF59884E10538C70058F6CB /* RulesCardDetectionTests.swift */; };
 		85F4804B7AD7698777A1234A /* RenderedContainerArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2654D67AE6252CC7FC5EF811 /* RenderedContainerArtwork.swift */; };
 		861B672A383314C8911CEE78 /* PriceAlertTargetPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF99C5EBD79EA1CE5CF57D8 /* PriceAlertTargetPanel.swift */; };
+		864EC534AE68F60ACB44ABA7 /* PriceAlertBellTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B3E8E02EFEA48E9F82E84C /* PriceAlertBellTip.swift */; };
 		86864222B8FF2693A0BDEDCD /* PortfolioSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 548FB2014A6E368E567EBB39 /* PortfolioSummary.swift */; };
 		869E157845B8C1C006046754 /* BuildDeckSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1951A2DC93C6BC3F9B29B1 /* BuildDeckSheet.swift */; };
 		884B9D336CE494DA2F93673F /* TradeConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93A8ADADEA4B71A8B17CAC8 /* TradeConfirmationView.swift */; };
@@ -402,6 +404,7 @@
 		E800550A08F26C9EE7F01479 /* OpeningHandSimulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E86DD8059DCCA4741B7F1C04 /* OpeningHandSimulator.swift */; };
 		E9B14E7FF29DC8D7FD5DBAFF /* BinderOpeningInsideCover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F6F63DF9A2278D5D5ED6A6 /* BinderOpeningInsideCover.swift */; };
 		E9BA973ABE8298DEF50FC3DE /* SetChecklistLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB5DB12319DF16FA575EF0F /* SetChecklistLayout.swift */; };
+		EABB53DC4F87328084525619 /* PriceAlertOfferModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD4E1C8DC055E3572B2F168 /* PriceAlertOfferModifier.swift */; };
 		EC289C46CFDECD9AF1BA235D /* ShareMilestone.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0C40ABB4DEDF6D9008F0E1 /* ShareMilestone.swift */; };
 		EF1ED0B1FE0DBE2B3B55AC01 /* StorageTileBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6CE5A40C7678D952970AD42 /* StorageTileBadge.swift */; };
 		EF30F02132892FF45F898ACE /* SparkleShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB788689F2C446D1C83170C7 /* SparkleShape.swift */; };
@@ -750,6 +753,7 @@
 		A2E370BC75265AAF0B2A78DF /* FoilTiltFilter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FoilTiltFilter.swift; sourceTree = "<group>"; };
 		A4830599C05F8B109EEDFDFD /* Inkwell KeeperTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Inkwell KeeperTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A58272E242BA935C138E0E7D /* ShelfSlot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShelfSlot.swift; sourceTree = "<group>"; };
+		A6B3E8E02EFEA48E9F82E84C /* PriceAlertBellTip.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertBellTip.swift; sourceTree = "<group>"; };
 		A8B3E5CA101035662470791D /* ChartRangePicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChartRangePicker.swift; sourceTree = "<group>"; };
 		A8C940D9F64033ECA834BE4F /* PriceAlertRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertRow.swift; sourceTree = "<group>"; };
 		AA1B2C3D4E5F678901234560 /* LoreCounterModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoreCounterModels.swift; sourceTree = "<group>"; };
@@ -784,6 +788,7 @@
 		BC0C40ABB4DEDF6D9008F0E1 /* ShareMilestone.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareMilestone.swift; sourceTree = "<group>"; };
 		BC844FB1BF5EF738AFCC4323 /* TradeCalculatorView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TradeCalculatorView.swift; sourceTree = "<group>"; };
 		BCD7B7D3D53A754F91108715 /* CollectionEmptyStateContent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CollectionEmptyStateContent.swift; sourceTree = "<group>"; };
+		BD1CC9F89D64754BB8908561 /* PriceAlertOfferBanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertOfferBanner.swift; sourceTree = "<group>"; };
 		BD3069F481FAC2207635DED0 /* StorageChip.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StorageChip.swift; sourceTree = "<group>"; };
 		C10CD1D348FA629BA80B2FBF /* RenderedArtworkMetrics+Generated.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "RenderedArtworkMetrics+Generated.swift"; sourceTree = "<group>"; };
 		C1D2E3F4A5B6C7D8E9F0A1B3 /* InteractiveHolographicEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractiveHolographicEffect.swift; sourceTree = "<group>"; };
@@ -831,6 +836,7 @@
 		DBFF6B0A02D74D5DBDDBD4B1 /* TypeBreakdownCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeBreakdownCard.swift; sourceTree = "<group>"; };
 		DC5483000A417BA10C98784A /* TradeSideTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TradeSideTests.swift; sourceTree = "<group>"; };
 		DCBEBA105D03828FFFF0BE0F /* AIDeckFeedbackReason.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIDeckFeedbackReason.swift; sourceTree = "<group>"; };
+		DDD4E1C8DC055E3572B2F168 /* PriceAlertOfferModifier.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PriceAlertOfferModifier.swift; sourceTree = "<group>"; };
 		E019A5353E22A19B7A111BDD /* TradeExchangeAnimation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TradeExchangeAnimation.swift; sourceTree = "<group>"; };
 		E104E2DD7BDCEB5B67B927C4 /* LeatherStitching.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LeatherStitching.swift; sourceTree = "<group>"; };
 		E105E89F1FF43FD4CBC90929 /* DeckToolsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeckToolsTests.swift; sourceTree = "<group>"; };
@@ -943,6 +949,9 @@
 				2E5C82105E9A7CF950C06B00 /* PriceAlertCallout.swift */,
 				4163A77904ACAC4424EE8FEC /* PriceAlertCardPicker.swift */,
 				219331CC5A93FCD6708694AE /* PriceAlertToolbarButton.swift */,
+				A6B3E8E02EFEA48E9F82E84C /* PriceAlertBellTip.swift */,
+				BD1CC9F89D64754BB8908561 /* PriceAlertOfferBanner.swift */,
+				DDD4E1C8DC055E3572B2F168 /* PriceAlertOfferModifier.swift */,
 			);
 			name = PriceAlerts;
 			path = PriceAlerts;
@@ -2013,6 +2022,9 @@
 				1DB74D20B14C57709417E954 /* PriceAlertCallout.swift in Sources */,
 				4E828086B9D10700893E1F95 /* PriceAlertCardPicker.swift in Sources */,
 				0F61DB701934CBDDE957DE2A /* PriceAlertToolbarButton.swift in Sources */,
+				864EC534AE68F60ACB44ABA7 /* PriceAlertBellTip.swift in Sources */,
+				1F55F435C7C077C7A49AA9A3 /* PriceAlertOfferBanner.swift in Sources */,
+				EABB53DC4F87328084525619 /* PriceAlertOfferModifier.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

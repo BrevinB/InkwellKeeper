@@ -104,7 +104,7 @@ struct PriceHistoryChartView: View {
             PriceTrendShareView(card: card, points: visiblePoints)
         }
         .sheet(isPresented: $showingAlertEditor) {
-            PriceAlertEditorView(card: card, alert: existingAlert)
+            PriceAlertEditorView(card: card, alert: existingAlert, source: "chart")
         }
     }
 
@@ -112,7 +112,7 @@ struct PriceHistoryChartView: View {
         VStack(alignment: .leading, spacing: 10) {
             let ranges = ChartRange.available(for: allPoints)
             if !ranges.isEmpty {
-                ChartRangePicker(ranges: ranges, selection: $range)
+                ChartRangePicker(ranges: ranges, selection: $range, scope: "card")
             }
             PriceTrendChart(points: visiblePoints)
                 .frame(minHeight: 160, maxHeight: 210)

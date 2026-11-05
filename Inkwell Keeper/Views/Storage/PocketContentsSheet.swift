@@ -19,6 +19,8 @@ struct PocketContentsSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var detailCard: LorcanaCard?
     @State private var changeFeedback = 0
+    /// Copies in the pocket when the sheet opened, to tell a new stack from an old one.
+    @State private var openingTotal: Int?
 
     var body: some View {
         let position = container.binderLayout.position(of: slot)
@@ -85,6 +87,14 @@ struct PocketContentsSheet: View {
                 }
             }
             .sensoryFeedback(.selection, trigger: changeFeedback)
+            .onAppear {
+                if openingTotal == nil { openingTotal = total }
+            }
+            .onDisappear {
+                guard total > 1, total != openingTotal else { return }
+                let stacked = printings.filter { storageManager.stackCount(of: $0, atSlot: slot, in: container) > 0 }
+                Analytics.send(.storagePocketStacked(copies: total, printings: stacked.count))
+            }
             .sheet(item: $detailCard) { card in
                 CollectionCardDetailView(
                     card: card,

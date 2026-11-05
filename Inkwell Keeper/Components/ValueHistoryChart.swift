@@ -21,6 +21,8 @@ struct ValueHistoryChart: View {
     /// Drag to scrub. Off for previews and share images.
     var isInteractive = true
     var lineWidth: CGFloat = 2
+    /// "card" or "collection": reports drag-to-scrub to analytics, once per drag.
+    var analyticsScope: String?
 
     @State private var selectedDate: Date?
 
@@ -140,6 +142,11 @@ struct ValueHistoryChart: View {
             }
         }
         .sensoryFeedback(.selection, trigger: selected?.date)
+        .onChange(of: selectedDate != nil) { _, isScrubbing in
+            if isScrubbing, isInteractive, let analyticsScope {
+                Analytics.send(.chartScrubbed(scope: analyticsScope))
+            }
+        }
     }
 
     private func extremeLabel(_ extreme: ValueHistoryChartModel.Extreme) -> String {

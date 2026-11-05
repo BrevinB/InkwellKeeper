@@ -23,12 +23,12 @@ struct PriceAlertCallout: View {
     }
 
     private var alert: PriceAlert? {
-        PriceAlertEditTarget.forCard(card, alerts: alerts).alert
+        PriceAlertEditTarget.forCard(card, alerts: alerts, source: "callout").alert
     }
 
     var body: some View {
         Button {
-            editing = PriceAlertEditTarget.forCard(card, alerts: alerts)
+            editing = PriceAlertEditTarget.forCard(card, alerts: alerts, source: "callout")
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: iconName)
@@ -63,7 +63,7 @@ struct PriceAlertCallout: View {
         }
         .buttonStyle(.plain)
         .sheet(item: $editing) { target in
-            PriceAlertEditorView(card: target.card, alert: target.alert)
+            PriceAlertEditorView(card: target.card, alert: target.alert, source: target.source)
         }
     }
 

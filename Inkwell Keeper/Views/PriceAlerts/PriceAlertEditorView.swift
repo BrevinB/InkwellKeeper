@@ -9,6 +9,7 @@
 
 import SwiftData
 import SwiftUI
+import TipKit
 
 struct PriceAlertEditorView: View {
     @Environment(\.dismiss) private var dismiss
@@ -21,8 +22,8 @@ struct PriceAlertEditorView: View {
     @State private var showingDeleteConfirmation = false
     @State private var isSaving = false
 
-    init(card: LorcanaCard, alert: PriceAlert? = nil) {
-        _model = State(initialValue: PriceAlertEditorModel(card: card, alert: alert))
+    init(card: LorcanaCard, alert: PriceAlert? = nil, source: String) {
+        _model = State(initialValue: PriceAlertEditorModel(card: card, alert: alert, source: source))
     }
 
     private var saveTitle: String {
@@ -75,6 +76,9 @@ struct PriceAlertEditorView: View {
                 }
             }
             .task { await model.loadPriceHistory() }
+            .onAppear {
+                Analytics.send(.priceAlertEditorOpened(source: model.source, existing: model.isEditing))
+            }
             .sheet(isPresented: $showingPaywall) {
                 RulesPaywallView(source: "priceAlerts")
             }
@@ -117,6 +121,9 @@ struct PriceAlertEditorView: View {
             showingPaywall = true
             return
         }
+
+        // Someone who set an alert has found the bell; stop pointing at it.
+        PriceAlertBellTip().invalidate(reason: .actionPerformed)
 
         let service = PriceAlertService.shared
         let allowed = await service.requestAuthorization()

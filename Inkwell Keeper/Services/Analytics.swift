@@ -63,8 +63,23 @@ enum Analytics {
         case aiDeckRated(mode: String, helpful: Bool, reason: String, format: String, ruleIssues: Int, retry: Bool)
 
         // MARK: Price alerts
-        /// `direction` is "above" or "below".
-        case priceAlertCreated(direction: String, foil: Bool)
+        /// `direction` is "above" or "below". `source` is where the editor was
+        /// opened from (see `priceAlertEditorOpened`); `method` is how the target
+        /// was last set: "suggested", "preset", "nudge", "typed" or "drag".
+        case priceAlertCreated(direction: String, foil: Bool, source: String, method: String)
+        /// The alert editor appeared. `source` is "toolbar", "callout", "chart",
+        /// "alertsList", "picker" or "wishlistOffer"; `existing` is an edit.
+        case priceAlertEditorOpened(source: String, existing: Bool)
+        /// The result of the one-time notification permission prompt.
+        case priceAlertPermissionAnswered(granted: Bool)
+        /// "Send Test Notification" result: "sent", "dry_run", "failed",
+        /// "unregistered" or "error".
+        case priceAlertTestSent(result: String)
+        /// The "watch this price?" prompt after a wishlist add was shown or waved off.
+        case priceAlertOfferShown
+        case priceAlertOfferDismissed
+        /// The owned-card move threshold changed, in percent.
+        case collectionAlertThresholdChanged(percent: Int)
         case priceAlertDeleted
         case priceAlertRearmed
         /// A free user tried to create an alert past the free limit.
@@ -115,6 +130,15 @@ enum Analytics {
         /// Copies were put into a container. `source` is "detail", "picker", "autoFill" or "scan".
         case storageCardsStored(count: Int, kind: String, source: String)
         case storageBinderAutoFilled(count: Int, order: String)
+        /// A binder pocket was left holding more than one copy. `printings` is how
+        /// many different printings (normal, foil, …) share it.
+        case storagePocketStacked(copies: Int, printings: Int)
+
+        // MARK: Value charts
+        /// `scope` is "card" or "collection"; `range` is the picker label ("1W", "All", …).
+        case chartRangeChanged(scope: String, range: String)
+        /// The user dragged across a value chart to read a day. Sent once per drag.
+        case chartScrubbed(scope: String)
         /// An idea deck got a deck box. `newBox` is false when an empty box was reused.
         case deckBuildStarted(newBox: Bool)
         /// Copies moved into a deck box from the pull list; `all` for "Pull All".
@@ -152,6 +176,12 @@ enum Analytics {
             case .rulesAnswerRated: "ai.rulesAnswerRated"
             case .aiDeckRated: "ai.deckRated"
             case .priceAlertCreated: "priceAlert.created"
+            case .priceAlertEditorOpened: "priceAlert.editorOpened"
+            case .priceAlertPermissionAnswered: "priceAlert.permissionAnswered"
+            case .priceAlertTestSent: "priceAlert.testSent"
+            case .priceAlertOfferShown: "priceAlert.offerShown"
+            case .priceAlertOfferDismissed: "priceAlert.offerDismissed"
+            case .collectionAlertThresholdChanged: "priceAlert.collectionThresholdChanged"
             case .priceAlertDeleted: "priceAlert.deleted"
             case .priceAlertRearmed: "priceAlert.rearmed"
             case .priceAlertLimitHit: "priceAlert.limitHit"
@@ -175,6 +205,9 @@ enum Analytics {
             case .storageContainerCreated: "storage.containerCreated"
             case .storageCardsStored: "storage.cardsStored"
             case .storageBinderAutoFilled: "storage.binderAutoFilled"
+            case .storagePocketStacked: "storage.pocketStacked"
+            case .chartRangeChanged: "chart.rangeChanged"
+            case .chartScrubbed: "chart.scrubbed"
             case .deckBuildStarted: "deck.buildStarted"
             case .deckCardsPulled: "deck.cardsPulled"
             case .deckTakenApart: "deck.takenApart"
@@ -216,8 +249,22 @@ enum Analytics {
                 ["format": format]
             case let .deckImported(format):
                 ["format": format]
-            case let .priceAlertCreated(direction, foil):
-                ["direction": direction, "foil": String(foil)]
+            case let .priceAlertCreated(direction, foil, source, method):
+                ["direction": direction, "foil": String(foil), "source": source, "method": method]
+            case let .priceAlertEditorOpened(source, existing):
+                ["source": source, "existing": String(existing)]
+            case let .priceAlertPermissionAnswered(granted):
+                ["granted": String(granted)]
+            case let .priceAlertTestSent(result):
+                ["result": result]
+            case let .collectionAlertThresholdChanged(percent):
+                ["percent": String(percent)]
+            case let .chartRangeChanged(scope, range):
+                ["chartScope": scope, "range": range]
+            case let .chartScrubbed(scope):
+                ["chartScope": scope]
+            case let .storagePocketStacked(copies, printings):
+                ["copies": String(copies), "printings": String(printings)]
             case let .collectionAlertToggled(kind, enabled):
                 ["alertKind": kind, "enabled": String(enabled)]
             case let .priceAlertOpened(kind):

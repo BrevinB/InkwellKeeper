@@ -32,7 +32,7 @@ struct PriceAlertTargetPanel: View {
                     "Target price",
                     value: Binding(
                         get: { model.threshold },
-                        set: { model.setThreshold($0, snapping: false) }
+                        set: { model.setThreshold($0, method: .typed) }
                     ),
                     format: .currency(code: "USD")
                 )
@@ -56,7 +56,7 @@ struct PriceAlertTargetPanel: View {
                             direction: model.direction,
                             isSelected: abs(model.threshold - preset.price) < 0.005
                         ) {
-                            withAnimation(.snappy) { model.setThreshold(preset.price, snapping: false) }
+                            withAnimation(.snappy) { model.setThreshold(preset.price, method: .preset) }
                         }
                     }
                 }
@@ -68,7 +68,7 @@ struct PriceAlertTargetPanel: View {
                         points: model.history,
                         threshold: model.threshold,
                         direction: model.direction
-                    ) { model.setThreshold($0) }
+                    ) { model.setThreshold($0, method: .drag) }
                     .frame(height: 190)
 
                     Label("Drag the chart to move your target", systemImage: "hand.draw")

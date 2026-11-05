@@ -10,6 +10,8 @@ import SwiftUI
 struct ChartRangePicker: View {
     let ranges: [ChartRange]
     @Binding var selection: ChartRange
+    /// "card" or "collection", for analytics.
+    let scope: String
 
     var body: some View {
         Picker("Time range", selection: $selection) {
@@ -21,5 +23,8 @@ struct ChartRangePicker: View {
         }
         .pickerStyle(.segmented)
         .sensoryFeedback(.selection, trigger: selection)
+        .onChange(of: selection) { _, range in
+            Analytics.send(.chartRangeChanged(scope: scope, range: range.rawValue))
+        }
     }
 }

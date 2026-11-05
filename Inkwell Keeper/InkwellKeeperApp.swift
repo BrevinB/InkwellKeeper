@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import TipKit
 import SwiftData
 import RevenueCat
 import TelemetryDeck
@@ -30,6 +31,13 @@ struct InkwellKeeperApp: App {
 
         // Pick up subscriptions started outside the app (e.g. offer codes)
         SubscriptionManager.shared.observeCustomerInfo()
+
+        // One-time feature tips. Kept out of screenshot and filming runs, which
+        // launch with these rig arguments, so a tip doesn't cover the shot.
+        let rigKeys = ["deeplink", "tab", "seedDemo", "demoImport", "demoAIDeck", "rulesQuestion"]
+        if !rigKeys.contains(where: { UserDefaults.standard.object(forKey: $0) != nil }) {
+            try? Tips.configure()
+        }
 
         // Refresh deck-construction rules (rotation + banned lists) from CloudKit
         DeckRulesService.shared.refresh()

@@ -30,6 +30,9 @@ struct CollectionAlertsSection: View {
                             Text("±\(threshold)%").tag(threshold)
                         }
                     }
+                    .onChange(of: service.moveThreshold) { _, percent in
+                        Analytics.send(.collectionAlertThresholdChanged(percent: percent))
+                    }
                 }
 
                 Toggle(isOn: Binding(

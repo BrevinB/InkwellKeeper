@@ -792,6 +792,7 @@ struct AddToWishlistView: View {
     @State private var searchResults: [CardGroup] = []
     @State private var searchTask: Task<Void, Never>?
     @State private var selectedCardGroupForWishlist: CardGroup?
+    @State private var alertOfferCard: LorcanaCard?
     
     var body: some View {
         NavigationStack {
@@ -868,12 +869,16 @@ struct AddToWishlistView: View {
                     for _ in 0..<quantity {
                         collectionManager.addToWishlist(selectedCard)
                     }
+                        if alertOfferCard == nil {
+                            alertOfferCard = PriceAlertService.shared.wishlistOfferCandidate(selectedCard)
+                        }
                     selectedCardGroupForWishlist = nil
                 },
                 isWishlist: true
             )
             .environment(collectionManager)
         }
+        .priceAlertOffer(for: $alertOfferCard)
     }
     
     private func searchCards(query: String) {

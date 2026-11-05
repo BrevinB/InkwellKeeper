@@ -8,6 +8,7 @@
 
 import SwiftData
 import SwiftUI
+import TipKit
 
 struct PriceAlertToolbarButton: View {
     let card: LorcanaCard
@@ -22,15 +23,16 @@ struct PriceAlertToolbarButton: View {
     }
 
     var body: some View {
-        let target = PriceAlertEditTarget.forCard(card, alerts: alerts)
+        let target = PriceAlertEditTarget.forCard(card, alerts: alerts, source: "toolbar")
         Button(
             target.alert == nil ? "Set Price Alert" : "Edit Price Alert",
             systemImage: target.alert.map { $0.isTriggered ? "bell.badge.fill" : "bell.fill" } ?? "bell"
         ) {
             editing = target
         }
+        .popoverTip(PriceAlertBellTip(), arrowEdge: .top)
         .sheet(item: $editing) { target in
-            PriceAlertEditorView(card: target.card, alert: target.alert)
+            PriceAlertEditorView(card: target.card, alert: target.alert, source: target.source)
         }
     }
 }

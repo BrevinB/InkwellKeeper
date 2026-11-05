@@ -63,7 +63,16 @@ struct AnalyticsEventTests {
         .onboardingStarted,
         .onboardingCompleted,
         .loreCounterGameStarted(players: 4, mode: "Coconut"),
-        .priceAlertCreated(direction: "below", foil: true),
+        .priceAlertCreated(direction: "below", foil: true, source: "toolbar", method: "drag"),
+        .priceAlertEditorOpened(source: "wishlistOffer", existing: false),
+        .priceAlertPermissionAnswered(granted: true),
+        .priceAlertTestSent(result: "sent"),
+        .priceAlertOfferShown,
+        .priceAlertOfferDismissed,
+        .collectionAlertThresholdChanged(percent: 20),
+        .storagePocketStacked(copies: 4, printings: 2),
+        .chartRangeChanged(scope: "card", range: "1M"),
+        .chartScrubbed(scope: "collection"),
         .priceAlertDeleted,
         .priceAlertRearmed,
         .priceAlertLimitHit,
@@ -106,6 +115,15 @@ struct AnalyticsEventTests {
         for step in steps {
             #expect(step.parameters["shareType"] == "haul", "\(step.signalName) lost its shareType")
         }
+    }
+
+    @Test("Price alert funnel events carry where they came from")
+    func priceAlertFunnelParametersSurvive() {
+        let created = Analytics.Event.priceAlertCreated(direction: "above", foil: false, source: "callout", method: "preset")
+        #expect(created.parameters["source"] == "callout")
+        #expect(created.parameters["method"] == "preset")
+        #expect(Analytics.Event.priceAlertEditorOpened(source: "chart", existing: true).parameters["source"] == "chart")
+        #expect(Analytics.Event.chartRangeChanged(scope: "card", range: "All").parameters["chartScope"] == "card")
     }
 
     @Test("Collection adds carry a source")

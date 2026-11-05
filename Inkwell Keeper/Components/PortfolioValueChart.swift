@@ -31,7 +31,8 @@ struct PortfolioValueChart: View {
             currencyCode: PricingService.preferredCurrency,
             showsAxes: showsAxes,
             isInteractive: showsAxes,
-            lineWidth: lineWidth
+            lineWidth: lineWidth,
+            analyticsScope: "collection"
         )
         .frame(height: 180)
         .accessibilityLabel("Collection value over time")

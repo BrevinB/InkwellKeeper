@@ -19,7 +19,8 @@ struct PriceTrendChart: View {
             tint: .lorcanaGold,
             // Backend price history is USD only.
             currencyCode: "USD",
-            isInteractive: isInteractive
+            isInteractive: isInteractive,
+            analyticsScope: "card"
         )
     }
 }

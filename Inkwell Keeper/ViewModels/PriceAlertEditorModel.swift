@@ -17,10 +17,18 @@ final class PriceAlertEditorModel {
         case needsPro
     }
 
+    /// How the target was last set, for analytics.
+    enum ThresholdMethod: String {
+        case suggested, preset, nudge, typed, drag
+    }
+
     /// The printing being watched. Switches between normal and foil while a
     /// new alert is set up; fixed once the alert exists.
     private(set) var card: LorcanaCard
     let alert: PriceAlert?
+    /// Where the editor was opened from, for analytics.
+    let source: String
+    private(set) var thresholdMethod: ThresholdMethod = .suggested
 
     var direction: PriceAlertDirection {
         didSet { suggestThresholdIfUntouched() }
@@ -33,9 +41,10 @@ final class PriceAlertEditorModel {
     private(set) var currentPrice: Double?
     private(set) var isLoadingPrice = false
 
-    init(card: LorcanaCard, alert: PriceAlert? = nil) {
+    init(card: LorcanaCard, alert: PriceAlert? = nil, source: String) {
         self.card = card
         self.alert = alert
+        self.source = source
         direction = alert?.alertDirection ?? .below
         threshold = alert?.threshold ?? 0
         hasEditedThreshold = alert != nil
@@ -104,14 +113,16 @@ final class PriceAlertEditorModel {
         threshold = PriceAlertRules.suggestedThreshold(currentPrice: currentPrice, direction: direction)
     }
 
-    /// Sets a threshold the user picked by preset, drag or typing.
-    func setThreshold(_ value: Double, snapping: Bool = true) {
-        threshold = snapping ? PriceAlertRules.snapped(value) : value
+    /// Sets a threshold the user picked. Dragged values snap to a price-sized
+    /// step; everything else is taken as given.
+    func setThreshold(_ value: Double, method: ThresholdMethod) {
+        threshold = method == .drag ? PriceAlertRules.snapped(value) : value
+        thresholdMethod = method
         hasEditedThreshold = true
     }
 
     func nudge(up: Bool) {
-        setThreshold(PriceAlertRules.nudged(max(threshold, 0), up: up), snapping: false)
+        setThreshold(PriceAlertRules.nudged(max(threshold, 0), up: up), method: .nudge)
     }
 
     /// Whether saving would add an armed alert, which counts against the free limit.
@@ -151,7 +162,12 @@ final class PriceAlertEditorModel {
                 threshold: rounded
             )
             context.insert(created)
-            Analytics.send(.priceAlertCreated(direction: direction.rawValue, foil: card.variant != .normal))
+            Analytics.send(.priceAlertCreated(
+                direction: direction.rawValue,
+                foil: card.variant != .normal,
+                source: source,
+                method: thresholdMethod.rawValue
+            ))
         }
         try? context.save()
         return .saved

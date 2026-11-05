@@ -17,6 +17,7 @@ struct CardSearchView: View {
     @State private var searchTask: Task<Void, Never>?
     @State private var selectedCardGroupForAdd: CardGroup?
     @State private var selectedCardGroupForWishlist: CardGroup?
+    @State private var alertOfferCard: LorcanaCard?
 
     private var displayedCards: [CardGroup] {
         searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? allCardGroups : searchResults
@@ -111,6 +112,9 @@ struct CardSearchView: View {
                     for _ in 0..<quantity {
                         collectionManager.addToWishlist(selectedCard)
                     }
+                    if alertOfferCard == nil {
+                        alertOfferCard = PriceAlertService.shared.wishlistOfferCandidate(selectedCard)
+                    }
                     selectedCardGroupForAdd = nil
                 }
             )
@@ -127,12 +131,16 @@ struct CardSearchView: View {
                     for _ in 0..<quantity {
                         collectionManager.addToWishlist(selectedCard)
                     }
+                    if alertOfferCard == nil {
+                        alertOfferCard = PriceAlertService.shared.wishlistOfferCandidate(selectedCard)
+                    }
                     selectedCardGroupForWishlist = nil
                 },
                 isWishlist: true
             )
             .environment(collectionManager)
         }
+        .priceAlertOffer(for: $alertOfferCard)
     }
 
     private func loadAllCards() {

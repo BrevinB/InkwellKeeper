@@ -29,6 +29,15 @@ enum PriceAlertRules {
         variant == .normal ? name : "\(name) (\(variant.rawValue))"
     }
 
+    /// Wishlist "watch this price?" offers in a row the user can ignore
+    /// before they stop appearing. Accepting one resets the count.
+    static let maxIgnoredWishlistOffers = 3
+
+    /// Whether adding a card to the wishlist should offer an alert on it.
+    static func shouldOfferWishlistAlert(hasAlert: Bool, ignoredOffers: Int) -> Bool {
+        !hasAlert && ignoredOffers < maxIgnoredWishlistOffers
+    }
+
     static func canCreateAlert(armedCount: Int, isSubscribed: Bool) -> Bool {
         isSubscribed || armedCount < freeAlertLimit
     }

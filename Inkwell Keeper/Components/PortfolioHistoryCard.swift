@@ -46,7 +46,7 @@ struct PortfolioHistoryCard: View {
                 let visible = range.filter(viewModel.points)
                 let ranges = ChartRange.available(for: viewModel.points)
                 if !ranges.isEmpty {
-                    ChartRangePicker(ranges: ranges, selection: $range)
+                    ChartRangePicker(ranges: ranges, selection: $range, scope: "collection")
                 }
                 PortfolioSummaryHeader(
                     summary: PortfolioHistoryBuilder.summary(for: visible),

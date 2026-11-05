@@ -72,6 +72,13 @@ struct PriceAlertTests {
         #expect(PriceAlertRules.distance(of: 36, from: 0) == nil)
     }
 
+    @Test func wishlistOffersStopForWatchedCardsAndAfterBeingIgnored() {
+        #expect(PriceAlertRules.shouldOfferWishlistAlert(hasAlert: false, ignoredOffers: 0))
+        #expect(PriceAlertRules.shouldOfferWishlistAlert(hasAlert: false, ignoredOffers: 2))
+        #expect(!PriceAlertRules.shouldOfferWishlistAlert(hasAlert: false, ignoredOffers: 3))
+        #expect(!PriceAlertRules.shouldOfferWishlistAlert(hasAlert: true, ignoredOffers: 0))
+    }
+
     @Test func detectsThresholdsTheMarketHasAlreadyCrossed() {
         #expect(PriceAlertRules.isAlreadyCrossed(threshold: 50, direction: .below, currentPrice: 45))
         #expect(!PriceAlertRules.isAlreadyCrossed(threshold: 40, direction: .below, currentPrice: 45))

@@ -51,6 +51,7 @@ final class PriceAlertService {
         static let deviceToken = "priceAlerts.deviceToken"
         static let isRegistered = "priceAlerts.isRegistered"
         static let holdingsSignature = "priceAlerts.holdingsSignature"
+        static let ignoredWishlistOffers = "priceAlerts.ignoredWishlistOffers"
     }
 
     private let defaults = UserDefaults.standard
@@ -70,6 +71,31 @@ final class PriceAlertService {
             ? storedThreshold
             : PriceAlertRules.defaultMoveThreshold
         digestEnabled = defaults.bool(forKey: Keys.digestEnabled)
+    }
+
+    // MARK: Wishlist offer
+
+    /// The card to offer an alert on after it was added to the wishlist, or
+    /// nil when it already has one or the user keeps waving the offer off.
+    func wishlistOfferCandidate(_ card: LorcanaCard) -> LorcanaCard? {
+        let cardId = card.id
+        let existing = (try? container?.mainContext.fetchCount(
+            FetchDescriptor<PriceAlert>(predicate: #Predicate { $0.cardId == cardId })
+        )) ?? 0
+        let offer = PriceAlertRules.shouldOfferWishlistAlert(
+            hasAlert: existing > 0,
+            ignoredOffers: defaults.integer(forKey: Keys.ignoredWishlistOffers)
+        )
+        return offer ? card : nil
+    }
+
+    func recordWishlistOffer(accepted: Bool) {
+        if accepted {
+            defaults.set(0, forKey: Keys.ignoredWishlistOffers)
+        } else {
+            defaults.set(defaults.integer(forKey: Keys.ignoredWishlistOffers) + 1, forKey: Keys.ignoredWishlistOffers)
+            Analytics.send(.priceAlertOfferDismissed)
+        }
     }
 
     func configure(container: ModelContainer) {
@@ -96,7 +122,8 @@ final class PriceAlertService {
     @discardableResult
     func requestAuthorization() async -> Bool {
         if authorizationStatus == .notDetermined {
-            _ = try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
+            let granted = (try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])) ?? false
+            Analytics.send(.priceAlertPermissionAnswered(granted: granted))
         }
         await refreshAuthorizationStatus()
         return isAuthorized

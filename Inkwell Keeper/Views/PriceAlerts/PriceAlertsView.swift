@@ -119,7 +119,7 @@ struct PriceAlertsView: View {
                 }
             }
             .sheet(item: $editing) { target in
-                PriceAlertEditorView(card: target.card, alert: target.alert)
+                PriceAlertEditorView(card: target.card, alert: target.alert, source: target.source)
             }
             .sheet(isPresented: $showingPaywall) {
                 RulesPaywallView(source: "priceAlerts")
@@ -129,13 +129,13 @@ struct PriceAlertsView: View {
 
     private func edit(_ alert: PriceAlert) {
         guard let card = SetsDataManager.shared.getAllCards().first(where: { $0.id == alert.cardId }) else { return }
-        editing = PriceAlertEditTarget(card: card.withVariant(alert.cardVariant), alert: alert)
+        editing = PriceAlertEditTarget(card: card.withVariant(alert.cardVariant), alert: alert, source: "alertsList")
     }
 
     private func openPickedCard() {
         guard let card = pickedCard else { return }
         pickedCard = nil
-        editing = PriceAlertEditTarget.forCard(card, alerts: alerts.filter { $0.cardId == card.id })
+        editing = PriceAlertEditTarget.forCard(card, alerts: alerts.filter { $0.cardId == card.id }, source: "picker")
     }
 
     private func rearm(_ alert: PriceAlert) {
@@ -161,7 +161,9 @@ struct PriceAlertsView: View {
 
     private func sendTest() async {
         isSendingTest = true
-        testMessage = switch await service.sendTestNotification() {
+        let result = await service.sendTestNotification()
+        Analytics.send(.priceAlertTestSent(result: result ?? "error"))
+        testMessage = switch result {
         case "sent":
             String(localized: "Sent — it should arrive in a few seconds.")
         case "dry_run":
